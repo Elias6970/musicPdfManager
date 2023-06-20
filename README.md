@@ -1,5 +1,7 @@
 # Activate the enviroment:
-  `source archivo_app` 
+  `source "~/archivo_app/bin/activate"` 
+
+The ~ symbol is "Alt Gr + ñ" in spanish keyboard
 
 # Librerias instaladas
 `pip3 install Pillow` 

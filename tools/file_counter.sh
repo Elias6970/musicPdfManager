@@ -78,3 +78,11 @@ done
 
 echo Pdf: $pdf, Rar: $rar, Zip: $zip, total: $m
 '
+if [[ "$actual_extension" == "PDF" ]]; then 
+    new_path="${file//PDF/}pdf"
+    mv "$file" "$new_path"
+  fi
+if [[ $file =~ ".." ]]; then
+    echo $file
+  fi
+
