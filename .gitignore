@@ -1,2 +1,6 @@
 .DS_Store
 paths_all_files.txt
+archive_app
+__pycache__
+.vscode
+*.db

@@ -1,70 +1,82 @@
-import os,sys
+import os,sys,shutil
+
+PARTITURAS = "partituras"
+EXTRAS = "extras"
+COMPRESS = "compress"
 
 
-def move_files(root,dir,files):
+def move_files(root,files):
     for i in files:
-        print(root)
-        if "partituras" not in root and ".pdf" in i:
-            os.rename(root+"/"+i,root+"/partituras/"+i)
-        elif "extras" not in root and ".pdf" not in i:
-            os.rename(root+"/"+i,root+"/extras/"+i)
-    
-#Error eliminando los dirs
-def delete_extra_dirs(root,dirs,files):
-    print("HELLO")
-    if "extras" in root:
+        if PARTITURAS not in root and ".pdf" in i:
+            os.rename(root+"/"+i,root+"/"+PARTITURAS+"/"+i)
+        elif COMPRESS not in root and (".zip" in i or ".rar" in i):
+            os.rename(root+"/"+i,root+"/"+COMPRESS+"/"+i) 
+        elif EXTRAS not in root and ".pdf" not in i:
+            os.rename(root+"/"+i,root+"/"+EXTRAS+"/"+i)
+
+
+#Elimina directorios creados sin querer
+def delete_extra_dirs(root):
+    if EXTRAS in root:
         try:
-            os.removedirs(root+"/partituras")
-            os.removedirs(root+"/compress")
+            shutil.rmtree(root+"/"+PARTITURAS)
+            shutil.rmtree(root+"/"+COMPRESS)
         except FileNotFoundError:
-            print("NOOOO")
-    if "compress" in root:
+            pass
+    if COMPRESS in root:
         try:
-            os.removedirs(root+"/partituras")
-            os.removedirs(root+"/extras")
+            shutil.rmtree(root+"/"+PARTITURAS)
+            shutil.rmtree(root+"/"+EXTRAS)
         except FileNotFoundError:
-            print("NOOOO")         
-    if "partituras" in root:
+            pass         
+    if PARTITURAS in root:
         try:
-            os.removedirs(root+"/compress")
-            os.removedirs(root+"/extras")
+            shutil.rmtree(root+"/"+COMPRESS)
+            shutil.rmtree(root+"/"+EXTRAS)
         except FileNotFoundError:
-            print("NOOOO")    
+            pass 
 
 
 #Create the empty dirs for the basic structure
-def create_dirs():
+def create_dirs(root,dirs:list):
+    #Create dirs
+    print(root)
+    if PARTITURAS not in dirs and PARTITURAS not in root and COMPRESS not in root and EXTRAS not in root:
+        os.makedirs(root+"/"+PARTITURAS,exist_ok=True)
+
+    if EXTRAS not in dirs and EXTRAS not in root and COMPRESS not in root and PARTITURAS not in root:
+        os.makedirs(root+"/"+EXTRAS,exist_ok=True)
+
+    if COMPRESS not in dirs and COMPRESS not in root and PARTITURAS not in root and EXTRAS not in root:
+        os.makedirs(root+"/"+COMPRESS,exist_ok=True)
+
+
+def other_names(dirs):
+    for i in dirs:
+        if PARTITURAS != i and EXTRAS != i and COMPRESS != i:
+            pass
+
+def reorganize():
+    #Get initial path
+    os.chdir(sys.argv[1])
     directories = os.listdir()
-    r = 0
+
+
+
     for actual_dir in directories:
         actual_walk = os.walk(actual_dir)
         for root,dirs,files in actual_walk:
-            #Create dirs
-            if "partituras" not in dirs and "partituras" not in root and "compress" not in root and "extras" not in root:
-                os.makedirs(root+"/partituras",exist_ok=True)
-            
-            if "extras" not in dirs and "extras" not in root and "compress" not in root and "partituras" not in root:
-                os.makedirs(root+"/extras",exist_ok=True)
-        
-            if "compress" not in dirs and "compress" not in root and "partituras" not in root and "extras" not in root:
-                os.makedirs(root+"/compress",exist_ok=True)
-            
-            move_files(root,dirs,files)
-            delete_extra_dirs(root,dirs,files)
-            r+=1
-            if r > 3:
-                exit()
-
-
-def main():
-    #Get initial path
-    os.chdir(sys.argv[1])
-
-    create_dirs()
+            #print(actual_dir)
+            #other_names(dirs)
+            create_dirs(root,dirs)
+            break
+    
+    #delete_extra_dirs(root)
+    #create_dirs()
 
 
 if __name__ == "__main__":
-    main()
+    reorganize()
 
 
 
