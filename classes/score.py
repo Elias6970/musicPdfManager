@@ -1,5 +1,5 @@
 class Score:
-    def __init__(self,cod,name=None,parts=None,type=None,author=None,create_date=None,last_modification=None):
+    def __init__(self,cod,name=None,author=None,type=None,parts=None,create_date=None,last_modification=None):
         self.cod = cod
         self.name = name
         #self.path = str(cod)+"-"+name

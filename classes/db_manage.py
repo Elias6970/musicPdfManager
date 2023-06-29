@@ -1,4 +1,4 @@
-import sqlite3,datetime
+import sqlite3,xlrd,openpyxl
 from .score import Score
 
 class db:
@@ -31,14 +31,50 @@ class db:
                 raise #Jump to the except statement
 
         except sqlite3.IntegrityError: #cod repited
-            print("Error, ya existe esa obra")
+            print("Error, ya existe esa obra: ",score.cod)
 
         except Exception as e:
-            print("Error introduciendo la obra, ",type(e))
+            print("Error ",type(e)," introduciendo la obra, ",score.name)
     
 
-    def insert_from_excel(self,file):
-        pass
+    #Insert into the db from excel xlsx 
+    def insert_from_xlsx(self,file):
+        i = 0
+        print("JJJ")
+        excel = openpyxl.load_workbook(file)
+        sheet = excel.active
+        for row in sheet.iter_rows(): # type: ignore    
+            if i == 0: #Jump the firsts iteration
+                i+=1
+                continue 
+
+            row_values = list(cell.value for cell in row)
+
+            #Don't analize the empty rows 
+            if row_values[0] == None:
+                continue
+            try:
+                self.insert(Score(row_values[0],str(row_values[1]),row_values[2],row_values[3]))
+            except:
+                print("Error inserting: ",row_values)
+
+            i+=1         
+
+
+    #Insert into the db from excel xls   
+    def insert_from_xls(self,file):
+        excel = xlrd.open_workbook(file)
+        sheet = excel.sheet_by_index(0)
+
+        for i in range(1,sheet.nrows):
+            row = sheet.row_values(i)
+            try:
+                self.insert(Score(row[0],str(row[1]),row[2],row[3]))
+            except:
+                print("Error inserting: ",row)
+        
+        self.cur.close()
+
 
     #Get rows from the db
         #type:
@@ -50,16 +86,20 @@ class db:
         try:
             self.cur.execute("PRAGMA case_sensitive_like = true")
             
-            line = self.cur.execute("SELECT * FROM archive WHERE {} like '%{}%'".format(type,value))
+            extracted = self.cur.execute("SELECT * FROM archive WHERE {} like '%{}%'".format(type,value))
 
         except Exception as e:
             print(e)
             return 0
         
-        return line.fetchall()
+        return extracted.fetchall()
 
 
     #Returns all the db
     def get_all(self):
         return self.cur.execute("SELECT * FROM archive").fetchall()
+    
+    #close the db
+    def close_db(self):
+        self.cur.close()
 
