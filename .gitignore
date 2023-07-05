@@ -7,3 +7,6 @@ __init__.py
 *.db
 *.xls
 *.xlsx
+build
+dist
+*.spec

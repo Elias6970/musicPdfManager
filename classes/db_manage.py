@@ -1,7 +1,7 @@
 import sqlite3,xlrd,openpyxl
 from .score import Score
 
-class db:
+class Db:
     def __init__(self,name):
         self.name = name
         self.path = "./classes/"+str(name)
@@ -82,15 +82,15 @@ class db:
         #   name->get rows with similar name
         #   author->get rows with similar author
         #   Can be used with dates but it doesn't work correctly
-    def get(self,type,value): 
+    def get(self,type,value,selected_camp='*'): 
         try:
             self.cur.execute("PRAGMA case_sensitive_like = true")
             
-            extracted = self.cur.execute("SELECT * FROM archive WHERE {} like '%{}%'".format(type,value))
+            extracted = self.cur.execute("SELECT {} FROM archive WHERE {} like '%{}%'".format(selected_camp,type,value))
 
         except Exception as e:
             print(e)
-            return 0
+            return ["0"]
         
         return extracted.fetchall()
 
@@ -98,7 +98,7 @@ class db:
     #Returns all the db
     def get_all(self):
         return self.cur.execute("SELECT * FROM archive").fetchall()
-    
+
     #close the db
     def close_db(self):
         self.cur.close()
