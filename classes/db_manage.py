@@ -6,8 +6,7 @@ class Db:
         self.name = name
         self.path = "./classes/"+str(name)
         
-        self.con = sqlite3.connect(self.path)
-        self.cur = self.con.cursor()
+        self.open_db()
 
         self.cur.execute("PRAGMA foreign_keys = 1") #Enable foreign keys
 
@@ -77,16 +76,20 @@ class Db:
 
 
     #Get rows from the db
-        #type:
+        #camp_to_compare:
         #   cod->get row by the cod
         #   name->get rows with similar name
         #   author->get rows with similar author
         #   Can be used with dates but it doesn't work correctly
-    def get(self,type,value,selected_camp='*'): 
+        #
+        #selected camp get the camp that you want to be selected from the db. Can be more than one ej:("cod,name")
+     
+    #Make the get but comparing with LIKE % %
+    def get_with_like(self,camp_to_compare,value,returned_camps='*'): 
         try:
             self.cur.execute("PRAGMA case_sensitive_like = true")
             
-            extracted = self.cur.execute("SELECT {} FROM archive WHERE {} like '%{}%'".format(selected_camp,type,value))
+            extracted = self.cur.execute("SELECT {} FROM archive WHERE {} LIKE '%{}%'".format(returned_camps,camp_to_compare,value))
 
         except Exception as e:
             print(e)
@@ -95,10 +98,27 @@ class Db:
         return extracted.fetchall()
 
 
+    #Make the get but comparing with '=' not with LIKE % %
+    def get_with_equals(self,camp_to_compare,value,returned_camps='*'):
+        try:
+            self.cur.execute("PRAGMA case_sensitive_like = true")
+            
+            extracted = self.cur.execute("SELECT {} FROM archive WHERE {} = '{}'".format(returned_camps,camp_to_compare,value))
+
+        except Exception as e:
+            print(e)
+            return ["0"]
+        
+        return extracted.fetchall()
+
     #Returns all the db
     def get_all(self):
         return self.cur.execute("SELECT * FROM archive").fetchall()
 
+
+    def open_db(self):
+        self.con = sqlite3.connect(self.path)
+        self.cur = self.con.cursor()
     #close the db
     def close_db(self):
         self.cur.close()

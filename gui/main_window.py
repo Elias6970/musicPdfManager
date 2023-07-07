@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets,QtCore
 from classes.db_manage import Db
-from classes.constants import OPTIONS_OF_INSTRUMENTS
+from classes.constants import *
 
 class MainWindow(QtWidgets.QMainWindow):
     actual_score = ""
@@ -70,9 +70,12 @@ class MainWindow(QtWidgets.QMainWindow):
         
         
         #Get the list of all partitures in the db
-        db_con = Db("archivo.db")
+        db_con = Db(DB_NAME)
 
-        pieces_packed = db_con.get("cod","","cod,name")
+        pieces_packed = db_con.get_with_like("cod","","cod,name")
+        
+        db_con.close_db() #close the connection
+        
         self.list_of_pieces = []
         for i in pieces_packed:
             self.list_of_pieces.append(str(i[0])+"-"+i[1])
@@ -88,6 +91,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #Rest of widgets
         self.piece_lbl = QtWidgets.QLabel()
         self.part_search = QtWidgets.QComboBox()
+        #self.part_search.setEditable(True)
         self.add_create_buttons = self.create_two_buttons("Add","Create Pdf")
         self.part_search.addItems(OPTIONS_OF_INSTRUMENTS)
         
@@ -155,34 +159,36 @@ class MainWindow(QtWidgets.QMainWindow):
 
         return scroll
 
-    #Update the labels of the down scores
-    def update_scores_added(self,score_to_add):
-        item = QtWidgets.QLabel(score_to_add)
-        self.status_console_layout.addWidget(item)
-        
-
-
+    
+    
+    #Check if the piece selected is equals to one on the list
     def validate_selection(self,text):
         if text in self.list_of_pieces:
             self.piece_lbl.setText(text)
             self.actual_score = text
+
+            #D
+            for i in range(self.part_search.count()):
+                self.part_search.removeItem(0)
             return True
 
+    #Add the score to the list of added scores an update it in the labels list
     def add_score(self):
         if self.validate_selection(self.actual_score):
             score_to_add = self.actual_score+"->"+self.part_search.currentText()
             self.scores_added.append(score_to_add)
-            self.update_scores_added(score_to_add)
+            
+            #Update the labels of the down scores
+            item = QtWidgets.QLabel(score_to_add)
+            self.status_console_layout.addWidget(item)
     
     
     def create_pdf(self):
-        OPTIONS_OF_INSTRUMENTS.append("a")
-        print(OPTIONS_OF_INSTRUMENTS)
-
-
+        pass
 
     def mv_back_preview(self):
         pass
+
     def mv_forward_preview(self):
         pass
 

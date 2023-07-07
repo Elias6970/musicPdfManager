@@ -10,3 +10,4 @@ __init__.py
 build
 dist
 *.spec
+*.txt
