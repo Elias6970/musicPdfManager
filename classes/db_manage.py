@@ -4,7 +4,7 @@ from .score import Score
 class Db:
     def __init__(self,name):
         self.name = name
-        self.path = "./classes/"+str(name)
+        self.db_path = "./classes/"+str(name)
         
         self.open_db()
 
@@ -117,8 +117,9 @@ class Db:
 
 
     def open_db(self):
-        self.con = sqlite3.connect(self.path)
+        self.con = sqlite3.connect(self.db_path)
         self.cur = self.con.cursor()
+
     #close the db
     def close_db(self):
         self.cur.close()

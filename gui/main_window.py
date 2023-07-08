@@ -1,6 +1,8 @@
 from PyQt5 import QtWidgets,QtCore
-from classes.db_manage import Db
+#from classes.db_manage import Db
 from classes.constants import *
+from classes.files_manage import *
+
 
 class MainWindow(QtWidgets.QMainWindow):
     actual_score = ""
@@ -10,6 +12,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
         super(MainWindow,self).__init__() #Create the MainWindow Object callin QMainWindow constructor(i think)
         
+        #Init the Archive 
+        self.archive = Archivo("archivo AMRV",RELATIVE_ARCHIVE_PATH)
+
+
         up_zone = self.create_up_zone()
 
         self.scroll = self.create_status_console()
@@ -70,12 +76,10 @@ class MainWindow(QtWidgets.QMainWindow):
         
         
         #Get the list of all partitures in the db
-        db_con = Db(DB_NAME)
 
-        pieces_packed = db_con.get_with_like("cod","","cod,name")
+        pieces_packed = self.archive.get_with_like("cod","","cod,name")
         
-        db_con.close_db() #close the connection
-        
+
         self.list_of_pieces = []
         for i in pieces_packed:
             self.list_of_pieces.append(str(i[0])+"-"+i[1])

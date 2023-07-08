@@ -19,11 +19,19 @@ found=false
 for file in "${file_list[@]}"; do
   actual_extension="${file##*.}"
 
-  echo $file >> "./paths_all_files.txt"
+  #echo $file >> "./paths_all_files.txt"
+
   #Uncoment this 3 lines to create a list of pdf
-  #if [[ "$actual_extension" == "pdf" ]]; then
-   # echo $file >> firstOut.txt
-  #fi
+  if [[ "$actual_extension" == "zip" ]]; then
+    echo "$file" >> data/zips.txt
+  fi
+  if [[ "$actual_extension" == "rar" ]]; then
+    echo "$file" >> data/rars.txt
+  fi
+  if [[ "$file" == *"MAC" ]]; then
+    echo "$file" 
+    #rm "$file"
+  fi
 
   #Compare if the file already exists in the type known
   for i in "${!extensions[@]}"; do
@@ -77,7 +85,9 @@ for file in "${file_list[@]}"; do
 done
 
 echo Pdf: $pdf, Rar: $rar, Zip: $zip, total: $m
-'
+
+
+#CHANGE PDF to pdf
 if [[ "$actual_extension" == "PDF" ]]; then 
     new_path="${file//PDF/}pdf"
     mv "$file" "$new_path"
@@ -85,4 +95,5 @@ if [[ "$actual_extension" == "PDF" ]]; then
 if [[ $file =~ ".." ]]; then
     echo $file
   fi
+'
 
