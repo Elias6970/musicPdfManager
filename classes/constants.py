@@ -6,5 +6,4 @@ DIR_SCORES = "/partituras/"
 DIR_EXTRAS = "/extras/"
 DIR_COMPRESS = "/compress/"
 IGNORE_FILES  = [".DS_Store"]
-SLASH = "/"
 HYPHEN = "-" 

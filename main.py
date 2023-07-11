@@ -6,26 +6,19 @@ from classes.constants import *
 #import classes.db_manage as db
 #import classes.score as sc
 #pytesseract.pytesseract.tesseract_cmd = "/usr/local/bin/tesseract"
-
+import os,rarfile
 
 
 
 def main():
-    #pa = sc.Score(cod=23,name="Sinfonías Marianas",parts=1,author="Jaime Emperador",create_date="11/03/2011")
-    #m = a.Dir("../ArchivoDigital/120-HIMNO REGIONAL VALENCIANO 120")
-    #m.export_all_names(RELATIVE_ARCHIVE_PATH)
 
-    
-    m = a.Archivo("archivo.db",RELATIVE_NEW_PATH)
-    
-    #r = a.Reorganize("archivo.db","../ArchivoDigitalSinTocar/")          
-    #r = a.Reorganize("archivo.db","../test/")
-    #print(m.get_dir_names())
-
-    """app = gui.QtWidgets.QApplication(sys.argv)
+    #rr = a.Reorganize("archivo.db","../test/","../felicidad/")
+    #ab = a.Archivo("archivo.db",RELATIVE_ARCHIVE_PATH)
+    #print(ab.get_dir_names())
+    app = gui.QtWidgets.QApplication(sys.argv)
     w = gui.MainWindow()
     w.show()
-    sys.exit(app.exec_())"""
+    sys.exit(app.exec_())
 
 
 

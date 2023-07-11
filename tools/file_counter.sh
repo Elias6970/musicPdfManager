@@ -28,7 +28,7 @@ for file in "${file_list[@]}"; do
   if [[ "$actual_extension" == "rar" ]]; then
     echo "$file" >> data/rars.txt
   fi
-  if [[ "$file" == *"MAC" ]]; then
+  if [[ "$actual_extension" == "DS_Store" ]]; then
     echo "$file" 
     #rm "$file"
   fi

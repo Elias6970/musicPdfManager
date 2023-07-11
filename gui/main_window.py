@@ -13,7 +13,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow,self).__init__() #Create the MainWindow Object callin QMainWindow constructor(i think)
         
         #Init the Archive 
-        self.archive = Archivo("archivo AMRV",RELATIVE_ARCHIVE_PATH)
+        self.archive = Archivo("archivo AMRV","archivo.db",RELATIVE_ARCHIVE_PATH)
 
 
         up_zone = self.create_up_zone()
@@ -95,9 +95,11 @@ class MainWindow(QtWidgets.QMainWindow):
         #Rest of widgets
         self.piece_lbl = QtWidgets.QLabel()
         self.part_search = QtWidgets.QComboBox()
-        #self.part_search.setEditable(True)
+        
+        self.part_search.addItems(self.option_of_instruments(21))
+
         self.add_create_buttons = self.create_two_buttons("Add","Create Pdf")
-        self.part_search.addItems(OPTIONS_OF_INSTRUMENTS)
+        
         
 
         #Add the widgets to the layout
@@ -186,7 +188,8 @@ class MainWindow(QtWidgets.QMainWindow):
             item = QtWidgets.QLabel(score_to_add)
             self.status_console_layout.addWidget(item)
     
-    
+    def option_of_instruments(self,cod):
+        return []
     def create_pdf(self):
         pass
 
