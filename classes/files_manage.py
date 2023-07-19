@@ -23,12 +23,9 @@ class File:
 class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
-        
-        
-        #self.scores = self.get_names(path + DIR_SCORES)
-        #if(self.scores == []):
-         #   print(path)
-        #self.extras = self.get_names(path + DIR_EXTRAS)
+         
+        self.scores = self.get_names(path + DIR_SCORES)
+        self.extras = self.get_names(path + DIR_EXTRAS)
 
 
     #With a path, returns the names of the files inside it
@@ -72,19 +69,20 @@ class Archivo(Db):
         
         self.archive_path = path
 
-
         #List of dirs objects
-        self.list_of_pieces = []
+        self.pieces_in_dirs = []
         
+        #Get the scores and extras of all pieces
         for i in os.listdir(path):
-            if i not in IGNORE_FILES: #Ignore the DS_Store 
-                self.list_of_pieces.append(Dir(path+i,i))
+            for j in IGNORE_FILES:
+                if i not in j: #Ignore the DS_Store 
+                    self.pieces_in_dirs.append(Dir(path+i,i))
         
 
 
     def get_dir_names(self):
         names = []
-        for i in self.list_of_pieces:
+        for i in self.pieces_in_dirs:
             names.append(i.name)
         
         return names
