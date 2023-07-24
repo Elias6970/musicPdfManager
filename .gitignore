@@ -11,3 +11,5 @@ build
 dist
 *.spec
 *.txt
+*.jpg
+*.pdf

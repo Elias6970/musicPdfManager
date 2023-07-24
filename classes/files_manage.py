@@ -3,7 +3,6 @@ from classes.constants import *
 from classes.db_manage import Db
 from unidecode import unidecode
 import zipfile,rarfile
-from unpack_recursive import unpack_recursive
 
 class File:
     def __init__(self,path):
@@ -171,7 +170,6 @@ class Reorganize(Archivo):
         
                     try:
                         zip.extract(internal_zip_file.filename,path=self.new_archive_path+dir_name)
-                        #input()
                         self.delete_intermediate_folders(dir_name,internal_zip_file,internal_zip_file.is_dir())
 
                     except Exception as e:

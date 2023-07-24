@@ -9,10 +9,12 @@ from classes.constants import *
 #import classes.score as sc
 #pytesseract.pytesseract.tesseract_cmd = "/usr/local/bin/tesseract"
 
-
+from autodetect.pdf_file import Pdf
 
 
 def main():
+    ab = Pdf("tests/gf.pdf")
+    ab.get_header()
 
     #rr = a.Reorganize("archivo.db","../test/","../felicidad/")
     #ab = a.Archivo("AMVR archive","archivo.db",RELATIVE_ARCHIVE_PATH)
@@ -24,10 +26,10 @@ def main():
 
 
     #print(ab.get_dir_names())
-    app = gui.QtWidgets.QApplication(sys.argv)
+    """app = gui.QtWidgets.QApplication(sys.argv)
     w = gui.MainWindow()
     w.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec_())"""
 
 
 
