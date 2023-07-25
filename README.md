@@ -11,3 +11,12 @@ The ~ symbol is "Alt Gr + ñ" in spanish keyboard
 `pip3 install opencv-python`
 
 `pip3 install thefuzz[speedup]`
+
+
+
+# Automatic detection of instruments with tesseract
+
+Its important to remember that i have added the files, when i create the build, these files will be needed:
+  - /usr/local/Cellar/tesseract/5.3.1/share/tessdata/spa.user-words
+  - /usr/local/Cellar/tesseract/5.3.1/share/tessdata/spa.user-patterns
+  - /usr/local/Cellar/tesseract/5.3.1/share/tessdata/configs/instruments

@@ -1,5 +1,6 @@
 import PyPDF2,tempfile,shutil,cv2
 import pandas as pd
+import pytesseract
 from matplotlib import pyplot as plt
 from pdf2image import pdf2image
 
@@ -21,13 +22,13 @@ class Pdf(File):
             writer.add_page(page)
         
 
-        temp_pdf_rotated = tempfile.NamedTemporaryFile(suffix=".pdf",delete=True)
-        writer.write(temp_pdf_rotated)
+        temp_pdf_rotated = tempfile.NamedTemporaryFile(delete=True)
+        writer.write(temp_pdf_rotated.name)
 
-
-        shutil.copy(temp_pdf_rotated.name,"a.pdf")
-
-        return temp_pdf_rotated
+        
+        shutil.copy(temp_pdf_rotated.name,"tests/el_moro.pdf")
+        #writer.write(open("tests/m.pdf",'wb'))
+        #return temp_pdf_rotated
          
 
     #Transform pdf into jpg and get the pag selected
@@ -36,16 +37,16 @@ class Pdf(File):
 
         pdf = pdf2image.convert_from_path(self.path,200)
         for i, page in enumerate(pdf):
-            if num_page-1 == i:
+            if num_page == i:
                 page.save(temp_jpg.name, 'JPEG')
 
-        print(temp_jpg.name)
+        #print(temp_jpg.name)
 
         return temp_jpg
 
     #Detect the headers of the score(from the top to the first line of the first pentagram)
     def get_header(self):
-        img_tmp = self.get_jpg(1)
+        img_tmp = self.get_jpg(2)
 
         img = cv2.imread(img_tmp.name)
 
@@ -57,22 +58,27 @@ class Pdf(File):
         
         #Create a df with the lines of df_lineLocation with Lenght > 0
         df_useful  = df_lineLocations[df_lineLocations['LineLength'] > 0]
-        
+        print(df_useful)
+        input()
         try:
             #Create a square from the top to the first line of the first pentagram)
-            cropped = img[0:int((df_useful.iloc[0])['rowLoc'])]
+            #I rest 10 to eliminate some notes over the pentagram
+            cropped = img[0:int((df_useful.iloc[0])['rowLoc'])-10]
             
+            out_cropped = img[int((df_useful.iloc[0])['rowLoc'])-10:-1]
             #Save the header in a temporal file and return his object
-            tmp_header = tempfile.NamedTemporaryFile(suffix=".jpg",delete=True)
-            cv2.imwrite(tmp_header.name,cropped)
+            #tmp_header = tempfile.NamedTemporaryFile(suffix=".jpg",delete=True)
+            #cv2.imwrite(tmp_header.name,cropped)
             
-            return tmp_header
 
             #To print it
-            """plt.figure(figsize=(8,8))
+            
+            plt.figure(figsize=(8,8))
             plt.imshow(cropped)
-            plt.waitforbuttonpress()"""
+            plt.waitforbuttonpress()
 
+            return cropped
+        
         except Exception as e:
             print("fallo ", e)
         
@@ -96,4 +102,14 @@ class Pdf(File):
         lineLocations = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, horizontal_kernel, iterations=1)
 
         return lineLocations
+
+
+
+
+    def extract_header_text(self):
+        tmp_img = self.get_header()
+        img_rgb = cv2.cvtColor(tmp_img,cv2.COLOR_BGR2RGB) #type:ignore
+       
+        #print(pytesseract.get_languages())
+        print(pytesseract.image_to_string(img_rgb,lang='eng+cat+spa',config='--psm 12 -c preserve_interword_spaces=1'))
 

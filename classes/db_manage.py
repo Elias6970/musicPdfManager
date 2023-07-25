@@ -2,15 +2,15 @@ import sqlite3,xlrd,openpyxl
 from .score import Score
 
 class Db:
-    def __init__(self,name):
-        self.name = name
-        self.db_path = "./classes/"+str(name)
+    def __init__(self,db_name,file_name):
+        self.db_name = db_name
+        self.db_path = "./data/"+str(file_name)
         
         self.open_db()
 
         self.cur.execute("PRAGMA foreign_keys = 1") #Enable foreign keys
 
-        self.cur.execute("CREATE TABLE IF NOT EXISTS archive(cod INTEGER PRIMARY KEY,name TEXT NOT NULL,author TEXT,type TEXT,create_date DATE,last_modification DATE)")
+        self.cur.execute("CREATE TABLE IF NOT EXISTS {} (cod INTEGER PRIMARY KEY,name TEXT NOT NULL,author TEXT,type TEXT,create_date DATE,last_modification DATE,digitalized INTEGER)".format(db_name))
 
         self.con.commit()
 
@@ -123,4 +123,3 @@ class Db:
     #close the db
     def close_db(self):
         self.cur.close()
-

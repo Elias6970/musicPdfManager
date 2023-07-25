@@ -36,7 +36,7 @@ class Dir(File):
     def export_all_names(self,path):
         file_dirs = open("archivo_names.txt","w")
         file_db = open("db_names.txt","w")
-        db_con = Db(DB_NAME)
+        db_con = Db(DB_NAME,DB_FILE_NAME)
 
         names = os.listdir(path)
         #indexes = []
@@ -63,8 +63,8 @@ class Dir(File):
 
 #The connection with the db is started when the obj is created with the super.
 class Archivo(Db):
-    def __init__(self,name,db_name,path):
-        super(Archivo,self).__init__(db_name)
+    def __init__(self,db_name,db_file_name,path):
+        super(Archivo,self).__init__(db_name,db_file_name)
         
         self.archive_path = path
 
@@ -78,15 +78,33 @@ class Archivo(Db):
                     self.pieces_in_dirs.append(Dir(path+i,i))
         
 
-
-    def get_dir_names(self):
-        names = []
-        for i in self.pieces_in_dirs:
-            names.append(i.name)
-        
-        return names
+    #Extract the cod giving parsed name(cod+name), ej(1591-ATMURAF)-->1591
+    def extract_cod(self,name) -> int:
+        one = name.split("-",1)[0]
+        two = name.split(" ",1)[0]
+        if len(one) < len(two):
+            return one
+        return two
     
 
+    #Stablish the name to the folders get from the db to standarize the names
+    #"cod-name" in capital leters and without accents
+    def get_parsed_name(self,cod):
+        name = self.get_with_equals("cod",cod,"cod,name")
+
+        return str(name[0][0])+HYPHEN+unidecode(str(name[0][1])).upper() 
+    
+
+    #Compare the names in the archive dir with the db and set digitalized to 1 if the dir exists    
+    def add_digitalized_mark(self):
+        names = os.listdir(RELATIVE_ARCHIVE_PATH)
+
+        for i in names:
+            if "DS_Store" not in i:
+                cod = self.extract_cod(i)
+                self.cur.execute("UPDATE {} SET digitalized = 1 WHERE cod = {};".format(DB_NAME,cod))
+                        
+        self.con.commit()
 
 
 
@@ -101,23 +119,7 @@ class Reorganize(Archivo):
         self.new_archive_path = new_archive_path
 
         self.create_new_archive()
-        self.clear_trash()
-
-
-    #Extract the cod giving parsed name(cod+name), ej(1591-ATMURAF)-->1591
-    def extract_cod(self,name) -> int:
-        one = name.split("-",1)[0]
-        two = name.split(" ",1)[0]
-        if len(one) < len(two):
-            return one
-        return two
-    
-    #Stablish the name to the folders get from the db to standarize the names
-    #"cod-name" in capital leters and without accents
-    def get_parsed_name(self,cod):
-        name = self.get_with_equals("cod",cod,"cod,name")
-
-        return str(name[0][0])+HYPHEN+unidecode(str(name[0][1])).upper()     
+        self.clear_trash()    
           
     
     #Create the dirs and return the path
@@ -199,6 +201,7 @@ class Reorganize(Archivo):
         else:
             shutil.copyfile(actual_path,self.new_archive_path+name+DIR_EXTRAS+os.path.basename(actual_path))
 
+
     #Delete the folders that are inside rar and zip files
     def delete_intermediate_folders(self,dir_name,file,is_dir):
         if not is_dir:
@@ -224,4 +227,6 @@ class Reorganize(Archivo):
                 for j in dirs:
                     if "__MACOSX" in j:
                         shutil.rmtree(os.path.join(root,j))
+    
+
     
