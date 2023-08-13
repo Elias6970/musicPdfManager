@@ -3,8 +3,10 @@ import pandas as pd
 import pytesseract
 from matplotlib import pyplot as plt
 from pdf2image import pdf2image
+from thefuzz import fuzz
 
 from classes.files_manage import File
+from classes.constants import OPTIONS_OF_INSTRUMENTS_ESP
 
 class Pdf(File):
     def __init__(self, path):
@@ -40,16 +42,14 @@ class Pdf(File):
             if num_page == i:
                 page.save(temp_jpg.name, 'JPEG')
 
-        #print(temp_jpg.name)
-
         return temp_jpg
 
     #Detect the headers of the score(from the top to the first line of the first pentagram)
-    def get_header(self):
-        img_tmp = self.get_jpg(2)
+    def get_header(self,n_page):
+        img_tmp = self.get_jpg(n_page)
 
         img = cv2.imread(img_tmp.name)
-
+        
         lineLocations = self.findHorizontalLines(img_tmp.name)
 
         #Create a dataFrame(a table like sql) with two columns
@@ -58,14 +58,13 @@ class Pdf(File):
         
         #Create a df with the lines of df_lineLocation with Lenght > 0
         df_useful  = df_lineLocations[df_lineLocations['LineLength'] > 0]
-        print(df_useful)
-        input()
+
         try:
             #Create a square from the top to the first line of the first pentagram)
             #I rest 10 to eliminate some notes over the pentagram
-            cropped = img[0:int((df_useful.iloc[0])['rowLoc'])-10]
+            cropped = img[0:int((df_useful.iloc[2])['rowLoc'])-10]
             
-            out_cropped = img[int((df_useful.iloc[0])['rowLoc'])-10:-1]
+            #out_cropped = img[int((df_useful.iloc[0])['rowLoc'])-10:-1]
             #Save the header in a temporal file and return his object
             #tmp_header = tempfile.NamedTemporaryFile(suffix=".jpg",delete=True)
             #cv2.imwrite(tmp_header.name,cropped)
@@ -73,9 +72,9 @@ class Pdf(File):
 
             #To print it
             
-            plt.figure(figsize=(8,8))
+            """plt.figure(figsize=(8,8))
             plt.imshow(cropped)
-            plt.waitforbuttonpress()
+            plt.waitforbuttonpress()"""
 
             return cropped
         
@@ -87,7 +86,7 @@ class Pdf(File):
     #Find the lines in the score, in this case the lines of the pentagram
     def findHorizontalLines(self,img):
         img = cv2.imread(img) 
-        
+
         #convert image to greyscale
         gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
         
@@ -106,10 +105,35 @@ class Pdf(File):
 
 
 
-    def extract_header_text(self):
-        tmp_img = self.get_header()
+    def extract_header_text(self,num_page):
+        tmp_img = self.get_header(num_page)
         img_rgb = cv2.cvtColor(tmp_img,cv2.COLOR_BGR2RGB) #type:ignore
        
         #print(pytesseract.get_languages())
-        print(pytesseract.image_to_string(img_rgb,lang='eng+cat+spa',config='--psm 12 -c preserve_interword_spaces=1'))
+        #print(pytesseract.image_to_string(img_rgb,lang='eng+cat+spa',config='--psm 12 -c preserve_interword_spaces=1'))
+        av = pytesseract.image_to_data(img_rgb,lang='eng+cat+spa',config='--psm 12 -c preserve_interword_spaces=1',output_type="data.frame")
+        
+        posibilities = []
+        for i in range(len(av)):
+            a = self.check_instruments(str((av.iloc[i])['text']).upper())
+            
+            if a != None:
+                #print(str((av.iloc[i])['text']),a)
+                posibilities.append(a)
+
+        posibilities = sorted(posibilities, key=lambda x:x[1],reverse=True)
+       
+        print(posibilities)
+        #return posibilities
+
+
+    def check_instruments(self,word):
+        if(word != "NAN"):
+            list = []
+            for i in OPTIONS_OF_INSTRUMENTS_ESP:
+                list.append((i,fuzz.token_sort_ratio(word,i)))
+            
+            return sorted(list, key=lambda x:x[1],reverse=True)[0]
+        
+        return None
 

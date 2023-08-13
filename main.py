@@ -13,14 +13,16 @@ from autodetect.pdf_file import Pdf
 
 
 def main():
-    #ab = Pdf("tests/el_moro.pdf")
+    ab = Pdf("tests/el_moro.pdf")
     #ab.rotate(90)
-    
-    #ab.extract_header_text()
-    
+    """ar = []
+    for i in range(29):
+        ar.append(ab.extract_header_text(i))"""
+    #print(ar)
     #rr = a.Reorganize("archivo.db","../test/","../felicidad/")
-    ab = a.Archivo("AMVR_archive","archivo.db",RELATIVE_ARCHIVE_PATH)
-
+    #ab = a.Archivo("AMVR_archive","archivo.db",RELATIVE_ARCHIVE_PATH)
+    #ab.add_digitalized_mark()
+    
 
     #m = list(filter(lambda i:os.path.basename(i.path),ab.pieces_in_dirs))
 

@@ -10,7 +10,7 @@ class Db:
 
         self.cur.execute("PRAGMA foreign_keys = 1") #Enable foreign keys
 
-        self.cur.execute("CREATE TABLE IF NOT EXISTS {} (cod INTEGER PRIMARY KEY,name TEXT NOT NULL,author TEXT,type TEXT,create_date DATE,last_modification DATE,digitalized INTEGER)".format(db_name))
+        self.cur.execute("CREATE TABLE IF NOT EXISTS {} (cod INTEGER PRIMARY KEY,name TEXT NOT NULL,author TEXT,type TEXT,created_date DATE,last_modification DATE,digitalized INTEGER DEFAULT 0,handwritten INTEGER DEFAULT 0,parted INTEGER DEFAULT 0)".format(db_name))
 
         self.con.commit()
 
