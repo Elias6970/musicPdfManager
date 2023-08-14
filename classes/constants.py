@@ -10,3 +10,4 @@ DIR_EXTRAS = "/extras/"
 DIR_COMPRESS = "/compress/"
 IGNORE_FILES  = [".DS_Store"]
 HYPHEN = "-" 
+MAX_COPIES = 20 #Max copies of the combo box next to the add button in select mode 

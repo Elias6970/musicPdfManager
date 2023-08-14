@@ -13,7 +13,7 @@ from autodetect.pdf_file import Pdf
 
 
 def main():
-    ab = Pdf("tests/el_moro.pdf")
+    #ab = Pdf("tests/el_moro.pdf")
     #ab.rotate(90)
     """ar = []
     for i in range(29):
@@ -31,10 +31,10 @@ def main():
 
 
     #print(ab.get_dir_names())
-    """app = gui.QtWidgets.QApplication(sys.argv)
+    app = gui.QtWidgets.QApplication(sys.argv)
     w = gui.MainWindow()
     w.show()
-    sys.exit(app.exec_())"""
+    sys.exit(app.exec_())
 
 
 

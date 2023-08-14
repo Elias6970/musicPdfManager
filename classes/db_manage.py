@@ -23,7 +23,7 @@ class Db:
                 
                 if score.create_date is None:
                     score.create_date = "DATE('now')"
-                self.cur.execute("INSERT INTO archive VALUES (?,?,?,?,{},{})".format(score.create_date,"DATE('now')"),(score.cod,score.name,score.author,score.type))
+                self.cur.execute("INSERT INTO {} VALUES (?,?,?,?,{},{})".format(self.db_name,score.create_date,"DATE('now')"),(score.cod,score.name,score.author,score.type))
                 self.con.commit()
             else:
                 print("Error en el código o nombre de la obra")
@@ -89,7 +89,7 @@ class Db:
         try:
             self.cur.execute("PRAGMA case_sensitive_like = true")
             
-            extracted = self.cur.execute("SELECT {} FROM archive WHERE {} LIKE '%{}%'".format(returned_camps,camp_to_compare,value))
+            extracted = self.cur.execute("SELECT {} FROM {} WHERE {} LIKE '%{}%'".format(returned_camps,self.db_name,camp_to_compare,value))
 
         except Exception as e:
             print(e)
@@ -103,7 +103,7 @@ class Db:
         try:
             self.cur.execute("PRAGMA case_sensitive_like = true")
             
-            extracted = self.cur.execute("SELECT {} FROM archive WHERE {} = '{}'".format(returned_camps,camp_to_compare,value))
+            extracted = self.cur.execute("SELECT {} FROM {} WHERE {} = '{}'".format(returned_camps,self.db_name,camp_to_compare,value))
 
         except Exception as e:
             print(e)
@@ -111,9 +111,14 @@ class Db:
         
         return extracted.fetchall()
 
+    #Get the next cod to the db
+    def get_next_cod(self):
+        next_cod = self.cur.execute("SELECT MAX(cod) FROM {}".format(self.db_name)).fetchone()
+        return int(next_cod[0])+1
+
     #Returns all the db
     def get_all(self):
-        return self.cur.execute("SELECT * FROM archive").fetchall()
+        return self.cur.execute("SELECT * FROM {}".format(self.db_name)).fetchall()
 
 
     def open_db(self):

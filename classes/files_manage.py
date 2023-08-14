@@ -14,7 +14,11 @@ class File:
     def remove(self):
         os.remove(self.path)
 
-
+class Print_file(File):
+    def __init__(self, path,copies:int):
+        super().__init__(path)
+        
+        self.copies = copies
 
 
 

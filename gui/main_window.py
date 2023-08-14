@@ -13,7 +13,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow,self).__init__() #Create the MainWindow Object callin QMainWindow constructor(i think)
         
         #Init the Archive 
-        self.archive = Archivo("archivo AMRV","archivo.db",RELATIVE_ARCHIVE_PATH)
+        self.archive = Archivo("AMVR_archive","archivo.db",RELATIVE_ARCHIVE_PATH)
 
         self.setMenuBar(self.create_menu_bar())        
 
@@ -39,36 +39,54 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setGeometry(100,80,200,200)
         self.setWindowTitle("AMRV archive manager")
 
+
     #Create the menu bar
     def create_menu_bar(self):
-        a1 = QtWidgets.QAction("Option 1",self)
-        a1.triggered.connect(self.mv_back_preview)
-        a2 = QtWidgets.QAction("Option 2",self)
-        a2.triggered.connect(self.mv_forward_preview)
-        menu = self.menuBar()
-        file_menu = menu.addMenu("File").addAction(a1)
-        edit_menu = menu.addMenu("Edit").addAction(a2)
+        opt1 = QtWidgets.QAction("Add scores",self)
+        opt1.triggered.connect(self.show_add_scores_menu)
 
+        menu = self.menuBar()
+        menu.addMenu("Archive").addActions([opt1])
+        
         return menu
 
 
-    #Create two buttons in a horizontal layout
-    def create_two_buttons(self,btn1,btn2):
+    #Create the zone with a combo box to the num of copies, add and create pdf buttons
+    def create_add_zone(self):
         obj = QtWidgets.QWidget()
+        layout = QtWidgets.QHBoxLayout()
 
-        btn_left = QtWidgets.QPushButton(btn1)
-        btn_right = QtWidgets.QPushButton(btn2)
+        self.num_copies = QtWidgets.QComboBox()
+        self.num_copies.setFixedWidth(50)
+        self.num_copies.addItems([str(i+1) for i in range(MAX_COPIES)])
 
+        btn1 = QtWidgets.QPushButton("Add")
+        btn2 = QtWidgets.QPushButton("Create Pdf")
+
+        btn1.clicked.connect(self.add_score)
+        btn2.clicked.connect(self.create_pdf)
+
+        layout.addWidget(self.num_copies)
+        layout.addWidget(btn1)
+        layout.addWidget(btn2)
+
+        obj.setLayout(layout)
+        return obj
+
+
+    #Create two buttons in a horizontal layout
+    def create_preview_buttons(self):
+        obj = QtWidgets.QWidget()
         hbox = QtWidgets.QHBoxLayout()
+        
+        btn_left = QtWidgets.QPushButton("<")
+        btn_right = QtWidgets.QPushButton(">")
+        
         hbox.addWidget(btn_left)
         hbox.addWidget(btn_right)
         
-        if btn1.lower() == "add":
-            btn_left.clicked.connect(self.add_score)
-            btn_right.clicked.connect(self.create_pdf)
-        else:
-            btn_left.clicked.connect(self.mv_back_preview)
-            btn_right.clicked.connect(self.mv_forward_preview)
+        btn_left.clicked.connect(self.mv_back_preview)
+        btn_right.clicked.connect(self.mv_forward_preview)
         
         obj.setLayout(hbox)
 
@@ -103,9 +121,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.piece_lbl = QtWidgets.QLabel()
         self.part_combo_box = QtWidgets.QComboBox()
         
-        #self.part_combo_box.addItems(self.option_of_instruments(21))
 
-        self.add_create_buttons = self.create_two_buttons("Add","Create Pdf")
+        self.add_create_buttons = self.create_add_zone()
         
 
         #Add the widgets to the layout
@@ -127,7 +144,7 @@ class MainWindow(QtWidgets.QMainWindow):
         preview_layout.setSpacing(0)
         preview_layout.setContentsMargins(30,0,0,0)
 
-        scroll_arrows = self.create_two_buttons("<",">")
+        scroll_arrows = self.create_preview_buttons()
         preview_layout.addWidget(QtWidgets.QLabel("Aquí iríra la preview del pdf"))
         preview_layout.addWidget(scroll_arrows)
 
@@ -186,9 +203,9 @@ class MainWindow(QtWidgets.QMainWindow):
         #Stops the user if try to add a score no existing
         if self.validate_selection(os.path.basename(self.actual_score.path),False):
             
-            self.score_parts_added.append(File(os.path.join(self.actual_score.path+DIR_SCORES,self.part_combo_box.currentText())))
+            self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path+DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
             
-            new_score_text = os.path.basename(self.actual_score.path)+"->"+self.part_combo_box.currentText()
+            new_score_text = self.num_copies.currentText()+"x "+os.path.basename(self.actual_score.path)+"->"+self.part_combo_box.currentText()
 
             #Update the labels of the down scores
             new_score_lbl = QtWidgets.QLabel(new_score_text)
@@ -220,7 +237,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 merged_pdf = PyPDF2.PdfWriter()
                 for i in self.score_parts_added:
                     if os.path.exists(i.path):
-                        merged_pdf.append(i.path)
+                        for j in range(i.copies): #Add the pdf the times that is selected in copies
+                            merged_pdf.append(i.path)
                 
                 merged_pdf.write(file_dialog.selectedFiles()[0])
                 merged_pdf.close()
@@ -230,9 +248,17 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def mv_back_preview(self):
-        self.hide()
-        aaa = add_scores_window()
-        aaa.show()
-        self.show()
+        pass
+
     def mv_forward_preview(self):
         pass
+
+    #Show the add_scores_window hiding the main menu
+    def show_add_scores_menu(self):
+        next_cod = self.archive.get_next_cod()
+        Add_scores_window(next_cod,self.centralWidget())
+        
+    
+    def show_select_scores_menu(self):
+        self.show()
+        
