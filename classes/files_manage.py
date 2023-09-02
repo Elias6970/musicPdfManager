@@ -1,4 +1,7 @@
 import os,sys,shutil
+from PIL import Image as PILImage
+from reportlab.platypus import SimpleDocTemplate,Table,Image
+from reportlab.lib import pagesizes,colors
 from classes.constants import *
 from classes.db_manage import Db
 from unidecode import unidecode
@@ -14,6 +17,14 @@ class File:
     def remove(self):
         os.remove(self.path)
 
+    @staticmethod
+    def is_pdf(path:str):
+        extension = os.path.splitext(path) #Extract the extension
+        if ".pdf" == extension[1]:
+            return True
+        return False
+
+
 class Print_file(File):
     def __init__(self, path,copies:int):
         super().__init__(path)
@@ -27,8 +38,8 @@ class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
          
-        self.scores = self.get_names(path + DIR_SCORES)
-        self.extras = self.get_names(path + DIR_EXTRAS)
+        self.scores = self.get_names(path + "/" + DIR_SCORES)
+        self.extras = self.get_names(path + "/" + DIR_EXTRAS)
 
 
     #With a path, returns the names of the files inside it
@@ -76,11 +87,15 @@ class Archivo(Db):
         self.pieces_in_dirs = []
         
         #Get the scores and extras of all pieces
-        for i in os.listdir(path):
+        self.update_pieces_in_dirs()
+
+    #Get the files inside the archive dir    
+    def update_pieces_in_dirs(self):
+        self.pieces_in_dirs = [] #Reset the variable to avoid duplication
+        for i in os.listdir(self.archive_path):
             for j in IGNORE_FILES:
                 if i not in j: #Ignore the DS_Store 
-                    self.pieces_in_dirs.append(Dir(path+i,i))
-        
+                    self.pieces_in_dirs.append(Dir(self.archive_path+i,i))
 
     #Extract the cod giving parsed name(cod+name), ej(1591-ATMURAF)-->1591
     def extract_cod(self,name) -> int:
@@ -93,12 +108,29 @@ class Archivo(Db):
 
     #Stablish the name to the folders get from the db to standarize the names
     #"cod-name" in capital leters and without accents
-    def get_parsed_name(self,cod):
+    """def get_parsed_name_from_db(self,cod):
         name = self.get_with_equals("cod",cod,"cod,name")
 
-        return str(name[0][0])+HYPHEN+unidecode(str(name[0][1])).upper() 
+        return str(name[0][0])+HYPHEN+unidecode(str(name[0][1])).upper()""" 
+    
+    #Return the standard name in the dirs structure
+    @staticmethod
+    def get_parsed_name(cod,name):
+        return str(cod)+HYPHEN+unidecode(str(name)).upper() 
     
 
+    #Create the dirs and return the path
+    @staticmethod
+    def make_dir(archive_path,name):
+        try:
+            os.makedirs(archive_path+name+"/"+DIR_SCORES) #Create /partituras/
+        except:
+            pass
+
+        try:
+            os.makedirs(archive_path+name+"/"+DIR_EXTRAS) #Create /extras/
+        except:
+            pass
     #Compare the names in the archive dir with the db and set digitalized to 1 if the dir exists    
     def add_digitalized_mark(self):
         names = os.listdir(RELATIVE_ARCHIVE_PATH)
@@ -110,6 +142,44 @@ class Archivo(Db):
                         
         self.con.commit()
 
+
+    #Export the pdf to be printed to the dossier
+    def export_pdf_to_print(self,pdf_file):
+
+        # Read Excel data into a list
+        data = self.get_all_to_print()
+        data.insert(0,("Digitalizada","Cod","Nombre","Autor","tipo")) #traducir
+
+        # Create a PDF document
+        doc = SimpleDocTemplate(pdf_file, pagesize=pagesizes.landscape(pagesizes.A4),topMargin=15,bottomMargin=10)
+        
+        #TODO: make that the img can be put in the first page as cover
+        img = Image(COVER_PARTITURES_GUIDE,width=841,height=595)
+        
+        
+        table = Table(data)
+
+        # Customize table appearance
+        cell_padding = 1.5
+        style = [
+            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ('LEFTPADDING', (0, 0), (-1, -1), cell_padding),
+            ('RIGHTPADDING', (0, 0), (-1, -1), cell_padding),
+            ('TOPPADDING', (0, 0), (-1, -1), cell_padding),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), cell_padding),
+        ]
+        table.spaceAfter = 0
+        table.spaceBefore = 0
+        table.setStyle(style)
+        
+        # Build the PDF
+        #story = [img,table]
+        story = [table]
+        doc.build(story)
 
 
 
@@ -125,18 +195,6 @@ class Reorganize(Archivo):
         self.create_new_archive()
         self.clear_trash()    
           
-    
-    #Create the dirs and return the path
-    def mk_score_and_extras_dirs(self,name):
-        try:
-            os.makedirs(self.new_archive_path+name+DIR_SCORES) #Create /partituras/
-        except:
-            pass
-
-        try:
-            os.makedirs(self.new_archive_path+name+DIR_EXTRAS) #Create /extras/
-        except:
-            pass
   
     
     #Create a new archive with with correct and standart names
@@ -145,8 +203,10 @@ class Reorganize(Archivo):
 
         for i in dir_list:
             if i not in IGNORE_FILES:
-                new_name = self.get_parsed_name(self.extract_cod(i))
-                self.mk_score_and_extras_dirs(new_name)
+                query = self.get_with_equals("cod",self.extract_cod(i),"cod,name")
+                new_name = Archivo.get_parsed_name(query[0][0],query[0][1])
+
+                Archivo.make_dir(self.new_archive_path,new_name)
 
                 for root,dir,files in os.walk(self.archive_path+i):
                     for j in files:
@@ -158,21 +218,21 @@ class Reorganize(Archivo):
     #Copy the file to the new path deppending the type of file 
     def copy_file(self,actual_path,name):
         if ".pdf" in actual_path:
-            shutil.copyfile(actual_path,self.new_archive_path+name+DIR_SCORES+os.path.basename(actual_path))
+            shutil.copyfile(actual_path,self.new_archive_path+name+"/"+DIR_SCORES+os.path.basename(actual_path))
         
         elif ".PDF" in actual_path: # To change PDF to pdf(not capital letters)
             name_without_extension = os.path.splitext(os.path.basename(actual_path))[0]
-            shutil.copyfile(actual_path,self.new_archive_path+name+DIR_SCORES+name_without_extension+".pdf")
+            shutil.copyfile(actual_path,self.new_archive_path+name+"/"+DIR_SCORES+name_without_extension+".pdf")
 
         elif ".zip" in actual_path:
             with zipfile.ZipFile(actual_path,'r') as zip:
                 for internal_zip_file in zip.infolist():
                     if ".pdf" in internal_zip_file.filename:
-                        dir_name = name+DIR_SCORES
+                        dir_name = name+"/"+DIR_SCORES
                     elif "DS_Store" in internal_zip_file.filename:
                         continue
                     else:
-                        dir_name = name+DIR_EXTRAS
+                        dir_name = name+"/"+DIR_EXTRAS
         
                     try:
                         zip.extract(internal_zip_file.filename,path=self.new_archive_path+dir_name)
@@ -185,11 +245,11 @@ class Reorganize(Archivo):
             with rarfile.RarFile(actual_path, 'r') as rar:
                 for internal_rar_file in rar.infolist():
                     if ".pdf" in internal_rar_file.filename:  
-                        dir_name = name+DIR_SCORES
+                        dir_name = name+"/"+DIR_SCORES
                     elif "DS_Store" in internal_rar_file.filename:
                         continue
                     else:
-                        dir_name = name+DIR_EXTRAS
+                        dir_name = name+"/"+DIR_EXTRAS
 
                     try:
                         rar.extract(internal_rar_file.filename,path=self.new_archive_path+dir_name)
@@ -203,7 +263,7 @@ class Reorganize(Archivo):
             return
         
         else:
-            shutil.copyfile(actual_path,self.new_archive_path+name+DIR_EXTRAS+os.path.basename(actual_path))
+            shutil.copyfile(actual_path,self.new_archive_path+name+"/"+DIR_EXTRAS+os.path.basename(actual_path))
 
 
     #Delete the folders that are inside rar and zip files

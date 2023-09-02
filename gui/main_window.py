@@ -2,18 +2,18 @@ from PyQt5 import QtWidgets,QtCore
 import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
-from gui.other_windows import *
+from gui.add_score_window import *
 
 class MainWindow(QtWidgets.QMainWindow):
     actual_score:Dir #Dir
-    score_parts_added = [] #List of Files
+    score_parts_added = [] #List of Print files
 
     def __init__(self):
 
         super(MainWindow,self).__init__() #Create the MainWindow Object callin QMainWindow constructor(i think)
         
         #Init the Archive 
-        self.archive = Archivo("AMVR_archive","archivo.db",RELATIVE_ARCHIVE_PATH)
+        self.archive = Archivo(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
 
         self.setMenuBar(self.create_menu_bar())        
 
@@ -37,16 +37,20 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setCentralWidget(container)
         self.setGeometry(100,80,200,200)
-        self.setWindowTitle("AMRV archive manager")
+        self.setWindowTitle("AMRV archive manager") #traducir
 
 
     #Create the menu bar
     def create_menu_bar(self):
-        opt1 = QtWidgets.QAction("Add scores",self)
+        opt1 = QtWidgets.QAction("Add scores",self) #traducir
         opt1.triggered.connect(self.show_add_scores_menu)
 
+        opt2 = QtWidgets.QAction("Export Dossier",self) #traducir
+        opt2.triggered.connect(self.print_dossier)
+
         menu = self.menuBar()
-        menu.addMenu("Archive").addActions([opt1])
+        menu.addMenu("Archive").addActions([opt1]) #traducir
+        menu.addMenu("Database").addActions([opt2]) #traducir
         
         return menu
 
@@ -59,9 +63,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.num_copies = QtWidgets.QComboBox()
         self.num_copies.setFixedWidth(50)
         self.num_copies.addItems([str(i+1) for i in range(MAX_COPIES)])
-
-        btn1 = QtWidgets.QPushButton("Add")
-        btn2 = QtWidgets.QPushButton("Create Pdf")
+        
+        btn1 = QtWidgets.QPushButton("Add") #traducir
+        btn2 = QtWidgets.QPushButton("Create Pdf") #traducir
 
         btn1.clicked.connect(self.add_score)
         btn2.clicked.connect(self.create_pdf)
@@ -104,7 +108,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         #All widgets
         self.piece_search_bar = QtWidgets.QLineEdit()
-        self.piece_search_bar.setPlaceholderText("Buscar partitura")
+        self.piece_search_bar.setPlaceholderText("Buscar partitura") #traducir
         self.piece_search_bar.textChanged.connect(self.validate_selection) #type: ignore
             
         self.pieces_names = [os.path.basename(i.path) for i in self.archive.pieces_in_dirs]
@@ -203,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #Stops the user if try to add a score no existing
         if self.validate_selection(os.path.basename(self.actual_score.path),False):
             
-            self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path+DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
+            self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path+"/"+DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
             
             new_score_text = self.num_copies.currentText()+"x "+os.path.basename(self.actual_score.path)+"->"+self.part_combo_box.currentText()
 
@@ -222,29 +226,37 @@ class MainWindow(QtWidgets.QMainWindow):
         self.part_combo_box.addItems(scores) 
 
 
-    #Create one pdf with all the selected pdfs merged
-    def create_pdf(self):
+    #Display a window to select a location to save a pdf
+    def dialog_new_pdf(self):
         file_dialog = QtWidgets.QFileDialog()
-        #file_dialog.setFileMode(QtWidgets.QFileDialog.AnyFile)  # Allow selecting any file type
-        file_dialog.setWindowTitle("Select Folder and File Name")
+        
+        file_dialog.setWindowTitle("Select Folder and File Name") #traducir
         file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)  # Set the dialog to save mode
         file_dialog.setDefaultSuffix(".pdf")
-        #file_dialog.setDirectory("/")
 
         if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+            return file_dialog.selectedFiles()[0]
+        else:
+            return ""
+        
+
+    #Create one pdf with all the selected pdfs merged
+    def create_pdf(self):
+        pdf_path = self.dialog_new_pdf()
             
-            try: #Check if the path is valid
-                merged_pdf = PyPDF2.PdfWriter()
-                for i in self.score_parts_added:
-                    if os.path.exists(i.path):
-                        for j in range(i.copies): #Add the pdf the times that is selected in copies
-                            merged_pdf.append(i.path)
-                
-                merged_pdf.write(file_dialog.selectedFiles()[0])
-                merged_pdf.close()
+        try: #Check if the path is valid
+            merged_pdf = PyPDF2.PdfWriter()
+            for i in self.score_parts_added:
+                if os.path.exists(i.path):
+                    for j in range(i.copies): #Add the pdf the times that is selected in copies
+                        merged_pdf.append(i.path)
             
-            except Exception as e:
-                print("Error: ",e)
+            merged_pdf.write(pdf_path)
+            merged_pdf.close()
+        
+        except Exception as e:
+            print("Error: ",e)
+
 
 
     def mv_back_preview(self):
@@ -256,9 +268,12 @@ class MainWindow(QtWidgets.QMainWindow):
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
         next_cod = self.archive.get_next_cod()
-        Add_scores_window(next_cod,self.centralWidget())
+        #Add_scores_window(next_cod,self.centralWidget())
+        Add_scores_window(next_cod,self.archive,self)
+        self.archive.update_pieces_in_dirs() #Update the list of pieces for the autocompleter
         
-    
-    def show_select_scores_menu(self):
-        self.show()
+
         
+    def print_dossier(self):
+        pdf_path = self.dialog_new_pdf()
+        self.archive.export_pdf_to_print(pdf_path)

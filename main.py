@@ -2,7 +2,7 @@
 import sys
 from PyQt5 import QtWidgets
 import gui.main_window as gui
-import gui.other_windows as ot
+import gui.add_score_window as ot
 import classes.files_manage as a
 from classes.constants import *
 #import classes.db_manage as db
@@ -10,7 +10,7 @@ from classes.constants import *
 #pytesseract.pytesseract.tesseract_cmd = "/usr/local/bin/tesseract"
 
 from autodetect.pdf_file import Pdf
-
+from classes.files_manage import Archivo
 
 def main():
     #ab = Pdf("tests/el_moro.pdf")
@@ -30,7 +30,10 @@ def main():
         #print(os.path.basename(i.path))
 
 
+    #archive = Archivo(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
+    #archive.export_pdf_to_print("out.pdf")
     #print(ab.get_dir_names())
+
     app = gui.QtWidgets.QApplication(sys.argv)
     w = gui.MainWindow()
     w.show()
