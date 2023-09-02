@@ -2,7 +2,9 @@ from PyQt5 import QtWidgets,QtCore
 import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
-from gui.add_score_window import *
+from gui.add_score_window import Add_score_window
+from gui.delete_and_modify_score_window import Delete_score_window,Modify_score_window
+from gui.window_extras import Error
 
 class MainWindow(QtWidgets.QMainWindow):
     actual_score:Dir #Dir
@@ -14,7 +16,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         #Init the Archive 
         self.archive = Archivo(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
-
+        
         self.setMenuBar(self.create_menu_bar())        
 
         up_zone = self.create_up_zone()
@@ -42,15 +44,21 @@ class MainWindow(QtWidgets.QMainWindow):
 
     #Create the menu bar
     def create_menu_bar(self):
-        opt1 = QtWidgets.QAction("Add scores",self) #traducir
-        opt1.triggered.connect(self.show_add_scores_menu)
+        add_score_opt = QtWidgets.QAction("Add score",self) #traducir
+        add_score_opt.triggered.connect(self.show_add_scores_menu)
 
-        opt2 = QtWidgets.QAction("Export Dossier",self) #traducir
-        opt2.triggered.connect(self.print_dossier)
+        modify_score_opt = QtWidgets.QAction("Modify score",self) #traducir
+        modify_score_opt.triggered.connect(self.show_modify_score_menu)
+
+        delete_score_opt = QtWidgets.QAction("Delete score",self) #traducir
+        delete_score_opt.triggered.connect(self.show_delete_score_menu)
+
+        export_dossier_opt = QtWidgets.QAction("Export Dossier",self) #traducir
+        export_dossier_opt.triggered.connect(self.export_dossier)
 
         menu = self.menuBar()
-        menu.addMenu("Archive").addActions([opt1]) #traducir
-        menu.addMenu("Database").addActions([opt2]) #traducir
+        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt]) #traducir
+        menu.addMenu("Database").addActions([export_dossier_opt]) #traducir
         
         return menu
 
@@ -103,12 +111,11 @@ class MainWindow(QtWidgets.QMainWindow):
         search_bars_layout = QtWidgets.QVBoxLayout()
         
         #Space
-        #search_bars_layout.setSpacing(2)
         search_bars_layout.setContentsMargins(0,0,0,0)
         
         #All widgets
         self.piece_search_bar = QtWidgets.QLineEdit()
-        self.piece_search_bar.setPlaceholderText("Buscar partitura") #traducir
+        self.piece_search_bar.setPlaceholderText("Search score") #traducir
         self.piece_search_bar.textChanged.connect(self.validate_selection) #type: ignore
             
         self.pieces_names = [os.path.basename(i.path) for i in self.archive.pieces_in_dirs]
@@ -255,25 +262,31 @@ class MainWindow(QtWidgets.QMainWindow):
             merged_pdf.close()
         
         except Exception as e:
-            print("Error: ",e)
-
-
+            Error.print_error(e)
+            
 
     def mv_back_preview(self):
         pass
 
+
     def mv_forward_preview(self):
         pass
 
+
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
-        next_cod = self.archive.get_next_cod()
-        #Add_scores_window(next_cod,self.centralWidget())
-        Add_scores_window(next_cod,self.archive,self)
+        Add_score_window(self.archive,self)
         self.archive.update_pieces_in_dirs() #Update the list of pieces for the autocompleter
-        
 
-        
-    def print_dossier(self):
+
+    def show_modify_score_menu(self):
+        pass
+
+    def show_delete_score_menu(self):
+        Delete_score_window(self.archive,self)
+
+
+    #Create a pdf with a list of all the db
+    def export_dossier(self):
         pdf_path = self.dialog_new_pdf()
         self.archive.export_pdf_to_print(pdf_path)

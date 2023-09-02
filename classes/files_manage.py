@@ -1,11 +1,11 @@
 import os,sys,shutil
-from PIL import Image as PILImage
+from unidecode import unidecode
+import zipfile,rarfile
 from reportlab.platypus import SimpleDocTemplate,Table,Image
 from reportlab.lib import pagesizes,colors
 from classes.constants import *
 from classes.db_manage import Db
-from unidecode import unidecode
-import zipfile,rarfile
+from gui.window_extras import Error
 
 class File:
     def __init__(self,path):
@@ -98,7 +98,8 @@ class Archivo(Db):
                     self.pieces_in_dirs.append(Dir(self.archive_path+i,i))
 
     #Extract the cod giving parsed name(cod+name), ej(1591-ATMURAF)-->1591
-    def extract_cod(self,name) -> int:
+    @staticmethod
+    def extract_cod(name) -> int:
         one = name.split("-",1)[0]
         two = name.split(" ",1)[0]
         if len(one) < len(two):
@@ -239,7 +240,8 @@ class Reorganize(Archivo):
                         self.delete_intermediate_folders(dir_name,internal_zip_file,internal_zip_file.is_dir())
 
                     except Exception as e:
-                        print("Error",e," with: ",internal_zip_file.filename)
+                        Error.print_error(e,"Error with zip: "+internal_zip_file.filename)
+                        #print("Error",e," with: ",internal_zip_file.filename)
 
         elif ".rar" in actual_path:
             with rarfile.RarFile(actual_path, 'r') as rar:
@@ -256,7 +258,8 @@ class Reorganize(Archivo):
                         self.delete_intermediate_folders(dir_name,internal_rar_file,internal_rar_file.isdir())
                     
                     except Exception as e:
-                        print("Error",e," with: ",internal_rar_file.filename)
+                        Error.print_error(e,"Error with rar: "+internal_rar_file.filename)
+                        #print("Error",e," with: ",internal_rar_file.filename)
 
 
         elif "DS_Store" in actual_path:

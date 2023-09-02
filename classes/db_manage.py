@@ -1,6 +1,6 @@
 import sqlite3,xlrd,openpyxl
 from .score import Score
-
+from gui.window_extras import Error
 class Db:
     def __init__(self,db_name,file_name):
         self.db_name = db_name
@@ -18,23 +18,24 @@ class Db:
     #Insert a score in the db
     def insert(self,score:Score):
         try: 
+            print(score.handwritten)
             #Check if cod>0 and have name
             if score.cod > 0 and score.name is not None and len(score.name.strip()) > 0:
 
-                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.db_name), (score.cod, score.name, score.author, score.type,score.digitalized,score.parted))
+                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.db_name), (score.cod, score.name, score.author, score.type,score.handwritten,score.parted))
                 self.con.commit()
                 return True
             
             else:
-                print("Error en el código o nombre de la obra") #traducir
+                Error.print_error(message="Error en el código o nombre de la obra")#traducir
                 raise #Jump to the except statement
 
-        except sqlite3.IntegrityError: #cod repited
-            print("Error, ya existe esa obra: ",score.cod) #traducir
+        except sqlite3.IntegrityError as e: #cod repited
+            Error.print_error(e,"Error, ya existe esa obra: "+ str(score.cod))#traducir
 
         except Exception as e:
-            print("Error ",type(e)," introduciendo la obra, ",score.name) #traducir
-        
+            Error.print_error(e,"Error, introduciendo la obra: "+ str(score.name))#traducir
+
         return False
 
     #Insert into the db from excel xlsx 
@@ -55,9 +56,10 @@ class Db:
                 continue
             try:
                 self.insert(Score(row_values[0],str(row_values[1]),row_values[2],row_values[3],digitalized=1))
-            except:
-                print("Error inserting: ",row_values)
-
+            except Exception as e:
+                #print("Error inserting: ",row_values)
+                Error.print_error(e,"Error inserting: "+str(row_values))
+            
             i+=1         
 
 
@@ -70,9 +72,10 @@ class Db:
             row = sheet.row_values(i)
             try:
                 self.insert(Score(row[0],str(row[1]),row[2],row[3],digitalized=1))
-            except:
-                print("Error inserting: ",row)
-        
+            except Exception as e:
+                #print("Error inserting: ",row)
+                Error.print_error(e,"Error inserting: "+str(row))
+
         self.cur.close()
 
     def delete_score(self,cod):
@@ -96,7 +99,7 @@ class Db:
             extracted = self.cur.execute("SELECT {} FROM {} WHERE {} LIKE '%{}%'".format(returned_camps,self.db_name,camp_to_compare,value))
 
         except Exception as e:
-            print(e)
+            Error.print_error(e)
             return ["0"]
         
         return extracted.fetchall()
@@ -108,7 +111,7 @@ class Db:
             extracted = self.cur.execute("SELECT {} FROM {} WHERE {} = '{}'".format(returned_camps,self.db_name,camp_to_compare,value))
 
         except Exception as e:
-            print(e)
+            Error.print_error(e)
             return ["0"]
         
         return extracted.fetchall()

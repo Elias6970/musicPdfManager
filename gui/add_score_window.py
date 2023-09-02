@@ -5,14 +5,15 @@ import shutil,os
 from classes.score import Score
 from classes.files_manage import Archivo,File
 from classes.constants import RELATIVE_ARCHIVE_PATH,DIR_EXTRAS,DIR_SCORES
+from gui.window_extras import Error
 
 
-
-class Add_scores_window(QtWidgets.QDialog):
-    def __init__(self,next_cod,archive:Archivo,parent=None):
-        super(Add_scores_window,self).__init__(parent=parent)
+class Add_score_window(QtWidgets.QDialog):
+    def __init__(self,archive:Archivo,parent=None):
+        super(Add_score_window,self).__init__(parent=parent)
         
         self.archive = archive
+        self.next_cod = self.archive.get_next_cod()
 
         self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
 
@@ -22,7 +23,7 @@ class Add_scores_window(QtWidgets.QDialog):
         container_layout.setSpacing(0)
         container_layout.setContentsMargins(20,0,20,20)
 
-        container_layout.addLayout(self.create_fields_layout(next_cod))
+        container_layout.addLayout(self.create_fields_layout(self.next_cod))
         container_layout.addLayout(self.create_checkbox_layout())
         container_layout.addLayout(self.create_buttons_layout())
         
@@ -32,18 +33,21 @@ class Add_scores_window(QtWidgets.QDialog):
 
         self.exec_()
 
+    def update_next_cod(self):
+        pass
     #Create the fields layout that is returned and added as a layout(not as a widget)
     def create_fields_layout(self,next_cod):
         fields_layout = QtWidgets.QVBoxLayout()
 
         
         self.line_cod = QtWidgets.QLineEdit()
-        self.line_cod.setPlaceholderText(f"next in the archive will be: {next_cod}") #traducir
+        #self.line_cod.setPlaceholderText(f"next in the archive will be: {next_cod}") #traducir
+        self.line_cod.setText(str(next_cod))
         self.line_name = QtWidgets.QLineEdit()
         self.line_author = QtWidgets.QLineEdit()
         self.line_type = QtWidgets.QLineEdit()
 
-
+        
         cod_layout = QtWidgets.QHBoxLayout()
         cod_layout.addWidget(QtWidgets.QLabel("Cod  ")) #traducir
         cod_layout.addWidget(self.line_cod)
@@ -71,15 +75,12 @@ class Add_scores_window(QtWidgets.QDialog):
     #Create the checkboxes handwritten,parted and digitalized
     def create_checkbox_layout(self):
         layout = QtWidgets.QHBoxLayout()
-        lbls_layout = QtWidgets.QHBoxLayout()
+
         self.handwritten_cbox = QtWidgets.QCheckBox("Handwritten") #traducir
         handwritten_lbl = QtWidgets.QLabel()
-        digitalized_cbox = QtWidgets.QCheckBox()
-        digitalized_lbl = QtWidgets.QLabel("Digitalized")#traducir
-        parted_cbox = QtWidgets.QCheckBox()
-        parted_lbl = QtWidgets.QLabel("Parted")#traducir
 
         handwritten_lbl.setToolTip("You must check this checkbox if the score is handwritten")#traducir
+        
         layout.setAlignment(QtCore.Qt.AlignLeft) #type: ignore
         layout.addWidget(handwritten_lbl)
         layout.addWidget(self.handwritten_cbox)
@@ -150,12 +151,12 @@ class Add_scores_window(QtWidgets.QDialog):
 
                     return True
             else:
-                alert =QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"Warning","Already exists a score with this cod or \nname can't be empty",QtWidgets.QMessageBox.Ok,self) #traducir
+                alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"Warning","Already exists a score with this cod or \nname can't be empty",QtWidgets.QMessageBox.Ok,self) #traducir
                 alert.exec_()
 
         except Exception as e:
-            print("Holaaaa")
-            print("Error: ",type(e),e)
+            Error.print_error(e)
+            #print("Error: ",type(e),e)
         
         return False
 
@@ -168,25 +169,29 @@ class Add_scores_window(QtWidgets.QDialog):
                 else:
                     shutil.copy(i,RELATIVE_ARCHIVE_PATH+score_path+"/"+DIR_EXTRAS+os.path.basename(i))
             return True
+        
         except Exception as e:
-            print("Error: ",type(e),e)
+            Error.print_error(e)
+            #print("Error: ",type(e),e)
+        
         return False
 
     #Show a pop up when the import is correct
     def alert_import(self,score:str,correct:bool):
         if correct:
-            alert =QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"","{} has been correctly imported".format(score),QtWidgets.QMessageBox.Ok,self) #traducir
+            alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"","{} has been correctly imported".format(score),QtWidgets.QMessageBox.Ok,self) #traducir
         else:
-            alert =QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"","There has been an error importing {}".format(score),QtWidgets.QMessageBox.Ok,self) #traducir
+            alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"","There has been an error importing {}".format(score),QtWidgets.QMessageBox.Ok,self) #traducir
         alert.exec_()
 
     #Clear the text in all the fiels
     def reset_fields(self):
-        self.line_cod.clear()
+        self.line_cod.setText(str(self.archive.get_next_cod()))
         self.line_name.clear()
         self.line_author.clear()
         self.line_type.clear()
-       
+
+        
     def close(self):
         self.hide()
 
