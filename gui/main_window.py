@@ -5,14 +5,15 @@ from classes.files_manage import *
 from gui.add_score_window import Add_score_window
 from gui.delete_and_modify_score_window import Delete_score_window,Modify_score_window
 from gui.window_extras import Error
+from gui.score_clasifier import Clasifier_window
 
-class MainWindow(QtWidgets.QMainWindow):
+class Main_window(QtWidgets.QMainWindow):
     actual_score:Dir #Dir
     score_parts_added = [] #List of Print files
 
     def __init__(self):
 
-        super(MainWindow,self).__init__() #Create the MainWindow Object callin QMainWindow constructor(i think)
+        super(Main_window,self).__init__() #Create the Main_window Object callin QMainWindow constructor(i think)
         
         #Init the Archive 
         self.archive = Archivo(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
@@ -53,11 +54,14 @@ class MainWindow(QtWidgets.QMainWindow):
         delete_score_opt = QtWidgets.QAction("Delete score",self) #traducir
         delete_score_opt.triggered.connect(self.show_delete_score_menu)
 
-        export_dossier_opt = QtWidgets.QAction("Export Dossier",self) #traducir
+        export_dossier_opt = QtWidgets.QAction("Export dossier",self) #traducir
         export_dossier_opt.triggered.connect(self.export_dossier)
+        
+        clasify_scores_opt = QtWidgets.QAction("Clasify scores",self) #traducir
+        clasify_scores_opt.triggered.connect(self.clasify_scores)
 
         menu = self.menuBar()
-        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt]) #traducir
+        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt,clasify_scores_opt]) #traducir
         menu.addMenu("Database").addActions([export_dossier_opt]) #traducir
         
         return menu
@@ -214,7 +218,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #Stops the user if try to add a score no existing
         if self.validate_selection(os.path.basename(self.actual_score.path),False):
             
-            self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path+"/"+DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
+            self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path,DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
             
             new_score_text = self.num_copies.currentText()+"x "+os.path.basename(self.actual_score.path)+"->"+self.part_combo_box.currentText()
 
@@ -263,6 +267,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         except Exception as e:
             Error.print_error(e)
+
             
 
     def mv_back_preview(self):
@@ -285,6 +290,15 @@ class MainWindow(QtWidgets.QMainWindow):
     def show_delete_score_menu(self):
         Delete_score_window(self.archive,self)
 
+    def clasify_scores(self):
+        list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1600-A")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
+        for i in list:
+            actual_clasification = Clasifier_window(i,self)
+            if actual_clasification.is_closed == True: #Check if the window was closed by the x-close button or the process was finished 
+                break
+            else:#Execute the query to set parted=1 in the db
+                #self.archive.cur.execute("")
+                pass
 
     #Create a pdf with a list of all the db
     def export_dossier(self):

@@ -165,9 +165,9 @@ class Add_score_window(QtWidgets.QDialog):
         try:
             for i in files:
                 if File.is_pdf(i):
-                    shutil.copy(i,RELATIVE_ARCHIVE_PATH+score_path+"/"+DIR_SCORES+os.path.basename(i))
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH,score_path,DIR_SCORES,os.path.basename(i)))
                 else:
-                    shutil.copy(i,RELATIVE_ARCHIVE_PATH+score_path+"/"+DIR_EXTRAS+os.path.basename(i))
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH,score_path,DIR_EXTRAS,os.path.basename(i)))
             return True
         
         except Exception as e:

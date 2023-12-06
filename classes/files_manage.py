@@ -38,13 +38,14 @@ class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
          
-        self.scores = self.get_names(path + "/" + DIR_SCORES)
-        self.extras = self.get_names(path + "/" + DIR_EXTRAS)
+        self.scores = self.get_names(os.path.join(path,DIR_SCORES))
+        self.extras = self.get_names(os.path.join(path,DIR_EXTRAS))
 
 
-    #With a path, returns the names of the files inside it
+    #Returns the names of the files inside it avoiding .DS_Store
     def get_names(self,path):
-        return os.listdir(path)
+        list = os.listdir(path)
+        return [i for i in list if i != ".DS_Store"]
 
     
     #Get the names from the database and the names from the dirs to check if are equals
@@ -95,7 +96,7 @@ class Archivo(Db):
         for i in os.listdir(self.archive_path):
             for j in IGNORE_FILES:
                 if i not in j: #Ignore the DS_Store 
-                    self.pieces_in_dirs.append(Dir(self.archive_path+i,i))
+                    self.pieces_in_dirs.append(Dir(os.path.join(self.archive_path,i),i))
 
     #Extract the cod giving parsed name(cod+name), ej(1591-ATMURAF)-->1591
     @staticmethod
@@ -124,12 +125,12 @@ class Archivo(Db):
     @staticmethod
     def make_dir(archive_path,name):
         try:
-            os.makedirs(archive_path+name+"/"+DIR_SCORES) #Create /partituras/
+            os.makedirs(os.path.join(archive_path,name,DIR_SCORES)) #Create partituras
         except:
             pass
 
         try:
-            os.makedirs(archive_path+name+"/"+DIR_EXTRAS) #Create /extras/
+            os.makedirs(os.path.join(archive_path,name,DIR_EXTRAS)) #Create extras
         except:
             pass
     #Compare the names in the archive dir with the db and set digitalized to 1 if the dir exists    
@@ -219,21 +220,21 @@ class Reorganize(Archivo):
     #Copy the file to the new path deppending the type of file 
     def copy_file(self,actual_path,name):
         if ".pdf" in actual_path:
-            shutil.copyfile(actual_path,self.new_archive_path+name+"/"+DIR_SCORES+os.path.basename(actual_path))
+            shutil.copyfile(actual_path,os.path.join(self.new_archive_path,name,DIR_SCORES,os.path.basename(actual_path)))
         
         elif ".PDF" in actual_path: # To change PDF to pdf(not capital letters)
             name_without_extension = os.path.splitext(os.path.basename(actual_path))[0]
-            shutil.copyfile(actual_path,self.new_archive_path+name+"/"+DIR_SCORES+name_without_extension+".pdf")
+            shutil.copyfile(actual_path,os.path.join(self.new_archive_path,name,DIR_SCORES,name_without_extension+".pdf"))
 
         elif ".zip" in actual_path:
             with zipfile.ZipFile(actual_path,'r') as zip:
                 for internal_zip_file in zip.infolist():
                     if ".pdf" in internal_zip_file.filename:
-                        dir_name = name+"/"+DIR_SCORES
+                        dir_name = os.path.join(name,DIR_SCORES)
                     elif "DS_Store" in internal_zip_file.filename:
                         continue
                     else:
-                        dir_name = name+"/"+DIR_EXTRAS
+                        dir_name = os.path.join(name,DIR_EXTRAS)
         
                     try:
                         zip.extract(internal_zip_file.filename,path=self.new_archive_path+dir_name)
@@ -247,11 +248,11 @@ class Reorganize(Archivo):
             with rarfile.RarFile(actual_path, 'r') as rar:
                 for internal_rar_file in rar.infolist():
                     if ".pdf" in internal_rar_file.filename:  
-                        dir_name = name+"/"+DIR_SCORES
+                        dir_name = os.path.join(name,DIR_SCORES)
                     elif "DS_Store" in internal_rar_file.filename:
                         continue
                     else:
-                        dir_name = name+"/"+DIR_EXTRAS
+                        dir_name = os.path.join(name,DIR_EXTRAS)
 
                     try:
                         rar.extract(internal_rar_file.filename,path=self.new_archive_path+dir_name)
@@ -266,7 +267,7 @@ class Reorganize(Archivo):
             return
         
         else:
-            shutil.copyfile(actual_path,self.new_archive_path+name+"/"+DIR_EXTRAS+os.path.basename(actual_path))
+            shutil.copyfile(actual_path,os.path.join(self.new_archive_path+name,DIR_EXTRAS,os.path.basename(actual_path)))
 
 
     #Delete the folders that are inside rar and zip files

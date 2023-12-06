@@ -1,4 +1,4 @@
-import sys
+import sys,re
 import gui.main_window as gui
 
 
@@ -9,8 +9,18 @@ import gui.main_window as gui
 
 
 def main():
+    """text="r1H"
+    pattern1 = r'^[gofnrcjatlprdbuGOFNRCJATLPRDBU][1-9](?:[hH])?$'
+    pattern2 = r'^[poner a mano las iniciales](?:[hH])?$'
+    a = re.match(pattern1,text)
+    if a:
+        print("Siii")
+    else:
+        print("NO")
+    print(a)"""
+
     app = gui.QtWidgets.QApplication(sys.argv)
-    w = gui.MainWindow()
+    w = gui.Main_window()
     w.show()
     sys.exit(app.exec_())
 

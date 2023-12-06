@@ -2,37 +2,28 @@ import os,sys,shutil
 
 PARTITURAS = "partituras"
 EXTRAS = "extras"
-COMPRESS = "compress"
 
 
 def move_files(root,files):
     for i in files:
         if PARTITURAS not in root and ".pdf" in i:
-            os.rename(root+"/"+i,root+"/"+PARTITURAS+"/"+i)
-        elif COMPRESS not in root and (".zip" in i or ".rar" in i):
-            os.rename(root+"/"+i,root+"/"+COMPRESS+"/"+i) 
+            os.rename(os.join(root,i),os.path.join(root,PARTITURAS,i))
         elif EXTRAS not in root and ".pdf" not in i:
-            os.rename(root+"/"+i,root+"/"+EXTRAS+"/"+i)
+            os.rename(os.join(root,i),os.path.join(root,EXTRAS,i))
+
 
 
 #Elimina directorios creados sin querer
 def delete_extra_dirs(root):
     if EXTRAS in root:
         try:
-            shutil.rmtree(root+"/"+PARTITURAS)
-            shutil.rmtree(root+"/"+COMPRESS)
+            shutil.rmtree(os.path.join(root,PARTITURAS))
         except FileNotFoundError:
             pass
-    if COMPRESS in root:
-        try:
-            shutil.rmtree(root+"/"+PARTITURAS)
-            shutil.rmtree(root+"/"+EXTRAS)
-        except FileNotFoundError:
-            pass         
+
     if PARTITURAS in root:
         try:
-            shutil.rmtree(root+"/"+COMPRESS)
-            shutil.rmtree(root+"/"+EXTRAS)
+            shutil.rmtree(os.path.join(root,EXTRAS))
         except FileNotFoundError:
             pass 
 
@@ -41,19 +32,16 @@ def delete_extra_dirs(root):
 def create_dirs(root,dirs:list):
     #Create dirs
     print(root)
-    if PARTITURAS not in dirs and PARTITURAS not in root and COMPRESS not in root and EXTRAS not in root:
-        os.makedirs(root+"/"+PARTITURAS,exist_ok=True)
+    if PARTITURAS not in dirs and PARTITURAS not in root and EXTRAS not in root:
+        os.makedirs(os.path.join(root,PARTITURAS),exist_ok=True)
 
-    if EXTRAS not in dirs and EXTRAS not in root and COMPRESS not in root and PARTITURAS not in root:
-        os.makedirs(root+"/"+EXTRAS,exist_ok=True)
-
-    if COMPRESS not in dirs and COMPRESS not in root and PARTITURAS not in root and EXTRAS not in root:
-        os.makedirs(root+"/"+COMPRESS,exist_ok=True)
+    if EXTRAS not in dirs and EXTRAS not in root and PARTITURAS not in root:
+        os.makedirs(os.path.join(root,EXTRAS),exist_ok=True)
 
 
 def other_names(dirs):
     for i in dirs:
-        if PARTITURAS != i and EXTRAS != i and COMPRESS != i:
+        if PARTITURAS != i and EXTRAS != i:
             pass
 
 def reorganize():

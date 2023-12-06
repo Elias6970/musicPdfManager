@@ -1,7 +1,7 @@
 # Activate the enviroment:
   `source "~/archivo_app/bin/activate"` 
 
-The ~ symbol is "Alt Gr + ñ" in spanish keyboard
+The ~ symbol is "Alt Gr + ñ" in spanish keyboard in mac
 
 # Librerias instaladas
 `pip3 install Pillow` 
@@ -12,6 +12,9 @@ The ~ symbol is "Alt Gr + ñ" in spanish keyboard
 
 `pip3 install thefuzz[speedup]`
 
+# Versions
+python 3.10.1
+pip 23.1.2
 
 
 # Automatic detection of instruments with tesseract

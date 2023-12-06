@@ -1,10 +1,10 @@
-import sqlite3,xlrd,openpyxl
+import sqlite3,xlrd,openpyxl,os
 from .score import Score
 from gui.window_extras import Error
 class Db:
     def __init__(self,db_name,file_name):
         self.db_name = db_name
-        self.db_path = "./data/"+str(file_name)
+        self.db_path = os.path.join("data",str(file_name))
         
         self.open_db()
 
