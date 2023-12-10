@@ -12,6 +12,6 @@ DIR_EXTRAS = "extras"
 IGNORE_FILES  = [".DS_Store"]
 HYPHEN = "-" 
 MAX_COPIES = 20 #Max copies of the combo box next to the add button in select mode 
-COVER_PARTITURES_GUIDE = os.path.join("data","portada_dossier_partituras.jpg")
+COVER_PARTITURES_GUIDE = os.path.join("data","portada_dossier_partituras.pdf")
 
 #CAMBIE DIR_SCORE y DIR_EXTRAS de partituras a partituras. Alomejor luego pueden haber problemas por eso. Para tenerlo en cuenta

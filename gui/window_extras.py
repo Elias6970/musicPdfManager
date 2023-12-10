@@ -50,6 +50,7 @@ class Search_score_bar(QtWidgets.QWidget):
                 return True
 
 
+#Error class that throws error creating a pop up window with the error.
 class Error:
     @staticmethod
     def print_error(e=None,message=""):

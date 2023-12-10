@@ -1,8 +1,10 @@
-import os,sys,shutil
+import os,sys,shutil,tempfile
 from unidecode import unidecode
 import zipfile,rarfile
 from reportlab.platypus import SimpleDocTemplate,Table,Image
 from reportlab.lib import pagesizes,colors
+from reportlab.pdfgen import canvas
+from PyPDF2 import PdfWriter,PdfReader
 from classes.constants import *
 from classes.db_manage import Db
 from gui.window_extras import Error
@@ -145,20 +147,19 @@ class Archivo(Db):
         self.con.commit()
 
 
-    #Export the pdf to be printed to the dossier
-    def export_pdf_to_print(self,pdf_file):
+    #Export the pdf dossier with the list of scores to be printed
+    def export_pdf_dossier_to_print(self,new_pdf_path:str,extra_cover_text:str):
+        #Create a temp file because later we need to merge this pdf with the front page with the band logo
+        #temp_dossier = tempfile.NamedTemporaryFile(delete=True)
+        temp_dossier = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
 
         # Read Excel data into a list
         data = self.get_all_to_print()
         data.insert(0,("Digitalizada","Cod","Nombre","Autor","tipo")) #traducir
 
         # Create a PDF document
-        doc = SimpleDocTemplate(pdf_file, pagesize=pagesizes.landscape(pagesizes.A4),topMargin=15,bottomMargin=10)
-        
-        #TODO: make that the img can be put in the first page as cover
-        img = Image(COVER_PARTITURES_GUIDE,width=841,height=595)
-        
-        
+        doc = SimpleDocTemplate(temp_dossier, pagesize=pagesizes.landscape(pagesizes.A4),topMargin=15,bottomMargin=10)
+
         table = Table(data)
 
         # Customize table appearance
@@ -178,10 +179,40 @@ class Archivo(Db):
         table.spaceBefore = 0
         table.setStyle(style)
         
-        # Build the PDF
-        #story = [img,table]
+        #Modify the front page to put a string
+        temp_overlay = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
+        canvas_overlay = canvas.Canvas(temp_overlay)
+        canvas_overlay.setFont("Helvetica-Bold",30)
+        canvas_overlay.drawString(453,70,extra_cover_text)
+        canvas_overlay.save()
+        
+        #Merge in the same page the cover and the text
+        cover_reader = PdfReader(COVER_PARTITURES_GUIDE)
+        overlay_reader = PdfReader(temp_overlay)
+        cover_reader.pages[0].merge_page(overlay_reader.pages[0])
+
+        # Build the score list pdf
         story = [table]
         doc.build(story)
+
+        
+        #Merge the cover(portada) and the list of score names
+        try:
+            merged_pdf = PdfWriter()
+            if os.path.exists(COVER_PARTITURES_GUIDE) and os.path.exists(temp_dossier):
+                merged_pdf.append(cover_reader)
+                merged_pdf.append(temp_dossier)
+            
+            merged_pdf.write(new_pdf_path)
+            merged_pdf.close()
+            
+            #Delete the temp file
+            os.unlink(temp_dossier)
+
+            
+        except Exception as e:
+            Error.print_error(e)
+        
 
 
 

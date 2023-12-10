@@ -238,7 +238,7 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     #Display a window to select a location to save a pdf
-    def dialog_new_pdf(self):
+    def dialog_window_select_new_pdf(self):
         file_dialog = QtWidgets.QFileDialog()
         
         file_dialog.setWindowTitle("Select Folder and File Name") #traducir
@@ -253,7 +253,7 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Create one pdf with all the selected pdfs merged
     def create_pdf(self):
-        pdf_path = self.dialog_new_pdf()
+        pdf_path = self.dialog_window_select_new_pdf()
             
         try: #Check if the path is valid
             merged_pdf = PyPDF2.PdfWriter()
@@ -300,7 +300,8 @@ class Main_window(QtWidgets.QMainWindow):
                 #self.archive.cur.execute("")
                 pass
 
-    #Create a pdf with a list of all the db
+    #Create a pdf dossier with a list of all the scores in the db as an index
     def export_dossier(self):
-        pdf_path = self.dialog_new_pdf()
-        self.archive.export_pdf_to_print(pdf_path)
+        extra_cover_text = QtWidgets.QInputDialog.getText(self,"Additional conver info","Enter additional info to be added to the cover:(max 9 chars)")[0] #traducir
+        pdf_path = self.dialog_window_select_new_pdf()
+        self.archive.export_pdf_dossier_to_print(pdf_path,extra_cover_text)

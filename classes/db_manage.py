@@ -1,6 +1,8 @@
 import sqlite3,xlrd,openpyxl,os
 from .score import Score
 from gui.window_extras import Error
+
+#Class that represents a sql database. This class creates and manages the sql db
 class Db:
     def __init__(self,db_name,file_name):
         self.db_name = db_name
@@ -14,7 +16,7 @@ class Db:
 
         self.con.commit()
 
- 
+
     #Insert a score in the db
     def insert(self,score:Score):
         try: 
