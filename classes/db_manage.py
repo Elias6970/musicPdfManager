@@ -1,6 +1,6 @@
 import sqlite3,xlrd,openpyxl,os
 from .score import Score
-from gui.window_extras import Error
+from classes.error import Error
 
 #Class that represents a sql database. This class creates and manages the sql db
 class Db:

@@ -5,7 +5,7 @@ import shutil,os
 from classes.score import Score
 from classes.files_manage import Archive,File
 from classes.constants import RELATIVE_ARCHIVE_PATH,DIR_EXTRAS,DIR_SCORES
-from gui.window_extras import Error
+from classes.error import Error
 
 
 class Add_score_window(QtWidgets.QDialog):

@@ -30,4 +30,5 @@ Its important to remember that i have added the files, when i create the build, 
 `Add an option to change the archieve path and the export cover path`
 `Transale the app and add the options for languages`
 `Option for: When you add a score pop ups the window to classify the score`
-`Update the autocompleter When you delete a score`
+`Make a combo box in the window that shows the scores that its names are similar to another ones when you add a score`
+`Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`

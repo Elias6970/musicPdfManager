@@ -7,7 +7,7 @@ from reportlab.pdfgen import canvas
 from PyPDF2 import PdfWriter,PdfReader
 from classes.constants import *
 from classes.db_manage import Db
-from gui.window_extras import Error
+from classes.error import Error
 
 class File:
     def __init__(self,path):

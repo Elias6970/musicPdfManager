@@ -2,10 +2,11 @@ from PyQt5 import QtWidgets,QtCore
 import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
+from classes.error import Error
 from gui.add_score_window import Add_score_window
 from gui.delete_and_modify_score_window import Delete_score_window,Modify_score_window
-from gui.window_extras import Error
 from gui.score_clasifier import Clasifier_window
+from gui.window_extras import Score_search_bar
 
 class Main_window(QtWidgets.QMainWindow):
     actual_score:Dir #Dir
@@ -118,20 +119,7 @@ class Main_window(QtWidgets.QMainWindow):
         #Space
         search_bars_layout.setContentsMargins(0,0,0,0)
         
-        #All widgets
-        self.piece_search_bar = QtWidgets.QLineEdit()
-        self.piece_search_bar.setPlaceholderText("Search score") #traducir
-        self.piece_search_bar.textChanged.connect(self.validate_selection) #type: ignore
-            
-        self.pieces_names = [os.path.basename(i.path) for i in self.archive.pieces_in_dirs]
-
-        #Auto Completer
-        self.completer = QtWidgets.QCompleter(self.pieces_names)
-        self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive) #type: ignore
-        self.completer.setFilterMode(QtCore.Qt.MatchContains) #type: ignore
-        #TODO
-        self.piece_search_bar.setCompleter(self.completer)
-
+        self.piece_search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.validate_selection)
 
         #Rest of widgets
         self.piece_lbl = QtWidgets.QLabel()
@@ -204,19 +192,19 @@ class Main_window(QtWidgets.QMainWindow):
         #Update the autocompleter list of the search bar
     def update_autocompleter_scores(self):
         self.archive.update_pieces_in_dirs()
-        self.pieces_names = [os.path.basename(i.path) for i in self.archive.pieces_in_dirs]
-        self.completer.setModel(QtCore.QStringListModel(self.pieces_names))
+        self.piece_search_bar.update_autocompleter_scores(self.archive.pieces_in_dirs)
 
 
     #Check if the piece selected is equals to one on the list
-    def validate_selection(self,text,new_check=True):
+    def validate_selection(self,text):
+        
+        #Use the list pieces in dirs because we need to extract the score names
         for i in self.archive.pieces_in_dirs:
             if text == os.path.basename(i.path):
                 self.piece_lbl.setText(text)
                 self.actual_score = i
 
-                if new_check:
-                    self.set_option_of_instruments(i.scores)
+                self.set_option_of_instruments(i.scores)
 
                 return True
 
@@ -224,7 +212,7 @@ class Main_window(QtWidgets.QMainWindow):
     #Add the score to the list of added scores an update it in the labels list
     def add_score(self):
         #Stops the user if try to add a score no existing
-        if self.validate_selection(os.path.basename(self.actual_score.path),False):
+        if self.validate_selection(os.path.basename(self.actual_score.path)):
             
             self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path,DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
             
