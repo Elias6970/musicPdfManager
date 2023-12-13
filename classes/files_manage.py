@@ -80,9 +80,9 @@ class Dir(File):
 
 
 #The connection with the db is started when the obj is created with the super.
-class Archivo(Db):
+class Archive(Db):
     def __init__(self,db_name,db_file_name,path):
-        super(Archivo,self).__init__(db_name,db_file_name)
+        super(Archive,self).__init__(db_name,db_file_name)
         
         self.archive_path = path
 
@@ -219,7 +219,7 @@ class Archivo(Db):
 
 
 #Reorganice the archive
-class Reorganize(Archivo):
+class Reorganize(Archive):
     def __init__(self,archive_name,db_name,archive_path,new_archive_path):
         super(Reorganize,self).__init__(archive_name,db_name,archive_path)
 
@@ -237,9 +237,9 @@ class Reorganize(Archivo):
         for i in dir_list:
             if i not in IGNORE_FILES:
                 query = self.get_with_equals("cod",self.extract_cod(i),"cod,name")
-                new_name = Archivo.get_parsed_name(query[0][0],query[0][1])
+                new_name = Archive.get_parsed_name(query[0][0],query[0][1])
 
-                Archivo.make_dir(self.new_archive_path,new_name)
+                Archive.make_dir(self.new_archive_path,new_name)
 
                 for root,dir,files in os.walk(self.archive_path+i):
                     for j in files:

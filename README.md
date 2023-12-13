@@ -27,6 +27,7 @@ Its important to remember that i have added the files, when i create the build, 
 # TODO
 `Modify menu`
 `Classifier for scores`
-`Refresh the list of scores when you add or delete one in the score selector page`
 `Add an option to change the archieve path and the export cover path`
 `Transale the app and add the options for languages`
+`Option for: When you add a score pop ups the window to classify the score`
+`Update the autocompleter When you delete a score`

@@ -16,7 +16,7 @@ class Main_window(QtWidgets.QMainWindow):
         super(Main_window,self).__init__() #Create the Main_window Object callin QMainWindow constructor(i think)
         
         #Init the Archive 
-        self.archive = Archivo(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
+        self.archive = Archive(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
         
         self.setMenuBar(self.create_menu_bar())        
 
@@ -61,7 +61,8 @@ class Main_window(QtWidgets.QMainWindow):
         clasify_scores_opt.triggered.connect(self.clasify_scores)
 
         menu = self.menuBar()
-        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt,clasify_scores_opt]) #traducir
+        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt,menu.addSeparator(),clasify_scores_opt]) #traducir
+        
         menu.addMenu("Database").addActions([export_dossier_opt]) #traducir
         
         return menu
@@ -125,11 +126,11 @@ class Main_window(QtWidgets.QMainWindow):
         self.pieces_names = [os.path.basename(i.path) for i in self.archive.pieces_in_dirs]
 
         #Auto Completer
-        completer = QtWidgets.QCompleter(self.pieces_names)
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive) #type: ignore
-        completer.setFilterMode(QtCore.Qt.MatchContains) #type: ignore
-
-        self.piece_search_bar.setCompleter(completer)
+        self.completer = QtWidgets.QCompleter(self.pieces_names)
+        self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive) #type: ignore
+        self.completer.setFilterMode(QtCore.Qt.MatchContains) #type: ignore
+        #TODO
+        self.piece_search_bar.setCompleter(self.completer)
 
 
         #Rest of widgets
@@ -199,7 +200,14 @@ class Main_window(QtWidgets.QMainWindow):
 
         return scroll
 
-    
+
+        #Update the autocompleter list of the search bar
+    def update_autocompleter_scores(self):
+        self.archive.update_pieces_in_dirs()
+        self.pieces_names = [os.path.basename(i.path) for i in self.archive.pieces_in_dirs]
+        self.completer.setModel(QtCore.QStringListModel(self.pieces_names))
+
+
     #Check if the piece selected is equals to one on the list
     def validate_selection(self,text,new_check=True):
         for i in self.archive.pieces_in_dirs:
@@ -267,8 +275,7 @@ class Main_window(QtWidgets.QMainWindow):
         
         except Exception as e:
             Error.print_error(e)
-
-            
+        
 
     def mv_back_preview(self):
         pass
@@ -281,14 +288,20 @@ class Main_window(QtWidgets.QMainWindow):
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
         Add_score_window(self.archive,self)
-        self.archive.update_pieces_in_dirs() #Update the list of pieces for the autocompleter
+        self.update_autocompleter_scores()
 
 
+    #Show the modifiy scores window hiding the main menu
+    #TODO: modify menu
     def show_modify_score_menu(self):
         pass
 
+
+    #Show delete score menu hiding main menu
     def show_delete_score_menu(self):
         Delete_score_window(self.archive,self)
+        self.update_autocompleter_scores()
+
 
     def clasify_scores(self):
         list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1600-A")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]

@@ -1,12 +1,12 @@
 from PyQt5 import QtCore, QtWidgets
 import os,shutil
-from classes.files_manage import Archivo,File
+from classes.files_manage import Archive,File
 from gui.window_extras import Search_score_bar,Error
 from classes.constants import RELATIVE_ARCHIVE_PATH
 
 class Delete_score_window(QtWidgets.QDialog):
     
-    def __init__(self,archive:Archivo,parent=None):
+    def __init__(self,archive:Archive,parent=None):
         super(Delete_score_window,self).__init__(parent=parent)
         
         self.archive = archive
@@ -43,7 +43,7 @@ class Delete_score_window(QtWidgets.QDialog):
     #Delete the selected score
     def delete_score(self):
         if self.search_bar.validate_selection(self.search_bar.piece_search_bar.text(),False):
-            cod = Archivo.extract_cod(self.search_bar.piece_lbl.text())
+            cod = Archive.extract_cod(self.search_bar.piece_lbl.text())
             #Ask to be sure that the user want to delete this score
             alert = QtWidgets.QMessageBox.question(self,"Warning","Are you sure that you want to delete \n{}".format(self.search_bar.piece_lbl.text()),QtWidgets.QMessageBox.Yes,QtWidgets.QMessageBox.No) #traducir
 
@@ -65,6 +65,6 @@ class Delete_score_window(QtWidgets.QDialog):
         self.hide()
 
 class Modify_score_window(QtWidgets.QDialog):
-    def __init__(self,archive:Archivo,parent=None):
+    def __init__(self,archive:Archive,parent=None):
         super(Modify_score_window,self).__init__(parent=parent)
     pass

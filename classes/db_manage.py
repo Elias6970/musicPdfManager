@@ -20,7 +20,6 @@ class Db:
     #Insert a score in the db
     def insert(self,score:Score):
         try: 
-            print(score.handwritten)
             #Check if cod>0 and have name
             if score.cod > 0 and score.name is not None and len(score.name.strip()) > 0:
 

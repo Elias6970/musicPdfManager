@@ -3,13 +3,13 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtWidgets import QWidget
 import shutil,os
 from classes.score import Score
-from classes.files_manage import Archivo,File
+from classes.files_manage import Archive,File
 from classes.constants import RELATIVE_ARCHIVE_PATH,DIR_EXTRAS,DIR_SCORES
 from gui.window_extras import Error
 
 
 class Add_score_window(QtWidgets.QDialog):
-    def __init__(self,archive:Archivo,parent=None):
+    def __init__(self,archive:Archive,parent=None):
         super(Add_score_window,self).__init__(parent=parent)
         
         self.archive = archive
@@ -105,7 +105,7 @@ class Add_score_window(QtWidgets.QDialog):
     def add_score(self):
         cod = self.line_cod.text()
         name = self.line_name.text()
-        parsed_name = Archivo.get_parsed_name(cod,name)
+        parsed_name = Archive.get_parsed_name(cod,name)
         
         if self.verifications(cod,name):
             
@@ -119,7 +119,7 @@ class Add_score_window(QtWidgets.QDialog):
             
             
             if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-                Archivo.make_dir(RELATIVE_ARCHIVE_PATH,parsed_name)
+                Archive.make_dir(RELATIVE_ARCHIVE_PATH,parsed_name)
                 
                 if self.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(Score(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.handwritten_cbox.isChecked()),parted=0)):
                     self.alert_import(parsed_name,True)
@@ -143,13 +143,16 @@ class Add_score_window(QtWidgets.QDialog):
                     if name_matches != []:
                         warning_text = "This score is called something like these:\n" #traducir
                         for i in name_matches:
-                            warning_text = warning_text + Archivo.get_parsed_name(i[0],i[1]) + "\n"
+                            warning_text = warning_text + Archive.get_parsed_name(i[0],i[1]) + "\n"
                         
                         #Pop up the scores matched
                         warning_window = Pop_up_window(warning_text,self)
                         warning_window.exec_()
-
-                    return True
+                    
+                    try:
+                        return warning_window.btn_yes_pressed
+                    except UnboundLocalError as e: #if the pop up warning is not being showed(not similar names)
+                        return True
             else:
                 alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"Warning","Already exists a score with this cod or \nname can't be empty",QtWidgets.QMessageBox.Ok,self) #traducir
                 alert.exec_()
@@ -201,6 +204,8 @@ class Pop_up_window(QtWidgets.QDialog):
     def __init__(self,text:str,parent: QWidget) -> None:
         super(Pop_up_window,self).__init__(parent)
 
+        self.btn_yes_pressed = False #This values become true when no button is pressed
+
         self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
 
         container_layout = QtWidgets.QVBoxLayout()
@@ -232,7 +237,8 @@ class Pop_up_window(QtWidgets.QDialog):
         self.setLayout(container_layout)
 
     def yes(self):
+        self.btn_yes_pressed = True
         self.hide()
-    #TODO: El botón de no no funciona, solo funciona el de yes. No se como hacer para que se cirre y no se prosiga
+    
     def no(self):
-        pass
+        self.hide()
