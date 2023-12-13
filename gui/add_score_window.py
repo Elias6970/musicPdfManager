@@ -12,6 +12,8 @@ class Add_score_window(QtWidgets.QDialog):
     def __init__(self,archive:Archive,parent=None):
         super(Add_score_window,self).__init__(parent=parent)
         
+        self.setWindowTitle("Add new score") #traducir
+
         self.archive = archive
         self.next_cod = self.archive.get_next_cod()
 

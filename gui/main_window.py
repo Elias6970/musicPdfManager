@@ -4,9 +4,10 @@ from classes.constants import *
 from classes.files_manage import *
 from classes.error import Error
 from gui.add_score_window import Add_score_window
-from gui.delete_and_modify_score_window import Delete_score_window,Modify_score_window
-from gui.score_clasifier import Clasifier_window
-from gui.window_extras import Score_search_bar
+from gui.other_windows import Score_search_bar,Delete_score_window,Add_scores_to_existing_piece_window,Modify_score_window
+from gui.score_clasifier_window import Clasifier_window
+
+
 
 class Main_window(QtWidgets.QMainWindow):
     actual_score:Dir #Dir
@@ -46,6 +47,9 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Create the menu bar
     def create_menu_bar(self):
+        preferences_opt = QtWidgets.QAction("Preferences",self) #traducir
+        preferences_opt.triggered.connect(self.show_preferences_window)
+
         add_score_opt = QtWidgets.QAction("Add score",self) #traducir
         add_score_opt.triggered.connect(self.show_add_scores_menu)
 
@@ -55,6 +59,9 @@ class Main_window(QtWidgets.QMainWindow):
         delete_score_opt = QtWidgets.QAction("Delete score",self) #traducir
         delete_score_opt.triggered.connect(self.show_delete_score_menu)
 
+        add_score_to_piece_opt = QtWidgets.QAction("Add score to piece",self) #traducir
+        add_score_to_piece_opt.triggered.connect(self.show_add_scores_to_existing_piece_window)
+        
         export_dossier_opt = QtWidgets.QAction("Export dossier",self) #traducir
         export_dossier_opt.triggered.connect(self.export_dossier)
         
@@ -62,7 +69,9 @@ class Main_window(QtWidgets.QMainWindow):
         clasify_scores_opt.triggered.connect(self.clasify_scores)
 
         menu = self.menuBar()
-        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt,menu.addSeparator(),clasify_scores_opt]) #traducir
+        menu.addMenu("File").addActions([preferences_opt]) #traducir
+
+        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt,menu.addSeparator(),add_score_to_piece_opt,menu.addSeparator(),clasify_scores_opt]) #traducir
         
         menu.addMenu("Database").addActions([export_dossier_opt]) #traducir
         
@@ -272,6 +281,8 @@ class Main_window(QtWidgets.QMainWindow):
     def mv_forward_preview(self):
         pass
 
+    def show_preferences_window(self):
+        pass
 
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
@@ -284,6 +295,9 @@ class Main_window(QtWidgets.QMainWindow):
     def show_modify_score_menu(self):
         pass
 
+    def show_add_scores_to_existing_piece_window(self):
+        Add_scores_to_existing_piece_window(self.archive,self)
+
 
     #Show delete score menu hiding main menu
     def show_delete_score_menu(self):
@@ -292,7 +306,7 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     def clasify_scores(self):
-        list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1600-A")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
+        list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1610-A")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
         for i in list:
             actual_clasification = Clasifier_window(i,self)
             if actual_clasification.is_closed == True: #Check if the window was closed by the x-close button or the process was finished 

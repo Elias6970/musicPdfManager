@@ -17,7 +17,9 @@ class Clasifier_window(QtWidgets.QDialog):
     def __init__(self,dir:Dir,parent=None) -> None:
         #super(Clasifier_window,self).__init__(parent=parent)
         super(Clasifier_window,self).__init__(parent=parent)
-        
+
+        self.setWindowTitle("Delete score") #traducir
+
         self.dir = dir
         self.is_closed = False #To be detected as closed out of the class
 
