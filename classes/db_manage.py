@@ -3,6 +3,15 @@ from .score import Score
 from classes.error import Error
 
 #Class that represents a sql database. This class creates and manages the sql db
+#   Cod: internal cod that uses the db and is defined in the archive. Is not set automatically and can be repeated because you could have a local archive and add scores not in order
+#   Name: name of the piece
+#   Author: author of the piece
+#   type: type of the score 
+#   created_date: date when the score was added to the db, is set automatically
+#   last_modification: last date when the row was modified, is set automatically
+#   digitalized: can be 0,1 if the piece is in the directory archive(if its pdf score exists)
+#   handwritten: can be 0,1 if the piece is digital or handwritten. All the pieces was set to 0 but in the future we need to be set to null and 0 or 1 deppending on their type
+#   parted: can be 0,1 if the score was parted with the classify tools of the program that splits the pdf by type of instrument
 class Db:
     def __init__(self,db_name,file_name):
         self.db_name = db_name
@@ -18,12 +27,12 @@ class Db:
 
 
     #Insert a score in the db
-    def insert(self,score:Score):
+    def insert(self,cod:int, name:str, author:str, type,handwritten=0,parted=0,digitalized=0):
         try: 
             #Check if cod>0 and have name
-            if score.cod > 0 and score.name is not None and len(score.name.strip()) > 0:
+            if cod > 0 and name is not None and len(name.strip()) > 0:
 
-                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.db_name), (score.cod, score.name, score.author, score.type,score.handwritten,score.parted))
+                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.db_name), (cod, name, author, type,handwritten,parted))
                 self.con.commit()
                 return True
             
@@ -32,10 +41,10 @@ class Db:
                 raise #Jump to the except statement
 
         except sqlite3.IntegrityError as e: #cod repited
-            Error.print_error(e,"Error, ya existe esa obra: "+ str(score.cod))#traducir
+            Error.print_error(e,"Error, ya existe esa obra: "+ str(cod))#traducir
 
         except Exception as e:
-            Error.print_error(e,"Error, introduciendo la obra: "+ str(score.name))#traducir
+            Error.print_error(e,"Error, introduciendo la obra: "+ str(name))#traducir
 
         return False
 
@@ -56,7 +65,7 @@ class Db:
             if row_values[0] == None:
                 continue
             try:
-                self.insert(Score(row_values[0],str(row_values[1]),row_values[2],row_values[3],digitalized=1))
+                self.insert(row_values[0],str(row_values[1]),row_values[2],row_values[3],digitalized=1)
             except Exception as e:
                 #print("Error inserting: ",row_values)
                 Error.print_error(e,"Error inserting: "+str(row_values))
@@ -72,7 +81,7 @@ class Db:
         for i in range(1,sheet.nrows):
             row = sheet.row_values(i)
             try:
-                self.insert(Score(row[0],str(row[1]),row[2],row[3],digitalized=1))
+                self.insert(row[0],str(row[1]),row[2],row[3],digitalized=1)
             except Exception as e:
                 #print("Error inserting: ",row)
                 Error.print_error(e,"Error inserting: "+str(row))

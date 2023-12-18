@@ -26,7 +26,7 @@ class Add_score_window(QtWidgets.QDialog):
         container_layout.setContentsMargins(20,0,20,20)
 
         container_layout.addLayout(self.create_fields_layout(self.next_cod))
-        container_layout.addLayout(self.create_checkbox_layout())
+        container_layout.addLayout(self.create_checkbox_layout(["handwritten","digitalized"]))
         container_layout.addLayout(self.create_buttons_layout())
         
 
@@ -74,22 +74,33 @@ class Add_score_window(QtWidgets.QDialog):
         return fields_layout
     
 
-    #Create the checkboxes handwritten,parted and digitalized
+    """#Create the checkboxes handwritten,parted and digitalized
     def create_checkbox_layout(self):
         layout = QtWidgets.QHBoxLayout()
 
         self.handwritten_cbox = QtWidgets.QCheckBox("Handwritten") #traducir
-        handwritten_lbl = QtWidgets.QLabel()
+        
 
-        handwritten_lbl.setToolTip("You must check this checkbox if the score is handwritten")#traducir
+        self.handwritten_cbox.setToolTip("You must check this checkbox if the score is handwritten")#traducir
         
         layout.setAlignment(QtCore.Qt.AlignLeft) #type: ignore
-        layout.addWidget(handwritten_lbl)
         layout.addWidget(self.handwritten_cbox)
 
         return layout
+    """
+        #Create the checkboxes handwritten,parted and digitalized
+    def create_checkbox_layout(self,names:list[str]):
+        self.checkboxes_dict:dict = {}
+        layout = QtWidgets.QVBoxLayout()
+        layout.setAlignment(QtCore.Qt.AlignLeft) #type: ignore
 
-
+        for i in names:
+            self.checkboxes_dict[i] = QtWidgets.QCheckBox(i)
+            layout.addWidget(self.checkboxes_dict[i])
+            #self.checkboxes_dict.setToolTip("You must check this checkbox if the score is handwritten")#traducir
+        
+        return layout
+    
     #Create the buttons layout
     def create_buttons_layout(self):
         btns_layout = QtWidgets.QHBoxLayout()
@@ -123,7 +134,7 @@ class Add_score_window(QtWidgets.QDialog):
             if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
                 Archive.make_dir(RELATIVE_ARCHIVE_PATH,parsed_name)
                 
-                if self.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(Score(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.handwritten_cbox.isChecked()),parted=0)):
+                if self.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.handwritten_cbox.isChecked()),parted=0):
                     self.alert_import(parsed_name,True)
                     self.reset_fields()
                 else:
@@ -152,12 +163,13 @@ class Add_score_window(QtWidgets.QDialog):
                         warning_window.exec_()
                     
                     try:
-                        return warning_window.btn_yes_pressed
+                        return warning_window.btn_yes_pressed #type:ignore
                     except UnboundLocalError as e: #if the pop up warning is not being showed(not similar names)
                         return True
             else:
                 alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"Warning","Already exists a score with this cod or \nname can't be empty",QtWidgets.QMessageBox.Ok,self) #traducir
                 alert.exec_()
+            
 
         except Exception as e:
             Error.print_error(e)
@@ -198,6 +210,7 @@ class Add_score_window(QtWidgets.QDialog):
 
         
     def close(self):
+        print(self.checkboxes_dict["handwritten"].isChecked()," ",self.checkboxes_dict["digitalized"].isChecked())
         self.hide()
 
 
