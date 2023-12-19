@@ -3,8 +3,11 @@ import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
 from classes.error import Error
-from gui.add_score_window import Add_score_window
-from gui.other_windows import Score_search_bar,Delete_score_window,Add_scores_to_existing_piece_window,Modify_score_window
+from gui.abstract_windows import Score_search_bar
+from gui.add_piece_window import Add_piece_window
+from gui.delete_piece_window import Delete_piece_window
+from gui.modify_piece_window import Modify_piece_window
+from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
 from gui.score_clasifier_window import Clasifier_window
 
 
@@ -54,7 +57,7 @@ class Main_window(QtWidgets.QMainWindow):
         add_score_opt.triggered.connect(self.show_add_scores_menu)
 
         modify_score_opt = QtWidgets.QAction("Modify score",self) #traducir
-        modify_score_opt.triggered.connect(self.show_modify_score_menu)
+        modify_score_opt.triggered.connect(self.show_modify_piece_menu)
 
         delete_score_opt = QtWidgets.QAction("Delete score",self) #traducir
         delete_score_opt.triggered.connect(self.show_delete_score_menu)
@@ -286,22 +289,24 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
-        Add_score_window(self.archive,self)
+        Add_piece_window(self.archive,self)
         self.update_autocompleter_scores()
 
 
     #Show the modifiy scores window hiding the main menu
     #TODO: modify menu
-    def show_modify_score_menu(self):
-        pass
+    def show_modify_piece_menu(self):
+        Modify_piece_window(self.archive,self)
+        self.update_autocompleter_scores()
 
     def show_add_scores_to_existing_piece_window(self):
         Add_scores_to_existing_piece_window(self.archive,self)
+        self.update_autocompleter_scores()
 
 
     #Show delete score menu hiding main menu
     def show_delete_score_menu(self):
-        Delete_score_window(self.archive,self)
+        Delete_piece_window(self.archive,self)
         self.update_autocompleter_scores()
 
 

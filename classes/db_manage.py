@@ -1,5 +1,4 @@
 import sqlite3,xlrd,openpyxl,os
-from .score import Score
 from classes.error import Error
 
 #Class that represents a sql database. This class creates and manages the sql db
@@ -15,6 +14,7 @@ from classes.error import Error
 class Db:
     def __init__(self,db_name,file_name):
         self.db_name = db_name
+
         self.db_path = os.path.join("data",str(file_name))
         
         self.open_db()
@@ -44,7 +44,7 @@ class Db:
             Error.print_error(e,"Error, ya existe esa obra: "+ str(cod))#traducir
 
         except Exception as e:
-            Error.print_error(e,"Error, introduciendo la obra: "+ str(name))#traducir
+            Error.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
 
         return False
 
@@ -135,6 +135,25 @@ class Db:
     def get_all_to_print(self):
         return self.cur.execute("SELECT CASE WHEN digitalized = '1' THEN 'x' WHEN digitalized = '0' THEN ' ' END AS modified_column,cod,name,author,type FROM {}".format(self.db_name)).fetchall()
 
+
+    #Try to insert a new row, if it is not possible it update the value of that row
+    def upsert(self,cod,name,author,type,handwritten=0,digitalized=0,parted=0):
+        try: 
+            #Check if cod>0 and have name
+            if cod > 0 and name is not None and len(name.strip()) > 0:
+
+                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.db_name), (cod, name, author, type,handwritten,parted))
+                self.con.commit()
+                return True
+        except sqlite3.IntegrityError as e: #cod repited
+            self.cur.execute("UPDATE {} SET cod=?,name=?,author=?,type=?,last_modification=CURRENT_TIMESTAMP,digitalized=?,handwritten=?,parted=? WHERE cod=?".format(self.db_name),(cod,name,author,type,digitalized,handwritten,parted,cod))
+            self.con.commit()
+            return True
+        
+        except Exception as e:
+            Error.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
+
+        return False
 
     def open_db(self):
         self.con = sqlite3.connect(self.db_path)

@@ -25,14 +25,6 @@ Its important to remember that i have added the files, when i create the build, 
   - /usr/local/Cellar/tesseract/5.3.1/share/tessdata/configs/instruments
 
 # TODO
-`Change names from score add or like that to piece add. When we add a new piece change to piece, score is only for the music sheet`
-
-`Creates a window to add scores to pieces that already exists in the db or the archive directory`
-
-`Create an abstract class of add score for modify score`
-
-`Modify menu`
-
 `Classifier for scores`
 
 `Add an option to change the archieve path and the export cover path`
@@ -43,6 +35,7 @@ Its important to remember that i have added the files, when i create the build, 
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
 
-`Format errors like printing errors without using error class`
+
+`Auto time set in db_manage with CURRENT_TIMESTAMP is set to gtm=0 and it need to be set to the local computer time`
 
 `Make a combo box in the window that shows the scores that its names are similar to another ones when you add a score`

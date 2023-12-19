@@ -4,7 +4,6 @@ archive_app
 __pycache__
 __init__.py
 .vscode
-*.db
 *.xls
 *.xlsx
 build

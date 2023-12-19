@@ -14,4 +14,14 @@ HYPHEN = "-"
 MAX_COPIES = 20 #Max copies of the combo box next to the add button in select mode 
 COVER_PARTITURES_GUIDE = os.path.join("data","portada_dossier_partituras.pdf")
 
+#Database parameters
+COD = "cod"
+NAME = "name"
+AUTHOR = "author"
+TYPE = "type"
+CREATED_DATE = "created_date"
+LAST_MODIFICATION = "last_modification"
+DIGITALIZED = "digitalized"
+HANDWRITTEN = "handwritten"
+PARTED = "parted"
 #CAMBIE DIR_SCORE y DIR_EXTRAS de partituras a partituras. Alomejor luego pueden haber problemas por eso. Para tenerlo en cuenta

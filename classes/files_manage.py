@@ -39,7 +39,7 @@ class Print_file(File):
 class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
-         
+
         self.scores = self.get_names(os.path.join(path,DIR_SCORES))
         self.extras = self.get_names(os.path.join(path,DIR_EXTRAS))
 
@@ -49,7 +49,19 @@ class Dir(File):
         list = os.listdir(path)
         return [i for i in list if i != ".DS_Store"]
 
-    
+   
+    def change_name(self,new_name):
+        try:
+            shutil.move(self.path,os.path.join(os.path.dirname(self.path),new_name))
+            self.set_path(os.path.join(os.path.dirname(self.path),new_name))
+            return True
+        
+        except Exception as e:
+            Error.print_error(e,"Error tocho")
+        
+        return False
+
+    #Unused function made to test the db
     #Get the names from the database and the names from the dirs to check if are equals
     def export_all_names(self,path):
         file_dirs = open("archivo_names.txt","w")
@@ -57,7 +69,6 @@ class Dir(File):
         db_con = Db(DB_NAME,DB_FILE_NAME)
 
         names = os.listdir(path)
-        #indexes = []
 
         for i in names:
             file_dirs.write(i+'\n')
@@ -77,8 +88,6 @@ class Dir(File):
 
 
 
-
-
 #The connection with the db is started when the obj is created with the super.
 class Archive(Db):
     def __init__(self,db_name,db_file_name,path):
@@ -87,7 +96,7 @@ class Archive(Db):
         self.archive_path = path
 
         #List of dirs objects
-        self.pieces_in_dirs = []
+        self.pieces_in_dirs:list[Dir] = []
         
         #Get the scores and extras of all pieces
         self.update_pieces_in_dirs()
@@ -212,9 +221,31 @@ class Archive(Db):
             
         except Exception as e:
             Error.print_error(e)
+   
+
+    #Change the name of the folder in the archive directory
+    #Recive the cod and the name
+    def change_piece_dir_name(self,cod:int,name:str):
+        for i in self.pieces_in_dirs:
+            if int(Archive.extract_cod(os.path.basename(i.path))) == int(cod):
+                if i.change_name(Archive.get_parsed_name(cod,name)):
+                    return True
+        return False
+
+    #Move the files to the internal archive deppending if there are scores or extras
+    def move_files(self,score_path,files:list):
+        try:
+            for i in files:
+                if File.is_pdf(i):
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH,score_path,DIR_SCORES,os.path.basename(i)))
+                else:
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH,score_path,DIR_EXTRAS,os.path.basename(i)))
+            return True
         
-
-
+        except Exception as e:
+            Error.print_error(e)
+        
+        return False
 
 
 
