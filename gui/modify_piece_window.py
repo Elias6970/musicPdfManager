@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from classes.files_manage import Archive
 from gui.abstract_windows import *
-from classes.error import Error
+from gui.error_window import Error
 from classes.constants import *
 
 

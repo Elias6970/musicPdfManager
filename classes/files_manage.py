@@ -7,7 +7,7 @@ from reportlab.pdfgen import canvas
 from PyPDF2 import PdfWriter,PdfReader
 from classes.constants import *
 from classes.db_manage import Db
-from classes.error import Error
+from gui.error_window import Error
 
 class File:
     def __init__(self,path):
@@ -39,7 +39,8 @@ class Print_file(File):
 class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
-
+        self.name = os.path.dirname(path)
+        
         self.scores = self.get_names(os.path.join(path,DIR_SCORES))
         self.extras = self.get_names(os.path.join(path,DIR_EXTRAS))
 

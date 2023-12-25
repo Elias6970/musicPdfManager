@@ -1,5 +1,5 @@
 import sqlite3,xlrd,openpyxl,os
-from classes.error import Error
+from gui.error_window import Error
 
 #Class that represents a sql database. This class creates and manages the sql db
 #   Cod: internal cod that uses the db and is defined in the archive. Is not set automatically and can be repeated because you could have a local archive and add scores not in order
@@ -155,6 +155,12 @@ class Db:
 
         return False
 
+    #Update parted flag
+    def update_parted(self,cod,parted:bool=True):
+        self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.db_name),(int(parted),cod))
+        self.con.commit()
+        return True
+    
     def open_db(self):
         self.con = sqlite3.connect(self.db_path)
         self.cur = self.con.cursor()

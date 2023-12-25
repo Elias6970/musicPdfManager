@@ -1,9 +1,8 @@
 
-from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtWidgets import QWidget
+from PyQt5 import QtWidgets
 from classes.files_manage import Archive
 from classes.constants import *
-from classes.error import Error
+from gui.error_window import Error
 from gui.abstract_windows import *
 
 

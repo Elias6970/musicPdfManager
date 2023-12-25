@@ -1,8 +1,7 @@
 from PyQt5 import QtCore, QtWidgets
-import os,shutil
-from classes.files_manage import Archive,File,Dir
-from classes.error import Error
-from classes.constants import RELATIVE_ARCHIVE_PATH,DIR_SCORES,DIR_EXTRAS
+import os
+from classes.files_manage import Archive,Dir
+from gui.error_window import Error
 
 
 #Abstract window that have: (Is a false abstract window but it used like that)

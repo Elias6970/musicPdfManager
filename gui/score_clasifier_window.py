@@ -1,6 +1,5 @@
-from PyQt5 import QtWidgets,QtCore,QtGui
-from PyQt5.QtWebEngineWidgets import QWebEngineSettings, QWebEngineView
-
+from PyQt5 import QtWidgets,QtCore
+from PyQt5.QtWebEngineWidgets import  QWebEngineView,QWebEngineSettings
 import shutil,tempfile,PyPDF2,os,re
 from classes.files_manage import Dir
 from classes.constants import RELATIVE_ARCHIVE_PATH,DIR_SCORES,DIR_EXTRAS
@@ -31,7 +30,7 @@ class Clasifier_window(QtWidgets.QDialog):
                 
 
 
-        self.exec_()
+        self.exec()
     
     #Init all the gui interface
     def init_ui(self):
@@ -65,7 +64,6 @@ class Clasifier_window(QtWidgets.QDialog):
         self.web_view = QWebEngineView()
         self.web_view.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True) #type: ignore
         self.web_view.settings().setAttribute(QWebEngineSettings.PdfViewerEnabled, True) #type: ignore
-
 
     #Create the lbl with the instructions for the input
     def create_instructions_lbl(self) -> QtWidgets.QLabel:

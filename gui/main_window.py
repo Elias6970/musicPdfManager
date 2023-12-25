@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets,QtCore
 import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
-from classes.error import Error
+from gui.error_window import Error
 from gui.abstract_windows import Score_search_bar
 from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window

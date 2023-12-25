@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 import os,shutil
 from classes.files_manage import Archive
 from gui.abstract_windows import *
-from classes.error import Error
+from gui.error_window import Error
 from classes.constants import *
 
 #Creates a window that can delete scores with search bar and 2 buttons

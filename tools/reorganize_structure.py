@@ -7,9 +7,9 @@ EXTRAS = "extras"
 def move_files(root,files):
     for i in files:
         if PARTITURAS not in root and ".pdf" in i:
-            os.rename(os.join(root,i),os.path.join(root,PARTITURAS,i))
+            os.rename(os.path.join(root,i),os.path.join(root,PARTITURAS,i))
         elif EXTRAS not in root and ".pdf" not in i:
-            os.rename(os.join(root,i),os.path.join(root,EXTRAS,i))
+            os.rename(os.path.join(root,i),os.path.join(root,EXTRAS,i))
 
 
 
