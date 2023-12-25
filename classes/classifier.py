@@ -166,11 +166,11 @@ class Text_analizer():
                 return Text_analizer.instruments[instrument]+"_"+str(num)
             #If the name is not in the list but is correct
             except KeyError:
-                return instrument+"_"+str(num)
+                return instrument.lower()+"_"+str(num)
         else:
             try:
                 return Text_analizer.instruments[instrument]
             #If the name is not in the list but is correct
             except KeyError as e:
-                return instrument
+                return instrument.lower()
             
