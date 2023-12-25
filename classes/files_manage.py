@@ -39,8 +39,8 @@ class Print_file(File):
 class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
-        self.name = os.path.dirname(path)
-        
+        self.name = os.path.basename(path)
+
         self.scores = self.get_names(os.path.join(path,DIR_SCORES))
         self.extras = self.get_names(os.path.join(path,DIR_EXTRAS))
 

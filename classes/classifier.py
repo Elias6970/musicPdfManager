@@ -102,13 +102,16 @@ class Text_analizer():
             "r":"requinto",
             "c":"clarinete",
             "j":"clarinete_bajo",
+            "s":"saxofon",
+            "x":"saxofon_tenor",
+            "b":"saxofon_baritono",
             "a":"fagot",
             "t":"trompa",
             "l":"fliscorno",
             "e":"trompeta",
             "m":"trombon",
             "d":"bombardino",
-            "b":"bajo",
+            "d":"bajo",
             "u":"tuba",
             "p":"percusion"
         }

@@ -8,7 +8,7 @@ from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
 from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
-from gui.score_clasifier_window import Clasifier_window
+from gui.score_classifier_window import Score_classifier_window
 
 
 
@@ -311,14 +311,9 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     def clasify_scores(self):
-        list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1610-A")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
-        for i in list:
-            actual_clasification = Clasifier_window(i,self)
-            if actual_clasification.is_closed == True: #Check if the window was closed by the x-close button or the process was finished 
-                break
-            else:#Execute the query to set parted=1 in the db
-                #self.archive.cur.execute("")
-                pass
+        list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1604-HOLA")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
+        actual_clasification = Score_classifier_window(list,self.archive.update_parted,self)
+
 
     #Create a pdf dossier with a list of all the scores in the db as an index
     def export_dossier(self):

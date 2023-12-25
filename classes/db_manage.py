@@ -157,6 +157,7 @@ class Db:
 
     #Update parted flag
     def update_parted(self,cod,parted:bool=True):
+        print("Siiiiiii  " ,cod)
         self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.db_name),(int(parted),cod))
         self.con.commit()
         return True

@@ -4,27 +4,32 @@ import sys
 from  classes.files_manage import Dir
 from classes.constants import *
 from classes.classifier import *
+from classes.files_manage import Archive
 from gui.error_window import Error
 import PyPDF2,tempfile,os,shutil
 from typing import List,Tuple
 
 #TODO: falta todo lo de abrir pdfs
 
-class Classifier_window(QtWidgets.QDialog):
+class Score_classifier_window(QtWidgets.QDialog):
     actual_piece:int = -1#is the number of the piece in peices_list
     last_temp_file_path:str
     last_new_name:str = ""
 
-    def __init__(self,pieces_list:list[Dir], parent=None) -> None:
+    def __init__(self,pieces_list:list[Dir],update_parted_flag_db_function, parent=None) -> None:
         super().__init__(parent)
 
         self.pieces_list = pieces_list
+        self.update_parted_flag_db_function = update_parted_flag_db_function
 
         self.setWindowTitle("Score classifier") #traducir 
         self.init_ui()
 
         #Classifer manage
         self.next_piece()
+        
+        self.exec_()
+
 
     #Creates the user interface
     def init_ui(self):
@@ -52,7 +57,7 @@ class Classifier_window(QtWidgets.QDialog):
         font.setBold(True)
         self.score_lbl.setFont(font)
 
-        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion  (o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  \nclarinete_ba(j)o  f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (b)ajo  t(u)ba  (p)ercusion""") #traducir
+        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (d)bajo  t(u)ba  (p)ercusion""") #traducir
         font.setPointSize(12)
         instructions_lbl.setFont(font)
 
@@ -97,7 +102,7 @@ class Classifier_window(QtWidgets.QDialog):
         self.score_lbl.setText(os.path.basename(self.pieces_list[self.actual_piece].path))
         self.next_page()
 
-
+    #Is called when you press enter
     def continue_btn(self):
         if self.line_edit.text() == "" and self.last_new_name == "":
             Error.print_error(ValueError(),"Empty initial input")
@@ -124,10 +129,14 @@ class Classifier_window(QtWidgets.QDialog):
             self.next_page()
         
         elif self.actual_piece+1 < len(self.pieces_list):
+            #Update the parted flag to 1 in the db
+            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_list[self.actual_piece].name),True)
+            
             self.pdf_controller.export()
             self.next_piece()
         else:
             self.pdf_controller.export()
+
             self.close()
             
         self.line_edit.clear()
@@ -136,12 +145,3 @@ class Classifier_window(QtWidgets.QDialog):
     def close(self):
         self.hide()
         exit(0)
-
-
-if __name__ == "__main__":
-    list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1610-A")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
-    #app = QtWidgets.QApplication(sys.argv)
-    #w = Classifier_window(list)
-    w = Pdf_controller(list[0])
-    #w.show()
-    #sys.exit(app.exec_())
