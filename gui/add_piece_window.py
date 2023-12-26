@@ -65,7 +65,7 @@ class Add_piece_window(Abstract_fields_window):
                     
                     
                     if name_matches != []:
-                        warning_text = "This score is called something like these:\n" #traducir
+                        warning_text = "This score is called similar like these ones:\n" #traducir
                         for i in name_matches:
                             warning_text = warning_text + Archive.get_parsed_name(i[0],i[1]) + "\n"
                         

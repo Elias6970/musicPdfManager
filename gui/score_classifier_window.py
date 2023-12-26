@@ -1,13 +1,12 @@
 from PyQt5 import QtWidgets,QtCore,QtGui
 from PyQt5.QtWebEngineWidgets import  QWebEngineView,QWebEngineSettings
-import sys
 from  classes.files_manage import Dir
 from classes.constants import *
 from classes.classifier import *
 from classes.files_manage import Archive
+from gui.abstract_windows import Score_search_bar,Status_console,Pop_up_window
 from gui.error_window import Error
-import PyPDF2,tempfile,os,shutil
-from typing import List,Tuple
+import PyPDF2,tempfile,os
 
 #TODO: falta todo lo de abrir pdfs
 
@@ -35,6 +34,16 @@ class Score_classifier_window(QtWidgets.QDialog):
     def init_ui(self):
         container_layout = QtWidgets.QVBoxLayout()
         btns_layout = QtWidgets.QHBoxLayout()
+        
+        #Menu bar
+
+        help_opt = QtWidgets.QAction("Help",self) #traducir
+        help_opt.triggered.connect(self.help_opt_menu)
+
+        menu = QtWidgets.QMenuBar()
+        menu.addAction(help_opt)
+        container_layout.setMenuBar(menu)
+
 
         #Pdf viewer
         self.web_view = QWebEngineView()
@@ -57,7 +66,7 @@ class Score_classifier_window(QtWidgets.QDialog):
         font.setBold(True)
         self.score_lbl.setFont(font)
 
-        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (d)bajo  t(u)ba  (p)ercusion""") #traducir
+        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (n)bajo  t(u)ba  (p)ercusion""") #traducir
         font.setPointSize(12)
         instructions_lbl.setFont(font)
 
@@ -135,13 +144,99 @@ class Score_classifier_window(QtWidgets.QDialog):
             self.pdf_controller.export()
             self.next_piece()
         else:
+            #Update the parted flag to 1 in the db
+            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_list[self.actual_piece].name),True)
             self.pdf_controller.export()
 
             self.close()
             
         self.line_edit.clear()
 
+    #Opens a pop up window with the instructions
+    def help_opt_menu(self):
+        Pop_up_window(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
+    
+    def close(self):
+        self.hide()
+
+
+
+#Window to select the pieces to classify with the score_classifier tool:
+#   pieces_in_dirs: list of Dir objects with the pieces in the file system archive
+#   update_parted_flag_db_function: pointer to the function that update the flag 
+#           parted in the db. This function is used in the score_classifier_window
+class Piece_selector_to_classify_window(QtWidgets.QDialog):
+    def __init__(self,archive:Archive,parent=None) -> None:
+        super().__init__(parent)
+        
+        self.pieces_to_classify:list[str] = []
+        self.archive = archive
+        
+
+        #Gui
+        container_layout = QtWidgets.QVBoxLayout()
+        
+        self.search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.validate_selection)
+        self.status_area = Status_console()
+        
+        #Butons
+        btn_layout = QtWidgets.QHBoxLayout()
+
+        add_btn = QtWidgets.QPushButton("Add") #traducir
+        classify_btn = QtWidgets.QPushButton("Classify") #traducir
+        close_btn = QtWidgets.QPushButton("Close") #traducir
+        add_btn.clicked.connect(self.btn_add)
+        classify_btn.clicked.connect(self.btn_classify)
+        close_btn.clicked.connect(self.close)
+        btn_layout.addWidget(add_btn)
+        btn_layout.addWidget(classify_btn)
+        btn_layout.addWidget(close_btn)
+
+        container_layout.addWidget(self.search_bar)
+        container_layout.addLayout(btn_layout)
+        container_layout.addWidget(self.status_area)
+        
+        self.setLayout(container_layout)
+
+        self.exec_()
+
+
+    #Check if the piece selected is equals to one on the list
+    def validate_selection(self,text):
+        for i in self.search_bar.pieces_names:
+            if text == i:
+                return True
+        return False
+    
+
+    def btn_add(self):
+        if self.validate_selection(self.search_bar.text()):
+            self.status_area.add_lbl(QtWidgets.QLabel(self.search_bar.text()))
+            self.pieces_to_classify.append(self.search_bar.text())
+
+            self.search_bar.clear()
+
+
+    #Button that opens the classify window.
+    #   This function checks if the pieces have the parted flag = 1 in the db
+    def btn_classify(self):
+        to_classify:list[Dir] = [] 
+        error_classified:str = "" #This list is of pieces that are already classified
+        for i in self.pieces_to_classify:
+            if self.archive.is_parted(str(Archive.extract_cod(i))):
+                error_classified += i+"\n"
+            else:
+                to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH,i)))
+        
+        if not error_classified == "":
+            Pop_up_window(error_classified+"\n Were already split ",True,self) #traducir
+        
+        if len(to_classify) > 0:
+            Score_classifier_window(to_classify,self.archive.update_parted)
+        else:
+            Error.print_error("Any score to classify") #traducir
+        
+        self.hide()
 
     def close(self):
         self.hide()
-        exit(0)

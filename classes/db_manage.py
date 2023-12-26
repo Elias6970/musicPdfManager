@@ -157,11 +157,16 @@ class Db:
 
     #Update parted flag
     def update_parted(self,cod,parted:bool=True):
-        print("Siiiiiii  " ,cod)
         self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.db_name),(int(parted),cod))
         self.con.commit()
         return True
+   
+    def is_parted(self,cod) -> bool:
+        if self.cur.execute("SELECT * FROM {} WHERE cod = '{}' and parted = 1".format(self.db_name,cod)).fetchall() == []:
+            return False
+        return True
     
+
     def open_db(self):
         self.con = sqlite3.connect(self.db_path)
         self.cur = self.con.cursor()

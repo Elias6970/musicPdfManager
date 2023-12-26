@@ -269,3 +269,23 @@ class Pop_up_window(QtWidgets.QDialog):
     def no(self):
         self.hide()
 
+#Scroll area where you can add QLabels 
+class Status_console(QtWidgets.QScrollArea):
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+
+        status_console = QtWidgets.QWidget()
+        self.status_console_layout = QtWidgets.QVBoxLayout()
+        self.status_console_layout.setSpacing(0)
+
+        #Create the labels that apear in the list
+        status_console.setLayout(self.status_console_layout)
+
+
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn) #type: ignore
+        self.setAlignment(QtCore.Qt.AlignTop) #type: ignore
+        self.setWidgetResizable(True)
+        self.setWidget(status_console)
+
+    def add_lbl(self,lbl:QtWidgets.QLabel) -> None:
+        self.status_console_layout.addWidget(lbl)

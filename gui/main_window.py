@@ -3,12 +3,12 @@ import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
 from gui.error_window import Error
-from gui.abstract_windows import Score_search_bar
+from gui.abstract_windows import Score_search_bar,Status_console
 from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
 from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
-from gui.score_classifier_window import Score_classifier_window
+from gui.score_classifier_window import Score_classifier_window,Piece_selector_to_classify_window
 
 
 
@@ -27,8 +27,7 @@ class Main_window(QtWidgets.QMainWindow):
 
         up_zone = self.create_up_zone()
 
-        self.scroll = self.create_status_console()
-
+        self.scroll = Status_console()
 
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()
@@ -71,12 +70,17 @@ class Main_window(QtWidgets.QMainWindow):
         clasify_scores_opt = QtWidgets.QAction("Clasify scores",self) #traducir
         clasify_scores_opt.triggered.connect(self.clasify_scores)
 
+        about_opt = QtWidgets.QAction("About",self) #traducir
+        about_opt.triggered.connect(self.about_opt_menu)
+
         menu = self.menuBar()
         menu.addMenu("File").addActions([preferences_opt]) #traducir
 
         menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt,menu.addSeparator(),add_score_to_piece_opt,menu.addSeparator(),clasify_scores_opt]) #traducir
         
         menu.addMenu("Database").addActions([export_dossier_opt]) #traducir
+        
+        menu.addMenu("Help").addActions([about_opt])
         
         return menu
 
@@ -180,25 +184,6 @@ class Main_window(QtWidgets.QMainWindow):
         up.setLayout(up_layout)
         
         return up
-    
-
-    #Create in the lower partthe block of text where will appear the scores added
-    def create_status_console(self):
-        self.status_console = QtWidgets.QWidget()
-        self.status_console_layout = QtWidgets.QVBoxLayout()
-        self.status_console_layout.setSpacing(0)
-
-        #Create the labels that apear in the list
-        self.status_console.setLayout(self.status_console_layout)
-
-        #Scroll zone for the scores
-        scroll = QtWidgets.QScrollArea()
-        scroll.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn) #type: ignore
-        scroll.setAlignment(QtCore.Qt.AlignTop) #type: ignore
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(self.status_console)
-
-        return scroll
 
 
         #Update the autocompleter list of the search bar
@@ -232,7 +217,8 @@ class Main_window(QtWidgets.QMainWindow):
 
             #Update the labels of the down scores
             new_score_lbl = QtWidgets.QLabel(new_score_text)
-            self.status_console_layout.addWidget(new_score_lbl)
+            #self.status_console_layout.addWidget(new_score_lbl)
+            self.scroll.add_lbl(new_score_lbl)
     
 
     #Set the option of the instruments to the combo box
@@ -280,7 +266,6 @@ class Main_window(QtWidgets.QMainWindow):
     def mv_back_preview(self):
         pass
 
-
     def mv_forward_preview(self):
         pass
 
@@ -311,12 +296,16 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     def clasify_scores(self):
-        list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1604-HOLA")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
-        actual_clasification = Score_classifier_window(list,self.archive.update_parted,self)
-
+        #list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1604-HOLA")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
+        #actual_clasification = Score_classifier_window(list,self.archive.update_parted,self)
+        Piece_selector_to_classify_window(self.archive,self)
 
     #Create a pdf dossier with a list of all the scores in the db as an index
     def export_dossier(self):
         extra_cover_text = QtWidgets.QInputDialog.getText(self,"Additional conver info","Enter additional info to be added to the cover:(max 9 chars)")[0] #traducir
         pdf_path = self.dialog_window_select_new_pdf()
         self.archive.export_pdf_dossier_to_print(pdf_path,extra_cover_text)
+
+    #TODO
+    def about_opt_menu(self):
+        pass
