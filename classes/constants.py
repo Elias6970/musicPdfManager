@@ -1,4 +1,8 @@
 import os 
+VERSION = "0.1"
+APP_NAME = "Music pdf manager"
+APP_AUTHOR = "Elías Iborra Pérez"
+GITHUB = "https://github.com/Elias6970/musicPdfManager"
 
 RELATIVE_ARCHIVE_PATH = os.path.join("..","ArchivoDigital")
 RELATIVE_NEW_PATH = os.path.join("..","newArchivo")

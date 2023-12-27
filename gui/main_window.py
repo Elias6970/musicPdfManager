@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets,QtCore
+from PyQt5 import QtWidgets,QtCore,QtGui
 import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
@@ -8,8 +8,8 @@ from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
 from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
-from gui.score_classifier_window import Score_classifier_window,Piece_selector_to_classify_window
-
+from gui.score_classifier_window import Piece_selector_to_classify_window
+from gui.about_us_window import About_us_window
 
 
 class Main_window(QtWidgets.QMainWindow):
@@ -23,6 +23,8 @@ class Main_window(QtWidgets.QMainWindow):
         #Init the Archive 
         self.archive = Archive(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
         
+        self.setWindowIcon(QtGui.QIcon(os.path.join('data','icon.ico')))
+
         self.setMenuBar(self.create_menu_bar())        
 
         up_zone = self.create_up_zone()
@@ -244,7 +246,6 @@ class Main_window(QtWidgets.QMainWindow):
         else:
             return ""
         
-
     #Create one pdf with all the selected pdfs merged
     def create_pdf(self):
         pdf_path = self.dialog_window_select_new_pdf()
@@ -279,10 +280,10 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     #Show the modifiy scores window hiding the main menu
-    #TODO: modify menu
     def show_modify_piece_menu(self):
         Modify_piece_window(self.archive,self)
         self.update_autocompleter_scores()
+
 
     def show_add_scores_to_existing_piece_window(self):
         Add_scores_to_existing_piece_window(self.archive,self)
@@ -296,9 +297,8 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     def clasify_scores(self):
-        #list = [Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1604-HOLA")),Dir(os.path.join(RELATIVE_ARCHIVE_PATH,"1596-FERVOR"))]
-        #actual_clasification = Score_classifier_window(list,self.archive.update_parted,self)
         Piece_selector_to_classify_window(self.archive,self)
+
 
     #Create a pdf dossier with a list of all the scores in the db as an index
     def export_dossier(self):
@@ -308,4 +308,4 @@ class Main_window(QtWidgets.QMainWindow):
 
     #TODO
     def about_opt_menu(self):
-        pass
+        About_us_window(self)
