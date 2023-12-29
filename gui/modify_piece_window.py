@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from classes.files_manage import Archive
 from gui.abstract_windows import *
-from gui.error_window import Error
+from gui.error_window import Error_window
 from classes.constants import *
 
 
@@ -42,7 +42,7 @@ class Modify_piece_window(QtWidgets.QDialog):
                 self.search_bar.update_autocompleter_scores(self.archive.pieces_in_dirs)
 
         except Exception as e:
-            Error.print_error(e,"Error modificating") #traducir
+            Error_window.print_error(e,"Error modificating") #traducir
 
      #Check if the piece selected is equals to one on the list
     def validate_selection(self,text):
@@ -51,7 +51,7 @@ class Modify_piece_window(QtWidgets.QDialog):
                 try:
                     getted = self.archive.get_with_equals(COD,self.archive.extract_cod(text),",".join([COD,NAME,AUTHOR,TYPE,HANDWRITTEN,DIGITALIZED,PARTED]))[0] 
                 except Exception as e:
-                    Error.print_error(e,"Piece doesn't found") #traducir
+                    Error_window.print_error(e,"Piece doesn't found") #traducir
                     return False
                 
                 self.abstract_fields.line_cod.setText(str(getted[0]))

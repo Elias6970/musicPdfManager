@@ -1,5 +1,6 @@
 import os,shutil,re
 from typing import List,Tuple
+from classes.error import PdfNotFoundException
 from classes.files_manage import File,Dir
 from classes.constants import DIR_SCORES
 import PyPDF2
@@ -55,6 +56,8 @@ class Exportable_pdf(File):
 #   actual_pdf_number: index of the pdf in the dir(dir/scores)
 #   actual_pdf_page: page of the actual pdf in scores dir
 #   pdfs: list of Exportable_pdf objects that have the path of the pdfs, their new names and the path to the temp file
+#   
+#   THROWS PdfNotFoundException()
 class Pdf_controller():
     def __init__(self,dir:Dir,actual_pdf_number=0) -> None:
         self.dir_path = dir.path
@@ -62,7 +65,10 @@ class Pdf_controller():
         self.actual_pdf_number:int = actual_pdf_number
 
         pdfs_paths:List[str] = [os.path.join(dir.path,DIR_SCORES,i) for i in dir.scores]
-
+        
+        if pdfs_paths == []:
+            raise PdfNotFoundException()
+        
         self.pdfs:List[Exportable_pdf] = [Exportable_pdf(i) for i in pdfs_paths if os.path.isfile(i)]
          
         """m=0

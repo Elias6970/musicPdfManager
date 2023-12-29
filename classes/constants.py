@@ -1,10 +1,13 @@
 import os 
+from classes.config import Configuration
+
+#Version
 VERSION = "0.1"
 APP_NAME = "Music pdf manager"
 APP_AUTHOR = "Elías Iborra Pérez"
 GITHUB = "https://github.com/Elias6970/musicPdfManager"
 
-RELATIVE_ARCHIVE_PATH = os.path.join("..","ArchivoDigital")
+RELATIVE_ARCHIVE_PATH = Configuration.archive_path
 RELATIVE_NEW_PATH = os.path.join("..","newArchivo")
 DB_FILE_NAME = "archivo.db"
 DB_NAME = "AMVR_archive"
@@ -16,7 +19,7 @@ DIR_EXTRAS = "extras"
 IGNORE_FILES  = [".DS_Store"]
 HYPHEN = "-" 
 MAX_COPIES = 20 #Max copies of the combo box next to the add button in select mode 
-COVER_PARTITURES_GUIDE = os.path.join("data","portada_dossier_partituras.pdf")
+COVER_DOSSIER_LIST = Configuration.dossier_cover 
 
 #Database parameters
 COD = "cod"

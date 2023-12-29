@@ -50,16 +50,9 @@ python 3.12.0
 pip 23.1.2
 
 # TODO
-
-`Option for: When you add a score pop ups the window to classify the score`
-
-`Add an option to change the archieve path and the export cover path`
-
 `Transale the app and add the options for languages`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
-
-`About the application window`
 
 `Implement a tool for getting logs to detect future errors`
 

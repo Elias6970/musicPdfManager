@@ -53,3 +53,5 @@ class About_us_window(QtWidgets.QDialog):
         self.setLayout(container_layout)
 
         self.exec_()
+
+        #VERSION = "0.2"

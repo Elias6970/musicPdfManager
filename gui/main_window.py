@@ -2,15 +2,15 @@ from PyQt5 import QtWidgets,QtCore,QtGui
 import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
-from gui.error_window import Error
+from gui.error_window import Error_window
 from gui.abstract_windows import Score_search_bar,Status_console
 from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
 from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
-from gui.score_classifier_window import Piece_selector_to_classify_window
+from gui.score_classifier_window import Piece_selector_to_classify_window,Score_classifier_window
 from gui.about_us_window import About_us_window
-
+from gui.preferences_window import Preferences_window
 
 class Main_window(QtWidgets.QMainWindow):
     actual_score:Dir #Dir
@@ -261,7 +261,7 @@ class Main_window(QtWidgets.QMainWindow):
             merged_pdf.close()
         
         except Exception as e:
-            Error.print_error(e)
+            Error_window.print_error(e)
         
 
     def mv_back_preview(self):
@@ -271,7 +271,7 @@ class Main_window(QtWidgets.QMainWindow):
         pass
 
     def show_preferences_window(self):
-        pass
+        Preferences_window(self)
 
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
@@ -298,7 +298,7 @@ class Main_window(QtWidgets.QMainWindow):
 
     def clasify_scores(self):
         Piece_selector_to_classify_window(self.archive,self)
-
+        self.update_autocompleter_scores()
 
     #Create a pdf dossier with a list of all the scores in the db as an index
     def export_dossier(self):
@@ -306,6 +306,5 @@ class Main_window(QtWidgets.QMainWindow):
         pdf_path = self.dialog_window_select_new_pdf()
         self.archive.export_pdf_dossier_to_print(pdf_path,extra_cover_text)
 
-    #TODO
     def about_opt_menu(self):
         About_us_window(self)

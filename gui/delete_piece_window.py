@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 import os,shutil
 from classes.files_manage import Archive
 from gui.abstract_windows import *
-from gui.error_window import Error
+from gui.error_window import Error_window
 from classes.constants import *
 
 #Creates a window that can delete scores with search bar and 2 buttons
@@ -31,4 +31,4 @@ class Delete_piece_window(Abstract_serch_bar_and_two_buttons_window):
 
                 except Exception as e:
                     #error = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"Error","Error: {},{}".format(type(e),e),QtWidgets.QMessageBox.Ok,self) #traducir
-                    Error.print_error(e,message="Error deleting")
+                    Error_window.print_error(e,message="Error deleting")

@@ -1,9 +1,11 @@
 
 from PyQt5 import QtWidgets
-from classes.files_manage import Archive
+from classes.files_manage import Archive,File
 from classes.constants import *
-from gui.error_window import Error
+from classes.error import PdfNotFoundException
+from gui.error_window import Error_window
 from gui.abstract_windows import *
+from gui.score_classifier_window import Score_classifier_window
 
 
 #Window to add a new piece to the db. When you add the piece you must add the corresponding scores
@@ -43,6 +45,16 @@ class Add_piece_window(Abstract_fields_window):
                 Archive.make_dir(RELATIVE_ARCHIVE_PATH,parsed_name)
                 
                 if self.archive.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0):
+                    pdfs:list = [i for i in file_dialog.selectedFiles() if File.is_pdf(i)]
+                    print(pdfs)
+                    #Check if there are any pdf
+                    #if not pdfs == []:
+                    try:
+                        Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH,parsed_name))],self.archive.update_parted)
+                    except PdfNotFoundException: 
+                        pass
+                    except Exception:
+                        pass
                     Pop_up_window("{} has been correctly imported".format(parsed_name),True,self)
                     self.reset_fields()
                 else:
@@ -82,7 +94,7 @@ class Add_piece_window(Abstract_fields_window):
             
 
         except Exception as e:
-            Error.print_error(e)
+            Error_window.print_error(e)
         
         return False
 

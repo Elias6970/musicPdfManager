@@ -5,10 +5,10 @@ from classes.constants import *
 from classes.classifier import *
 from classes.files_manage import Archive
 from gui.abstract_windows import Score_search_bar,Status_console,Pop_up_window
-from gui.error_window import Error
+from gui.error_window import Error_window
 import PyPDF2,tempfile,os
 
-#TODO: falta todo lo de abrir pdfs
+
 
 class Score_classifier_window(QtWidgets.QDialog):
     actual_piece:int = -1#is the number of the piece in peices_list
@@ -114,7 +114,7 @@ class Score_classifier_window(QtWidgets.QDialog):
     #Is called when you press enter
     def continue_btn(self):
         if self.line_edit.text() == "" and self.last_new_name == "":
-            Error.print_error(ValueError(),"Empty initial input")
+            Error_window.print_error(ValueError(),"Empty initial input")
             return
         if self.line_edit.text() == "":
             input_analized = self.last_new_name
@@ -123,7 +123,7 @@ class Score_classifier_window(QtWidgets.QDialog):
                 input_analized = Text_analizer.analize(self.line_edit.text())
                 self.last_new_name = input_analized
             except ValueError as e:
-                Error.print_error(e,"Incorrect input")
+                Error_window.print_error(e,"Incorrect input")
                 return
 
         self.pdf_controller.get_actual_pdf().add_pdf_page(self.last_temp_file_path,input_analized)
@@ -232,9 +232,13 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
             Pop_up_window(error_classified+"\n Were already split ",True,self) #traducir
         
         if len(to_classify) > 0:
-            Score_classifier_window(to_classify,self.archive.update_parted)
+            print(to_classify[0].scores)
+            try:
+                Score_classifier_window(to_classify,self.archive.update_parted)
+            except PdfNotFoundException as e:
+                Error_window.print_error(e,"The piece doesn't have any pdf") #traducir
         else:
-            Error.print_error("Any score to classify") #traducir
+            Error_window.print_error("Any score to classify") #traducir
         
         self.hide()
 

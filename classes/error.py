@@ -1,0 +1,3 @@
+
+class PdfNotFoundException(Exception):
+    pass

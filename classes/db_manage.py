@@ -1,5 +1,5 @@
 import sqlite3,xlrd,openpyxl,os
-from gui.error_window import Error
+from gui.error_window import Error_window
 
 #Class that represents a sql database. This class creates and manages the sql db
 #   Cod: internal cod that uses the db and is defined in the archive. Is not set automatically and can be repeated because you could have a local archive and add scores not in order
@@ -37,14 +37,14 @@ class Db:
                 return True
             
             else:
-                Error.print_error(message="Error en el código o nombre de la obra")#traducir
+                Error_window.print_error(message="Error en el código o nombre de la obra")#traducir
                 raise #Jump to the except statement
 
         except sqlite3.IntegrityError as e: #cod repited
-            Error.print_error(e,"Error, ya existe esa obra: "+ str(cod))#traducir
+            Error_window.print_error(e,"Error, ya existe esa obra: "+ str(cod))#traducir
 
         except Exception as e:
-            Error.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
+            Error_window.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
 
         return False
 
@@ -68,7 +68,7 @@ class Db:
                 self.insert(row_values[0],str(row_values[1]),row_values[2],row_values[3],digitalized=1)
             except Exception as e:
                 #print("Error inserting: ",row_values)
-                Error.print_error(e,"Error inserting: "+str(row_values))
+                Error_window.print_error(e,"Error inserting: "+str(row_values))
             
             i+=1         
 
@@ -84,7 +84,7 @@ class Db:
                 self.insert(row[0],str(row[1]),row[2],row[3],digitalized=1)
             except Exception as e:
                 #print("Error inserting: ",row)
-                Error.print_error(e,"Error inserting: "+str(row))
+                Error_window.print_error(e,"Error inserting: "+str(row))
 
         self.cur.close()
 
@@ -109,7 +109,7 @@ class Db:
             extracted = self.cur.execute("SELECT {} FROM {} WHERE {} LIKE '%{}%'".format(returned_camps,self.db_name,camp_to_compare,value))
 
         except Exception as e:
-            Error.print_error(e)
+            Error_window.print_error(e)
             return ["0"]
         
         return extracted.fetchall()
@@ -121,7 +121,7 @@ class Db:
             extracted = self.cur.execute("SELECT {} FROM {} WHERE {} = '{}'".format(returned_camps,self.db_name,camp_to_compare,value))
 
         except Exception as e:
-            Error.print_error(e)
+            Error_window.print_error(e)
             return ["0"]
         
         return extracted.fetchall()
@@ -151,7 +151,7 @@ class Db:
             return True
         
         except Exception as e:
-            Error.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
+            Error_window.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
 
         return False
 

@@ -7,7 +7,7 @@ from reportlab.pdfgen import canvas
 from PyPDF2 import PdfWriter,PdfReader
 from classes.constants import *
 from classes.db_manage import Db
-from gui.error_window import Error
+from gui.error_window import Error_window
 
 class File:
     def __init__(self,path):
@@ -58,7 +58,7 @@ class Dir(File):
             return True
         
         except Exception as e:
-            Error.print_error(e,"Error tocho")
+            Error_window.print_error(e,"Error tocho")
         
         return False
 
@@ -197,7 +197,7 @@ class Archive(Db):
         canvas_overlay.save()
         
         #Merge in the same page the cover and the text
-        cover_reader = PdfReader(COVER_PARTITURES_GUIDE)
+        cover_reader = PdfReader(COVER_DOSSIER_LIST)
         overlay_reader = PdfReader(temp_overlay)
         cover_reader.pages[0].merge_page(overlay_reader.pages[0])
 
@@ -209,7 +209,7 @@ class Archive(Db):
         #Merge the cover(portada) and the list of score names
         try:
             merged_pdf = PdfWriter()
-            if os.path.exists(COVER_PARTITURES_GUIDE) and os.path.exists(temp_dossier):
+            if os.path.exists(COVER_DOSSIER_LIST) and os.path.exists(temp_dossier):
                 merged_pdf.append(cover_reader)
                 merged_pdf.append(temp_dossier)
             
@@ -219,9 +219,11 @@ class Archive(Db):
             #Delete the temp file
             os.unlink(temp_dossier)
 
-            
+        except ValueError:
+            Error_window.print_error(message="Incorrect file name") #traducir
+        
         except Exception as e:
-            Error.print_error(e)
+            Error_window.print_error(e)
    
 
     #Change the name of the folder in the archive directory
@@ -244,7 +246,7 @@ class Archive(Db):
             return True
         
         except Exception as e:
-            Error.print_error(e)
+            Error_window.print_error(e)
         
         return False
 
@@ -304,7 +306,7 @@ class Reorganize(Archive):
                         self.delete_intermediate_folders(dir_name,internal_zip_file,internal_zip_file.is_dir())
 
                     except Exception as e:
-                        Error.print_error(e,"Error with zip: "+internal_zip_file.filename)
+                        Error_window.print_error(e,"Error with zip: "+internal_zip_file.filename)
                         #print("Error",e," with: ",internal_zip_file.filename)
 
         elif ".rar" in actual_path:
@@ -322,7 +324,7 @@ class Reorganize(Archive):
                         self.delete_intermediate_folders(dir_name,internal_rar_file,internal_rar_file.isdir())
                     
                     except Exception as e:
-                        Error.print_error(e,"Error with rar: "+internal_rar_file.filename)
+                        Error_window.print_error(e,"Error with rar: "+internal_rar_file.filename)
                         #print("Error",e," with: ",internal_rar_file.filename)
 
 
