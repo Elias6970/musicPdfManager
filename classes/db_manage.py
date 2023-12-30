@@ -67,7 +67,6 @@ class Db:
             try:
                 self.insert(row_values[0],str(row_values[1]),row_values[2],row_values[3],digitalized=1)
             except Exception as e:
-                #print("Error inserting: ",row_values)
                 Error_window.print_error(e,"Error inserting: "+str(row_values))
             
             i+=1         
@@ -83,7 +82,6 @@ class Db:
             try:
                 self.insert(row[0],str(row[1]),row[2],row[3],digitalized=1)
             except Exception as e:
-                #print("Error inserting: ",row)
                 Error_window.print_error(e,"Error inserting: "+str(row))
 
         self.cur.close()

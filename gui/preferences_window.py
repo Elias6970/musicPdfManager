@@ -65,8 +65,8 @@ class Preferences_window(QtWidgets.QDialog):
 
     #Set the value that have 
     def set_field_value(self):
-        self.line_archive_path.setText(Configuration.archive_path)
-        self.line_cover_path.setText(Configuration.dossier_cover)
+        self.line_archive_path.setText(Configuration.get_archive_path())
+        self.line_cover_path.setText(Configuration.get_dossier_cover())
 
     
     #Appear a file dialog to select a file or a folder. This path is saved in the correct field.

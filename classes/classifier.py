@@ -11,7 +11,7 @@ import PyPDF2
 class Exportable_pdf(File):
     def __init__(self,path) -> None:
         super().__init__(path)
-        #print(os.path.dirname(os.path.abspath(__file__)))
+
         self.num_pages:int = len(PyPDF2.PdfReader(path).pages)
 
         self.actual_pdf_page:int = 0
@@ -49,7 +49,6 @@ class Exportable_pdf(File):
             else:
                 shutil.copy(i[0],os.path.join(os.path.dirname(self.path),i[1])+".pdf")
 
-            #print(i[0],"   ",os.path.join(os.path.dirname(self.path),i[1])+".pdf")
 
 
 #Object that controlls the pdfs ONLY IN ONE PIECE DIR
@@ -132,33 +131,26 @@ class Text_analizer():
         #if len(text) <= 2:
         #Exception for principal clarinet
         if text == "cp":
-            #print("Clarinete Principal")
             return ("clarinete_pral",None)
         
         elif re.fullmatch(fr'^[{Text_analizer.instruments_chars}]$', text,re.IGNORECASE):
-            #print("Primero")
             return (text,None)
         
         elif re.fullmatch(fr'^[{Text_analizer.instruments_chars}]\d$', text,re.IGNORECASE):
-            #print("Segundo")
             input = re.split(r"(\d+)",text)
             return (str(input[0]),int(input[1]))
 
         elif re.fullmatch(r"[a-z]{2,}$",text,re.IGNORECASE):
-            #print("Tercero")
             return (text,None)
         
         #char+number
         elif re.fullmatch(r'^(?:[a-zA-Z]{2,}\d)$',text,re.IGNORECASE):
-            #print("Cuarto")
             input = re.split(r"(\d+)",text)
             return (str(input[0]),int(input[1]))
 
         elif text == "":
-            #print("Blanco")
             return ("",None)
         else:
-            #print("Ninguno")
             raise ValueError()
 
 

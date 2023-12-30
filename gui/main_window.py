@@ -1,14 +1,15 @@
-from PyQt5 import QtWidgets,QtCore,QtGui
+from PyQt5 import QtWidgets,QtGui
 import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
+from classes.config import PLAIN_TEXT_CONFIG_PATH
 from gui.error_window import Error_window
 from gui.abstract_windows import Score_search_bar,Status_console
 from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
 from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
-from gui.score_classifier_window import Piece_selector_to_classify_window,Score_classifier_window
+from gui.score_classifier_window import Piece_selector_to_classify_window
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
 
@@ -20,8 +21,12 @@ class Main_window(QtWidgets.QMainWindow):
 
         super(Main_window,self).__init__() #Create the Main_window Object callin QMainWindow constructor(i think)
         
+        #Check if there is the config file and the paths exitsts
+        while(not os.path.exists(PLAIN_TEXT_CONFIG_PATH) or not os.path.exists(Configuration.get_archive_path()) or not os.path.exists(Configuration.get_dossier_cover())):
+            Preferences_window(self)
+
         #Init the Archive 
-        self.archive = Archive(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH)
+        self.archive = Archive(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH())
         
         self.setWindowIcon(QtGui.QIcon(os.path.join('data','icon.ico')))
 

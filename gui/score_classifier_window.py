@@ -226,13 +226,12 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
             if self.archive.is_parted(str(Archive.extract_cod(i))):
                 error_classified += i+"\n"
             else:
-                to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH,i)))
+                to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
         
         if not error_classified == "":
             Pop_up_window(error_classified+"\n Were already split ",True,self) #traducir
         
         if len(to_classify) > 0:
-            print(to_classify[0].scores)
             try:
                 Score_classifier_window(to_classify,self.archive.update_parted)
             except PdfNotFoundException as e:

@@ -22,7 +22,7 @@ class Delete_piece_window(Abstract_serch_bar_and_two_buttons_window):
             if alert == QtWidgets.QMessageBox.Yes:
                 try:
                     self.archive.delete_score(int(cod)) #Delete from db
-                    shutil.rmtree(os.path.join(RELATIVE_ARCHIVE_PATH,self.piece_lbl.text())) #Delete files
+                    shutil.rmtree(os.path.join(RELATIVE_ARCHIVE_PATH(),self.piece_lbl.text())) #Delete files
 
                     alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"","{} has been correctly deleted".format(self.piece_lbl.text()),QtWidgets.QMessageBox.Ok,self) #traducir
                     self.search_bar.clear() #Clear the text

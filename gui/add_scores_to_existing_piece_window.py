@@ -26,7 +26,7 @@ class Add_scores_to_existing_piece_window(Abstract_serch_bar_and_two_buttons_win
         if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
             if self.validate_selection(self.search_bar.text()) and self.archive.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
                 try: 
-                    Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH,self.search_bar.text()))],self.archive.update_parted)
+                    Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.update_parted)
                 except PdfNotFoundException: 
                         pass
                 Pop_up_window("Correctly imported",True,self) #Traducir

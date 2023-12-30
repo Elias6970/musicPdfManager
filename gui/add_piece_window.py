@@ -42,15 +42,15 @@ class Add_piece_window(Abstract_fields_window):
             
             
             if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-                Archive.make_dir(RELATIVE_ARCHIVE_PATH,parsed_name)
+                Archive.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
                 
                 if self.archive.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0):
                     pdfs:list = [i for i in file_dialog.selectedFiles() if File.is_pdf(i)]
-                    print(pdfs)
+
                     #Check if there are any pdf
                     #if not pdfs == []:
                     try:
-                        Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH,parsed_name))],self.archive.update_parted)
+                        Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.update_parted)
                     except PdfNotFoundException: 
                         pass
                     except Exception:

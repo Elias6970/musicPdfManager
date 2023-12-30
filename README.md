@@ -7,6 +7,34 @@ This gui application is a tool to manage the digital archive of a music band wit
 2. Install the requeriments using `pip install -r requeriments.txt`.
 3. Execute the main file to start the program `python main.py`
 
+# File structure
+The file structure of the directory with the files is this:
+```
+.
+├── 1-PIECE
+│   ├── partituras
+│   │   ├──clarinete_1.pdf
+│   │   ├──saxo_1.pdf
+│   │   └──...
+│   └── extras
+│       ├──audio1.mp3
+│       ├──score.mscz
+│       └──...
+├── 2-ANOTHER PIECE
+│   ├── partituras
+│   │   ├──timbales.pdf
+│   │   ├──oboe_1.pdf
+│   │   └──...
+│   └── extras
+│       ├──audio2.wav
+│       ├──score.musicxml
+│       └──...
+└── etc
+```
+The archive has folders with the `cod` and the `name` separated with a hyppen `-` for every piece. Every folder has two folders:
++  partituras: has the pdfs with their correct name made with [the classifier tool](#herramienta-clasificador-de-partituras).
++ extras: has the other data that is not a pdf. Now it is not possible to see the extra files with this application. You need to go to the folder and see it manually.
+
 # Herramienta clasificador de partituras
 
 ####  Introducción
@@ -49,12 +77,19 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 python 3.12.0
 pip 23.1.2
 
+# IMPORTANT
+The standalone only work if it has the data directory in the same folder as the exe
+
 # TODO
+`Make the standalone`
+
 `Transale the app and add the options for languages`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
 
 `Implement a tool for getting logs to detect future errors`
+
+`Import db from xlsx and xls`
 
 `Auto time set in db_manage with CURRENT_TIMESTAMP is set to gtm=0 and it need to be set to the local computer time`
 

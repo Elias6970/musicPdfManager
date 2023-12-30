@@ -70,17 +70,19 @@ class Configuration_setter():
 
 #Idea of static class to get the configuration of the application
 class Configuration():
-    archive_path = Configuration_setter.import_archive_path()
-    dossier_cover = Configuration_setter.import_dossier_cover_path()
-    try:
-        presets:list[Instruments_preset] = Configuration_setter.import_prests()
-    except FileNotFoundError as e:
-        pass
 
+    @staticmethod
+    def get_archive_path() -> str:
+        return Configuration_setter.import_archive_path()
+    
+    @staticmethod
+    def get_dossier_cover() -> str:
+        return Configuration_setter.import_dossier_cover_path()
 
-if __name__ == "__main__":
-    print(Configuration.archive_path)
-    print(Configuration.dossier_cover)
-    print(os.path.join("..","ArchivoDigital"))
-    print(os.path.join("data","portada_dossier_partituras.pdf"))
-
+    @staticmethod
+    def get_presets() -> list[Instruments_preset]:
+        try:
+            return Configuration_setter.import_prests()
+        except FileNotFoundError:
+            pass
+        return []

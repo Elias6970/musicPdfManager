@@ -147,7 +147,7 @@ class Archive(Db):
             pass
     #Compare the names in the archive dir with the db and set digitalized to 1 if the dir exists    
     def add_digitalized_mark(self):
-        names = os.listdir(RELATIVE_ARCHIVE_PATH)
+        names = os.listdir(RELATIVE_ARCHIVE_PATH())
 
         for i in names:
             if "DS_Store" not in i:
@@ -197,7 +197,7 @@ class Archive(Db):
         canvas_overlay.save()
         
         #Merge in the same page the cover and the text
-        cover_reader = PdfReader(COVER_DOSSIER_LIST)
+        cover_reader = PdfReader(COVER_DOSSIER_LIST())
         overlay_reader = PdfReader(temp_overlay)
         cover_reader.pages[0].merge_page(overlay_reader.pages[0])
 
@@ -209,7 +209,7 @@ class Archive(Db):
         #Merge the cover(portada) and the list of score names
         try:
             merged_pdf = PdfWriter()
-            if os.path.exists(COVER_DOSSIER_LIST) and os.path.exists(temp_dossier):
+            if os.path.exists(COVER_DOSSIER_LIST()) and os.path.exists(temp_dossier):
                 merged_pdf.append(cover_reader)
                 merged_pdf.append(temp_dossier)
             
@@ -240,9 +240,9 @@ class Archive(Db):
         try:
             for i in files:
                 if File.is_pdf(i):
-                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH,score_path,DIR_SCORES,os.path.basename(i)))
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH(),score_path,DIR_SCORES,os.path.basename(i)))
                 else:
-                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH,score_path,DIR_EXTRAS,os.path.basename(i)))
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH(),score_path,DIR_EXTRAS,os.path.basename(i)))
             return True
         
         except Exception as e:
@@ -307,7 +307,7 @@ class Reorganize(Archive):
 
                     except Exception as e:
                         Error_window.print_error(e,"Error with zip: "+internal_zip_file.filename)
-                        #print("Error",e," with: ",internal_zip_file.filename)
+
 
         elif ".rar" in actual_path:
             with rarfile.RarFile(actual_path, 'r') as rar:
@@ -325,7 +325,7 @@ class Reorganize(Archive):
                     
                     except Exception as e:
                         Error_window.print_error(e,"Error with rar: "+internal_rar_file.filename)
-                        #print("Error",e," with: ",internal_rar_file.filename)
+
 
 
         elif "DS_Store" in actual_path:
@@ -351,7 +351,7 @@ class Reorganize(Archive):
     #Clear the __MACOSX dirs
     def clear_trash(self):
         dir_list = os.listdir(self.new_archive_path)
-        #print(dir_list)
+
         for i in dir_list:
             if "__MACOSX" in i:
                 shutil.rmtree(self.archive_path+i)
