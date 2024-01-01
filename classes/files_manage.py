@@ -67,7 +67,7 @@ class Dir(File):
     def export_all_names(self,path):
         file_dirs = open("archivo_names.txt","w")
         file_db = open("db_names.txt","w")
-        db_con = Db(DB_NAME,DB_FILE_NAME)
+        db_con = Db(DB_NAME)
 
         names = os.listdir(path)
 
@@ -91,10 +91,10 @@ class Dir(File):
 
 #The connection with the db is started when the obj is created with the super.
 class Archive(Db):
-    def __init__(self,db_name,db_file_name,path):
-        super(Archive,self).__init__(db_name,db_file_name)
+    def __init__(self,db_name,archive_path):
+        super(Archive,self).__init__(db_name)
         
-        self.archive_path = path
+        self.archive_path = archive_path
 
         #List of dirs objects
         self.pieces_in_dirs:list[Dir] = []
@@ -254,8 +254,8 @@ class Archive(Db):
 
 #Reorganice the archive
 class Reorganize(Archive):
-    def __init__(self,archive_name,db_name,archive_path,new_archive_path):
-        super(Reorganize,self).__init__(archive_name,db_name,archive_path)
+    def __init__(self,archive_name,db_name,new_archive_path):
+        super(Reorganize,self).__init__(archive_name,db_name)
 
         self.new_archive_path = new_archive_path
 

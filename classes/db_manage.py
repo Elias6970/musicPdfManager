@@ -1,21 +1,35 @@
-import sqlite3,xlrd,openpyxl,os
+import sqlite3,xlrd,openpyxl
+from classes.constants import DB_PATH
 from gui.error_window import Error_window
 
 #Class that represents a sql database. This class creates and manages the sql db
-#   Cod: internal cod that uses the db and is defined in the archive. Is not set automatically and can be repeated because you could have a local archive and add scores not in order
-#   Name: name of the piece
-#   Author: author of the piece
-#   type: type of the score 
-#   created_date: date when the score was added to the db, is set automatically
-#   last_modification: last date when the row was modified, is set automatically
-#   digitalized: can be 0,1 if the piece is in the directory archive(if its pdf score exists)
-#   handwritten: can be 0,1 if the piece is digital or handwritten. All the pieces was set to 0 but in the future we need to be set to null and 0 or 1 deppending on their type
-#   parted: can be 0,1 if the score was parted with the classify tools of the program that splits the pdf by type of instrument
+#---Data table:
+#       Cod: internal cod that uses the db and is defined in the archive. Is not set automatically and can be repeated because you could have a local archive and add scores not in order
+#       Name: name of the piece
+#       Author: author of the piece
+#       type: type of the score 
+#       created_date: date when the score was added to the db, is set automatically
+#       last_modification: last date when the row was modified, is set automatically
+#       digitalized: can be 0,1 if the piece is in the directory archive(if its pdf score exists)
+#       handwritten: can be 0,1 if the piece is digital or handwritten. All the pieces was set to 0 but in the future we need to be set to null and 0 or 1 deppending on their type
+#       parted: can be 0,1 if the score was parted with the classify tools of the program that splits the pdf by type of instrument
+#
+#----------NO IMPLEMENTED UNDER THIS-------------------------
+#---Config table:
+#       archive_path: absolute path to the archive directory
+#       dossier_cover_path: absolute path to the dossier cover
+#
+#---Presets:
+#       name: name of the preset
+#       preset: has a str with instruments separated with commas. 
+#               The instruments are represented like in the score classifier
+#               (one letter or the complete name and can be a number)
+
 class Db:
-    def __init__(self,db_name,file_name):
+    def __init__(self,db_name):
         self.db_name = db_name
 
-        self.db_path = os.path.join("data",str(file_name))
+        self.db_path = DB_PATH
         
         self.open_db()
 
@@ -49,6 +63,7 @@ class Db:
         return False
 
     #Insert into the db from excel xlsx 
+    #Imports the first four columns of the excel and must be cod,name,author,type. IN THIS ORDER
     def insert_from_xlsx(self,file):
         i = 0
 
@@ -65,14 +80,15 @@ class Db:
             if row_values[0] == None:
                 continue
             try:
-                self.insert(row_values[0],str(row_values[1]),row_values[2],row_values[3],digitalized=1)
+                self.insert(row_values[0],str(row_values[1]),row_values[2],row_values[3])
             except Exception as e:
                 Error_window.print_error(e,"Error inserting: "+str(row_values))
             
             i+=1         
 
 
-    #Insert into the db from excel xls   
+    #Insert into the db from excel xls
+    #Imports the first four columns of the excel and must be cod,name,author,type. IN THIS ORDER
     def insert_from_xls(self,file):
         excel = xlrd.open_workbook(file)
         sheet = excel.sheet_by_index(0)
@@ -80,15 +96,17 @@ class Db:
         for i in range(1,sheet.nrows):
             row = sheet.row_values(i)
             try:
-                self.insert(row[0],str(row[1]),row[2],row[3],digitalized=1)
+                self.insert(row[0],str(row[1]),row[2],row[3])
             except Exception as e:
                 Error_window.print_error(e,"Error inserting: "+str(row))
 
         self.cur.close()
 
+
     def delete_score(self,cod):
         self.cur.execute("DELETE FROM {} WHERE cod = {}".format(self.db_name,cod))
         self.con.commit()
+
 
     #Get rows from the db
         #camp_to_compare:
@@ -124,10 +142,12 @@ class Db:
         
         return extracted.fetchall()
 
+
     #Get the next cod to the db
     def get_next_cod(self):
         next_cod = self.cur.execute("SELECT MAX(cod) FROM {}".format(self.db_name)).fetchone()
         return int(next_cod[0])+1
+
 
     #Returns all the db(without parted, handwritten,created_date and last_modification)
     def get_all_to_print(self):
@@ -153,12 +173,14 @@ class Db:
 
         return False
 
+
     #Update parted flag
     def update_parted(self,cod,parted:bool=True):
         self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.db_name),(int(parted),cod))
         self.con.commit()
         return True
-   
+
+
     def is_parted(self,cod) -> bool:
         if self.cur.execute("SELECT * FROM {} WHERE cod = '{}' and parted = 1".format(self.db_name,cod)).fetchall() == []:
             return False
@@ -168,6 +190,7 @@ class Db:
     def open_db(self):
         self.con = sqlite3.connect(self.db_path)
         self.cur = self.con.cursor()
+
 
     #close the db
     def close_db(self):

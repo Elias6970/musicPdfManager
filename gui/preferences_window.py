@@ -1,13 +1,15 @@
+import sys
 from PyQt5 import QtWidgets,QtCore
 from classes.config import Configuration,Configuration_setter
 from gui.abstract_windows import Pop_up_window
 
 #Window to set the paths of the archive and the cover to export the list of pieces
 class Preferences_window(QtWidgets.QDialog):
-    def __init__(self,parent=None):
-        super(Preferences_window,self).__init__(parent)
-        
+    def __init__(self,first_time:bool,parent=None):
+        super(Preferences_window,self).__init__(parent)  
         self.setWindowTitle("Preferences") #traducir
+
+        self.first_time = first_time
 
         self.init_ui()
         self.set_field_value()
@@ -29,7 +31,7 @@ class Preferences_window(QtWidgets.QDialog):
         archive_path_btn = QtWidgets.QPushButton("Browse") #traducir
         archive_path_btn.clicked.connect(lambda: self.browse("archive"))
 
-        archive_path_layout.addWidget(QtWidgets.QLabel("Archive path  ")) #traducir
+        archive_path_layout.addWidget(QtWidgets.QLabel("Archive path  *")) #traducir
         archive_path_layout.addWidget(self.line_archive_path)
         archive_path_layout.addWidget(archive_path_btn)
 
@@ -95,4 +97,6 @@ class Preferences_window(QtWidgets.QDialog):
     
 
     def close(self):
+        if self.first_time:
+            sys.exit()
         self.hide()

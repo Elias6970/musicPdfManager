@@ -8,8 +8,8 @@ __init__.py
 *.xlsx
 build
 dist
-*.spec
 *.txt
 *.jpg
 *.pdf
 !instrucciones_clasificador.txt
+!portada_dossier_partituras.pdf

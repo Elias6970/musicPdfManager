@@ -1,8 +1,8 @@
-import os 
+import os,sys
 from classes.config import Configuration
 
 #Version
-VERSION = "0.2"
+VERSION = "0.4"
 APP_NAME = "Music pdf manager"
 APP_AUTHOR = "Elías Iborra Pérez"
 GITHUB = "https://github.com/Elias6970/musicPdfManager"
@@ -12,6 +12,9 @@ def RELATIVE_ARCHIVE_PATH():
 def COVER_DOSSIER_LIST():
     return Configuration.get_dossier_cover() 
 
+
+
+
 DB_FILE_NAME = "archivo.db"
 DB_NAME = "AMVR_archive"
 DIR_SCORES = "partituras"
@@ -19,6 +22,16 @@ DIR_EXTRAS = "extras"
 IGNORE_FILES  = [".DS_Store"]
 HYPHEN = "-" 
 MAX_COPIES = 20 #Max copies of the combo box next to the add button in select mode 
+
+#DB PATH
+DB_PATH = os.path.join('data',DB_FILE_NAME)
+
+#The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
+#Every time you execute the application a temp folder is created
+if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+    ICON_PATH = os.path.join(sys._MEIPASS,"data","icon.ico") #type: ignore
+else:
+    ICON_PATH = os.path.join('data','icon.ico')
 
 
 #Database parameters

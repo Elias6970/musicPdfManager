@@ -143,7 +143,6 @@ class Text_analizer():
         elif re.fullmatch(r"[a-z]{2,}$",text,re.IGNORECASE):
             return (text,None)
         
-        #char+number
         elif re.fullmatch(r'^(?:[a-zA-Z]{2,}\d)$',text,re.IGNORECASE):
             input = re.split(r"(\d+)",text)
             return (str(input[0]),int(input[1]))
@@ -171,4 +170,19 @@ class Text_analizer():
             #If the name is not in the list but is correct
             except KeyError as e:
                 return instrument.lower()
+    
+
+    #Return a list with the internal names of the instruments
+    @staticmethod
+    def get_internal_names(names:list[str]):
+        internal_names:list[str] = []
+        for i in names:
+            #Quit .pdf
+            i = os.path.splitext(i)[0]
             
+            try:
+                internal_names.append(i.split("_")[0]+i.split("_")[1])
+            except IndexError:
+                internal_names.append(i.split("_")[0])
+            
+        return internal_names

@@ -1,13 +1,26 @@
 # Music pdf manager
 This gui application is a tool to manage the digital archive of a music band without using the file system. 
++ [Installation](#installation)
++ [Creating the standalone](#creating-the-standalone)
++ [Important](#important)
++ [Archive file structure](#archive-file-structure)
++ [Herramienta clasificadora de partituras](#herramienta-clasificador-de-partituras)
++ [To do](#todo)
 
-# Getting Started
+# Installation
 1. Have [python 3.12.0](https://www.python.org/downloads/release/python-3120/) installed and added to the path. You can install it from their oficial website.
 1.1 You can create a virtual enviroment using `python -m venv /path/to/new/virtual/environment` to have a clean installation. After creating the env you need to activate it using `/path/to/new/virtual/enviroment/Scripts/Activate`. You can check their [oficial website](https://docs.python.org/3/library/venv.html).
 2. Install the requeriments using `pip install -r requeriments.txt`.
 3. Execute the main file to start the program `python main.py`
 
-# File structure
+# Creating the standalone
+1.  Execute  in the console `pyinstaller main.spec` (pyinstaller is installed in the requeriments.txt).
+2.  You have your standalone in the dist folder.
+
+# Important
+To work, the application need a directory called 'data' in the same folder as the main.py/executable. (Inside it has the database and a config file)
+
+# Archive file structure
 The file structure of the directory with the files is this:
 ```
 .
@@ -71,18 +84,7 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 #### **Lógica aplicación**
 + La aplicación no efectua los cambios hasta que no se acabe de clasificar una obra entera.
 
-
-
-# Versions
-python 3.12.0
-pip 23.1.2
-
-# IMPORTANT
-The standalone only work if it has the data directory in the same folder as the exe
-
 # TODO
-`Make the standalone`
-
 `Transale the app and add the options for languages`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`

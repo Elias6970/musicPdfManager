@@ -22,13 +22,14 @@ class Main_window(QtWidgets.QMainWindow):
         super(Main_window,self).__init__() #Create the Main_window Object callin QMainWindow constructor(i think)
         
         #Check if there is the config file and the paths exitsts
+        #IMPORTANTE: Solo comprueba que exista el archivo, el dossier no lo  mira
         while(not os.path.exists(PLAIN_TEXT_CONFIG_PATH) or not os.path.exists(Configuration.get_archive_path()) or not os.path.exists(Configuration.get_dossier_cover())):
-            Preferences_window(self)
+            Preferences_window(True,self)
 
         #Init the Archive 
-        self.archive = Archive(DB_NAME,DB_FILE_NAME,RELATIVE_ARCHIVE_PATH())
+        self.archive = Archive(DB_NAME,RELATIVE_ARCHIVE_PATH())
         
-        self.setWindowIcon(QtGui.QIcon(os.path.join('data','icon.ico')))
+        self.setWindowIcon(QtGui.QIcon(ICON_PATH))
 
         self.setMenuBar(self.create_menu_bar())        
 
@@ -218,6 +219,7 @@ class Main_window(QtWidgets.QMainWindow):
         #Stops the user if try to add a score no existing
         if self.validate_selection(os.path.basename(self.actual_score.path)):
             
+
             self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path,DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
             
             new_score_text = self.num_copies.currentText()+"x "+os.path.basename(self.actual_score.path)+"->"+self.part_combo_box.currentText()
@@ -276,7 +278,7 @@ class Main_window(QtWidgets.QMainWindow):
         pass
 
     def show_preferences_window(self):
-        Preferences_window(self)
+        Preferences_window(False,self)
 
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
