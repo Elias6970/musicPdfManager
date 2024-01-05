@@ -6,7 +6,7 @@ from reportlab.lib import pagesizes,colors
 from reportlab.pdfgen import canvas
 from PyPDF2 import PdfWriter,PdfReader
 from classes.constants import *
-from classes.db_manage import Db
+from classes.db_manage import Db_archive
 from gui.error_window import Error_window
 
 class File:
@@ -41,8 +41,8 @@ class Dir(File):
         super().__init__(path)
         self.name = os.path.basename(path)
 
-        self.scores = self.get_names(os.path.join(path,DIR_SCORES))
-        self.extras = self.get_names(os.path.join(path,DIR_EXTRAS))
+        self.scores:list[str] = self.get_names(os.path.join(path,DIR_SCORES))
+        self.extras:list[str] = self.get_names(os.path.join(path,DIR_EXTRAS))
 
 
     #Returns the names of the files inside it avoiding .DS_Store
@@ -62,12 +62,12 @@ class Dir(File):
         
         return False
 
-    #Unused function made to test the db
+    #-------Unused function made to test the db-----------------
     #Get the names from the database and the names from the dirs to check if are equals
     def export_all_names(self,path):
         file_dirs = open("archivo_names.txt","w")
         file_db = open("db_names.txt","w")
-        db_con = Db(DB_NAME)
+        db_con = Db_archive(DB_NAME)
 
         names = os.listdir(path)
 
@@ -90,10 +90,10 @@ class Dir(File):
 
 
 #The connection with the db is started when the obj is created with the super.
-class Archive(Db):
+class Archive(Db_archive):
     def __init__(self,db_name,archive_path):
         super(Archive,self).__init__(db_name)
-        
+        self.db_name = db_name
         self.archive_path = archive_path
 
         #List of dirs objects
@@ -145,6 +145,7 @@ class Archive(Db):
             os.makedirs(os.path.join(archive_path,name,DIR_EXTRAS)) #Create extras
         except:
             pass
+    
     #Compare the names in the archive dir with the db and set digitalized to 1 if the dir exists    
     def add_digitalized_mark(self):
         names = os.listdir(RELATIVE_ARCHIVE_PATH())

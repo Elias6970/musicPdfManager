@@ -2,8 +2,30 @@ import sqlite3,xlrd,openpyxl
 from classes.constants import DB_PATH
 from gui.error_window import Error_window
 
-#Class that represents a sql database. This class creates and manages the sql db
-#---Data table:
+
+#Abstraction of a class that represets a db
+class Db:
+    def __init__(self,table_name) -> None:
+        self.table_name = table_name
+        self.db_path = DB_PATH
+        
+        self.open_db()
+        self.create_tables()
+
+    #Set up the tables 
+    def create_tables(self) -> None:...
+
+    def open_db(self):
+        self.con = sqlite3.connect(self.db_path)
+        self.cur = self.con.cursor()
+    
+    #close the db
+    def close_db(self):
+        self.cur.close()
+
+
+#Manages the archive table in the db
+#---Data table(named AMVR_archive):
 #       Cod: internal cod that uses the db and is defined in the archive. Is not set automatically and can be repeated because you could have a local archive and add scores not in order
 #       Name: name of the piece
 #       Author: author of the piece
@@ -13,29 +35,15 @@ from gui.error_window import Error_window
 #       digitalized: can be 0,1 if the piece is in the directory archive(if its pdf score exists)
 #       handwritten: can be 0,1 if the piece is digital or handwritten. All the pieces was set to 0 but in the future we need to be set to null and 0 or 1 deppending on their type
 #       parted: can be 0,1 if the score was parted with the classify tools of the program that splits the pdf by type of instrument
-#
-#----------NO IMPLEMENTED UNDER THIS-------------------------
-#---Config table:
-#       archive_path: absolute path to the archive directory
-#       dossier_cover_path: absolute path to the dossier cover
-#
-#---Presets:
-#       name: name of the preset
-#       preset: has a str with instruments separated with commas. 
-#               The instruments are represented like in the score classifier
-#               (one letter or the complete name and can be a number)
+class Db_archive(Db):
+    def __init__(self,table_name):
+        super(Db_archive,self).__init__(table_name)
 
-class Db:
-    def __init__(self,db_name):
-        self.db_name = db_name
-
-        self.db_path = DB_PATH
-        
-        self.open_db()
+    def create_tables(self) -> None:
 
         self.cur.execute("PRAGMA foreign_keys = 1") #Enable foreign keys
 
-        self.cur.execute("CREATE TABLE IF NOT EXISTS {} (cod INTEGER PRIMARY KEY,name TEXT NOT NULL,author TEXT,type TEXT,created_date DATE,last_modification DATE,digitalized INTEGER DEFAULT 0,handwritten INTEGER DEFAULT 0,parted INTEGER DEFAULT 0)".format(db_name))
+        self.cur.execute("CREATE TABLE IF NOT EXISTS {} (cod INTEGER PRIMARY KEY,name TEXT NOT NULL,author TEXT,type TEXT,created_date DATE,last_modification DATE,digitalized INTEGER DEFAULT 0,handwritten INTEGER DEFAULT 0,parted INTEGER DEFAULT 0)".format(self.table_name))
 
         self.con.commit()
 
@@ -46,7 +54,7 @@ class Db:
             #Check if cod>0 and have name
             if cod > 0 and name is not None and len(name.strip()) > 0:
 
-                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.db_name), (cod, name, author, type,handwritten,parted))
+                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.table_name), (cod, name, author, type,handwritten,parted))
                 self.con.commit()
                 return True
             
@@ -104,7 +112,7 @@ class Db:
 
 
     def delete_score(self,cod):
-        self.cur.execute("DELETE FROM {} WHERE cod = {}".format(self.db_name,cod))
+        self.cur.execute("DELETE FROM {} WHERE cod = {}".format(self.table_name,cod))
         self.con.commit()
 
 
@@ -122,7 +130,7 @@ class Db:
         try:
             self.cur.execute("PRAGMA case_sensitive_like = false")
             
-            extracted = self.cur.execute("SELECT {} FROM {} WHERE {} LIKE '%{}%'".format(returned_camps,self.db_name,camp_to_compare,value))
+            extracted = self.cur.execute("SELECT {} FROM {} WHERE {} LIKE '%{}%'".format(returned_camps,self.table_name,camp_to_compare,value))
 
         except Exception as e:
             Error_window.print_error(e)
@@ -134,7 +142,7 @@ class Db:
     #Make the get but comparing with '=' not with LIKE % %
     def get_with_equals(self,camp_to_compare:str,value,returned_camps='*'):
         try:
-            extracted = self.cur.execute("SELECT {} FROM {} WHERE {} = '{}'".format(returned_camps,self.db_name,camp_to_compare,value))
+            extracted = self.cur.execute("SELECT {} FROM {} WHERE {} = '{}'".format(returned_camps,self.table_name,camp_to_compare,value))
 
         except Exception as e:
             Error_window.print_error(e)
@@ -145,13 +153,13 @@ class Db:
 
     #Get the next cod to the db
     def get_next_cod(self):
-        next_cod = self.cur.execute("SELECT MAX(cod) FROM {}".format(self.db_name)).fetchone()
+        next_cod = self.cur.execute("SELECT MAX(cod) FROM {}".format(self.table_name)).fetchone()
         return int(next_cod[0])+1
 
 
     #Returns all the db(without parted, handwritten,created_date and last_modification)
     def get_all_to_print(self):
-        return self.cur.execute("SELECT CASE WHEN digitalized = '1' THEN 'x' WHEN digitalized = '0' THEN ' ' END AS modified_column,cod,name,author,type FROM {}".format(self.db_name)).fetchall()
+        return self.cur.execute("SELECT CASE WHEN digitalized = '1' THEN 'x' WHEN digitalized = '0' THEN ' ' END AS modified_column,cod,name,author,type FROM {}".format(self.table_name)).fetchall()
 
 
     #Try to insert a new row, if it is not possible it update the value of that row
@@ -160,11 +168,11 @@ class Db:
             #Check if cod>0 and have name
             if cod > 0 and name is not None and len(name.strip()) > 0:
 
-                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.db_name), (cod, name, author, type,handwritten,parted))
+                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.table_name), (cod, name, author, type,handwritten,parted))
                 self.con.commit()
                 return True
         except sqlite3.IntegrityError as e: #cod repited
-            self.cur.execute("UPDATE {} SET cod=?,name=?,author=?,type=?,last_modification=CURRENT_TIMESTAMP,digitalized=?,handwritten=?,parted=? WHERE cod=?".format(self.db_name),(cod,name,author,type,digitalized,handwritten,parted,cod))
+            self.cur.execute("UPDATE {} SET cod=?,name=?,author=?,type=?,last_modification=CURRENT_TIMESTAMP,digitalized=?,handwritten=?,parted=? WHERE cod=?".format(self.table_name),(cod,name,author,type,digitalized,handwritten,parted,cod))
             self.con.commit()
             return True
         
@@ -176,13 +184,13 @@ class Db:
 
     #Update parted flag
     def update_parted(self,cod,parted:bool=True):
-        self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.db_name),(int(parted),cod))
+        self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.table_name),(int(parted),cod))
         self.con.commit()
         return True
 
 
     def is_parted(self,cod) -> bool:
-        if self.cur.execute("SELECT * FROM {} WHERE cod = '{}' and parted = 1".format(self.db_name,cod)).fetchall() == []:
+        if self.cur.execute("SELECT * FROM {} WHERE cod = '{}' and parted = 1".format(self.table_name,cod)).fetchall() == []:
             return False
         return True
     
@@ -195,3 +203,33 @@ class Db:
     #close the db
     def close_db(self):
         self.cur.close()
+
+
+
+#---Presets:
+#       name: name of the preset
+#       preset: has a str with instruments separated with commas. 
+#               The instruments are represented like in the score classifier
+#               (one letter or the complete name and can be a number)
+class Db_presets(Db):
+    def __init__(self, table_name):
+        super(Db_presets,self).__init__(table_name)
+
+        self.table_name = table_name
+   
+    def create_tables(self) -> None:
+        self.cur.execute("CREATE TABLE IF NOT EXISTS {} (name TEXT NOT NULL,preset TEXT)".format(self.table_name))
+        self.con.commit()
+
+    def get_preset(self,name:str) -> list[tuple[str,str]]:
+        return self.cur.execute("SELECT * FROM {} WHERE name = {}".format(self.table_name,name)).fetchall()
+    
+    def get_presets(self) -> list[tuple[str,str]]:
+        return self.cur.execute("SELECT * FROM {}".format(self.table_name)).fetchall()
+
+    def save_preset(self,name:str,preset:str) -> bool:
+        try:
+            self.cur.execute("INSERT INTO {} (name, preset) VALUES ({},{})".format(self.table_name,name,preset))
+            return True
+        except Exception:
+            return False

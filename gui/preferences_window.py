@@ -40,7 +40,7 @@ class Preferences_window(QtWidgets.QDialog):
         cover_path_btn.clicked.connect(lambda: self.browse("cover"))
 
         cover_path_layout = QtWidgets.QHBoxLayout()
-        cover_path_layout.addWidget(QtWidgets.QLabel("Dossier cover path  ")) #traducir
+        cover_path_layout.addWidget(QtWidgets.QLabel("Dossier cover path \n (Don't touch pls)  ")) #traducir
         cover_path_layout.addWidget(self.line_cover_path)
         cover_path_layout.addWidget(cover_path_btn)
 
@@ -91,7 +91,7 @@ class Preferences_window(QtWidgets.QDialog):
 
 
     def save(self):
-        Configuration_setter.export_paths(self.line_archive_path.text(),self.line_cover_path.text())
+        Configuration.export_paths(self.line_archive_path.text(),self.line_cover_path.text())
         Pop_up_window("Changes saved succesfully",True,self) #translate
         self.hide()
     

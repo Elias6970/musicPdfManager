@@ -1,8 +1,9 @@
 from PyQt5 import QtWidgets,QtGui
-import PyPDF2
 from classes.constants import *
 from classes.files_manage import *
 from classes.config import PLAIN_TEXT_CONFIG_PATH
+from classes.validate import Validate
+from classes.printer import Printer
 from gui.error_window import Error_window
 from gui.abstract_windows import Score_search_bar,Status_console
 from gui.add_piece_window import Add_piece_window
@@ -14,7 +15,7 @@ from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
 
 class Main_window(QtWidgets.QMainWindow):
-    actual_score:Dir #Dir
+    #actual_score:Dir #Dir
     score_parts_added = [] #List of Print files
 
     def __init__(self):
@@ -28,7 +29,8 @@ class Main_window(QtWidgets.QMainWindow):
 
         #Init the Archive 
         self.archive = Archive(DB_NAME,RELATIVE_ARCHIVE_PATH())
-        
+        self.printer = Printer()
+
         self.setWindowIcon(QtGui.QIcon(ICON_PATH))
 
         self.setMenuBar(self.create_menu_bar())        
@@ -143,7 +145,7 @@ class Main_window(QtWidgets.QMainWindow):
         #Space
         search_bars_layout.setContentsMargins(0,0,0,0)
         
-        self.piece_search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.validate_selection)
+        self.piece_search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.set_option_of_instruments)
 
         #Rest of widgets
         self.piece_lbl = QtWidgets.QLabel()
@@ -193,52 +195,44 @@ class Main_window(QtWidgets.QMainWindow):
         
         return up
 
+#------------------------APP LOGIC -----------------------------
 
-        #Update the autocompleter list of the search bar
+    #Update the autocompleter list of the search bar
     def update_autocompleter_scores(self):
         self.archive.update_pieces_in_dirs()
         self.piece_search_bar.update_autocompleter_scores(self.archive.pieces_in_dirs)
+    
+    
+    #Set the option of the instruments to the combo box
+    def set_option_of_instruments(self,text):
+        #Clear the old options
+        for i in range(self.part_combo_box.count()):
+                self.part_combo_box.removeItem(0)
 
+        #set news
+        try:
+            piece = Validate.select_window_validate_selection(text,self.archive.pieces_in_dirs)
+            
+            self.part_combo_box.addItems(piece.scores) #type: ignore
+            self.piece_lbl.setText(piece.name) #type: ignore
+            self.printer.actual_piece = piece #type: ignore
 
-    #Check if the piece selected is equals to one on the list
-    def validate_selection(self,text):
-        
-        #Use the list pieces in dirs because we need to extract the score names
-        for i in self.archive.pieces_in_dirs:
-            if text == os.path.basename(i.path):
-                self.piece_lbl.setText(text)
-                self.actual_score = i
-
-                self.set_option_of_instruments(i.scores)
-
-                return True
+        except TypeError:
+            pass
+        except AttributeError:
+            pass
 
 
     #Add the score to the list of added scores an update it in the labels list
     def add_score(self):
-        #Stops the user if try to add a score no existing
-        if self.validate_selection(os.path.basename(self.actual_score.path)):
-            
-
-            self.score_parts_added.append(Print_file(os.path.join(self.actual_score.path,DIR_SCORES,self.part_combo_box.currentText()),int(self.num_copies.currentText())))
-            
-            new_score_text = self.num_copies.currentText()+"x "+os.path.basename(self.actual_score.path)+"->"+self.part_combo_box.currentText()
+        if self.printer.add_score(self.part_combo_box.currentText(),int(self.num_copies.currentText()),self.archive.pieces_in_dirs):
+            new_score_text = self.num_copies.currentText()+"x "+self.printer.actual_piece.name+"->"+self.part_combo_box.currentText()
 
             #Update the labels of the down scores
             new_score_lbl = QtWidgets.QLabel(new_score_text)
             #self.status_console_layout.addWidget(new_score_lbl)
             self.scroll.add_lbl(new_score_lbl)
     
-
-    #Set the option of the instruments to the combo box
-    def set_option_of_instruments(self,scores):
-        #Clear the old options
-        for i in range(self.part_combo_box.count()):
-                self.part_combo_box.removeItem(0)
-        
-        #Set the news
-        self.part_combo_box.addItems(scores) 
-
 
     #Display a window to select a location to save a pdf
     def dialog_window_select_new_pdf(self):
@@ -252,20 +246,13 @@ class Main_window(QtWidgets.QMainWindow):
             return file_dialog.selectedFiles()[0]
         else:
             return ""
-        
+
+
     #Create one pdf with all the selected pdfs merged
-    def create_pdf(self):
-        pdf_path = self.dialog_window_select_new_pdf()
-            
-        try: #Check if the path is valid
-            merged_pdf = PyPDF2.PdfWriter()
-            for i in self.score_parts_added:
-                if os.path.exists(i.path):
-                    for j in range(i.copies): #Add the pdf the times that is selected in copies
-                        merged_pdf.append(i.path)
-            
-            merged_pdf.write(pdf_path)
-            merged_pdf.close()
+    def create_pdf(self):     
+        try:
+            pdf_path = self.dialog_window_select_new_pdf()
+            self.printer.create_pdf(pdf_path)
         
         except Exception as e:
             Error_window.print_error(e)
@@ -277,6 +264,9 @@ class Main_window(QtWidgets.QMainWindow):
     def mv_forward_preview(self):
         pass
 
+
+#-----------------Show other windows-----------------------
+    #Show the config window
     def show_preferences_window(self):
         Preferences_window(False,self)
 
@@ -285,27 +275,29 @@ class Main_window(QtWidgets.QMainWindow):
         Add_piece_window(self.archive,self)
         self.update_autocompleter_scores()
 
-
     #Show the modifiy scores window hiding the main menu
     def show_modify_piece_menu(self):
         Modify_piece_window(self.archive,self)
         self.update_autocompleter_scores()
 
-
+    #Show the add to exisiting piece window
     def show_add_scores_to_existing_piece_window(self):
         Add_scores_to_existing_piece_window(self.archive,self)
         self.update_autocompleter_scores()
-
 
     #Show delete score menu hiding main menu
     def show_delete_score_menu(self):
         Delete_piece_window(self.archive,self)
         self.update_autocompleter_scores()
 
-
+    #Show the window to classify the scores
     def clasify_scores(self):
         Piece_selector_to_classify_window(self.archive,self)
         self.update_autocompleter_scores()
+
+    #Show about us window
+    def about_opt_menu(self):
+        About_us_window(self)
 
     #Create a pdf dossier with a list of all the scores in the db as an index
     def export_dossier(self):
@@ -313,5 +305,3 @@ class Main_window(QtWidgets.QMainWindow):
         pdf_path = self.dialog_window_select_new_pdf()
         self.archive.export_pdf_dossier_to_print(pdf_path,extra_cover_text)
 
-    def about_opt_menu(self):
-        About_us_window(self)

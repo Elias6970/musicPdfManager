@@ -7,6 +7,7 @@ APP_NAME = "Music pdf manager"
 APP_AUTHOR = "Elías Iborra Pérez"
 GITHUB = "https://github.com/Elias6970/musicPdfManager"
 
+#Path to the file system archive
 def RELATIVE_ARCHIVE_PATH():
     return Configuration.get_archive_path()
 def COVER_DOSSIER_LIST():
@@ -23,7 +24,7 @@ IGNORE_FILES  = [".DS_Store"]
 HYPHEN = "-" 
 MAX_COPIES = 20 #Max copies of the combo box next to the add button in select mode 
 
-#DB PATH
+#Path to the .db file
 DB_PATH = os.path.join('data',DB_FILE_NAME)
 
 #The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 

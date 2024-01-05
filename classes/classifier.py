@@ -70,11 +70,6 @@ class Pdf_controller():
         
         self.pdfs:List[Exportable_pdf] = [Exportable_pdf(i) for i in pdfs_paths if os.path.isfile(i)]
          
-        """m=0
-        for i in pdfs_paths:
-            self.pdfs[0].add_new_page(i,"c"+str(m))
-            m+=1 
-        self.pdfs[0].export()"""
 
     #return the actual pdf
     def get_actual_pdf(self):
@@ -127,8 +122,8 @@ class Text_analizer():
     
     #Return a tuple with the (instrument,number) or none if not match with any re
     @staticmethod
-    def parse_input(text:str):# -> Tuple[str,int|None] | None:
-        #if len(text) <= 2:
+    def parse_input(text:str) -> Tuple[str,str|None]:
+
         #Exception for principal clarinet
         if text == "cp":
             return ("clarinete_pral",None)
@@ -138,14 +133,14 @@ class Text_analizer():
         
         elif re.fullmatch(fr'^[{Text_analizer.instruments_chars}]\d$', text,re.IGNORECASE):
             input = re.split(r"(\d+)",text)
-            return (str(input[0]),int(input[1]))
+            return (str(input[0]),str(input[1]))
 
-        elif re.fullmatch(r"[a-z]{2,}$",text,re.IGNORECASE):
+        elif re.fullmatch(r"[a-z]+$",text,re.IGNORECASE):
             return (text,None)
         
-        elif re.fullmatch(r'^(?:[a-zA-Z]{2,}\d)$',text,re.IGNORECASE):
+        elif re.fullmatch(r'^[a-zA-Z]+\d+$',text,re.IGNORECASE):
             input = re.split(r"(\d+)",text)
-            return (str(input[0]),int(input[1]))
+            return (str(input[0]),str(input[1]))
 
         elif text == "":
             return ("",None)
@@ -160,10 +155,10 @@ class Text_analizer():
         instrument,num = Text_analizer.parse_input(text)
         if num != None:
             try:
-                return Text_analizer.instruments[instrument]+"_"+str(num)
+                return Text_analizer.instruments[instrument]+"_"+num
             #If the name is not in the list but is correct
             except KeyError:
-                return instrument.lower()+"_"+str(num)
+                return instrument.lower()+"_"+num
         else:
             try:
                 return Text_analizer.instruments[instrument]
