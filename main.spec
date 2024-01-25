@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=['C:\\Users\\Elias6970\\Desktop\\archivo\\projecto\\'],
     binaries=[],
-    datas=[('data\\icon.ico','data'),('data\\portada_dossier_partituras.pdf','data')],
+    datas=[('data\\img\\icon.ico','data'),('data\\img\\rotate_left.png','data'),('data\\img\\rotate_right.png','data'),('data\\portada_dossier_partituras.pdf','data')],
     hiddenimports=['PyQt5', 'PyQtWebEngine', 'openpyxl', 'xlrd', 'unidecode', 'rarfile', 'reportlab', 'PyPDF2', 'pdf2image'],
     hookspath=[],
     hooksconfig={},
@@ -34,5 +34,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['data/icon.ico']
+    icon=['data/img/icon.ico']
 )

@@ -14,7 +14,7 @@ class Score_classifier_window(QtWidgets.QDialog):
     actual_piece:int = -1#is the number of the piece in peices_list
     last_temp_file_path:str
     last_new_name:str = ""
-
+    last_rotation:int = 0 #Save the last rotation
     def __init__(self,pieces_list:list[Dir],update_parted_flag_db_function, parent=None) -> None:
         super().__init__(parent)
 
@@ -33,8 +33,9 @@ class Score_classifier_window(QtWidgets.QDialog):
     #Creates the user interface
     def init_ui(self):
         container_layout = QtWidgets.QVBoxLayout()
+        rotate_btns_layout = QtWidgets.QVBoxLayout()
         btns_layout = QtWidgets.QHBoxLayout()
-        
+    
         #Menu bar
 
         help_opt = QtWidgets.QAction("Help",self) #traducir
@@ -49,13 +50,43 @@ class Score_classifier_window(QtWidgets.QDialog):
         self.web_view = QWebEngineView()
         self.web_view.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True) #type: ignore
         self.web_view.settings().setAttribute(QWebEngineSettings.PdfViewerEnabled, True) #type: ignore
+        
+        #Rotate area
 
+        btn_rotate_left = QtWidgets.QPushButton()
+        btn_rotate_left.clicked.connect(lambda: self.rotate(-90))
+        btn_rotate_left.setToolTip("Rotate the pdf 90º to the left")
+        btn_rotate_right = QtWidgets.QPushButton()
+        btn_rotate_right.clicked.connect(lambda: self.rotate(90))
+        btn_rotate_right.setToolTip("Rotate the pdf 90º to the right")
+        
+        try:
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                img_path = os.path.join(sys._MEIPASS,'data','img') #type: ignore
+            else:
+                img_path = os.path.join('data','img')
+            btn_rotate_left.setIcon(QtGui.QIcon(os.path.join(img_path,'rotate_left.png'))) #traducir
+            btn_rotate_right.setIcon(QtGui.QIcon(os.path.join(img_path,'rotate_right.png'))) #traducir
+        except Exception:
+            pass
+        
+        self.rotation_cb = QtWidgets.QCheckBox("Keep rotation to next scores") #traducir
+        self.rotation_cb.setToolTip("If this checkbox is checked the next pdf is going to be rotated the same as the previous") #traducir
+        rotate_btns_horizontal_layout = QtWidgets.QHBoxLayout()
+        rotate_btns_horizontal_layout.addWidget(btn_rotate_left)
+        rotate_btns_horizontal_layout.addWidget(btn_rotate_right)
+
+        rotate_btns_layout.addWidget(QtWidgets.QLabel("Rotate",alignment=QtCore.Qt.AlignCenter)) #type:ignore #Traducir
+        rotate_btns_layout.addWidget(self.rotation_cb)
+        rotate_btns_layout.addLayout(rotate_btns_horizontal_layout)
+        
         #buttons
         btn_next = QtWidgets.QPushButton("Continue") #traducir
         btn_next.clicked.connect(self.continue_btn)
         btn_close = QtWidgets.QPushButton("Close") #traducir
         btn_close.clicked.connect(self.close)
         self.line_edit = QtWidgets.QLineEdit()
+        self.line_edit.returnPressed.connect(btn_next.click) #When you press enter pass to the next page
         btns_layout.addWidget(btn_next)
         btns_layout.addWidget(btn_close)
         
@@ -73,6 +104,7 @@ class Score_classifier_window(QtWidgets.QDialog):
         #Add widgets
         container_layout.addWidget(self.score_lbl)
         container_layout.addWidget(self.web_view)
+        container_layout.addLayout(rotate_btns_layout)
         container_layout.addWidget(instructions_lbl)
         container_layout.addWidget(self.line_edit) #Create the text box to input what is the part that you are seing
         
@@ -101,11 +133,15 @@ class Score_classifier_window(QtWidgets.QDialog):
         writer.add_page(reader.pages[self.pdf_controller.get_actual_pdf().actual_pdf_page])
         writer.write(temp_path)
 
+        if self.rotation_cb.isChecked():
+            self.rotate(self.last_rotation)
+
         self.opener(temp_path)
 
 
     #Jump to the next piece
     def next_piece(self):
+        self.last_rotation = 0
         self.actual_piece += 1
         self.pdf_controller = Pdf_controller(self.pieces_list[self.actual_piece])
         self.score_lbl.setText(os.path.basename(self.pieces_list[self.actual_piece].path))
@@ -152,12 +188,23 @@ class Score_classifier_window(QtWidgets.QDialog):
             
         self.line_edit.clear()
 
+    def rotate(self,degrees):
+        Exportable_pdf.rotate(degrees,self.last_temp_file_path)
+        self.opener(self.last_temp_file_path)
+        self.last_rotation = degrees
+
     #Opens a pop up window with the instructions
     def help_opt_menu(self):
         Pop_up_window(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
     
     def close(self):
         self.hide()
+
+
+
+
+
+
 
 
 

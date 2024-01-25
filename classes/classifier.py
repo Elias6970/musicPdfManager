@@ -50,6 +50,18 @@ class Exportable_pdf(File):
                 shutil.copy(i[0],os.path.join(os.path.dirname(self.path),i[1])+".pdf")
 
 
+    @staticmethod
+    def rotate(degrees:int,path:str) -> None:
+        reader = PyPDF2.PdfReader(path)
+        writer = PyPDF2.PdfWriter()
+
+        for i in range(len(reader.pages)):
+            page = reader.pages[i]
+            page.rotate(degrees)
+            writer.add_page(page)
+        
+        writer.write(path)
+
 
 #Object that controlls the pdfs ONLY IN ONE PIECE DIR
 #   actual_pdf_number: index of the pdf in the dir(dir/scores)

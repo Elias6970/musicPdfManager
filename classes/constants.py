@@ -30,9 +30,9 @@ DB_PATH = os.path.join('data',DB_FILE_NAME)
 #The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
 #Every time you execute the application a temp folder is created
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    ICON_PATH = os.path.join(sys._MEIPASS,"data","icon.ico") #type: ignore
+    ICON_PATH = os.path.join(sys._MEIPASS,'data','img','icon.ico') #type: ignore
 else:
-    ICON_PATH = os.path.join('data','icon.ico')
+    ICON_PATH = os.path.join('data','img','icon.ico')
 
 
 #Database parameters

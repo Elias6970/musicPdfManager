@@ -58,7 +58,8 @@ class Dir(File):
             return True
         
         except Exception as e:
-            Error_window.print_error(e,"Error tocho")
+            if self.path == os.path.join(os.path.dirname(self.path),new_name): # if the name is the same
+                return True
         
         return False
 
