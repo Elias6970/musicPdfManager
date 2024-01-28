@@ -35,7 +35,7 @@ class Main_window(QtWidgets.QMainWindow):
         
         #Check if there is the config file and the paths exitsts
         #IMPORTANTE: Solo comprueba que exista el archivo, el dossier no lo  mira
-        while(not os.path.exists(PLAIN_TEXT_CONFIG_PATH) or not os.path.exists(Configuration.get_archive_path()) or not os.path.exists(Configuration.get_dossier_cover())):
+        while(not os.path.exists(PLAIN_TEXT_CONFIG_PATH) or not os.path.exists(Configuration.get_archive_path()) or not os.path.exists(Configuration.get_dossier_cover_path())):
             Preferences_window(True,self)
 
         #Init the Archive 

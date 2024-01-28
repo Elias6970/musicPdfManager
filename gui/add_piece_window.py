@@ -35,7 +35,7 @@ class Add_piece_window(Abstract_fields_window):
             #Open a dialog to select the files to be putted in the directory
             file_dialog = QtWidgets.QFileDialog()
             file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFiles)  # Allow selecting any file type
-            file_dialog.setWindowTitle("Select a folder or a file") #traducir
+            file_dialog.setWindowTitle(self.tr("Select a folder or a file")) #traducir
             file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)  # Set the dialog to save mode
 
 
@@ -55,10 +55,10 @@ class Add_piece_window(Abstract_fields_window):
                         pass
                     except Exception:
                         pass
-                    Pop_up_window("{} has been correctly imported".format(parsed_name),True,self)
+                    Pop_up_window(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
                     self.reset_fields()
                 else:
-                    Pop_up_window("Has been an error importing {}".format(parsed_name),True,self)
+                    Pop_up_window(self.tr("Has been an error importing {}".format(parsed_name)),True,self)
                 
 
 

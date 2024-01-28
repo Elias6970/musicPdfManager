@@ -37,12 +37,12 @@ class Modify_piece_window(QtWidgets.QDialog):
             a2 = self.archive.change_piece_dir_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
 
             if(a1 and a2):
-                Pop_up_window("Correctly modificated",True,self) #traducir
+                Pop_up_window(self.tr("Correctly modificated"),True,self) #traducir
                 self.archive.update_pieces_in_dirs()
                 self.search_bar.update_autocompleter_scores(self.archive.pieces_in_dirs)
 
         except Exception as e:
-            Error_window.print_error(e,"Error modificating") #traducir
+            Error_window.print_error(e,self.tr("Error modificating")) #traducir
 
      #Check if the piece selected is equals to one on the list
     def validate_selection(self,text):
@@ -51,7 +51,7 @@ class Modify_piece_window(QtWidgets.QDialog):
                 try:
                     getted = self.archive.get_with_equals(COD,self.archive.extract_cod(text),",".join([COD,NAME,AUTHOR,TYPE,HANDWRITTEN,DIGITALIZED,PARTED]))[0] 
                 except Exception as e:
-                    Error_window.print_error(e,"Piece doesn't found") #traducir
+                    Error_window.print_error(e,self.tr("Piece doesn't found")) #traducir
                     return False
                 
                 self.abstract_fields.line_cod.setText(str(getted[0]))

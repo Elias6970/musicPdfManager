@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets,QtGui
+from PyQt5 import QtWidgets,QtGui,QtCore
 from classes.constants import *
 from classes.files_manage import *
 from classes.config import PLAIN_TEXT_CONFIG_PATH
@@ -21,10 +21,11 @@ class Main_window(QtWidgets.QMainWindow):
     def __init__(self):
 
         super(Main_window,self).__init__() #Create the Main_window Object callin QMainWindow constructor(i think)
+        self.change_language(Configuration.name_to_cod_language(Configuration.get_language()))
         
         #Check if there is the config file and the paths exitsts
         #IMPORTANTE: Solo comprueba que exista el archivo, el dossier no lo  mira
-        while(not os.path.exists(PLAIN_TEXT_CONFIG_PATH) or not os.path.exists(Configuration.get_archive_path()) or not os.path.exists(Configuration.get_dossier_cover())):
+        while(not os.path.exists(PLAIN_TEXT_CONFIG_PATH) or not os.path.exists(Configuration.get_archive_path()) or not os.path.exists(Configuration.get_dossier_cover_path())):
             Preferences_window(True,self)
 
         #Init the Archive 
@@ -59,38 +60,38 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Create the menu bar
     def create_menu_bar(self):
-        preferences_opt = QtWidgets.QAction("Preferences",self) #traducir
+        preferences_opt = QtWidgets.QAction(self.tr("Preferences"),self) #traducir
         preferences_opt.triggered.connect(self.show_preferences_window)
 
-        add_score_opt = QtWidgets.QAction("Add score",self) #traducir
+        add_score_opt = QtWidgets.QAction(self.tr("Add score"),self) #traducir
         add_score_opt.triggered.connect(self.show_add_scores_menu)
 
-        modify_score_opt = QtWidgets.QAction("Modify score",self) #traducir
+        modify_score_opt = QtWidgets.QAction(self.tr("Modify score"),self) #traducir
         modify_score_opt.triggered.connect(self.show_modify_piece_menu)
 
-        delete_score_opt = QtWidgets.QAction("Delete score",self) #traducir
+        delete_score_opt = QtWidgets.QAction(self.tr("Delete score"),self) #traducir
         delete_score_opt.triggered.connect(self.show_delete_score_menu)
 
-        add_score_to_piece_opt = QtWidgets.QAction("Add score to piece",self) #traducir
+        add_score_to_piece_opt = QtWidgets.QAction(self.tr("Add score to piece"),self) #traducir
         add_score_to_piece_opt.triggered.connect(self.show_add_scores_to_existing_piece_window)
         
-        export_dossier_opt = QtWidgets.QAction("Export dossier",self) #traducir
+        export_dossier_opt = QtWidgets.QAction(self.tr("Export dossier"),self) #traducir
         export_dossier_opt.triggered.connect(self.export_dossier)
         
-        clasify_scores_opt = QtWidgets.QAction("Clasify scores",self) #traducir
+        clasify_scores_opt = QtWidgets.QAction(self.tr("Clasify scores"),self) #traducir
         clasify_scores_opt.triggered.connect(self.clasify_scores)
 
-        about_opt = QtWidgets.QAction("About",self) #traducir
+        about_opt = QtWidgets.QAction(self.tr("About"),self) #traducir
         about_opt.triggered.connect(self.about_opt_menu)
 
         menu = self.menuBar()
-        menu.addMenu("File").addActions([preferences_opt]) #traducir
+        menu.addMenu(self.tr("Configuration")).addActions([preferences_opt]) #traducir
 
-        menu.addMenu("Archive").addActions([add_score_opt,modify_score_opt,delete_score_opt,menu.addSeparator(),add_score_to_piece_opt,menu.addSeparator(),clasify_scores_opt]) #traducir
+        menu.addMenu(self.tr("Archive")).addActions([add_score_opt,modify_score_opt,delete_score_opt,menu.addSeparator(),add_score_to_piece_opt,menu.addSeparator(),clasify_scores_opt]) #traducir
         
-        menu.addMenu("Database").addActions([export_dossier_opt]) #traducir
+        menu.addMenu(self.tr("Database")).addActions([export_dossier_opt]) #traducir
         
-        menu.addMenu("Help").addActions([about_opt])
+        menu.addMenu(self.tr("Help")).addActions([about_opt])
         
         return menu
 
@@ -104,8 +105,8 @@ class Main_window(QtWidgets.QMainWindow):
         self.num_copies.setFixedWidth(50)
         self.num_copies.addItems([str(i+1) for i in range(MAX_COPIES)])
         
-        btn1 = QtWidgets.QPushButton("Add") #traducir
-        btn2 = QtWidgets.QPushButton("Create Pdf") #traducir
+        btn1 = QtWidgets.QPushButton(self.tr("Add")) #traducir
+        btn2 = QtWidgets.QPushButton(self.tr("Create Pdf")) #traducir
 
         btn1.clicked.connect(self.add_score)
         btn2.clicked.connect(self.create_pdf)
@@ -238,7 +239,7 @@ class Main_window(QtWidgets.QMainWindow):
     def dialog_window_select_new_pdf(self):
         file_dialog = QtWidgets.QFileDialog()
         
-        file_dialog.setWindowTitle("Select Folder and File Name") #traducir
+        file_dialog.setWindowTitle(self.tr("Select Folder and File Name")) #traducir
         file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)  # Set the dialog to save mode
         file_dialog.setDefaultSuffix(".pdf")
 
@@ -264,6 +265,19 @@ class Main_window(QtWidgets.QMainWindow):
     def mv_forward_preview(self):
         pass
 
+
+    def change_language(self,language):
+        translator = QtCore.QTranslator(self)
+
+        if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+            path = os.path.join(sys._MEIPASS,"translate",language,"compiled",language+".qm")
+        else:
+            path = os.path.join("translate",language,"compiled",language+".qm")
+
+        translator.load(path)
+
+        QtWidgets.QApplication.instance().installTranslator(translator)
+    
 
 #-----------------Show other windows-----------------------
     #Show the config window
@@ -301,7 +315,7 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Create a pdf dossier with a list of all the scores in the db as an index
     def export_dossier(self):
-        extra_cover_text = QtWidgets.QInputDialog.getText(self,"Additional conver info","Enter additional info to be added to the cover:(max 9 chars)")[0] #traducir
+        extra_cover_text = QtWidgets.QInputDialog.getText(self,self.tr("Additional conver info"),self.tr("Enter additional info to be added to the cover:(max 9 chars)"))[0] #traducir
         pdf_path = self.dialog_window_select_new_pdf()
         self.archive.export_pdf_dossier_to_print(pdf_path,extra_cover_text)
 

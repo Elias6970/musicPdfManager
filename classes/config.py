@@ -1,15 +1,13 @@
-import pickle,os,sys
+import pickle,os,sys,locale,ctypes
 
 #Config files location
-#The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
-#Every time you execute the application a temp folder is created
-"""if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    PLAIN_TEXT_CONFIG_PATH = os.path.join(sys._MEIPASS,"data","config.yml") #type: ignore
-    PRESETS_PATH = os.path.join(sys._MEIPASS,"data","presets.bin") #type: ignore
-else:"""
 PLAIN_TEXT_CONFIG_PATH = os.path.join("data","config.yml")
 PRESETS_PATH = os.path.join("data","presets.bin")
 
+#Languages
+LAN_ESP = "Espanol"
+LAN_ENG = "English"
+LAN_VAL = "Valencià"
 
 #Class that represents a list of instruments to make presets to make pdfs
 class Instruments_preset():
@@ -30,65 +28,16 @@ class Instruments_preset():
         self.instruments.remove(instrument)
 
 
-class Configuration_setter():
-    @staticmethod
-    def import_archive_path():
-        try:
-            with open(PLAIN_TEXT_CONFIG_PATH,'r') as file:
-                for i in file.readlines():
-                    split = i.split("=")
-                    if(split[0].upper() == "ARCHIVE_PATH"):
-                        return split[1].split("\n")[0]
-
-        except FileNotFoundError:
-            open(PLAIN_TEXT_CONFIG_PATH,'w')
-
-        return ""
-    
-    @staticmethod
-    def import_dossier_cover_path():
-        try:     
-            with open(PLAIN_TEXT_CONFIG_PATH,'r') as file:
-                for i in file.readlines():
-                    split = i.split("=")
-                    if(split[0].upper() == "DOSSIER_COVER"):
-                        return split[1].split("\n")[0]
-
-        except FileNotFoundError:
-            open(PLAIN_TEXT_CONFIG_PATH,'w')
-        
-        return ""
-    
-    @staticmethod
-    def import_prests():
-        with open(PRESETS_PATH,'rb') as file:
-            a = pickle.load(file)
-        return a
-
-    @staticmethod
-    def export_presets(presets:list[Instruments_preset],path:str):
-        with open(PRESETS_PATH,'wb') as file:      
-            pickle.dump(presets,file)
-            file.close()
-    
-    @staticmethod
-    def export_paths(archive_path:str,dossier_cover:str):
-        with open(PLAIN_TEXT_CONFIG_PATH,'w') as file:
-            file.write("ARCHIVE_PATH="+archive_path+"\n")
-            file.write("DOSSIER_COVER="+dossier_cover)
-
 
 #Idea of static class to get the configuration of the application
 class Configuration():
-
     @staticmethod
-    def get_archive_path() -> str:
-        #return Configuration_setter.import_archive_path()
+    def get_attribute(attribute):
         try:
             with open(PLAIN_TEXT_CONFIG_PATH,'r') as file:
                 for i in file.readlines():
                     split = i.split("=")
-                    if(split[0].upper() == "ARCHIVE_PATH"):
+                    if(split[0].upper() == attribute):
                         return split[1].split("\n")[0]
 
         except FileNotFoundError:
@@ -103,39 +52,67 @@ class Configuration():
     
     
     @staticmethod
-    def get_dossier_cover() -> str:
+    def get_archive_path() -> str:
+        return Configuration.get_attribute("ARCHIVE_PATH")
+    
+    @staticmethod
+    def get_dossier_cover_path() -> str:
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
             return os.path.join(sys._MEIPASS,"data","portada_dossier_partituras.pdf") #type: ignore
         
-        try:     
-            with open(PLAIN_TEXT_CONFIG_PATH,'r') as file:
-                for i in file.readlines():
-                    split = i.split("=")
-                    if(split[0].upper() == "DOSSIER_COVER"):
-                        return split[1].split("\n")[0]
+        return Configuration.get_attribute("DOSSIER_COVER")       
 
-        except FileNotFoundError:
-            try:
-                os.mkdir("data")
-            except Exception:
-                pass
-            
-            open(PLAIN_TEXT_CONFIG_PATH,'w')
-
+    @staticmethod
+    def get_language() -> str:
+        language = Configuration.get_attribute("LANGUAGE")
         
-        return ""        
+        if language == "":
+            #Get the system language
+            if os.name == 'posix':
+                return os.getenv('LANG')
+            else:
+                language = locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]
+       
+        if language.startswith("es_"):
+            return LAN_ESP
+        #for valenciano and catalan
+        elif language.startswith("ca_"):
+            return LAN_VAL
+        #default case is english
+        else:
+            return LAN_ENG
 
+
+    #If the language is not supported return an empty string
+    @staticmethod
+    def name_to_cod_language(name:str) -> str:
+        if name == LAN_ESP:
+            return "es_ES"
+        elif name == LAN_ENG:
+            return "en_US"
+        elif name == LAN_VAL:
+            return "ca_VA"
+        else:
+            return ""
+    
 
     @staticmethod
     def get_presets() -> list[Instruments_preset]:
         try:
-            return Configuration_setter.import_prests()
+            with open(PRESETS_PATH,'rb') as file:
+                a = pickle.load(file)
+            return a
+
         except FileNotFoundError:
             pass
         return []
 
+    #Lenguage has to be in es_ES format
     @staticmethod
-    def export_paths(archive_path:str,dossier_cover:str):
+    def save_config(archive_path:str,dossier_cover:str,language:str):
         with open(PLAIN_TEXT_CONFIG_PATH,'w') as file:
             file.write("ARCHIVE_PATH="+archive_path+"\n")
-            file.write("DOSSIER_COVER="+dossier_cover)
+            file.write("DOSSIER_COVER="+dossier_cover+"\n")
+            file.write("LANGUAGE="+language+"\n")
+
+

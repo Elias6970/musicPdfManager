@@ -85,7 +85,6 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 + La aplicación no efectua los cambios hasta que no se acabe de clasificar una obra entera.
 
 # TODO
-`Transale the app and add the options for languages`
 `If you try to reclassify a piece, the window gives you the option to reclassify it`
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
 

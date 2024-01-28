@@ -6,7 +6,7 @@ class About_us_window(QtWidgets.QDialog):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
 
-        self.setWindowTitle("About")
+        self.setWindowTitle(self.tr("About"))
         self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
 
         container_layout = QtWidgets.QVBoxLayout()
@@ -22,19 +22,19 @@ class About_us_window(QtWidgets.QDialog):
         title = QtWidgets.QLabel(APP_NAME)
         title.setFont(font)
         
-        subtitle = QtWidgets.QLabel("Simply archive app to manage music pdfs for a music band" ) #traducir
+        subtitle = QtWidgets.QLabel(self.tr("Simply archive app to manage music pdfs for a music band" )) #traducir
         font.setPointSize(10)
         font.setBold(False)
         subtitle.setFont(font)
 
-        subtitle2 = QtWidgets.QLabel("Made for Asociación Musical Virgen del Remedio (Petrer, Spain)")
+        subtitle2 = QtWidgets.QLabel(self.tr("Made for Asociación Musical Virgen del Remedio (Petrer, Spain)"))
         subtitle2.setFont(font)
 
-        version = QtWidgets.QLabel("Version: " + VERSION)
+        version = QtWidgets.QLabel(self.tr("Version: ") + VERSION)
         font.setPointSize(10)
         version.setFont(font)
         
-        author = QtWidgets.QLabel("Author: " + APP_AUTHOR) #traducir
+        author = QtWidgets.QLabel(self.tr("Author: ") + APP_AUTHOR) #traducir
         author.setFont(font)
         
         github_page = QtWidgets.QLabel("<a href='{}'>{}</a>".format(GITHUB,GITHUB))
@@ -54,4 +54,3 @@ class About_us_window(QtWidgets.QDialog):
 
         self.exec_()
 
-        #VERSION = "0.2"

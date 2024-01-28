@@ -9,12 +9,14 @@ from gui.error_window import Error_window
 #   a lbl with the score selected
 #   btn1 that you can select the lbl and you set the function
 #   cancel btn that exits
+#   NEED TO ADD THE TEXT TO THE self.func_btn FOR EVERY INSTANCE 
+#   NEED TO ADD THE WINDOW TITLE USING self.setWindowTitle
 class Abstract_serch_bar_and_two_buttons_window(QtWidgets.QDialog):
 
-    def __init__(self,archive:Archive,window_title:str,btn_lbl:str,btn_function,parent=None):
+    def __init__(self,archive:Archive,btn_function,parent=None):
         super(Abstract_serch_bar_and_two_buttons_window,self).__init__(parent)
         
-        self.setWindowTitle(window_title) #traducir
+        #self.setWindowTitle(window_title) #traducir
 
         self.archive = archive
         self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
@@ -29,21 +31,21 @@ class Abstract_serch_bar_and_two_buttons_window(QtWidgets.QDialog):
         
         container_layout.addWidget(self.search_bar)
         container_layout.addWidget(self.piece_lbl)
-        container_layout.addLayout(self.create_buttons_layout(btn_lbl,btn_function))
+        container_layout.addLayout(self.create_buttons_layout(btn_function))
         
         self.setGeometry(0,0,400,200)
         self.setLayout(container_layout)
 
 
-    def create_buttons_layout(self,btn1_lbl:str,btn_function):
+    def create_buttons_layout(self,btn_function):
         btns_layout = QtWidgets.QHBoxLayout()
-        close_btn = QtWidgets.QPushButton("Close") #traducir
-        func_btn = QtWidgets.QPushButton(btn1_lbl) #traducir
+        close_btn = QtWidgets.QPushButton(self.tr("Close")) #traducir
+        self.func_btn = QtWidgets.QPushButton("Action") #traducir
 
         close_btn.clicked.connect(self.close)
-        func_btn.clicked.connect(btn_function)
+        self.func_btn.clicked.connect(btn_function)
         
-        btns_layout.addWidget(func_btn)
+        btns_layout.addWidget(self.func_btn)
         btns_layout.addWidget(close_btn)
         
         return btns_layout
@@ -121,19 +123,19 @@ class Abstract_fields_window(QtWidgets.QDialog):
 
         
         cod_layout = QtWidgets.QHBoxLayout()
-        cod_layout.addWidget(QtWidgets.QLabel("Cod  ")) #traducir
+        cod_layout.addWidget(QtWidgets.QLabel(self.tr("Cod  "))) #traducir
         cod_layout.addWidget(self.line_cod)
 
         name_layout = QtWidgets.QHBoxLayout()
-        name_layout.addWidget(QtWidgets.QLabel("Name *  ")) #traducir
+        name_layout.addWidget(QtWidgets.QLabel(self.tr("Name *  "))) #traducir
         name_layout.addWidget(self.line_name)
 
         author_layout = QtWidgets.QHBoxLayout()
-        author_layout.addWidget(QtWidgets.QLabel("Author  ")) #traducir
+        author_layout.addWidget(QtWidgets.QLabel(self.tr("Author  "))) #traducir
         author_layout.addWidget(self.line_author)
         
         type_layout = QtWidgets.QHBoxLayout()
-        type_layout.addWidget(QtWidgets.QLabel("Type  ")) #traducir
+        type_layout.addWidget(QtWidgets.QLabel(self.tr("Type  "))) #traducir
         type_layout.addWidget(self.line_type)
 
         fields_layout.addLayout(cod_layout)
@@ -161,7 +163,7 @@ class Abstract_fields_window(QtWidgets.QDialog):
     #Create the buttons layout
     def create_buttons_layout(self,btn_lbl:str,btn_function,close_function):
         btns_layout = QtWidgets.QHBoxLayout()
-        close_btn = QtWidgets.QPushButton("Close") #traducir
+        close_btn = QtWidgets.QPushButton(self.tr("Close")) #traducir
         add_btn = QtWidgets.QPushButton(btn_lbl) #traducir
 
         if close_function != None:
@@ -196,7 +198,7 @@ class Score_search_bar(QtWidgets.QLineEdit):
         super(Score_search_bar,self).__init__(parent)
 
         self.setContentsMargins(0,0,0,0)
-        self.setPlaceholderText("Search score") #traducir
+        self.setPlaceholderText(self.tr("Search score")) #traducir
         self.textChanged.connect(lambda: verify_function(self.text()))
 
         self.pieces_names:list[str] = [os.path.basename(i.path) for i in pieces_in_dirs]
@@ -238,18 +240,18 @@ class Pop_up_window(QtWidgets.QDialog):
 
 
         if only_yes_btn == False:
-            yes_btn = QtWidgets.QPushButton("Yes") #traducir
-            no_btn = QtWidgets.QPushButton("No") #traducir
+            yes_btn = QtWidgets.QPushButton(self.tr("Yes")) #traducir
+            no_btn = QtWidgets.QPushButton(self.tr("No")) #traducir
             yes_btn.clicked.connect(self.confirm)
             no_btn.clicked.connect(self.no)
             btn_layout.addWidget(yes_btn)
             btn_layout.addWidget(no_btn)
 
-            confirmation_lbl = QtWidgets.QLabel("Do you want to keep adding it?")#traducir
+            confirmation_lbl = QtWidgets.QLabel(self.tr("Do you want to keep adding it?"))#traducir
             container_layout.addWidget(confirmation_lbl)
         
         else:
-            confirm_btn = QtWidgets.QPushButton("Ok") #traducir
+            confirm_btn = QtWidgets.QPushButton(self.tr("Ok")) #traducir
             confirm_btn.clicked.connect(self.confirm)
             btn_layout.addWidget(confirm_btn)
 

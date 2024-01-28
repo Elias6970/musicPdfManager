@@ -5,7 +5,7 @@ a = Analysis(
     ['main.py'],
     pathex=['C:\\Users\\Elias6970\\Desktop\\archivo\\projecto\\'],
     binaries=[],
-    datas=[('data\\img\\icon.ico','data'),('data\\img\\rotate_left.png','data'),('data\\img\\rotate_right.png','data'),('data\\portada_dossier_partituras.pdf','data')],
+    datas=[('data\\img\\icon.ico','data\\img'),('data\\img\\rotate_left.png','data\\img'),('data\\img\\rotate_right.png','data\\img'),('data\\portada_dossier_partituras.pdf','data'),('translate\\ca_VA\\compiled\\ca_VA.qm','translate\\ca_VA\\compiled\\'),('translate\\en_US\\compiled\\en_US.qm','translate\\en_US\\compiled'),('translate\\es_ES\\compiled\\es_ES.qm','translate\\es_ES\\compiled')],
     hiddenimports=['PyQt5', 'PyQtWebEngine', 'openpyxl', 'xlrd', 'unidecode', 'rarfile', 'reportlab', 'PyPDF2', 'pdf2image'],
     hookspath=[],
     hooksconfig={},

@@ -11,9 +11,9 @@ GITHUB = "https://github.com/Elias6970/musicPdfManager"
 def RELATIVE_ARCHIVE_PATH():
     return Configuration.get_archive_path()
 def COVER_DOSSIER_LIST():
-    return Configuration.get_dossier_cover() 
-
-
+    return Configuration.get_dossier_cover_path() 
+def LANGUAGE():
+    return Configuration.get_language()
 
 
 DB_FILE_NAME = "archivo.db"

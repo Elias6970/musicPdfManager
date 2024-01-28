@@ -21,7 +21,7 @@ class Score_classifier_window(QtWidgets.QDialog):
         self.pieces_list = pieces_list
         self.update_parted_flag_db_function = update_parted_flag_db_function
 
-        self.setWindowTitle("Score classifier") #traducir 
+        self.setWindowTitle(self.tr("Score classifier")) #traducir 
         self.init_ui()
 
         #Classifer manage
@@ -38,7 +38,7 @@ class Score_classifier_window(QtWidgets.QDialog):
     
         #Menu bar
 
-        help_opt = QtWidgets.QAction("Help",self) #traducir
+        help_opt = QtWidgets.QAction(self.tr("Help"),self) #traducir
         help_opt.triggered.connect(self.help_opt_menu)
 
         menu = QtWidgets.QMenuBar()
@@ -55,10 +55,10 @@ class Score_classifier_window(QtWidgets.QDialog):
 
         btn_rotate_left = QtWidgets.QPushButton()
         btn_rotate_left.clicked.connect(lambda: self.rotate(-90))
-        btn_rotate_left.setToolTip("Rotate the pdf 90º to the left")
+        btn_rotate_left.setToolTip(self.tr("Rotate the pdf 90º to the left"))
         btn_rotate_right = QtWidgets.QPushButton()
         btn_rotate_right.clicked.connect(lambda: self.rotate(90))
-        btn_rotate_right.setToolTip("Rotate the pdf 90º to the right")
+        btn_rotate_right.setToolTip(self.tr("Rotate the pdf 90º to the right"))
         
         try:
             if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
@@ -70,20 +70,20 @@ class Score_classifier_window(QtWidgets.QDialog):
         except Exception:
             pass
         
-        self.rotation_cb = QtWidgets.QCheckBox("Keep rotation to next scores") #traducir
-        self.rotation_cb.setToolTip("If this checkbox is checked the next pdf is going to be rotated the same as the previous") #traducir
+        self.rotation_cb = QtWidgets.QCheckBox(self.tr("Keep rotation to next scores")) #traducir
+        self.rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf is going to be rotated the same as the previous")) #traducir
         rotate_btns_horizontal_layout = QtWidgets.QHBoxLayout()
         rotate_btns_horizontal_layout.addWidget(btn_rotate_left)
         rotate_btns_horizontal_layout.addWidget(btn_rotate_right)
 
-        rotate_btns_layout.addWidget(QtWidgets.QLabel("Rotate",alignment=QtCore.Qt.AlignCenter)) #type:ignore #Traducir
+        rotate_btns_layout.addWidget(QtWidgets.QLabel(self.tr("Rotate"),alignment=QtCore.Qt.AlignCenter)) #type:ignore #Traducir
         rotate_btns_layout.addWidget(self.rotation_cb)
         rotate_btns_layout.addLayout(rotate_btns_horizontal_layout)
         
         #buttons
-        btn_next = QtWidgets.QPushButton("Continue") #traducir
+        btn_next = QtWidgets.QPushButton(self.tr("Continue")) #traducir
         btn_next.clicked.connect(self.continue_btn)
-        btn_close = QtWidgets.QPushButton("Close") #traducir
+        btn_close = QtWidgets.QPushButton(self.tr("Close")) #traducir
         btn_close.clicked.connect(self.close)
         self.line_edit = QtWidgets.QLineEdit()
         self.line_edit.returnPressed.connect(btn_next.click) #When you press enter pass to the next page
@@ -150,7 +150,7 @@ class Score_classifier_window(QtWidgets.QDialog):
     #Is called when you press enter
     def continue_btn(self):
         if self.line_edit.text() == "" and self.last_new_name == "":
-            Error_window.print_error(ValueError(),"Empty initial input")
+            Error_window.print_error(ValueError(),self.tr("Empty initial input"))
             return
         if self.line_edit.text() == "":
             input_analized = self.last_new_name
@@ -159,7 +159,7 @@ class Score_classifier_window(QtWidgets.QDialog):
                 input_analized = Text_analizer.analize(self.line_edit.text())
                 self.last_new_name = input_analized
             except ValueError as e:
-                Error_window.print_error(e,"Incorrect input")
+                Error_window.print_error(e,self.tr("Incorrect input"))
                 return
 
         self.pdf_controller.get_actual_pdf().add_pdf_page(self.last_temp_file_path,input_analized)
@@ -229,9 +229,9 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         #Butons
         btn_layout = QtWidgets.QHBoxLayout()
 
-        add_btn = QtWidgets.QPushButton("Add") #traducir
-        classify_btn = QtWidgets.QPushButton("Classify") #traducir
-        close_btn = QtWidgets.QPushButton("Close") #traducir
+        add_btn = QtWidgets.QPushButton(self.tr("Add")) #traducir
+        classify_btn = QtWidgets.QPushButton(self.tr("Classify")) #traducir
+        close_btn = QtWidgets.QPushButton(self.tr("Close")) #traducir
         add_btn.clicked.connect(self.btn_add)
         classify_btn.clicked.connect(self.btn_classify)
         close_btn.clicked.connect(self.close)
@@ -276,15 +276,15 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
                 to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
         
         if not error_classified == "":
-            Pop_up_window(error_classified+"\n Were already split ",True,self) #traducir
+            Pop_up_window(error_classified + self.tr("\n Were already split "),True,self) #traducir
         
         if len(to_classify) > 0:
             try:
                 Score_classifier_window(to_classify,self.archive.update_parted)
             except PdfNotFoundException as e:
-                Error_window.print_error(e,"The piece doesn't have any pdf") #traducir
+                Error_window.print_error(e,self.tr("The piece doesn't have any pdf")) #traducir
         else:
-            Error_window.print_error("Any score to classify") #traducir
+            Error_window.print_error(self.tr("Any score to classify")) #traducir
         
         self.hide()
 
