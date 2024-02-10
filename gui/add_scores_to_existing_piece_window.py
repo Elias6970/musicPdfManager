@@ -1,5 +1,5 @@
 from PyQt5 import  QtWidgets
-from classes.files_manage import Archive
+from classes.files_manage import Archive,Archive_file_manager
 from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException
 from gui.abstract_windows import *
@@ -27,7 +27,7 @@ class Add_scores_to_existing_piece_window(Abstract_serch_bar_and_two_buttons_win
 
 
         if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-            if self.validate_selection(self.search_bar.text()) and self.archive.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
+            if self.validate_selection(self.search_bar.text()) and Archive_file_manager.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
                 try: 
                     Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.update_parted)
                 except PdfNotFoundException: 

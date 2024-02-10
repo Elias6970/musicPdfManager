@@ -86,7 +86,18 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 
 # TODO
 `If you try to reclassify a piece, the window gives you the option to reclassify it`
+
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
+
+`Make a checkbox in selection window to show only pieces that are in the pyshical archive`
+
+`Make the preview for the actual selected pdf in selection window`
+
+`Translate the line 75 of Dossier class(printer file) which is showed when you create the dossier`
+
+`Set a label in classify window that shows the name of the previous intrument classified`
+
+`Maybe we can add a window that shows all the instruments selected  when you finish a piece in classify window`
 
 `Implement a tool for getting logs to detect future errors`
 
@@ -94,5 +105,5 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 
 `Auto time set in db_manage with CURRENT_TIMESTAMP is set to gtm=0 and it need to be set to the local computer time`
 
-`Make a combo box in the window that shows the scores that its names are similar to another ones when you add a score`
+
 

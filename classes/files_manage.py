@@ -1,7 +1,7 @@
 import os,sys,shutil,tempfile
 from unidecode import unidecode
 import zipfile,rarfile
-from reportlab.platypus import SimpleDocTemplate,Table,Image
+from reportlab.platypus import SimpleDocTemplate,Table
 from reportlab.lib import pagesizes,colors
 from reportlab.pdfgen import canvas
 from PyPDF2 import PdfWriter,PdfReader
@@ -123,16 +123,69 @@ class Archive(Db_archive):
 
     #Stablish the name to the folders get from the db to standarize the names
     #"cod-name" in capital leters and without accents
-    """def get_parsed_name_from_db(self,cod):
+    def get_parsed_name_from_db(self,cod):
         name = self.get_with_equals("cod",cod,"cod,name")
 
-        return str(name[0][0])+HYPHEN+unidecode(str(name[0][1])).upper()""" 
+        return str(name[0][0])+HYPHEN+unidecode(str(name[0][1])).upper()
     
     #Return the standard name in the dirs structure
     @staticmethod
     def get_parsed_name(cod,name):
         return str(cod)+HYPHEN+unidecode(str(name)).upper() 
     
+
+    #Compare the names in the archive dir with the db and set digitalized to 1 if the dir exists    
+    def add_digitalized_mark(self):
+        names = os.listdir(RELATIVE_ARCHIVE_PATH())
+
+        for i in names:
+            if "DS_Store" not in i:
+                cod = self.extract_cod(i)
+                self.cur.execute("UPDATE {} SET digitalized = 1 WHERE cod = {};".format(DB_NAME,cod))
+                        
+        self.con.commit()
+
+
+
+
+#This class make all the interactions with the files on the archive path
+class Archive_file_manager:
+
+    #Move the files to the internal archive deppending if there are scores or extras
+    @staticmethod
+    def move_files(piece_path:str,files:list):
+        try:
+            for i in files:
+                if File.is_pdf(i):
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH(),piece_path,DIR_SCORES,os.path.basename(i)))
+                else:
+                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH(),piece_path,DIR_EXTRAS,os.path.basename(i)))
+            return True
+        
+        except Exception as e:
+            Error_window.print_error(e)
+        
+        return False
+    
+    #If the piece doesn't exist or doesn't have any score it returns an empty list
+    @staticmethod
+    def get_scores(piece_path:str,normalized_name:str) -> list[str]:
+        try:
+            list = os.listdir(piece_path)
+            return [i for i in list if i != ".DS_Store"]
+        except FileNotFoundError:
+            return []
+
+
+    #If the piece doesn't exist or doesn't have any exta it returns an empty list
+    @staticmethod
+    def get_extras(piece_path:str,normalized_name:str) -> list[str]:
+        try:
+            list = os.listdir(piece_path)
+            return [i for i in list if i != ".DS_Store"]
+        except FileNotFoundError:
+            return []
+
 
     #Create the dirs and return the path
     @staticmethod
@@ -147,112 +200,24 @@ class Archive(Db_archive):
         except:
             pass
     
-    #Compare the names in the archive dir with the db and set digitalized to 1 if the dir exists    
-    def add_digitalized_mark(self):
-        names = os.listdir(RELATIVE_ARCHIVE_PATH())
+    #delete a piece. Recive the stadard name-> num-name ej: 1-HOLA
+    @staticmethod
+    def delete_piece(parsed_piece_name:str):
+        shutil.rmtree(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_piece_name)) #Delete files
+    
+    
+    @staticmethod
+    def change_piece_dir_name(cod:int,new_cod:int,name:str):
+        pass
 
-        for i in names:
-            if "DS_Store" not in i:
-                cod = self.extract_cod(i)
-                self.cur.execute("UPDATE {} SET digitalized = 1 WHERE cod = {};".format(DB_NAME,cod))
-                        
-        self.con.commit()
-
-
-    #Export the pdf dossier with the list of scores to be printed
-    def export_pdf_dossier_to_print(self,new_pdf_path:str,extra_cover_text:str):
-        #Create a temp file because later we need to merge this pdf with the front page with the band logo
-        #temp_dossier = tempfile.NamedTemporaryFile(delete=True)
-        temp_dossier = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
-
-        # Read Excel data into a list
-        data = self.get_all_to_print()
-        data.insert(0,("Digitalizada","Cod","Nombre","Autor","tipo")) #traducir
-
-        # Create a PDF document
-        doc = SimpleDocTemplate(temp_dossier, pagesize=pagesizes.landscape(pagesizes.A4),topMargin=15,bottomMargin=10)
-
-        table = Table(data)
-
-        # Customize table appearance
-        cell_padding = 1.5
-        style = [
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('LEFTPADDING', (0, 0), (-1, -1), cell_padding),
-            ('RIGHTPADDING', (0, 0), (-1, -1), cell_padding),
-            ('TOPPADDING', (0, 0), (-1, -1), cell_padding),
-            ('BOTTOMPADDING', (0, 0), (-1, -1), cell_padding),
-        ]
-        table.spaceAfter = 0
-        table.spaceBefore = 0
-        table.setStyle(style)
-        
-        #Modify the front page to put a string
-        temp_overlay = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
-        canvas_overlay = canvas.Canvas(temp_overlay)
-        canvas_overlay.setFont("Helvetica-Bold",30)
-        canvas_overlay.drawString(453,70,extra_cover_text)
-        canvas_overlay.save()
-        
-        #Merge in the same page the cover and the text
-        cover_reader = PdfReader(COVER_DOSSIER_LIST())
-        overlay_reader = PdfReader(temp_overlay)
-        cover_reader.pages[0].merge_page(overlay_reader.pages[0])
-
-        # Build the score list pdf
-        story = [table]
-        doc.build(story)
-
-        
-        #Merge the cover(portada) and the list of score names
-        try:
-            merged_pdf = PdfWriter()
-            if os.path.exists(COVER_DOSSIER_LIST()) and os.path.exists(temp_dossier):
-                merged_pdf.append(cover_reader)
-                merged_pdf.append(temp_dossier)
-            
-            merged_pdf.write(new_pdf_path)
-            merged_pdf.close()
-            
-            #Delete the temp file
-            os.unlink(temp_dossier)
-
-        except ValueError:
-            Error_window.print_error(message="Incorrect file name") #traducir
-        
-        except Exception as e:
-            Error_window.print_error(e)
-   
-
-    #Change the name of the folder in the archive directory
+"""    #Change the name of the folder in the archive directory
     #Recive the cod and the name
     def change_piece_dir_name(self,cod:int,name:str):
         for i in self.pieces_in_dirs:
             if int(Archive.extract_cod(os.path.basename(i.path))) == int(cod):
                 if i.change_name(Archive.get_parsed_name(cod,name)):
                     return True
-        return False
-
-    #Move the files to the internal archive deppending if there are scores or extras
-    def move_files(self,score_path,files:list):
-        try:
-            for i in files:
-                if File.is_pdf(i):
-                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH(),score_path,DIR_SCORES,os.path.basename(i)))
-                else:
-                    shutil.copy(i,os.path.join(RELATIVE_ARCHIVE_PATH(),score_path,DIR_EXTRAS,os.path.basename(i)))
-            return True
-        
-        except Exception as e:
-            Error_window.print_error(e)
-        
-        return False
-
-
+        return False"""
 
 #Reorganice the archive
 class Reorganize(Archive):
@@ -275,7 +240,7 @@ class Reorganize(Archive):
                 query = self.get_with_equals("cod",self.extract_cod(i),"cod,name")
                 new_name = Archive.get_parsed_name(query[0][0],query[0][1])
 
-                Archive.make_dir(self.new_archive_path,new_name)
+                Archive_file_manager.make_dir(self.new_archive_path,new_name)
 
                 for root,dir,files in os.walk(self.archive_path+i):
                     for j in files:

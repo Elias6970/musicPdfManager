@@ -3,7 +3,7 @@ from classes.constants import *
 from classes.files_manage import *
 from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.validate import Validate
-from classes.printer import Printer
+from classes.printer import Printer,Dossier
 from gui.error_window import Error_window
 from gui.abstract_windows import Score_search_bar,Status_console
 from gui.add_piece_window import Add_piece_window
@@ -15,9 +15,6 @@ from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
 
 class Main_window(QtWidgets.QMainWindow):
-    #actual_score:Dir #Dir
-    score_parts_added = [] #List of Print files
-
     def __init__(self):
 
         super(Main_window,self).__init__() #Create the Main_window Object callin QMainWindow constructor(i think)
@@ -270,7 +267,7 @@ class Main_window(QtWidgets.QMainWindow):
         translator = QtCore.QTranslator(self)
 
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            path = os.path.join(sys._MEIPASS,"translate",language,"compiled",language+".qm")
+            path = os.path.join(sys._MEIPASS,"translate",language,"compiled",language+".qm") #type:ignore
         else:
             path = os.path.join("translate",language,"compiled",language+".qm")
 
@@ -317,5 +314,11 @@ class Main_window(QtWidgets.QMainWindow):
     def export_dossier(self):
         extra_cover_text = QtWidgets.QInputDialog.getText(self,self.tr("Additional conver info"),self.tr("Enter additional info to be added to the cover:(max 9 chars)"))[0] #traducir
         pdf_path = self.dialog_window_select_new_pdf()
-        self.archive.export_pdf_dossier_to_print(pdf_path,extra_cover_text)
+        
+        try:
+            Dossier.export_pdf_dossier_to_print(self.archive.get_all_to_print(),pdf_path,extra_cover_text)
+        except ValueError as e:
+            Error_window.print_error(message="Incorrect file name",e=e) #traducir
+        except Exception as e:
+            Error_window.print_error(e)
 

@@ -159,7 +159,7 @@ class Db_archive(Db):
 
     #Returns all the db(without parted, handwritten,created_date and last_modification)
     def get_all_to_print(self):
-        return self.cur.execute("SELECT CASE WHEN digitalized = '1' THEN 'x' WHEN digitalized = '0' THEN ' ' END AS modified_column,cod,name,author,type FROM {}".format(self.table_name)).fetchall()
+        return self.cur.execute("SELECT CASE WHEN digitalized = '1' THEN 'x' WHEN digitalized = '0' THEN ' ' END AS modified_column,cod,name,author,type FROM {} ORDER BY name".format(self.table_name)).fetchall()
 
 
     #Try to insert a new row, if it is not possible it update the value of that row

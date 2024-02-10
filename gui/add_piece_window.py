@@ -1,6 +1,6 @@
 
 from PyQt5 import QtWidgets
-from classes.files_manage import Archive,File
+from classes.files_manage import Archive,File,Archive_file_manager
 from classes.constants import *
 from classes.error import PdfNotFoundException
 from gui.error_window import Error_window
@@ -42,9 +42,9 @@ class Add_piece_window(Abstract_fields_window):
             
             
             if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
-                Archive.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
+                Archive_file_manager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
                 
-                if self.archive.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0):
+                if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0):
                     pdfs:list = [i for i in file_dialog.selectedFiles() if File.is_pdf(i)]
 
                     #Check if there are any pdf

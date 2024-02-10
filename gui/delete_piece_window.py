@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 import os,shutil
-from classes.files_manage import Archive
+from classes.files_manage import Archive,Archive_file_manager
 from gui.abstract_windows import *
 from gui.error_window import Error_window
 from classes.constants import *
@@ -25,13 +25,12 @@ class Delete_piece_window(Abstract_serch_bar_and_two_buttons_window):
             if alert == QtWidgets.QMessageBox.Yes:
                 try:
                     self.archive.delete_score(int(cod)) #Delete from db
-                    shutil.rmtree(os.path.join(RELATIVE_ARCHIVE_PATH(),self.piece_lbl.text())) #Delete files
-
+                    Archive_file_manager.delete_piece(self.piece_lbl.text())
+                    
                     alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"",self.tr("{} has been correctly deleted".format(self.piece_lbl.text())),QtWidgets.QMessageBox.Ok,self) #traducir
                     self.search_bar.clear() #Clear the text
                     self.piece_lbl.clear()
                     self.update_autocompleter_scores()
 
                 except Exception as e:
-                    #error = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"Error","Error: {},{}".format(type(e),e),QtWidgets.QMessageBox.Ok,self) #traducir
                     Error_window.print_error(e,message=self.tr("Error deleting"))

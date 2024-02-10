@@ -10,7 +10,7 @@ GITHUB = "https://github.com/Elias6970/musicPdfManager"
 #Path to the file system archive
 def RELATIVE_ARCHIVE_PATH():
     return Configuration.get_archive_path()
-def COVER_DOSSIER_LIST():
+def COVER_LIST_DOSSIER():
     return Configuration.get_dossier_cover_path() 
 def LANGUAGE():
     return Configuration.get_language()
