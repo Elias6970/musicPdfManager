@@ -41,8 +41,8 @@ class Dir(File):
         super().__init__(path)
         self.name = os.path.basename(path)
 
-        self.scores:list[str] = self.get_names(os.path.join(path,DIR_SCORES))
-        self.extras:list[str] = self.get_names(os.path.join(path,DIR_EXTRAS))
+        #self.scores:list[str] = self.get_names(os.path.join(path,DIR_SCORES))
+        #self.extras:list[str] = self.get_names(os.path.join(path,DIR_EXTRAS))
 
 
     #Returns the names of the files inside it avoiding .DS_Store
@@ -50,7 +50,11 @@ class Dir(File):
         list = os.listdir(path)
         return [i for i in list if i != ".DS_Store"]
 
-   
+    def get_scores(self):
+        return self.get_names(os.path.join(self.path,DIR_SCORES))
+    def get_extras(self):
+        return self.get_names(os.path.join(self.path,DIR_EXTRAS))
+    
     def change_name(self,new_name):
         try:
             shutil.move(self.path,os.path.join(os.path.dirname(self.path),new_name))

@@ -135,7 +135,7 @@
         <translation> se ha borrado correctamente</translation>
     </message>
     <message>
-        <location filename="../../gui/delete_piece_window.py" line="37"/>
+        <location filename="../../gui/delete_piece_window.py" line="36"/>
         <source>Error deleting</source>
         <translation>Error borrando</translation>
     </message>
@@ -143,87 +143,87 @@
 <context>
     <name>Main_window</name>
     <message>
-        <location filename="../../gui/main_window.py" line="63"/>
+        <location filename="../../gui/main_window.py" line="60"/>
         <source>Preferences</source>
         <translation>Preferencias</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="66"/>
+        <location filename="../../gui/main_window.py" line="63"/>
         <source>Add score</source>
         <translation>Añadir obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="69"/>
+        <location filename="../../gui/main_window.py" line="66"/>
         <source>Modify score</source>
         <translation>Modificar obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="72"/>
+        <location filename="../../gui/main_window.py" line="69"/>
         <source>Delete score</source>
         <translation>Borrar obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="75"/>
+        <location filename="../../gui/main_window.py" line="72"/>
         <source>Add score to piece</source>
         <translation>Añadir partitura a obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="78"/>
+        <location filename="../../gui/main_window.py" line="75"/>
         <source>Export dossier</source>
         <translation>Exportar guión</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="81"/>
+        <location filename="../../gui/main_window.py" line="78"/>
         <source>Clasify scores</source>
         <translation>Clasificar partituras</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="84"/>
+        <location filename="../../gui/main_window.py" line="81"/>
         <source>About</source>
         <translation>Sobre nosotros</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="90"/>
+        <location filename="../../gui/main_window.py" line="87"/>
         <source>Archive</source>
         <translation>Archivo</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="92"/>
+        <location filename="../../gui/main_window.py" line="89"/>
         <source>Database</source>
         <translation>Base de datos</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="94"/>
+        <location filename="../../gui/main_window.py" line="91"/>
         <source>Help</source>
         <translation>Ayuda</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="108"/>
+        <location filename="../../gui/main_window.py" line="105"/>
         <source>Add</source>
         <translation>Añadir</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="109"/>
+        <location filename="../../gui/main_window.py" line="106"/>
         <source>Create Pdf</source>
         <translation>Generar Pdf</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="242"/>
+        <location filename="../../gui/main_window.py" line="239"/>
         <source>Select Folder and File Name</source>
         <translation>Selecciona una carpeta y el nombre del archivo a generar</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="318"/>
+        <location filename="../../gui/main_window.py" line="315"/>
         <source>Additional conver info</source>
         <translation>Información adicional de la portada</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="318"/>
+        <location filename="../../gui/main_window.py" line="315"/>
         <source>Enter additional info to be added to the cover:(max 9 chars)</source>
         <translation>Introduce ifnormación adicional para añadir a la portada: (máximo 9 caracteres)</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="88"/>
+        <location filename="../../gui/main_window.py" line="85"/>
         <source>Configuration</source>
         <translation>Configuración</translation>
     </message>
@@ -249,17 +249,17 @@
 <context>
     <name>Piece_selector_to_classify_window</name>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="232"/>
+        <location filename="../../gui/score_classifier_window.py" line="196"/>
         <source>Add</source>
         <translation>Añadir</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="233"/>
+        <location filename="../../gui/score_classifier_window.py" line="197"/>
         <source>Classify</source>
         <translation>Clasificar</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="234"/>
+        <location filename="../../gui/score_classifier_window.py" line="198"/>
         <source>Close</source>
         <translation>Cerrar</translation>
     </message>
@@ -267,17 +267,28 @@
         <location filename="../../gui/score_classifier_window.py" line="279"/>
         <source>
  Were already split </source>
-        <translation>Ya está dividida </translation>
+        <translation type="obsolete">Ya está dividida </translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="285"/>
+        <location filename="../../gui/score_classifier_window.py" line="252"/>
         <source>The piece doesn&apos;t have any pdf</source>
         <translation>La obra no tiene ningún pdf asociado</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="287"/>
+        <location filename="../../gui/score_classifier_window.py" line="254"/>
         <source>Any score to classify</source>
         <translation>Ninguna partitura para clasificar</translation>
+    </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="244"/>
+        <source> is already splited,
+</source>
+        <translation>Ya está dividido</translation>
+    </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="244"/>
+        <source>do you want to redo it? </source>
+        <translation>quieres volver a dividirlo?</translation>
     </message>
 </context>
 <context>
@@ -364,59 +375,69 @@
 <context>
     <name>Score_classifier_window</name>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="24"/>
+        <location filename="../../gui/score_classifier_window.py" line="19"/>
         <source>Score classifier</source>
         <translation>Classificador de partituras</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="41"/>
+        <location filename="../../gui/score_classifier_window.py" line="36"/>
         <source>Help</source>
         <translation>Ayuda</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="58"/>
+        <location filename="../../gui/score_classifier_window.py" line="53"/>
         <source>Rotate the pdf 90º to the left</source>
         <translation>Girar el pdf 90º a la izquierda</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="61"/>
+        <location filename="../../gui/score_classifier_window.py" line="56"/>
         <source>Rotate the pdf 90º to the right</source>
         <translation>Girar el pdf 90º a la derecha</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="73"/>
+        <location filename="../../gui/score_classifier_window.py" line="68"/>
         <source>Keep rotation to next scores</source>
         <translation>Mantener la rotación para el siguiente pdf</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="74"/>
+        <location filename="../../gui/score_classifier_window.py" line="69"/>
         <source>If this checkbox is checked the next pdf is going to be rotated the same as the previous</source>
         <translation>Si esta casilla está marcada el siguiente pdf se va a girar lo mismo que el anterior</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="79"/>
+        <location filename="../../gui/score_classifier_window.py" line="74"/>
         <source>Rotate</source>
         <translation>Girar</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="84"/>
+        <location filename="../../gui/score_classifier_window.py" line="81"/>
         <source>Continue</source>
         <translation>Continuar</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="86"/>
+        <location filename="../../gui/score_classifier_window.py" line="83"/>
         <source>Close</source>
         <translation>Cerrar</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="153"/>
+        <location filename="../../gui/score_classifier_window.py" line="132"/>
         <source>Empty initial input</source>
         <translation>Entrada inicial vacía</translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="162"/>
+        <location filename="../../gui/score_classifier_window.py" line="135"/>
         <source>Incorrect input</source>
         <translation>Entrada incorrecta</translation>
+    </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="79"/>
+        <source>Previous</source>
+        <translation>Anterior</translation>
+    </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="147"/>
+        <source>You are in the first page, you can&apos;t go to a previous one</source>
+        <translation>Ya estás en la primera página, no hay ninguna anterior</translation>
     </message>
 </context>
 <context>

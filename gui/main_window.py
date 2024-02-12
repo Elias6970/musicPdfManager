@@ -211,7 +211,7 @@ class Main_window(QtWidgets.QMainWindow):
         try:
             piece = Validate.select_window_validate_selection(text,self.archive.pieces_in_dirs)
             
-            self.part_combo_box.addItems(piece.scores) #type: ignore
+            self.part_combo_box.addItems(piece.get_scores()) #type: ignore
             self.piece_lbl.setText(piece.name) #type: ignore
             self.printer.actual_piece = piece #type: ignore
 

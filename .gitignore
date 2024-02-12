@@ -13,3 +13,4 @@ dist
 *.pdf
 !instrucciones_clasificador.txt
 !portada_dossier_partituras.pdf
+*.exe

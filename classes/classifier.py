@@ -1,7 +1,7 @@
-import os,shutil,re
+import os,shutil,re,tempfile
 from typing import List,Tuple
-from classes.error import PdfNotFoundException
-from classes.files_manage import File,Dir
+from classes.error import *
+from classes.files_manage import File,Dir,Archive
 from classes.constants import DIR_SCORES
 import PyPDF2
 
@@ -30,17 +30,18 @@ class Exportable_pdf(File):
 
 
     #Add a new page to the list of new files.
-    #   if new_name exists in the list_of_new_files append this temp pdf
-    #       to the one that is in the list
-    #   if not, appends the new pdf to the list with its name
-    def add_pdf_page(self,temp_file_path:str,new_name:str) -> None:
-        for i in self.list_of_new_files:
-            if(i[1] == new_name):
-                self.append_page(i[0],temp_file_path)
-                return None
-            
+    #Appends the new pdf to the list with its name
+    def add_pdf_page(self,temp_file_path:str,new_name:str) -> None:  
         self.list_of_new_files.append((temp_file_path,new_name))
-        
+    
+    #Remove the latest page from the list
+    def remove_latest_page(self) -> None:
+        self.list_of_new_files.pop()
+
+    #Return the temporaly path from the actual pdf page
+    def get_actual_temp_path(self):
+        print(self.list_of_new_files[self.actual_pdf_page][0])
+        return self.list_of_new_files[self.actual_pdf_page][0]
     
     def export(self):
         for i in self.list_of_new_files:
@@ -75,7 +76,7 @@ class Pdf_controller():
 
         self.actual_pdf_number:int = actual_pdf_number
 
-        pdfs_paths:List[str] = [os.path.join(dir.path,DIR_SCORES,i) for i in dir.scores]
+        pdfs_paths:List[str] = [os.path.join(dir.path,DIR_SCORES,i) for i in dir.get_scores()]
         
         if pdfs_paths == []:
             raise PdfNotFoundException()
@@ -87,7 +88,7 @@ class Pdf_controller():
     def get_actual_pdf(self):
         return self.pdfs[self.actual_pdf_number]
 
-
+    #Move the original to a new folder to have a backup 
     def move_originals(self):
         if not os.path.exists(os.path.join(self.dir_path,"partituras_antiguo")):
             os.mkdir(os.path.join(self.dir_path,"partituras_antiguo"))
@@ -97,11 +98,137 @@ class Pdf_controller():
 
 
     def export(self):
+        self.move_originals()
+
         for i in self.pdfs:
             i.export()
         
-        self.move_originals()
         
+
+#This class manage how pieces are classified.
+class Classifier:
+    def __init__(self,pieces_to_classify:list[Dir],update_parted_flag_db_function) -> None:
+        self.actual_piece:int = -1#is the number of the piece in peices_list
+        self.last_temp_file_path:str
+        self.last_new_name:str = ""
+        self.last_rotation:int = 0 #Save the last rotation
+        self.actual_piece_name:str = ""
+
+        self.pieces_to_classify = pieces_to_classify
+        self.update_parted_flag_db_function = update_parted_flag_db_function
+    
+    #Used to show the first page of the classification
+    def first_page(self) -> str:
+        self.next_piece()
+        return self.next_page(False)
+    
+    #Generates a temp file path
+    def generate_temp(self) -> str:
+        path = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
+        self.last_temp_file_path = path
+        return path
+
+    #Rotate a file x degress
+    def rotate(self,degrees):
+        Exportable_pdf.rotate(degrees,self.last_temp_file_path)
+        self.last_rotation = degrees
+    
+    #Parse the initial input to a standarized program form
+    def parse_input(self,input):
+        if input == "" and self.last_new_name == "":
+            raise EmptyInitialInputException()
+        if input == "":
+            input_analized = self.last_new_name
+        else:
+            #Can raise ValueError
+            input_analized = Text_analizer.analize(input)
+            self.last_new_name = input_analized
+        
+        return input_analized
+    
+    
+    #Pass the page to the next one
+    def next_page(self,rotation_checkbox:bool):
+        try:
+            return self.pdf_controller.get_actual_pdf().get_actual_temp_path()
+        except IndexError:
+            pass
+
+        temp_path = self.generate_temp()
+        reader = PyPDF2.PdfReader(self.pdf_controller.get_actual_pdf().path)
+        writer = PyPDF2.PdfWriter()
+        writer.add_page(reader.pages[self.pdf_controller.get_actual_pdf().actual_pdf_page])
+        writer.write(temp_path)
+
+        if rotation_checkbox:
+            self.rotate(self.last_rotation)
+
+        return temp_path
+    
+
+
+    #Jump to the next piece
+    def next_piece(self):
+        self.last_rotation = 0
+        self.actual_piece += 1
+        self.pdf_controller = Pdf_controller(self.pieces_to_classify[self.actual_piece])
+        self.actual_piece_name = os.path.basename(self.pieces_to_classify[self.actual_piece].path)
+
+    #Manage the functionality to go to the previous page
+    def previous_page_manager(self):
+        if self.pdf_controller.actual_pdf_number == 0 and self.pdf_controller.get_actual_pdf().actual_pdf_page == 0:
+            raise FirstPageException()
+        
+        elif self.pdf_controller.get_actual_pdf().actual_pdf_page == 0:
+            self.pdf_controller.actual_pdf_number -= 1
+        else:
+            self.pdf_controller.get_actual_pdf().actual_pdf_page -= 1
+        
+        self.pdf_controller.get_actual_pdf().remove_latest_page()
+
+        return self.next_page(False)
+
+
+    #Decide what is the next pdf page that need to be showed
+    #1-Check if the actual pdf have more pages
+    #2-Check if the actual piece have more pdfs
+    #3-Check if there are more pieces to classify
+    def next_page_manager(self,rotation_checkbox:bool):
+        self.pdf_controller.get_actual_pdf().actual_pdf_page += 1
+
+        if self.pdf_controller.get_actual_pdf().actual_pdf_page < self.pdf_controller.get_actual_pdf().num_pages:
+            pass
+        
+        elif self.pdf_controller.actual_pdf_number+1 < len(self.pdf_controller.pdfs):
+            self.pdf_controller.actual_pdf_number += 1
+
+        
+        elif self.actual_piece+1 < len(self.pieces_to_classify):
+            #Update the parted flag to 1 in the db
+            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_to_classify[self.actual_piece].name),True)
+            
+            self.pdf_controller.export()
+            self.next_piece()
+
+        #Finish classifing all the list
+        else: 
+            #Update the parted flag to 1 in the db
+            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_to_classify[self.actual_piece].name),True)
+            self.pdf_controller.export()
+
+            raise NoMorePiecesToClassifyException()
+
+        
+        return self.next_page(rotation_checkbox)
+
+            
+    #Classify the input
+    def classify(self,input:str):
+        input_analized = self.parse_input(input)
+
+        self.pdf_controller.get_actual_pdf().add_pdf_page(self.last_temp_file_path,input_analized)
+
+
 
 
 class Text_analizer():
@@ -123,8 +250,8 @@ class Text_analizer():
             "e":"trompeta",
             "m":"trombon",
             "d":"bombardino",
-            "d":"bajo",
-            "n":"tuba",
+            "z":"bajo",
+            "u":"tuba",
             "p":"percusion"
         }
     instruments_chars = ','.join(list(instruments.keys()))

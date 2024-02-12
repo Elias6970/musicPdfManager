@@ -84,8 +84,13 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 #### **Lógica aplicación**
 + La aplicación no efectua los cambios hasta que no se acabe de clasificar una obra entera.
 
+# **Features**
+1. You can reclasify a piece
+2. You can go the previous page when you are classifying
+3. Label added to see the previous instrument classified
+4. All translated except classifying instructions
+
 # TODO
-`If you try to reclassify a piece, the window gives you the option to reclassify it`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
 
@@ -93,9 +98,9 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 
 `Make the preview for the actual selected pdf in selection window`
 
-`Translate the line 75 of Dossier class(printer file) which is showed when you create the dossier`
+`Translate classifying instructions`
 
-`Set a label in classify window that shows the name of the previous intrument classified`
+`Translate the line 75 of Dossier class(printer file) which is showed when you create the dossier`
 
 `Maybe we can add a window that shows all the instruments selected  when you finish a piece in classify window`
 

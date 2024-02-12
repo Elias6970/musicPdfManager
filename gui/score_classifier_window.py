@@ -6,26 +6,21 @@ from classes.classifier import *
 from classes.files_manage import Archive
 from gui.abstract_windows import Score_search_bar,Status_console,Pop_up_window
 from gui.error_window import Error_window
-import PyPDF2,tempfile,os
+import os
 
 
 
 class Score_classifier_window(QtWidgets.QDialog):
-    actual_piece:int = -1#is the number of the piece in peices_list
-    last_temp_file_path:str
-    last_new_name:str = ""
-    last_rotation:int = 0 #Save the last rotation
     def __init__(self,pieces_list:list[Dir],update_parted_flag_db_function, parent=None) -> None:
         super().__init__(parent)
 
-        self.pieces_list = pieces_list
-        self.update_parted_flag_db_function = update_parted_flag_db_function
+        self.classifier = Classifier(pieces_list,update_parted_flag_db_function)
 
         self.setWindowTitle(self.tr("Score classifier")) #traducir 
         self.init_ui()
 
-        #Classifer manage
-        self.next_piece()
+        #Open the fiirst page
+        self.opener(self.classifier.first_page())
         
         self.exec_()
 
@@ -81,33 +76,39 @@ class Score_classifier_window(QtWidgets.QDialog):
         rotate_btns_layout.addLayout(rotate_btns_horizontal_layout)
         
         #buttons
+        btn_prev = QtWidgets.QPushButton(self.tr("Previous")) #traducir
+        btn_prev.clicked.connect(self.previous_btn)       
         btn_next = QtWidgets.QPushButton(self.tr("Continue")) #traducir
         btn_next.clicked.connect(self.continue_btn)
         btn_close = QtWidgets.QPushButton(self.tr("Close")) #traducir
         btn_close.clicked.connect(self.close)
         self.line_edit = QtWidgets.QLineEdit()
         self.line_edit.returnPressed.connect(btn_next.click) #When you press enter pass to the next page
+        btns_layout.addWidget(btn_prev)
         btns_layout.addWidget(btn_next)
         btns_layout.addWidget(btn_close)
         
-        #Label
-        self.score_lbl = QtWidgets.QLabel()
+        #Labels
+        self.piece_name_lbl = QtWidgets.QLabel()
         font = QtGui.QFont()
         font.setPointSize(20)
         font.setBold(True)
-        self.score_lbl.setFont(font)
+        self.piece_name_lbl.setFont(font)
 
-        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (n)bajo  t(u)ba  (p)ercusion""") #traducir
+        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (z)bajo  t(u)ba  (p)ercusion""") #traducir
         font.setPointSize(12)
         instructions_lbl.setFont(font)
 
+        self.last_classfied_lbl = QtWidgets.QLabel()
+
         #Add widgets
-        container_layout.addWidget(self.score_lbl)
+        container_layout.addWidget(self.piece_name_lbl)
         container_layout.addWidget(self.web_view)
         container_layout.addLayout(rotate_btns_layout)
         container_layout.addWidget(instructions_lbl)
         container_layout.addWidget(self.line_edit) #Create the text box to input what is the part that you are seing
-        
+        container_layout.addWidget(self.last_classfied_lbl)
+
         container_layout.addLayout(btns_layout)
         #self.setGeometry(0,0,500,400)
         
@@ -119,79 +120,36 @@ class Score_classifier_window(QtWidgets.QDialog):
         self.web_view.load(QtCore.QUrl.fromLocalFile(path))
 
 
-    #Generates a temp file path
-    def generate_temp(self) -> str:
-        path = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
-        self.last_temp_file_path = path
-        return path
-    
-    #Pass the page to the next one
-    def next_page(self):
-        temp_path = self.generate_temp()
-        reader = PyPDF2.PdfReader(self.pdf_controller.get_actual_pdf().path)
-        writer = PyPDF2.PdfWriter()
-        writer.add_page(reader.pages[self.pdf_controller.get_actual_pdf().actual_pdf_page])
-        writer.write(temp_path)
-
-        if self.rotation_cb.isChecked():
-            self.rotate(self.last_rotation)
-
-        self.opener(temp_path)
-
-
-    #Jump to the next piece
-    def next_piece(self):
-        self.last_rotation = 0
-        self.actual_piece += 1
-        self.pdf_controller = Pdf_controller(self.pieces_list[self.actual_piece])
-        self.score_lbl.setText(os.path.basename(self.pieces_list[self.actual_piece].path))
-        self.next_page()
-
     #Is called when you press enter
     def continue_btn(self):
-        if self.line_edit.text() == "" and self.last_new_name == "":
+        try:
+            self.classifier.classify(self.line_edit.text())
+            self.opener(self.classifier.next_page_manager(self.rotation_cb.isChecked()))
+            #Set labels
+            self.piece_name_lbl.setText(self.classifier.actual_piece_name)
+            self.last_classfied_lbl.setText(self.classifier.last_new_name)
+        except EmptyInitialInputException:
             Error_window.print_error(ValueError(),self.tr("Empty initial input"))
             return
-        if self.line_edit.text() == "":
-            input_analized = self.last_new_name
-        else:
-            try:
-                input_analized = Text_analizer.analize(self.line_edit.text())
-                self.last_new_name = input_analized
-            except ValueError as e:
-                Error_window.print_error(e,self.tr("Incorrect input"))
-                return
-
-        self.pdf_controller.get_actual_pdf().add_pdf_page(self.last_temp_file_path,input_analized)
-
-        self.pdf_controller.get_actual_pdf().actual_pdf_page += 1
-
-        if self.pdf_controller.get_actual_pdf().actual_pdf_page < self.pdf_controller.get_actual_pdf().num_pages:
-            self.next_page()
-        
-        elif self.pdf_controller.actual_pdf_number+1 < len(self.pdf_controller.pdfs):
-            self.pdf_controller.actual_pdf_number += 1
-            self.next_page()
-        
-        elif self.actual_piece+1 < len(self.pieces_list):
-            #Update the parted flag to 1 in the db
-            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_list[self.actual_piece].name),True)
-            
-            self.pdf_controller.export()
-            self.next_piece()
-        else:
-            #Update the parted flag to 1 in the db
-            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_list[self.actual_piece].name),True)
-            self.pdf_controller.export()
-
+        except ValueError as e:
+            Error_window.print_error(e,self.tr("Incorrect input"))
+            return
+        except NoMorePiecesToClassifyException:
             self.close()
-            
+
         self.line_edit.clear()
 
+    
+    def previous_btn(self):
+        try:
+            self.opener(self.classifier.previous_page_manager())
+        except FirstPageException:
+            Error_window.print_error(self.tr("You are in the first page, you can't go to a previous one")) #TRADUCIR
+
+
     def rotate(self,degrees):
-        Exportable_pdf.rotate(degrees,self.last_temp_file_path)
-        self.opener(self.last_temp_file_path)
-        self.last_rotation = degrees
+        self.classifier.rotate(degrees)
+        self.opener(self.classifier.last_temp_file_path)
 
     #Opens a pop up window with the instructions
     def help_opt_menu(self):
@@ -200,6 +158,12 @@ class Score_classifier_window(QtWidgets.QDialog):
     def close(self):
         self.hide()
 
+    #For testing
+    """def state(self):
+        print("Actual piece index: ",self.classifier.actual_piece)
+        print("Actual pdf number: ",self.classifier.pdf_controller.actual_pdf_number)
+        print("Actual pdf page: ", self.classifier.pdf_controller.get_actual_pdf().actual_pdf_page)"""
+    
 
 
 
@@ -268,16 +232,19 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
     #   This function checks if the pieces have the parted flag = 1 in the db
     def btn_classify(self):
         to_classify:list[Dir] = [] 
-        error_classified:str = "" #This list is of pieces that are already classified
+        error_classified:list[str] = [] #This list is of pieces that are already classified
         for i in self.pieces_to_classify:
             if self.archive.is_parted(str(Archive.extract_cod(i))):
-                error_classified += i+"\n"
+                error_classified.append(i)
             else:
                 to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
         
         if not error_classified == "":
-            Pop_up_window(error_classified + self.tr("\n Were already split "),True,self) #traducir
-        
+            for i in error_classified:
+                answer = Pop_up_window(i + self.tr(" is already splited,\n")+self.tr("do you want to redo it? "),False,self) #traducir
+                if answer.btn_confirm_pressed == True:
+                    to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
+
         if len(to_classify) > 0:
             try:
                 Score_classifier_window(to_classify,self.archive.update_parted)
@@ -286,7 +253,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         else:
             Error_window.print_error(self.tr("Any score to classify")) #traducir
         
-        self.hide()
+        self.close()
 
     def close(self):
         self.hide()
