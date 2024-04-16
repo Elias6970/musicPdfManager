@@ -40,7 +40,6 @@ class Exportable_pdf(File):
 
     #Return the temporaly path from the actual pdf page
     def get_actual_temp_path(self):
-        print(self.list_of_new_files[self.actual_pdf_page][0])
         return self.list_of_new_files[self.actual_pdf_page][0]
     
     def export(self):

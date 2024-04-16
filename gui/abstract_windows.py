@@ -201,8 +201,8 @@ class Score_search_bar(QtWidgets.QLineEdit):
         self.setPlaceholderText(self.tr("Search score")) #traducir
         self.textChanged.connect(lambda: verify_function(self.text()))
 
-        self.pieces_names:list[str] = [os.path.basename(i.path) for i in pieces_in_dirs]
-
+        self.pieces_names:list[str] = [i.name for i in pieces_in_dirs]
+        #print(self.pieces_names)
         #Auto Completer
         self.auto_completer = QtWidgets.QCompleter(self.pieces_names)
         self.auto_completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive) #type: ignore

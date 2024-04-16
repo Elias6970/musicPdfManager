@@ -88,7 +88,8 @@ class Db_archive(Db):
             if row_values[0] == None:
                 continue
             try:
-                self.insert(row_values[0],str(row_values[1]),row_values[2],row_values[3])
+                
+                self.insert(int(str(row_values[0])),str(row_values[1]),str(row_values[2]),row_values[3])
             except Exception as e:
                 Error_window.print_error(e,"Error inserting: "+str(row_values))
             
@@ -161,6 +162,9 @@ class Db_archive(Db):
     def get_all_to_print(self):
         return self.cur.execute("SELECT CASE WHEN digitalized = '1' THEN 'x' WHEN digitalized = '0' THEN ' ' END AS modified_column,cod,name,author,type FROM {} ORDER BY name".format(self.table_name)).fetchall()
 
+    #Return a list of tuples with all COD-NAME in the db
+    def get_all_names(self):
+        return self.cur.execute("SELECT COD || '-' || NAME AS CODNAME FROM {}".format(self.table_name)).fetchall()
 
     #Try to insert a new row, if it is not possible it update the value of that row
     def upsert(self,cod,name,author,type,handwritten=0,digitalized=0,parted=0):

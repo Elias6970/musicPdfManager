@@ -108,7 +108,6 @@ class Preferences_window(QtWidgets.QDialog):
 
     def save(self):
         try:
-            print(self.language_combobox.currentText())
             Configuration.save_config(self.line_archive_path.text(),self.line_cover_path.text(),Configuration.name_to_cod_language(self.language_combobox.currentText()))
             Pop_up_window(self.tr("Changes saved succesfully")+"\n"+self.tr("If you have changed the language you need to restart the app"),True,self) #translate
         

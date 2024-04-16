@@ -1,10 +1,7 @@
-import os,sys,shutil,tempfile
+import os,shutil,time
 from unidecode import unidecode
 import zipfile,rarfile
-from reportlab.platypus import SimpleDocTemplate,Table
-from reportlab.lib import pagesizes,colors
-from reportlab.pdfgen import canvas
-from PyPDF2 import PdfWriter,PdfReader
+from classes.piece import Piece
 from classes.constants import *
 from classes.db_manage import Db_archive
 from gui.error_window import Error_window
@@ -40,7 +37,7 @@ class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
         self.name = os.path.basename(path)
-
+        #print(self.name," ",os.path.abspath(self.path))
         #self.scores:list[str] = self.get_names(os.path.join(path,DIR_SCORES))
         #self.extras:list[str] = self.get_names(os.path.join(path,DIR_EXTRAS))
 
@@ -103,9 +100,34 @@ class Archive(Db_archive):
 
         #List of dirs objects
         self.pieces_in_dirs:list[Dir] = []
-        
+        self.pieces:list[Piece] = []
         #Get the scores and extras of all pieces
-        self.update_pieces_in_dirs()
+    """
+    #----------------RESULTS----------------
+    #With 1603 pieces and 308 digitalized
+    #Dir:  0.0008343287467956542
+    #Piece:  0.011169951963424683
+    #Set:  0.011861127614974976
+    #Query:  0.00045802669525146485
+    
+    #------------------TESTS-----------------
+        print("Dir: ",self.test(self.update_pieces_in_dirs))
+        print("Piece: ",self.test(self.update_pieces))
+        print("Set: ",self.test(self.update_pieces_set))
+        print("Query: ",self.test(self.query))
+
+
+    def test(self,func):
+        b = 0
+        for i in range(1000):
+            r = time.time()
+            func()   
+            b = b + (time.time() - r)
+        return b/1000
+    
+    def query(self):
+        self.get_all_names()
+    """
 
     #Get the files inside the archive dir    
     def update_pieces_in_dirs(self):
@@ -114,6 +136,17 @@ class Archive(Db_archive):
             for j in IGNORE_FILES:
                 if i not in j: #Ignore the DS_Store 
                     self.pieces_in_dirs.append(Dir(os.path.join(self.archive_path,i),i))
+
+    #Refactor to use Piece objects not a list of Dirs
+    def update_pieces(self):
+        self.pieces = []
+        for i in self.get_all_names():
+            i = i[0]
+            if os.path.exists(os.path.join(self.archive_path,i)):
+                self.pieces.append(Piece.from_parsed_name(i,os.path.join(self.archive_path,i)))
+            else:
+                self.pieces.append(Piece.from_parsed_name(i))
+    
 
     #Extract the cod giving parsed name(cod+name), ej(1591-ATMURAF)-->1591
     @staticmethod
