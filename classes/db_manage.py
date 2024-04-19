@@ -164,7 +164,7 @@ class Db_archive(Db):
 
     #Return a list of tuples with all COD-NAME in the db
     def get_all_names(self):
-        return self.cur.execute("SELECT COD || '-' || NAME AS CODNAME FROM {}".format(self.table_name)).fetchall()
+        return self.cur.execute("SELECT COD || '-' || UPPER(NAME) AS CODNAME FROM {}".format(self.table_name)).fetchall()
 
     #Try to insert a new row, if it is not possible it update the value of that row
     def upsert(self,cod,name,author,type,handwritten=0,digitalized=0,parted=0):

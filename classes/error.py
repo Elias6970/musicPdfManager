@@ -10,3 +10,6 @@ class NoMorePiecesToClassifyException(Exception):
 
 class FirstPageException(Exception):
     pass
+
+class PathNotFoundException(Exception):
+    pass

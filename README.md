@@ -91,6 +91,10 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 4. All translated except classifying instructions
 
 # TODO
+`Refactor the project with Pieces not an array of strings`
+
+`Add a refresh button next to search bar`
+
 `Error modifying the pieces`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
