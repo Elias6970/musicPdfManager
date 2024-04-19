@@ -186,13 +186,13 @@ class Db_archive(Db):
         return False
 
 
-    #Update parted flag
+    #Update parted flag of one piece
     def update_parted(self,cod,parted:bool=True):
         self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.table_name),(int(parted),cod))
         self.con.commit()
         return True
 
-
+    #Check if a piece is parted
     def is_parted(self,cod) -> bool:
         if self.cur.execute("SELECT * FROM {} WHERE cod = '{}' and parted = 1".format(self.table_name,cod)).fetchall() == []:
             return False
