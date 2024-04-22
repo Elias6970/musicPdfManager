@@ -20,7 +20,7 @@ class Add_piece_window(Abstract_fields_window):
     def __init__(self, archive: Archive, parent=None):
         super().__init__(archive, "Add new piece", "Add", [HANDWRITTEN],self.add_score, parent=parent)
         
-        self.line_cod.setText(str(self.archive.get_next_cod()))#cambiar
+        self.line_cod.setText(str(self.archive.db.get_next_cod()))#cambiar
 
 
         self.exec_()
@@ -44,13 +44,13 @@ class Add_piece_window(Abstract_fields_window):
             if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
                 Archive_file_manager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
                 
-                if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0):
+                if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0):
                     pdfs:list = [i for i in file_dialog.selectedFiles() if File.is_pdf(i)]
 
                     #Check if there are any pdf
                     #if not pdfs == []:
                     try:
-                        Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.update_parted)
+                        Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
                     except PdfNotFoundException: 
                         pass
                     except Exception:
@@ -70,10 +70,10 @@ class Add_piece_window(Abstract_fields_window):
     #   if its name in in the db --> ONLY APPEAR A WINDOW SHOWING THE NAMES SIMILARS(YOU CAN CHOOSE YES OR NO TO ADD IT)
     def verifications(self,cod,name:str):
         try:
-            checked_cod = self.archive.get_with_equals("cod",cod,"cod") #Check if the cod is in the db
+            checked_cod = self.archive.db.get_with_equals("cod",cod,"cod") #Check if the cod is in the db
             
             if checked_cod == [] and len(name.strip()) != 0:
-                    name_matches = self.archive.get_with_like("name",name,"cod,name")
+                    name_matches = self.archive.db.get_with_like("name",name,"cod,name")
                     
                     
                     if name_matches != []:

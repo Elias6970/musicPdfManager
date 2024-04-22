@@ -14,3 +14,5 @@ dist
 !instrucciones_clasificador.txt
 !portada_dossier_partituras.pdf
 *.exe
+*.yml
+*.db

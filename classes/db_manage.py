@@ -162,10 +162,15 @@ class Db_archive(Db):
     def get_all_to_print(self):
         return self.cur.execute("SELECT CASE WHEN digitalized = '1' THEN 'x' WHEN digitalized = '0' THEN ' ' END AS modified_column,cod,name,author,type FROM {} ORDER BY name".format(self.table_name)).fetchall()
 
-    #Return a list of tuples with all COD-NAME in the db
-    def get_all_names(self):
-        return self.cur.execute("SELECT COD || '-' || UPPER(NAME) AS CODNAME FROM {}".format(self.table_name)).fetchall()
-
+    #Return a list of tuples with all COD-name in the db
+    #The name returned is the name in the db(not upper)
+    def get_all_parsed_names(self):
+        return self.cur.execute("SELECT COD || '-' || NAME AS CODNAME FROM {}".format(self.table_name)).fetchall()
+    
+    #returns all the names and cods in a list of tuples
+    def get_all_cod_name(self):
+        return self.cur.execute("SELECT COD,NAME FROM {}".format(self.table_name)).fetchall()
+    
     #Try to insert a new row, if it is not possible it update the value of that row
     def upsert(self,cod,name,author,type,handwritten=0,digitalized=0,parted=0):
         try: 
@@ -195,6 +200,11 @@ class Db_archive(Db):
     #Check if a piece is parted
     def is_parted(self,cod) -> bool:
         if self.cur.execute("SELECT * FROM {} WHERE cod = '{}' and parted = 1".format(self.table_name,cod)).fetchall() == []:
+            return False
+        return True
+    
+    def is_digitalized(self,cod) -> bool:
+        if self.cur.execute("SELECT * FROM {} WHERE cod = '{}' and digitalized = 1".format(self.table_name,cod)).fetchall() == []:
             return False
         return True
     

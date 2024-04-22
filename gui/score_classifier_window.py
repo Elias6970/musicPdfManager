@@ -234,7 +234,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         to_classify:list[Dir] = [] 
         error_classified:list[str] = [] #This list is of pieces that are already classified
         for i in self.pieces_to_classify:
-            if self.archive.is_parted(str(Archive.extract_cod(i))):
+            if self.archive.db.is_parted(str(Archive.extract_cod(i))):
                 error_classified.append(i)
             else:
                 to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
@@ -247,7 +247,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
 
         if len(to_classify) > 0:
             try:
-                Score_classifier_window(to_classify,self.archive.update_parted)
+                Score_classifier_window(to_classify,self.archive.db.update_parted)
             except PdfNotFoundException as e:
                 Error_window.print_error(e,self.tr("The piece doesn't have any pdf")) #traducir
         else:

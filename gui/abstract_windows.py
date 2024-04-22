@@ -181,7 +181,7 @@ class Abstract_fields_window(QtWidgets.QDialog):
     
     #Clear the text in all the fiels
     def reset_fields(self):
-        self.line_cod.setText(str(self.archive.get_next_cod()))
+        self.line_cod.setText(str(self.archive.db.get_next_cod()))
         self.line_name.clear()
         self.line_author.clear()
         self.line_type.clear()

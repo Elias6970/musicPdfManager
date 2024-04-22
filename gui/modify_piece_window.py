@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from classes.files_manage import Archive
+from classes.files_manage import Archive,Archive_file_manager
 from gui.abstract_windows import *
 from gui.error_window import Error_window
 from classes.constants import *
@@ -26,7 +26,7 @@ class Modify_piece_window(QtWidgets.QDialog):
 
     def add_modification(self):
         try:
-            a1 = self.archive.upsert(int(self.abstract_fields.line_cod.text()),
+            a1 = self.archive.db.upsert(int(self.abstract_fields.line_cod.text()),
                             self.abstract_fields.line_name.text(),
                             self.abstract_fields.line_author.text(),
                             self.abstract_fields.line_type.text(),
@@ -34,7 +34,7 @@ class Modify_piece_window(QtWidgets.QDialog):
                             int(self.abstract_fields.checkboxes_dict[DIGITALIZED].isChecked()),
                             int(self.abstract_fields.checkboxes_dict[PARTED].isChecked()))
         
-            a2 = self.archive.change_piece_dir_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
+            a2 = Archive_file_manager.change_piece_dir_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
 
             if(a1 and a2):
                 Pop_up_window(self.tr("Correctly modificated"),True,self) #traducir

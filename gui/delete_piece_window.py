@@ -24,7 +24,7 @@ class Delete_piece_window(Abstract_serch_bar_and_two_buttons_window):
 
             if alert == QtWidgets.QMessageBox.Yes:
                 try:
-                    self.archive.delete_score(int(cod)) #Delete from db
+                    self.archive.db.delete_score(int(cod)) #Delete from db
                     Archive_file_manager.delete_piece(self.piece_lbl.text())
                     
                     alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"",self.tr("{} has been correctly deleted".format(self.piece_lbl.text())),QtWidgets.QMessageBox.Ok,self) #traducir

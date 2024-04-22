@@ -1,7 +1,7 @@
 import os,shutil,time
 from unidecode import unidecode
 import zipfile,rarfile
-from classes.piece import Piece
+from classes.piece import Piece,Pieces_list
 from classes.constants import *
 from classes.db_manage import Db_archive
 from gui.error_window import Error_window
@@ -92,15 +92,16 @@ class Dir(File):
 
 
 #The connection with the db is started when the obj is created with the super.
-class Archive(Db_archive):
+class Archive:
     def __init__(self,db_name,archive_path):
-        super(Archive,self).__init__(db_name)
-        self.db_name = db_name
+        self.db = Db_archive(db_name)
         self.archive_path = archive_path
-
+        self.pieces = Pieces_list()
         #List of dirs objects
         self.pieces_in_dirs:list[Dir] = []
-        self.pieces:list[Piece] = []
+        #self.pieces:list[Piece] = []
+        self.pieces.update_pieces(self.db.get_all_cod_name())
+
         #Get the scores and extras of all pieces
     """
     #----------------RESULTS----------------
@@ -126,7 +127,7 @@ class Archive(Db_archive):
         return b/1000
     
     def query(self):
-        self.get_all_names()
+        self.get_all_parsed_names()
     """
 
     #Get the files inside the archive dir    
@@ -140,7 +141,7 @@ class Archive(Db_archive):
     #Refactor to use Piece objects not a list of Dirs
     def update_pieces(self):
         self.pieces = []
-        for i in self.get_all_names():
+        for i in self.db.get_all_parsed_names():
             i = i[0]
             if os.path.exists(os.path.join(self.archive_path,i)):
                 self.pieces.append(Piece.from_parsed_name(i,os.path.join(self.archive_path,i)))
@@ -161,7 +162,7 @@ class Archive(Db_archive):
     #Stablish the name to the folders get from the db to standarize the names
     #"cod-name" in capital leters and without accents
     def get_parsed_name_from_db(self,cod):
-        name = self.get_with_equals("cod",cod,"cod,name")
+        name = self.db.get_with_equals("cod",cod,"cod,name")
 
         return str(name[0][0])+HYPHEN+unidecode(str(name[0][1])).upper()
     
@@ -178,16 +179,33 @@ class Archive(Db_archive):
         for i in names:
             if "DS_Store" not in i:
                 cod = self.extract_cod(i)
-                self.cur.execute("UPDATE {} SET digitalized = 1 WHERE cod = {};".format(DB_NAME,cod))
+                self.db.cur.execute("UPDATE {} SET digitalized = 1 WHERE cod = {};".format(DB_NAME,cod))
                         
-        self.con.commit()
+        self.db.con.commit()
 
 
 
 
 #This class make all the interactions with the files on the archive path
 class Archive_file_manager:
-
+    
+    #Returns the name of the folder in the directory archive
+    #Parsed_name: is the parsed name(cod-NAME) but
+    #replaces the forbidden simbols
+    #forbidden (space) its replaces:
+    #\ ^
+    #/ ^
+    #: _
+    #* +
+    #? ¿
+    #" '
+    #< ^
+    #> ^
+    #| ^
+    @staticmethod
+    def parse_name_to_file_manager(parsed_name:str) -> str:
+        return parsed_name.replace("\\","^").replace("/","^").replace(":","_").replace("*","+").replace("?","¿").replace('"',"'").replace("<","^").replace(">","^").replace("|","^")
+    
     #Move the files to the internal archive deppending if there are scores or extras
     @staticmethod
     def move_files(piece_path:str,files:list):
@@ -242,9 +260,9 @@ class Archive_file_manager:
     def delete_piece(parsed_piece_name:str):
         shutil.rmtree(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_piece_name)) #Delete files
     
-    
+    #TODO: Make this
     @staticmethod
-    def change_piece_dir_name(cod:int,new_cod:int,name:str):
+    def change_piece_dir_name(cod:int,name:str):
         pass
 
 """    #Change the name of the folder in the archive directory
@@ -274,7 +292,7 @@ class Reorganize(Archive):
 
         for i in dir_list:
             if i not in IGNORE_FILES:
-                query = self.get_with_equals("cod",self.extract_cod(i),"cod,name")
+                query = self.db.get_with_equals("cod",self.extract_cod(i),"cod,name")
                 new_name = Archive.get_parsed_name(query[0][0],query[0][1])
 
                 Archive_file_manager.make_dir(self.new_archive_path,new_name)

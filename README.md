@@ -95,7 +95,7 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 
 `Add a refresh button next to search bar`
 
-`Error modifying the pieces`
+`Error modifying the pieces due to change_piece_dir_name function in Archive_file_manager`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
 

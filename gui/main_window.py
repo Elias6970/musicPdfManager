@@ -316,7 +316,7 @@ class Main_window(QtWidgets.QMainWindow):
         pdf_path = self.dialog_window_select_new_pdf()
         
         try:
-            Dossier.export_pdf_dossier_to_print(self.archive.get_all_to_print(),pdf_path,extra_cover_text)
+            Dossier.export_pdf_dossier_to_print(self.archive.db.get_all_to_print(),pdf_path,extra_cover_text)
         except ValueError as e:
             Error_window.print_error(message="Incorrect file name",e=e) #traducir
         except Exception as e:
