@@ -99,10 +99,9 @@ class Archive:
         self.pieces = Pieces_list()
         #List of dirs objects
         self.pieces_in_dirs:list[Dir] = []
-        #self.pieces:list[Piece] = []
-        self.pieces.update_pieces(self.db.get_all_cod_name())
-
-        #Get the scores and extras of all pieces
+        #Pieces List
+        self.pieces.update_pieces(self.db.get_all_cod_name_digitalized())
+        
     """
     #----------------RESULTS----------------
     #With 1603 pieces and 308 digitalized

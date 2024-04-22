@@ -167,9 +167,9 @@ class Db_archive(Db):
     def get_all_parsed_names(self):
         return self.cur.execute("SELECT COD || '-' || NAME AS CODNAME FROM {}".format(self.table_name)).fetchall()
     
-    #returns all the names and cods in a list of tuples
-    def get_all_cod_name(self):
-        return self.cur.execute("SELECT COD,NAME FROM {}".format(self.table_name)).fetchall()
+    #returns all the names, cods and digitalized flag in a list of tuples
+    def get_all_cod_name_digitalized(self):
+        return self.cur.execute("SELECT COD,NAME,DIGITALIZED FROM {}".format(self.table_name)).fetchall()
     
     #Try to insert a new row, if it is not possible it update the value of that row
     def upsert(self,cod,name,author,type,handwritten=0,digitalized=0,parted=0):
