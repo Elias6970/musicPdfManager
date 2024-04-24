@@ -1,6 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
 import os
-from classes.files_manage import Archive,Dir
+from classes.files_manage import Archive
 from gui.error_window import Error_window
 
 
@@ -26,7 +26,7 @@ class Abstract_serch_bar_and_two_buttons_window(QtWidgets.QDialog):
         #Space
         container_layout.setSpacing(0)
         
-        self.search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.validate_selection)
+        self.search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.validate_selection) # type: ignore
         self.piece_lbl = QtWidgets.QLabel()
         
         container_layout.addWidget(self.search_bar)
@@ -53,13 +53,13 @@ class Abstract_serch_bar_and_two_buttons_window(QtWidgets.QDialog):
     
     #Update the autocompleter list of the search
     def update_autocompleter_scores(self):
-        self.archive.update_pieces_in_dirs()
-        self.search_bar.update_autocompleter_scores(self.archive.pieces_in_dirs)
+        #self.archive.update_pieces_in_dirs()
+        self.search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names()) #type: ignore
     
     
     #Check if the piece selected is equals to one on the list
     def validate_selection(self,text):
-        for i in self.search_bar.pieces_names:
+        for i in self.search_bar.pieces_parsed_names:
             if text == i:
                 self.piece_lbl.setText(text)
                 return True
@@ -194,26 +194,26 @@ class Abstract_fields_window(QtWidgets.QDialog):
 
 #Search bar + autocompleter that shows the score selected
 class Score_search_bar(QtWidgets.QLineEdit):
-    def __init__(self, pieces_in_dirs:list[Dir],verify_function,parent=None) -> None:
+    def __init__(self, pieces_parsed_names:list[str],verify_function,parent=None) -> None:
         super(Score_search_bar,self).__init__(parent)
 
         self.setContentsMargins(0,0,0,0)
         self.setPlaceholderText(self.tr("Search score")) #traducir
         self.textChanged.connect(lambda: verify_function(self.text()))
+        
+        self.pieces_parsed_names =  pieces_parsed_names
 
-        self.pieces_names:list[str] = [i.name for i in pieces_in_dirs]
-        #print(self.pieces_names)
         #Auto Completer
-        self.auto_completer = QtWidgets.QCompleter(self.pieces_names)
+        self.auto_completer = QtWidgets.QCompleter(self.pieces_parsed_names)
         self.auto_completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive) #type: ignore
         self.auto_completer.setFilterMode(QtCore.Qt.MatchContains) #type: ignore
         
         self.setCompleter(self.auto_completer)
 
     #Update the autocompleter list of the search bar
-    def update_autocompleter_scores(self,pieces_in_dirs:list[Dir]):
-        self.pieces_names = [os.path.basename(i.path) for i in pieces_in_dirs]
-        self.auto_completer.setModel(QtCore.QStringListModel(self.pieces_names))
+    def update_autocompleter_scores(self,pieces_parsed_names:list[str]):
+        self.pieces_parsed_names =  pieces_parsed_names
+        self.auto_completer.setModel(QtCore.QStringListModel(self.pieces_parsed_names))
 
 
 """
@@ -275,11 +275,12 @@ class Pop_up_window(QtWidgets.QDialog):
 class Status_console(QtWidgets.QScrollArea):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
+        self.labels:list[QtWidgets.QLabel] = []
 
         status_console = QtWidgets.QWidget()
         self.status_console_layout = QtWidgets.QVBoxLayout()
         self.status_console_layout.setSpacing(0)
-
+        
         #Create the labels that apear in the list
         status_console.setLayout(self.status_console_layout)
 
@@ -291,3 +292,10 @@ class Status_console(QtWidgets.QScrollArea):
 
     def add_lbl(self,lbl:QtWidgets.QLabel) -> None:
         self.status_console_layout.addWidget(lbl)
+        self.labels.append(lbl)
+    
+    def clear(self):
+        for i in self.labels:
+            self.status_console_layout.removeWidget(i)
+            i.deleteLater()
+        self.labels.clear()

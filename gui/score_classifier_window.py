@@ -187,7 +187,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         #Gui
         container_layout = QtWidgets.QVBoxLayout()
         
-        self.search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.validate_selection)
+        self.search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.validate_selection) #type: ignore
         self.status_area = Status_console()
         
         #Butons

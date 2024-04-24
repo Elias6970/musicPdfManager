@@ -16,9 +16,9 @@ class Printer:
     def set_actual_score(self,new_piece:Dir):
         self.actual_piece = new_piece
 
-    def add_score(self,score_path:str,num_copies:int,pieces:list[Dir]) -> bool:
-         #Stops the user if try to add a score no existing
-        if Validate.validate_selection(self.actual_piece.name,[i.name for i in pieces]):
+    def add_score(self,score_path:str,num_copies:int,pieces:list[str]) -> bool:
+        #Stops the user if try to add a score no existing
+        if Validate.validate_selection(self.actual_piece.name,pieces):
 
             self.pdfs_added.append(Print_file(os.path.join(self.actual_piece.path,DIR_SCORES,score_path),num_copies))
             return True

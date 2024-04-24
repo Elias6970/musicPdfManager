@@ -91,15 +91,13 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 4. All translated except classifying instructions
 
 # TODO
-`Refactor the project with Pieces not an array of strings`
+`50% Refactor the project with Pieces not an array of strings`
 
-`Add a refresh button next to search bar`
+`Translate text main_window and modify window`
 
-`Error modifying the pieces due to change_piece_dir_name function in Archive_file_manager`
+`Modify pop_up_window to change 'do you want to keep adding it?' to be variable`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
-
-`Make a checkbox in selection window to show only pieces that are in the pyshical archive`
 
 `Make the preview for the actual selected pdf in selection window`
 

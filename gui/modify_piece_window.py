@@ -1,5 +1,7 @@
 from PyQt5 import QtWidgets
 from classes.files_manage import Archive,Archive_file_manager
+from classes.piece import Piece
+from classes.error import AvoidModificationException
 from gui.abstract_windows import *
 from gui.error_window import Error_window
 from classes.constants import *
@@ -14,7 +16,7 @@ class Modify_piece_window(QtWidgets.QDialog):
 
         container_layout = QtWidgets.QVBoxLayout()
 
-        self.search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.validate_selection)
+        self.search_bar:Score_search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.validate_selection) # type: ignore
         self.abstract_fields = Abstract_fields_window(archive,"Modify piece","Modify",[HANDWRITTEN,DIGITALIZED,PARTED],self.add_modification,self.close)
 
         container_layout.addWidget(self.search_bar)
@@ -26,7 +28,15 @@ class Modify_piece_window(QtWidgets.QDialog):
 
     def add_modification(self):
         try:
-            a1 = self.archive.db.upsert(int(self.abstract_fields.line_cod.text()),
+            #Ask the user if he want to modify the cod
+            if self.old_piece.cod != int(self.abstract_fields.line_cod.text()):
+                confirmation = Pop_up_window(self.tr("Are you sure that you want to modify the cod?")+"\n"+self.tr("It is a sensitive  and essential part of the archive"),False,self)
+                if confirmation.btn_confirm_pressed == False:
+                    raise AvoidModificationException()
+            
+
+            insertion = self.archive.db.upsert(self.old_piece.cod,
+                            int(self.abstract_fields.line_cod.text()),
                             self.abstract_fields.line_name.text(),
                             self.abstract_fields.line_author.text(),
                             self.abstract_fields.line_type.text(),
@@ -34,25 +44,33 @@ class Modify_piece_window(QtWidgets.QDialog):
                             int(self.abstract_fields.checkboxes_dict[DIGITALIZED].isChecked()),
                             int(self.abstract_fields.checkboxes_dict[PARTED].isChecked()))
         
-            a2 = Archive_file_manager.change_piece_dir_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
 
-            if(a1 and a2):
-                Pop_up_window(self.tr("Correctly modificated"),True,self) #traducir
-                self.archive.update_pieces_in_dirs()
-                self.search_bar.update_autocompleter_scores(self.archive.pieces_in_dirs)
+            if insertion:
+                Archive_file_manager.change_piece_dir_name(self.old_piece.parsed_name,Piece.make_parsed_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text()))
+                self.archive.pieces.update_cod_and_name(self.old_piece.cod,int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
+                
 
+                Pop_up_window(self.tr("Correctly modificated"),True,self) 
+
+                self.clear_form()
+                self.search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
+
+        except AvoidModificationException:
+            pass
         except Exception as e:
-            Error_window.print_error(e,self.tr("Error modificating")) #traducir
+            Error_window.print_error(e,self.tr("Error modificating"))
 
      #Check if the piece selected is equals to one on the list
     def validate_selection(self,text):
-        for i in self.search_bar.pieces_names:
+        for i in self.search_bar.pieces_parsed_names:
             if text == i:
                 try:
-                    getted = self.archive.get_with_equals(COD,self.archive.extract_cod(text),",".join([COD,NAME,AUTHOR,TYPE,HANDWRITTEN,DIGITALIZED,PARTED]))[0] 
+                    getted = self.archive.db.get_with_equals(COD,self.archive.extract_cod(text),",".join([COD,NAME,AUTHOR,TYPE,HANDWRITTEN,DIGITALIZED,PARTED]))[0] 
                 except Exception as e:
                     Error_window.print_error(e,self.tr("Piece doesn't found")) #traducir
                     return False
+                
+                self.old_piece = self.archive.pieces.get(int(getted[0]))
                 
                 self.abstract_fields.line_cod.setText(str(getted[0]))
                 self.abstract_fields.line_name.setText(getted[1])
@@ -65,6 +83,17 @@ class Modify_piece_window(QtWidgets.QDialog):
                 self.abstract_fields.checkboxes_dict[PARTED].setChecked(bool(getted[6]))
 
                 return True
+
+    #Put all the form in blank
+    def clear_form(self):
+        self.search_bar.clear()
+        self.abstract_fields.line_cod.clear()
+        self.abstract_fields.line_name.clear()
+        self.abstract_fields.line_author.clear()
+        self.abstract_fields.line_type.clear()
+        self.abstract_fields.checkboxes_dict[HANDWRITTEN].setChecked(False)
+        self.abstract_fields.checkboxes_dict[DIGITALIZED].setChecked(False)
+        self.abstract_fields.checkboxes_dict[PARTED].setChecked(False)
 
     def close(self):
         self.hide()

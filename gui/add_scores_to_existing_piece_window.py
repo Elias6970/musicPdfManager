@@ -1,5 +1,5 @@
 from PyQt5 import  QtWidgets
-from classes.files_manage import Archive,Archive_file_manager
+from classes.files_manage import Archive,Archive_file_manager,Dir
 from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException
 from gui.abstract_windows import *

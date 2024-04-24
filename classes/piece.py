@@ -1,7 +1,6 @@
-import os
 from unidecode import unidecode
 from classes.constants import RELATIVE_ARCHIVE_PATH
-from classes.error import PathNotFoundException
+from classes.error import PieceNotFoundException
 
 #Class that represents a piece
 #raise PathNotFoundException if the path doesn't exits unless is None
@@ -42,12 +41,16 @@ class Piece:
     @staticmethod
     def extract_name(std_name:str) -> str:
         return std_name.split("-",maxsplit=1)[1]
+    
+    @staticmethod
+    def make_parsed_name(cod,name) -> str:
+        return str(cod) + "-" + name
 
 #List of pieces
 class Pieces_list:
-    pieces:list[Piece] = []
+    pieces:list[Piece]
     def __init__(self):
-        pass
+        self.pieces = []
     #Refactor to use Piece objects not a list of Dirs
     #parsed names is a list of cod-name, ej: 18-PETRER
     def update_pieces_parsed_names(self,names:list):
@@ -55,6 +58,7 @@ class Pieces_list:
             self.pieces.append(Piece.from_parsed_name(i[0]))
     
     def update_pieces(self,cod_names:list[tuple]):
+        self.pieces.clear()
         for i in cod_names:
             self.add(i[0],i[1],digitalized=bool(i[2]))
 
@@ -77,11 +81,30 @@ class Pieces_list:
         return True
 
     #Raise ValueError if Piece doesn't exists
-    def remove(self,cod:int,name:str,parsed_name=None,digitalized:bool=False):
-        self.pieces.remove(Piece(cod,name,parsed_name,digitalized))
-        return True
+    def remove(self,cod:int) -> bool:
+        for i in self.pieces:
+            if i.cod == cod:
+                self.pieces.remove(i)
+                return True
+        return False
     
     #Raise ValueError if Piece doesn't exists
-    def remove_parsed(self,parsed_name,digitalized:bool=False):
-        self.pieces.remove(Piece.from_parsed_name(parsed_name,digitalized))
-        return True
+    def remove_parsed(self,parsed_name:str) -> bool:
+        return self.remove(Piece.extract_cod(parsed_name))
+    
+    #Return a copy of an element. Raise PieceNotFoundException if the piece doesn't exists
+    def get(self,cod:int):
+        try:
+            return [i for i in self.pieces if i.cod == cod][0]
+        except IndexError:
+            raise PieceNotFoundException()
+    
+    #Update the name of a piece
+    def update_cod_and_name(self,old_cod:int,new_cod,new_name:str):
+        for i in self.pieces:
+            if i.cod == old_cod:
+                i.cod = new_cod
+                i.name = new_name
+                i.parsed_name = i.update_parsed_name()
+                return True
+        return False

@@ -13,3 +13,12 @@ class FirstPageException(Exception):
 
 class PathNotFoundException(Exception):
     pass
+
+class NoScoresException(Exception):
+    pass
+
+class PieceNotFoundException(Exception):
+    pass
+
+class AvoidModificationException(Exception):
+    pass

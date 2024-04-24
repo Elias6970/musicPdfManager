@@ -4,6 +4,7 @@ from classes.files_manage import *
 from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.validate import Validate
 from classes.printer import Printer,Dossier
+from classes.error import NoScoresException
 from gui.error_window import Error_window
 from gui.abstract_windows import Score_search_bar,Status_console
 from gui.add_piece_window import Add_piece_window
@@ -35,7 +36,7 @@ class Main_window(QtWidgets.QMainWindow):
 
         up_zone = self.create_up_zone()
 
-        self.scroll = Status_console()
+        self.scroll:Status_console = Status_console()
 
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()
@@ -138,14 +139,33 @@ class Main_window(QtWidgets.QMainWindow):
     #Create the up-left zone of the program(Two search bars, two labels and two buttons)
     def create_search_bars(self):
         search_bars = QtWidgets.QWidget()
-        search_bars_layout = QtWidgets.QVBoxLayout()
-        
+        select_zone_layout = QtWidgets.QVBoxLayout()
+        search_bar_layout = QtWidgets.QHBoxLayout()
+        check_box_layout = QtWidgets.QHBoxLayout()
         #Space
-        search_bars_layout.setContentsMargins(0,0,0,0)
+        select_zone_layout.setContentsMargins(0,0,0,0)
+        search_bar_layout.setContentsMargins(0,0,0,0)
         
-        self.piece_search_bar = Score_search_bar(self.archive.pieces_in_dirs,self.set_option_of_instruments)
+        #Refresh button
+        self.refresh_button = QtWidgets.QPushButton()
+        self.refresh_button.clicked.connect(self.refresh)
+
+        try:
+            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+                img_path = os.path.join(sys._MEIPASS,'data','img') #type: ignore
+            else:
+                img_path = os.path.join('data','img')
+                self.refresh_button.setIcon(QtGui.QIcon(os.path.join(img_path,'refresh.png')))
+        except Exception:
+            pass
+
+        #Search bar
+        self.piece_search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.set_option_of_instruments)
 
         #Rest of widgets
+        self.only_digitalized_cb = QtWidgets.QCheckBox()
+        self.only_digitalized_cb.clicked.connect(self.only_digitalized)
+        only_digitalized_lbl = QtWidgets.QLabel(self.tr("Only digitalized")) #traducir
         self.piece_lbl = QtWidgets.QLabel()
         self.part_combo_box = QtWidgets.QComboBox()
         
@@ -154,12 +174,20 @@ class Main_window(QtWidgets.QMainWindow):
         
 
         #Add the widgets to the layout
-        search_bars_layout.addWidget(self.piece_search_bar)
-        search_bars_layout.addWidget(self.piece_lbl)
-        search_bars_layout.addWidget(self.part_combo_box)
-        search_bars_layout.addWidget(self.add_create_buttons)
+        search_bar_layout.addWidget(self.refresh_button)
+        search_bar_layout.addWidget(self.piece_search_bar)
         
-        search_bars.setLayout(search_bars_layout)
+        check_box_layout.addWidget(self.only_digitalized_cb)
+        check_box_layout.addWidget(only_digitalized_lbl)
+        check_box_layout.setAlignment(QtCore.Qt.AlignLeft) #type: ignore
+
+        select_zone_layout.addLayout(search_bar_layout)
+        select_zone_layout.addLayout(check_box_layout)
+        select_zone_layout.addWidget(self.piece_lbl)
+        select_zone_layout.addWidget(self.part_combo_box)
+        select_zone_layout.addWidget(self.add_create_buttons)
+        
+        search_bars.setLayout(select_zone_layout)
     
         return search_bars    
     
@@ -193,12 +221,14 @@ class Main_window(QtWidgets.QMainWindow):
         
         return up
 
-#------------------------APP LOGIC -----------------------------
+#####################################################################
+#----------------------------APP LOGIC -----------------------------#
+#####################################################################
 
     #Update the autocompleter list of the search bar
     def update_autocompleter_scores(self):
-        self.archive.update_pieces_in_dirs()
-        self.piece_search_bar.update_autocompleter_scores(self.archive.pieces_in_dirs)
+        #self.archive.update_pieces_in_dirs()
+        self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
     
     
     #Set the option of the instruments to the combo box
@@ -207,23 +237,34 @@ class Main_window(QtWidgets.QMainWindow):
         for i in range(self.part_combo_box.count()):
                 self.part_combo_box.removeItem(0)
 
-        #set news
-        try:
-            piece = Validate.select_window_validate_selection(text,self.archive.pieces_in_dirs)
+        #set instruments
+        piece = Validate.select_window_validate_selection(text,self.archive.pieces.get_parsed_names())
+        if not isinstance(piece,Dir_Error):
+            try:
+                piece.path = os.path.join(self.archive.archive_path,piece.name)
+                scores = piece.get_scores()
+                #Raise the error if the scores dir is empty
+                if not scores:
+                    raise NoScoresException()
+                
+                self.part_combo_box.setEnabled(True)
+                self.part_combo_box.addItems(piece.get_scores())
+                self.piece_lbl.setText(piece.name)
+                self.printer.actual_piece = piece
             
-            self.part_combo_box.addItems(piece.get_scores()) #type: ignore
-            self.piece_lbl.setText(piece.name) #type: ignore
-            self.printer.actual_piece = piece #type: ignore
+            #if the piece is not in the digital archive
+            except FileNotFoundError:
+                self.part_combo_box.setEnabled(False)
+                self.part_combo_box.insertItem(0,self.tr("NO DIGITALIZED")) #TRADUCIR
+            except NoScoresException:
+                self.part_combo_box.setEnabled(False)
+                self.part_combo_box.insertItem(0,self.tr("NO SCORES")) #TRADUCIR
 
-        except TypeError:
-            pass
-        except AttributeError:
-            pass
 
 
     #Add the score to the list of added scores an update it in the labels list
     def add_score(self):
-        if self.printer.add_score(self.part_combo_box.currentText(),int(self.num_copies.currentText()),self.archive.pieces_in_dirs):
+        if self.part_combo_box.isEnabled() and self.printer.add_score(self.part_combo_box.currentText(),int(self.num_copies.currentText()),self.archive.pieces.get_parsed_names()):
             new_score_text = self.num_copies.currentText()+"x "+self.printer.actual_piece.name+"->"+self.part_combo_box.currentText()
 
             #Update the labels of the down scores
@@ -249,12 +290,32 @@ class Main_window(QtWidgets.QMainWindow):
     #Create one pdf with all the selected pdfs merged
     def create_pdf(self):     
         try:
-            pdf_path = self.dialog_window_select_new_pdf()
-            self.printer.create_pdf(pdf_path)
+            if self.printer.pdfs_added:
+                pdf_path = self.dialog_window_select_new_pdf()
+                self.printer.create_pdf(pdf_path)
         
         except Exception as e:
             Error_window.print_error(e)
-        
+
+
+    #Refresh the list of pieces and delete the info in the printer  
+    def refresh(self):
+        self.scroll.clear()
+        self.scroll.update()
+        self.piece_search_bar.clear()
+        self.piece_lbl.clear()
+
+        self.printer = Printer()
+        self.archive.update_pieces()
+
+
+    #Controlls the pieces showed in the search bar
+    def only_digitalized(self):
+        if self.only_digitalized_cb.isChecked():
+            self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_digitalized_parsed_names())
+        else:
+            self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
+
 
     def mv_back_preview(self):
         pass
@@ -275,8 +336,10 @@ class Main_window(QtWidgets.QMainWindow):
 
         QtWidgets.QApplication.instance().installTranslator(translator)
     
-
-#-----------------Show other windows-----------------------
+  
+#####################################################################
+#------------------------SHOW OTHER WINDOWS ------------------------#
+#####################################################################
     #Show the config window
     def show_preferences_window(self):
         Preferences_window(False,self)

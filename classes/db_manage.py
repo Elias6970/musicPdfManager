@@ -172,18 +172,17 @@ class Db_archive(Db):
         return self.cur.execute("SELECT COD,NAME,DIGITALIZED FROM {}".format(self.table_name)).fetchall()
     
     #Try to insert a new row, if it is not possible it update the value of that row
-    def upsert(self,cod,name,author,type,handwritten=0,digitalized=0,parted=0):
+    def upsert(self,old_cod,cod,name,author,type,handwritten=0,digitalized=0,parted=0):
         try: 
-            #Check if cod>0 and have name
-            if cod > 0 and name is not None and len(name.strip()) > 0:
-
+            if cod > 0 and name is not None and len(name.strip()) > 0 and old_cod != cod:
+                self.cur.execute("DELETE FROM {} WHERE cod = {} ".format(self.table_name,old_cod))
                 self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.table_name), (cod, name, author, type,handwritten,parted))
                 self.con.commit()
                 return True
-        except sqlite3.IntegrityError as e: #cod repited
-            self.cur.execute("UPDATE {} SET cod=?,name=?,author=?,type=?,last_modification=CURRENT_TIMESTAMP,digitalized=?,handwritten=?,parted=? WHERE cod=?".format(self.table_name),(cod,name,author,type,digitalized,handwritten,parted,cod))
-            self.con.commit()
-            return True
+            else:
+                self.cur.execute("UPDATE {} SET cod=?,name=?,author=?,type=?,last_modification=CURRENT_TIMESTAMP,digitalized=?,handwritten=?,parted=? WHERE cod=?".format(self.table_name),(cod,name,author,type,digitalized,handwritten,parted,cod))
+                self.con.commit()
+                return True
         
         except Exception as e:
             Error_window.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir

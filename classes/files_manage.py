@@ -36,11 +36,10 @@ class Print_file(File):
 class Dir(File):
     def __init__(self, path,name=None):
         super().__init__(path)
-        self.name = os.path.basename(path)
-        #print(self.name," ",os.path.abspath(self.path))
-        #self.scores:list[str] = self.get_names(os.path.join(path,DIR_SCORES))
-        #self.extras:list[str] = self.get_names(os.path.join(path,DIR_EXTRAS))
-
+        if name == None:
+            self.name = os.path.basename(path)
+        else:
+            self.name = name
 
     #Returns the names of the files inside it avoiding .DS_Store
     def get_names(self,path):
@@ -85,7 +84,10 @@ class Dir(File):
         file_dirs.close()
         file_db.close()
 
-
+#Class for returning errors
+class Dir_Error(Dir):
+    def __init__(self):
+        super().__init__("Error")
 
 
 
@@ -100,7 +102,8 @@ class Archive:
         #List of dirs objects
         self.pieces_in_dirs:list[Dir] = []
         #Pieces List
-        self.pieces.update_pieces(self.db.get_all_cod_name_digitalized())
+        #self.pieces.update_pieces(self.db.get_all_cod_name_digitalized())
+        self.update_pieces()
         
     """
     #----------------RESULTS----------------
@@ -128,6 +131,8 @@ class Archive:
     def query(self):
         self.get_all_parsed_names()
     """
+    def update_pieces(self):
+        self.pieces.update_pieces(self.db.get_all_cod_name_digitalized())
 
     #Get the files inside the archive dir    
     def update_pieces_in_dirs(self):
@@ -137,7 +142,7 @@ class Archive:
                 if i not in j: #Ignore the DS_Store 
                     self.pieces_in_dirs.append(Dir(os.path.join(self.archive_path,i),i))
 
-    #Refactor to use Piece objects not a list of Dirs
+    """#Refactor to use Piece objects not a list of Dirs
     def update_pieces(self):
         self.pieces = []
         for i in self.db.get_all_parsed_names():
@@ -146,7 +151,7 @@ class Archive:
                 self.pieces.append(Piece.from_parsed_name(i,os.path.join(self.archive_path,i)))
             else:
                 self.pieces.append(Piece.from_parsed_name(i))
-    
+    """
 
     #Extract the cod giving parsed name(cod+name), ej(1591-ATMURAF)-->1591
     @staticmethod
@@ -259,19 +264,11 @@ class Archive_file_manager:
     def delete_piece(parsed_piece_name:str):
         shutil.rmtree(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_piece_name)) #Delete files
     
-    #TODO: Make this
+    #Change the name of a directory depending on the cod
     @staticmethod
-    def change_piece_dir_name(cod:int,name:str):
-        pass
+    def change_piece_dir_name(old_name:str,new_name:str):
+        os.rename(os.path.join(RELATIVE_ARCHIVE_PATH(),old_name),os.path.join(RELATIVE_ARCHIVE_PATH(),new_name))
 
-"""    #Change the name of the folder in the archive directory
-    #Recive the cod and the name
-    def change_piece_dir_name(self,cod:int,name:str):
-        for i in self.pieces_in_dirs:
-            if int(Archive.extract_cod(os.path.basename(i.path))) == int(cod):
-                if i.change_name(Archive.get_parsed_name(cod,name)):
-                    return True
-        return False"""
 
 #Reorganice the archive
 class Reorganize(Archive):
