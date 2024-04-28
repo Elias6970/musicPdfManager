@@ -214,7 +214,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
 
     #Check if the piece selected is equals to one on the list
     def validate_selection(self,text):
-        for i in self.search_bar.pieces_names:
+        for i in self.search_bar.pieces_parsed_names:
             if text == i:
                 return True
         return False

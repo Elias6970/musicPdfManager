@@ -44,7 +44,7 @@ class Add_piece_window(Abstract_fields_window):
             if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
                 Archive_file_manager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
                 
-                if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0):
+                if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0,digitalized=1):
                     try:
                         #TODO: problema, no se sabe si luego se ha clasificado o no entoces en archive.pieces puede haber una incongruencia con la flag digitalized 
                         self.archive.pieces.add(int(cod),name,parsed_name)

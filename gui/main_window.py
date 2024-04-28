@@ -5,6 +5,7 @@ from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.validate import Validate
 from classes.printer import Printer,Dossier
 from classes.error import NoScoresException
+from classes.preview_controller import Preview_controller
 from gui.error_window import Error_window
 from gui.abstract_windows import Score_search_bar,Status_console
 from gui.add_piece_window import Add_piece_window
@@ -14,6 +15,7 @@ from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece
 from gui.score_classifier_window import Piece_selector_to_classify_window
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
+from gui.preview import Preview
 
 class Main_window(QtWidgets.QMainWindow):
     def __init__(self):
@@ -122,15 +124,14 @@ class Main_window(QtWidgets.QMainWindow):
         obj = QtWidgets.QWidget()
         hbox = QtWidgets.QHBoxLayout()
         
-        btn_left = QtWidgets.QPushButton("<")
-        btn_right = QtWidgets.QPushButton(">")
+        self.btn_mv_back_preview = QtWidgets.QPushButton("<")
+        self.btn_mv_forward_preview = QtWidgets.QPushButton(">")
         
-        hbox.addWidget(btn_left)
-        hbox.addWidget(btn_right)
-        
-        btn_left.clicked.connect(self.mv_back_preview)
-        btn_right.clicked.connect(self.mv_forward_preview)
-        
+        self.btn_mv_back_preview.clicked.connect(self.mv_back_preview)
+        self.btn_mv_forward_preview.clicked.connect(self.mv_forward_preview)
+
+        hbox.addWidget(self.btn_mv_back_preview)
+        hbox.addWidget(self.btn_mv_forward_preview)
         obj.setLayout(hbox)
 
         return obj
@@ -169,6 +170,7 @@ class Main_window(QtWidgets.QMainWindow):
         self.piece_lbl = QtWidgets.QLabel()
         self.part_combo_box = QtWidgets.QComboBox()
         
+        self.part_combo_box.currentIndexChanged.connect(lambda: self.update_preview(self.piece_search_bar.text(),self.part_combo_box.currentText()))
 
         self.add_create_buttons = self.create_add_zone()
         
@@ -200,8 +202,10 @@ class Main_window(QtWidgets.QMainWindow):
         preview_layout.setSpacing(0)
         preview_layout.setContentsMargins(30,0,0,0)
 
+        self.preview = Preview(self)
+
         scroll_arrows = self.create_preview_buttons()
-        preview_layout.addWidget(QtWidgets.QLabel("Aquí iríra la preview del pdf"))
+        preview_layout.addWidget(self.preview)
         preview_layout.addWidget(scroll_arrows)
 
         preview.setLayout(preview_layout)
@@ -316,12 +320,50 @@ class Main_window(QtWidgets.QMainWindow):
         else:
             self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
 
+    
 
     def mv_back_preview(self):
-        pass
+        self.change_preview_img()
+        self.preview_controller.previous_page()
+        self.check_mv_btns_enableability()
+            
 
     def mv_forward_preview(self):
-        pass
+        self.change_preview_img()
+        self.preview_controller.next_page()
+        self.check_mv_btns_enableability()
+
+    #Check if move preview buttons must be enabled or disabled
+    def check_mv_btns_enableability(self):
+        if self.preview_controller.is_in_first_page():
+            self.btn_mv_back_preview.setEnabled(False)
+        else:
+            self.btn_mv_back_preview.setEnabled(True)
+        if self.preview_controller.is_in_last_page():
+            self.btn_mv_forward_preview.setEnabled(False)
+        else:
+            self.btn_mv_forward_preview.setEnabled(True)
+
+    #Change the preview image
+    def change_preview_img(self):
+        self.preview.set_image(self.preview_controller.get_image())
+    
+    #Change the preview controller class
+    def update_preview(self,piece_parsed_name:str,instrument:str) -> None:
+        try:
+            try:
+                if piece_parsed_name == self.preview_controller.piece_parsed_name:
+                    self.preview_controller.instrument = instrument
+                    self.preview_controller.update_path()
+                else:
+                    self.preview_controller = Preview_controller(piece_parsed_name,instrument)
+            except Exception:
+                self.preview_controller = Preview_controller(piece_parsed_name,instrument)
+
+            self.change_preview_img()
+        except Exception as e:
+            print(e)
+            
 
 
     def change_language(self,language):

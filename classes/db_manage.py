@@ -54,7 +54,7 @@ class Db_archive(Db):
             #Check if cod>0 and have name
             if cod > 0 and name is not None and len(name.strip()) > 0:
 
-                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.table_name), (cod, name, author, type,handwritten,parted))
+                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?)".format(self.table_name), (cod, name, author, type,digitalized,handwritten,parted))
                 self.con.commit()
                 return True
             
