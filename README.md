@@ -94,15 +94,13 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 # TODO
 `50% Refactor the project with Pieces not an array of strings`
 
-`Translate text main_window and modify window`
-
-`Modify pop_up_window to change 'do you want to keep adding it?' to be variable`
-
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
 
 `Translate classifying instructions`
 
-`Translate the line 75 of Dossier class(printer file) which is showed when you create the dossier`
+`Translate text main_window and modify window and Translate the line 75 of Dossier class(printer file) which is showed when you create the dossier`
+
+`Modify pop_up_window to change 'do you want to keep adding it?' to be variable`
 
 `Maybe we can add a window that shows all the instruments selected  when you finish a piece in classify window`
 

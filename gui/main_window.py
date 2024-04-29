@@ -15,7 +15,7 @@ from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece
 from gui.score_classifier_window import Piece_selector_to_classify_window
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
-from gui.preview import Preview
+from gui.previewer import Preview
 
 class Main_window(QtWidgets.QMainWindow):
     def __init__(self):
@@ -24,7 +24,6 @@ class Main_window(QtWidgets.QMainWindow):
         self.change_language(Configuration.name_to_cod_language(Configuration.get_language()))
         
         #Check if there is the config file and the paths exitsts
-        #IMPORTANTE: Solo comprueba que exista el archivo, el dossier no lo  mira
         while(not os.path.exists(PLAIN_TEXT_CONFIG_PATH) or not os.path.exists(Configuration.get_archive_path()) or not os.path.exists(Configuration.get_dossier_cover_path())):
             Preferences_window(True,self)
 
@@ -35,26 +34,27 @@ class Main_window(QtWidgets.QMainWindow):
         self.setWindowIcon(QtGui.QIcon(ICON_PATH))
 
         self.setMenuBar(self.create_menu_bar())        
-
-        up_zone = self.create_up_zone()
-
-        self.scroll:Status_console = Status_console()
-
+        
         container = QtWidgets.QWidget()
-        container_layout = QtWidgets.QVBoxLayout()
+        container_layout = QtWidgets.QHBoxLayout()
         
         #Space
         container_layout.setSpacing(0)
         container_layout.setContentsMargins(20,0,20,20)
 
-        container_layout.addWidget(up_zone)
-        container_layout.addWidget(self.scroll)
-        
+        #This extra layout Align the left zone to the top 
+        left_zone_layout = QtWidgets.QVBoxLayout()
+        left_zone_layout.addWidget(self.create_left_zone())
+        left_zone_layout.setAlignment(QtCore.Qt.AlignTop) #type: ignore
+
+        container_layout.addLayout(left_zone_layout)
+        container_layout.addWidget(self.create_preview())
+
         container.setLayout(container_layout)
 
 
         self.setCentralWidget(container)
-        self.setGeometry(100,80,200,200)
+        #self.setGeometry(100,80,200,200)
         self.setWindowTitle("AMRV archive manager") #traducir
 
 
@@ -133,7 +133,8 @@ class Main_window(QtWidgets.QMainWindow):
         hbox.addWidget(self.btn_mv_back_preview)
         hbox.addWidget(self.btn_mv_forward_preview)
         obj.setLayout(hbox)
-
+        #obj.setStyleSheet("border: 1px solid red;")
+        obj.setMaximumHeight(40)
         return obj
 
 
@@ -194,7 +195,7 @@ class Main_window(QtWidgets.QMainWindow):
         return search_bars    
     
 
-    #Create the preview. This is going to be developed in the future. Now its not necessary
+    #Create the preview
     def create_preview(self):
         preview = QtWidgets.QWidget()
         preview_layout = QtWidgets.QVBoxLayout()
@@ -203,27 +204,31 @@ class Main_window(QtWidgets.QMainWindow):
         preview_layout.setContentsMargins(30,0,0,0)
 
         self.preview = Preview(self)
-
+        
         scroll_arrows = self.create_preview_buttons()
+        #scroll_arrows.setStyleSheet("border: 1px solid black;")
         preview_layout.addWidget(self.preview)
         preview_layout.addWidget(scroll_arrows)
-
+       # preview_layout.setAlignment(QtCore.Qt.AlignBottom)
         preview.setLayout(preview_layout)
-
+        preview.setMinimumWidth(600)
         return preview
 
 
-    #Create the layout of all the up zone(search bars+preview)
-    def create_up_zone(self):
-        up = QtWidgets.QWidget()
-        up_layout = QtWidgets.QHBoxLayout()
-
-        up_layout.addWidget(self.create_search_bars())
-        up_layout.addWidget(self.create_preview())
-
-        up.setLayout(up_layout)
+    #Create the layout of all the left zone(search bars+scroll area)
+    def create_left_zone(self):
+        left = QtWidgets.QWidget()
+        left_layout = QtWidgets.QVBoxLayout()
+        self.scroll:Status_console = Status_console()
         
-        return up
+        left_layout.addWidget(self.create_search_bars())
+        left_layout.addWidget(self.scroll)
+        #left_layout.setAlignment(QtCore.Qt.AlignTop) #type: ignore
+        self.setMinimumHeight(550)
+        left.setLayout(left_layout)
+        left.setFixedSize(300,600)
+
+        return left
 
 #####################################################################
 #----------------------------APP LOGIC -----------------------------#

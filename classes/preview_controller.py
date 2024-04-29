@@ -19,7 +19,7 @@ class Preview_controller:
     def get_image(self) -> str:  
         path =  os.path.join(tempfile.gettempdir(), os.urandom(24,).hex()+".png")
         file = fitz.open(self.path)
-        page = file.load_page(self.page_number).get_pixmap() #type:ignore
+        page = file.load_page(self.page_number).get_pixmap(dpi=200) #type:ignore
         page.save(path)
         
         return path
