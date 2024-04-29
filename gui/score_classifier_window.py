@@ -66,7 +66,7 @@ class Score_classifier_window(QtWidgets.QDialog):
             pass
         
         self.rotation_cb = QtWidgets.QCheckBox(self.tr("Keep rotation to next scores")) #traducir
-        self.rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf is going to be rotated the same as the previous")) #traducir
+        self.rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf is going to be rotated like the previous")) #traducir
         rotate_btns_horizontal_layout = QtWidgets.QHBoxLayout()
         rotate_btns_horizontal_layout.addWidget(btn_rotate_left)
         rotate_btns_horizontal_layout.addWidget(btn_rotate_right)
@@ -129,7 +129,7 @@ class Score_classifier_window(QtWidgets.QDialog):
             self.piece_name_lbl.setText(self.classifier.actual_piece_name)
             self.last_classfied_lbl.setText(self.classifier.last_new_name)
         except EmptyInitialInputException:
-            Error_window.print_error(ValueError(),self.tr("Empty initial input"))
+            Error_window.print_error(ValueError(),self.tr("The first time the input can't be empty"))
             return
         except ValueError as e:
             Error_window.print_error(e,self.tr("Incorrect input"))

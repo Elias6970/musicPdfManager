@@ -16,6 +16,7 @@ from gui.score_classifier_window import Piece_selector_to_classify_window
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
 from gui.previewer import Preview
+from tools.delete_junk_files import delete_junk_files
 
 class Main_window(QtWidgets.QMainWindow):
     def __init__(self):
@@ -81,6 +82,9 @@ class Main_window(QtWidgets.QMainWindow):
         clasify_scores_opt = QtWidgets.QAction(self.tr("Clasify scores"),self) #traducir
         clasify_scores_opt.triggered.connect(self.clasify_scores)
 
+        delete_junk_files_opt = QtWidgets.QAction(self.tr("Delete junk files"),self)
+        delete_junk_files_opt.triggered.connect(lambda: delete_junk_files(RELATIVE_ARCHIVE_PATH()))
+
         about_opt = QtWidgets.QAction(self.tr("About"),self) #traducir
         about_opt.triggered.connect(self.about_opt_menu)
 
@@ -91,6 +95,8 @@ class Main_window(QtWidgets.QMainWindow):
         
         menu.addMenu(self.tr("Database")).addActions([export_dossier_opt]) #traducir
         
+        menu.addMenu(self.tr("Tools")).addActions([delete_junk_files_opt])
+
         menu.addMenu(self.tr("Help")).addActions([about_opt])
         
         return menu

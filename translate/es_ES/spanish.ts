@@ -73,12 +73,12 @@
         <translation>Selecciona un archivo o carpeta</translation>
     </message>
     <message>
-        <location filename="../../gui/add_piece_window.py" line="57"/>
+        <location filename="../../gui/add_piece_window.py" line="55"/>
         <source>{} has been correctly imported</source>
         <translation> se ha importado correctamente</translation>
     </message>
     <message>
-        <location filename="../../gui/add_piece_window.py" line="60"/>
+        <location filename="../../gui/add_piece_window.py" line="58"/>
         <source>Has been an error importing {}</source>
         <translation>Ha ocurrido un error importando </translation>
     </message>
@@ -88,7 +88,7 @@
     <message>
         <location filename="../../gui/add_scores_to_existing_piece_window.py" line="14"/>
         <source>Add scores to existing piece</source>
-        <translation>Añadir partituras a la obra acutal</translation>
+        <translation>Añadir partituras a una obra existente</translation>
     </message>
     <message>
         <location filename="../../gui/add_scores_to_existing_piece_window.py" line="15"/>
@@ -127,15 +127,15 @@
         <location filename="../../gui/delete_piece_window.py" line="23"/>
         <source>Are you sure that you want to delete 
 {}</source>
-        <translation>Estas seguro que queiere borrar </translation>
+        <translation>Estas seguro que quieres borrar </translation>
     </message>
     <message>
-        <location filename="../../gui/delete_piece_window.py" line="30"/>
+        <location filename="../../gui/delete_piece_window.py" line="36"/>
         <source>{} has been correctly deleted</source>
         <translation> se ha borrado correctamente</translation>
     </message>
     <message>
-        <location filename="../../gui/delete_piece_window.py" line="36"/>
+        <location filename="../../gui/delete_piece_window.py" line="42"/>
         <source>Error deleting</source>
         <translation>Error borrando</translation>
     </message>
@@ -143,107 +143,142 @@
 <context>
     <name>Main_window</name>
     <message>
-        <location filename="../../gui/main_window.py" line="60"/>
+        <location filename="../../gui/main_window.py" line="64"/>
         <source>Preferences</source>
         <translation>Preferencias</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="63"/>
+        <location filename="../../gui/main_window.py" line="67"/>
         <source>Add score</source>
         <translation>Añadir obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="66"/>
+        <location filename="../../gui/main_window.py" line="70"/>
         <source>Modify score</source>
         <translation>Modificar obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="69"/>
+        <location filename="../../gui/main_window.py" line="73"/>
         <source>Delete score</source>
         <translation>Borrar obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="72"/>
+        <location filename="../../gui/main_window.py" line="76"/>
         <source>Add score to piece</source>
-        <translation>Añadir partitura a obra</translation>
+        <translation>Añadir partitura a una obra</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="75"/>
+        <location filename="../../gui/main_window.py" line="79"/>
         <source>Export dossier</source>
-        <translation>Exportar guión</translation>
+        <translation>Exportar guión de partituras</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="78"/>
+        <location filename="../../gui/main_window.py" line="82"/>
         <source>Clasify scores</source>
-        <translation>Clasificar partituras</translation>
+        <translation>Clasificar obras</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="81"/>
+        <location filename="../../gui/main_window.py" line="88"/>
         <source>About</source>
         <translation>Sobre nosotros</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="87"/>
+        <location filename="../../gui/main_window.py" line="94"/>
         <source>Archive</source>
         <translation>Archivo</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="89"/>
+        <location filename="../../gui/main_window.py" line="96"/>
         <source>Database</source>
         <translation>Base de datos</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="91"/>
+        <location filename="../../gui/main_window.py" line="100"/>
         <source>Help</source>
         <translation>Ayuda</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="105"/>
+        <location filename="../../gui/main_window.py" line="114"/>
         <source>Add</source>
         <translation>Añadir</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="106"/>
+        <location filename="../../gui/main_window.py" line="115"/>
         <source>Create Pdf</source>
         <translation>Generar Pdf</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="239"/>
+        <location filename="../../gui/main_window.py" line="295"/>
         <source>Select Folder and File Name</source>
         <translation>Selecciona una carpeta y el nombre del archivo a generar</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="315"/>
+        <location filename="../../gui/main_window.py" line="437"/>
         <source>Additional conver info</source>
         <translation>Información adicional de la portada</translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="315"/>
+        <location filename="../../gui/main_window.py" line="437"/>
         <source>Enter additional info to be added to the cover:(max 9 chars)</source>
-        <translation>Introduce ifnormación adicional para añadir a la portada: (máximo 9 caracteres)</translation>
+        <translation>Introduce información adicional para añadir a la portada: (máximo 9 caracteres)</translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="92"/>
+        <source>Configuration</source>
+        <translation>Configuración</translation>
     </message>
     <message>
         <location filename="../../gui/main_window.py" line="85"/>
-        <source>Configuration</source>
-        <translation>Configuración</translation>
+        <source>Delete junk files</source>
+        <translation>Borrar archivos basura</translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="98"/>
+        <source>Tools</source>
+        <translation>Herramientas</translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="176"/>
+        <source>Only digitalized</source>
+        <translation>Solo digitalizadas</translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="273"/>
+        <source>NO DIGITALIZED</source>
+        <translation>SIN DIGITALIZAR</translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="276"/>
+        <source>NO SCORES</source>
+        <translation>SIN PARTITURAS</translation>
     </message>
 </context>
 <context>
     <name>Modify_piece_window</name>
     <message>
-        <location filename="../../gui/modify_piece_window.py" line="40"/>
+        <location filename="../../gui/modify_piece_window.py" line="53"/>
         <source>Correctly modificated</source>
         <translation>Modificado correctamente</translation>
     </message>
     <message>
-        <location filename="../../gui/modify_piece_window.py" line="45"/>
+        <location filename="../../gui/modify_piece_window.py" line="61"/>
         <source>Error modificating</source>
         <translation>Error modificando</translation>
     </message>
     <message>
-        <location filename="../../gui/modify_piece_window.py" line="54"/>
+        <location filename="../../gui/modify_piece_window.py" line="70"/>
         <source>Piece doesn&apos;t found</source>
         <translation>Obra no encontrada</translation>
+    </message>
+    <message>
+        <location filename="../../gui/modify_piece_window.py" line="33"/>
+        <source>Are you sure that you want to modify the cod?</source>
+        <translation>Estás seguro que quieres modificar el código?</translation>
+    </message>
+    <message>
+        <location filename="../../gui/modify_piece_window.py" line="33"/>
+        <source>It is a sensitive  and essential part of the archive</source>
+        <translation>Es una parte sensible y esencial del archivo</translation>
     </message>
 </context>
 <context>
@@ -277,7 +312,7 @@
     <message>
         <location filename="../../gui/score_classifier_window.py" line="254"/>
         <source>Any score to classify</source>
-        <translation>Ninguna partitura para clasificar</translation>
+        <translation>Ninguna obra para clasificar</translation>
     </message>
     <message>
         <location filename="../../gui/score_classifier_window.py" line="244"/>
@@ -306,7 +341,7 @@
     <message>
         <location filename="../../gui/abstract_windows.py" line="250"/>
         <source>Do you want to keep adding it?</source>
-        <translation>Quieres seguir añadiendolo?</translation>
+        <translation>¿Quieres seguir añadiéndola?</translation>
     </message>
     <message>
         <location filename="../../gui/abstract_windows.py" line="254"/>
@@ -329,12 +364,12 @@
     <message>
         <location filename="../../gui/preferences_window.py" line="36"/>
         <source>Archive path  *</source>
-        <translation>Carpeta del archivo</translation>
+        <translation>Carpeta del archivo  *</translation>
     </message>
     <message>
         <location filename="../../gui/preferences_window.py" line="46"/>
         <source>Dossier cover path</source>
-        <translation>Portada guión partituras</translation>
+        <translation>Portada guión partituras (.pdf)</translation>
     </message>
     <message>
         <location filename="../../gui/preferences_window.py" line="46"/>
@@ -362,12 +397,12 @@
         <translation>Selecciona una carpeta</translation>
     </message>
     <message>
-        <location filename="../../gui/preferences_window.py" line="113"/>
+        <location filename="../../gui/preferences_window.py" line="112"/>
         <source>Changes saved succesfully</source>
         <translation>Cambios guardados correctamente</translation>
     </message>
     <message>
-        <location filename="../../gui/preferences_window.py" line="113"/>
+        <location filename="../../gui/preferences_window.py" line="112"/>
         <source>If you have changed the language you need to restart the app</source>
         <translation>Si has cambiado el idioma tienes que reiniciar la aplicación para que los cambios tengan efecto</translation>
     </message>
@@ -397,12 +432,12 @@
     <message>
         <location filename="../../gui/score_classifier_window.py" line="68"/>
         <source>Keep rotation to next scores</source>
-        <translation>Mantener la rotación para el siguiente pdf</translation>
+        <translation>Mantener la rotación para las siguientes partituras</translation>
     </message>
     <message>
         <location filename="../../gui/score_classifier_window.py" line="69"/>
         <source>If this checkbox is checked the next pdf is going to be rotated the same as the previous</source>
-        <translation>Si esta casilla está marcada el siguiente pdf se va a girar lo mismo que el anterior</translation>
+        <translation type="obsolete">Si esta casilla está marcada el siguiente pdf se va a girar igual que el anterior</translation>
     </message>
     <message>
         <location filename="../../gui/score_classifier_window.py" line="74"/>
@@ -422,7 +457,7 @@
     <message>
         <location filename="../../gui/score_classifier_window.py" line="132"/>
         <source>Empty initial input</source>
-        <translation>Entrada inicial vacía</translation>
+        <translation type="obsolete">La primera vez la entrada no puede estar vacía</translation>
     </message>
     <message>
         <location filename="../../gui/score_classifier_window.py" line="135"/>
@@ -439,13 +474,23 @@
         <source>You are in the first page, you can&apos;t go to a previous one</source>
         <translation>Ya estás en la primera página, no hay ninguna anterior</translation>
     </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="69"/>
+        <source>If this checkbox is checked the next pdf is going to be rotated like the previous</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="132"/>
+        <source>The first time the input can&apos;t be empty</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Score_search_bar</name>
     <message>
         <location filename="../../gui/abstract_windows.py" line="201"/>
         <source>Search score</source>
-        <translation>Buscar partitura</translation>
+        <translation type="unfinished">Buscar obra</translation>
     </message>
 </context>
 </TS>

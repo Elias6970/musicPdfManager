@@ -43,7 +43,7 @@ class Preferences_window(QtWidgets.QDialog):
 
         cover_path_layout = QtWidgets.QHBoxLayout()
         cover_path_layout.setSpacing(0)
-        cover_path_layout.addWidget(QtWidgets.QLabel(self.tr("Dossier cover path")+ "\n" + self.tr("(Don't touch pls)  "))) #traducir
+        cover_path_layout.addWidget(QtWidgets.QLabel(self.tr("Dossier cover path (.pdf)")+ "\n" + self.tr("(Don't touch pls)  "))) #traducir
         cover_path_layout.addWidget(self.line_cover_path)
         cover_path_layout.addWidget(cover_path_btn)
         

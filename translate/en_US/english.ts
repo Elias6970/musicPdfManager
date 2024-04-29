@@ -73,12 +73,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/add_piece_window.py" line="57"/>
+        <location filename="../../gui/add_piece_window.py" line="55"/>
         <source>{} has been correctly imported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/add_piece_window.py" line="60"/>
+        <location filename="../../gui/add_piece_window.py" line="58"/>
         <source>Has been an error importing {}</source>
         <translation type="unfinished"></translation>
     </message>
@@ -130,12 +130,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/delete_piece_window.py" line="30"/>
+        <location filename="../../gui/delete_piece_window.py" line="36"/>
         <source>{} has been correctly deleted</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/delete_piece_window.py" line="36"/>
+        <location filename="../../gui/delete_piece_window.py" line="42"/>
         <source>Error deleting</source>
         <translation type="unfinished"></translation>
     </message>
@@ -143,106 +143,141 @@
 <context>
     <name>Main_window</name>
     <message>
-        <location filename="../../gui/main_window.py" line="60"/>
+        <location filename="../../gui/main_window.py" line="64"/>
         <source>Preferences</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="63"/>
+        <location filename="../../gui/main_window.py" line="67"/>
         <source>Add score</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="66"/>
+        <location filename="../../gui/main_window.py" line="70"/>
         <source>Modify score</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="69"/>
+        <location filename="../../gui/main_window.py" line="73"/>
         <source>Delete score</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="72"/>
+        <location filename="../../gui/main_window.py" line="76"/>
         <source>Add score to piece</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="75"/>
+        <location filename="../../gui/main_window.py" line="79"/>
         <source>Export dossier</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="78"/>
+        <location filename="../../gui/main_window.py" line="82"/>
         <source>Clasify scores</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="81"/>
+        <location filename="../../gui/main_window.py" line="88"/>
         <source>About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="85"/>
+        <location filename="../../gui/main_window.py" line="92"/>
         <source>Configuration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="87"/>
+        <location filename="../../gui/main_window.py" line="94"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="89"/>
+        <location filename="../../gui/main_window.py" line="96"/>
         <source>Database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="91"/>
+        <location filename="../../gui/main_window.py" line="100"/>
         <source>Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="105"/>
+        <location filename="../../gui/main_window.py" line="114"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="106"/>
+        <location filename="../../gui/main_window.py" line="115"/>
         <source>Create Pdf</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="239"/>
+        <location filename="../../gui/main_window.py" line="295"/>
         <source>Select Folder and File Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="315"/>
+        <location filename="../../gui/main_window.py" line="437"/>
         <source>Additional conver info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/main_window.py" line="315"/>
+        <location filename="../../gui/main_window.py" line="437"/>
         <source>Enter additional info to be added to the cover:(max 9 chars)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="85"/>
+        <source>Delete junk files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="98"/>
+        <source>Tools</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="176"/>
+        <source>Only digitalized</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="273"/>
+        <source>NO DIGITALIZED</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/main_window.py" line="276"/>
+        <source>NO SCORES</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>Modify_piece_window</name>
     <message>
-        <location filename="../../gui/modify_piece_window.py" line="40"/>
+        <location filename="../../gui/modify_piece_window.py" line="53"/>
         <source>Correctly modificated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/modify_piece_window.py" line="45"/>
+        <location filename="../../gui/modify_piece_window.py" line="61"/>
         <source>Error modificating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/modify_piece_window.py" line="54"/>
+        <location filename="../../gui/modify_piece_window.py" line="70"/>
         <source>Piece doesn&apos;t found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/modify_piece_window.py" line="33"/>
+        <source>Are you sure that you want to modify the cod?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/modify_piece_window.py" line="33"/>
+        <source>It is a sensitive  and essential part of the archive</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -356,12 +391,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/preferences_window.py" line="113"/>
+        <location filename="../../gui/preferences_window.py" line="112"/>
         <source>Changes saved succesfully</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/preferences_window.py" line="113"/>
+        <location filename="../../gui/preferences_window.py" line="112"/>
         <source>If you have changed the language you need to restart the app</source>
         <translation type="unfinished"></translation>
     </message>
@@ -394,11 +429,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="69"/>
-        <source>If this checkbox is checked the next pdf is going to be rotated the same as the previous</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../gui/score_classifier_window.py" line="74"/>
         <source>Rotate</source>
         <translation type="unfinished"></translation>
@@ -414,11 +444,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/score_classifier_window.py" line="132"/>
-        <source>Empty initial input</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../../gui/score_classifier_window.py" line="135"/>
         <source>Incorrect input</source>
         <translation type="unfinished"></translation>
@@ -431,6 +456,16 @@
     <message>
         <location filename="../../gui/score_classifier_window.py" line="147"/>
         <source>You are in the first page, you can&apos;t go to a previous one</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="69"/>
+        <source>If this checkbox is checked the next pdf is going to be rotated like the previous</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/score_classifier_window.py" line="132"/>
+        <source>The first time the input can&apos;t be empty</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
