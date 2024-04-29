@@ -22,7 +22,8 @@ class Modify_piece_window(QtWidgets.QDialog):
         container_layout.addWidget(self.search_bar)
         container_layout.addWidget(self.abstract_fields)
 
-        self.setGeometry(0,0,400,200)
+        #self.setGeometry(0,0,400,200)
+        #self.setBaseSize(400,200)
         self.setLayout(container_layout)
         self.exec_()
 

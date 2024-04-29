@@ -33,7 +33,8 @@ class Abstract_serch_bar_and_two_buttons_window(QtWidgets.QDialog):
         container_layout.addWidget(self.piece_lbl)
         container_layout.addLayout(self.create_buttons_layout(btn_function))
         
-        self.setGeometry(0,0,400,200)
+        #self.setGeometry(0,0,400,200)
+        self.setFixedSize(400,100)
         self.setLayout(container_layout)
 
 
@@ -98,7 +99,7 @@ class Abstract_fields_window(QtWidgets.QDialog):
         container_layout = QtWidgets.QVBoxLayout()
         
         #Space
-        container_layout.setSpacing(0)
+        container_layout.setSpacing(5)
         container_layout.setContentsMargins(20,0,20,20)
 
         container_layout.addLayout(self.create_fields_layout())
@@ -106,7 +107,8 @@ class Abstract_fields_window(QtWidgets.QDialog):
         container_layout.addLayout(self.create_buttons_layout(btn_lbl,btn_function,close_function))
         
 
-        self.setGeometry(0,0,400,200)
+        #self.setGeometry(0,0,400,200)
+        self.setFixedSize(400,200)
         self.setLayout(container_layout)
 
         
@@ -259,7 +261,6 @@ class Pop_up_window(QtWidgets.QDialog):
         container_layout.addLayout(btn_layout)
 
 
-        #self.setGeometry(0,0,400,200)
         self.setLayout(container_layout)
 
         self.exec_()
@@ -280,7 +281,7 @@ class Status_console(QtWidgets.QScrollArea):
         status_console = QtWidgets.QWidget()
         self.status_console_layout = QtWidgets.QVBoxLayout()
         self.status_console_layout.setSpacing(0)
-        
+        self.status_console_layout.setAlignment(QtCore.Qt.AlignTop) #type: ignore
         #Create the labels that apear in the list
         status_console.setLayout(self.status_console_layout)
 
