@@ -308,9 +308,11 @@ class Main_window(QtWidgets.QMainWindow):
         self.scroll.update()
         self.piece_search_bar.clear()
         self.piece_lbl.clear()
-
+        #Printer
         self.printer = Printer()
         self.archive.update_pieces()
+        #Preview
+        self.preview.clear()
 
 
     #Controlls the pieces showed in the search bar
@@ -321,17 +323,17 @@ class Main_window(QtWidgets.QMainWindow):
             self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
 
     
-
+    #Move to the previous preview page 
     def mv_back_preview(self):
-        self.change_preview_img()
         self.preview_controller.previous_page()
         self.check_mv_btns_enableability()
-            
-
-    def mv_forward_preview(self):
         self.change_preview_img()
+            
+    #Move to the next preview page
+    def mv_forward_preview(self):
         self.preview_controller.next_page()
         self.check_mv_btns_enableability()
+        self.change_preview_img()
 
     #Check if move preview buttons must be enabled or disabled
     def check_mv_btns_enableability(self):
@@ -348,21 +350,25 @@ class Main_window(QtWidgets.QMainWindow):
     def change_preview_img(self):
         self.preview.set_image(self.preview_controller.get_image())
     
-    #Change the preview controller class
+    
+    #Manage the preview controller
     def update_preview(self,piece_parsed_name:str,instrument:str) -> None:
-        try:
+        #Check if a piece and instrument is selected
+        piece = Validate.select_window_validate_selection(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
+        if not isinstance(piece,Dir_Error):
             try:
-                if piece_parsed_name == self.preview_controller.piece_parsed_name:
-                    self.preview_controller.instrument = instrument
-                    self.preview_controller.update_path()
-                else:
+                try:
+                    if piece_parsed_name == self.preview_controller.piece_parsed_name:
+                        self.preview_controller.instrument = instrument
+                        self.preview_controller.update_path()
+                    else:
+                        self.preview_controller = Preview_controller(piece_parsed_name,instrument)
+                except Exception:
                     self.preview_controller = Preview_controller(piece_parsed_name,instrument)
-            except Exception:
-                self.preview_controller = Preview_controller(piece_parsed_name,instrument)
 
-            self.change_preview_img()
-        except Exception as e:
-            print(e)
+                self.change_preview_img()
+            except Exception as e:
+                print(type(e)," ",e)
             
 
 

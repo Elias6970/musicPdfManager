@@ -17,8 +17,9 @@ This gui application is a tool to manage the digital archive of a music band wit
 1.  Execute  in the console `pyinstaller main.spec` (pyinstaller is installed in the requeriments.txt).
 2.  You have your standalone in the dist folder.
 
-# Important
-To work, the application need a directory called 'data' in the same folder as the main.py/executable. (Inside it has the database and a config file)
+# Important details
+- To work, the application need a directory called 'data' in the same folder as the main.py/executable. (Inside it has the database and a config file)
+- Can be troubles if you add a piece and don't add scores.
 
 # Archive file structure
 The file structure of the directory with the files is this:
@@ -98,8 +99,6 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 `Modify pop_up_window to change 'do you want to keep adding it?' to be variable`
 
 `Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
-
-`Make the preview for the actual selected pdf in selection window`
 
 `Translate classifying instructions`
 
