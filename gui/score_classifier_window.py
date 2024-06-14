@@ -3,13 +3,14 @@ from PyQt5.QtWebEngineWidgets import  QWebEngineView,QWebEngineSettings
 from  classes.files_manage import Dir
 from classes.constants import *
 from classes.classifier import *
+from classes.error import StopClassifyingException
 from classes.files_manage import Archive
 from gui.abstract_windows import Score_search_bar,Status_console,Pop_up_window
 from gui.error_window import Error_window
 import os
 
 
-
+#Throw StopClassifyingException if the classification doesn't finish
 class Score_classifier_window(QtWidgets.QDialog):
     def __init__(self,pieces_list:list[Dir],update_parted_flag_db_function, parent=None) -> None:
         super().__init__(parent)
@@ -157,6 +158,12 @@ class Score_classifier_window(QtWidgets.QDialog):
     
     def close(self):
         self.hide()
+        raise StopClassifyingException()
+
+
+    def closeEvent(self,event):
+        event.accept()
+        raise StopClassifyingException()
 
     #For testing
     """def state(self):
@@ -187,7 +194,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         #Gui
         container_layout = QtWidgets.QVBoxLayout()
         
-        self.search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.validate_selection) #type: ignore
+        self.search_bar = Score_search_bar(self.archive.pieces.get_digitalized_parsed_names(),self.validate_selection) #type: ignore
         self.status_area = Status_console()
         
         #Butons
@@ -248,6 +255,8 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         if len(to_classify) > 0:
             try:
                 Score_classifier_window(to_classify,self.archive.db.update_parted)
+            except StopClassifyingException:
+                pass
             except PdfNotFoundException as e:
                 Error_window.print_error(e,self.tr("The piece doesn't have any pdf")) #traducir
         else:

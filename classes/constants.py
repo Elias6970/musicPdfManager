@@ -42,9 +42,7 @@ AUTHOR = "author"
 TYPE = "type"
 CREATED_DATE = "created_date"
 LAST_MODIFICATION = "last_modification"
-DIGITALIZED = "digitalized"
-HANDWRITTEN = "handwritten"
-PARTED = "parted"
+
 #CAMBIE DIR_SCORE y DIR_EXTRAS de partituras a partituras. Alomejor luego pueden haber problemas por eso. Para tenerlo en cuenta
 
 INSTRUCTIONS_SCORE_CLASSIFIER = """*******Herramienta clasificador de partituras*******

@@ -22,3 +22,6 @@ class PieceNotFoundException(Exception):
 
 class AvoidModificationException(Exception):
     pass
+
+class StopClassifyingException(Exception):
+    pass

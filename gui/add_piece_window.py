@@ -2,12 +2,12 @@
 from PyQt5 import QtWidgets
 from classes.files_manage import Archive,File,Archive_file_manager,Dir
 from classes.constants import *
-from classes.error import PdfNotFoundException
+from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
 from gui.abstract_windows import *
 from gui.score_classifier_window import Score_classifier_window
-
-
+from gui.gui_constants import *
+import sys
 #Window to add a new piece to the db. When you add the piece you must add the corresponding scores
 #Parameters:
 #   	archive: Archive object of the archive
@@ -18,8 +18,8 @@ from gui.score_classifier_window import Score_classifier_window
 #   
 class Add_piece_window(Abstract_fields_window):
     def __init__(self, archive: Archive, parent=None):
-        super().__init__(archive, "Add new piece", "Add", [HANDWRITTEN],self.add_score, parent=parent)
-        
+        super().__init__(archive, "Add new piece", "Add", [HANDWRITTEN,DONT_ADD_SCORES],self.add_score, parent=parent)
+
         self.line_cod.setText(str(self.archive.db.get_next_cod()))#cambiar
 
 
@@ -46,9 +46,11 @@ class Add_piece_window(Abstract_fields_window):
                 
                 if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0,digitalized=1):
                     try:
-                        #TODO: problema, no se sabe si luego se ha clasificado o no entoces en archive.pieces puede haber una incongruencia con la flag digitalized 
-                        self.archive.pieces.add(int(cod),name,parsed_name)
                         Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
+                        self.archive.pieces.add(int(cod),name,parsed_name,True)
+                    
+                    except StopClassifyingException:
+                        self.archive.pieces.add(int(cod),name,parsed_name)
                     except PdfNotFoundException: 
                         pass
                     except Exception:

@@ -368,6 +368,8 @@ class Main_window(QtWidgets.QMainWindow):
         piece = Validate.select_window_validate_selection(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
+                if not piece.get_scores():
+                    raise NoScoresException()
                 try:
                     if piece_parsed_name == self.preview_controller.piece_parsed_name:
                         self.preview_controller.instrument = instrument
@@ -378,6 +380,10 @@ class Main_window(QtWidgets.QMainWindow):
                     self.preview_controller = Preview_controller(piece_parsed_name,instrument)
 
                 self.change_preview_img()
+            except NoScoresException:
+                pass
+            except FileNotFoundError:
+                pass
             except Exception as e:
                 print(type(e)," ",e)
             
