@@ -1,8 +1,7 @@
 from matplotlib import pyplot as plt
-import pandas as pd, numpy as np
+import pandas as pd
 import os,cv2
-from pdf2image import pdf2image
-import pandasql as ps
+import fitz,tempfile,pytesseract
 
 def findHorizontalLines(img):
     img = cv2.imread(img) 
@@ -22,15 +21,17 @@ def findHorizontalLines(img):
 
     return lineLocations
 
-
+#Returns a png path with the image
+def get_image(pdf_path) -> str:  
+    path =  os.path.join(tempfile.gettempdir(), os.urandom(24,).hex()+".png")
+    file = fitz.open(pdf_path)
+    page = file.load_page(0).get_pixmap(dpi=200) #type:ignore
+    page.save(path)
+    
+    return path
 
 def a():
-    #path = "../../score_examples/madera.jpg"
-    path = "gf.jpg"
-    #pages = pdf2image.convert_from_path('../../score_examples/madera.pdf',200)
-    pages = pdf2image.convert_from_path('gf.pdf',200)
-    for count, page in enumerate(pages):
-        page.save(path, 'JPEG')
+    path = get_image("tests\\gf.pdf")
 
     img = cv2.imread(path)
     lineLocations = findHorizontalLines(path)
@@ -44,11 +45,17 @@ def a():
     
     try:
         cropped = img[0:int((a.iloc[0])['rowLoc'])]
-
+        print(pytesseract.image_to_string(cropped,"cat"))
         plt.figure(figsize=(8,8))
-        plt.imshow(cropped)
-        plt.waitforbuttonpress()
+        plt.imsave("a.png",cropped)
+
     except Exception as e:
         print("fallo ", e)
+    
 
-a()
+
+
+if __name__ == "__main__":
+    pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+    print(pytesseract.get_languages())
+    a()
