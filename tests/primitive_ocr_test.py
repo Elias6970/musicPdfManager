@@ -1,7 +1,9 @@
 from matplotlib import pyplot as plt
-import pandas as pd
+import pandas as pd, numpy as np
 import os,cv2
 import fitz,tempfile,pytesseract
+
+custom_config = r'--psm 11 --oem 3 --user-words instruments.txt -c tessedit_char_whitelist="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"'
 
 def findHorizontalLines(img):
     img = cv2.imread(img) 
@@ -30,10 +32,21 @@ def get_image(pdf_path) -> str:
     
     return path
 
+#Paint in the image the lines founded
+def paint_lines_found(img:cv2.typing.MatLike,lines:pd.DataFrame) -> cv2.typing.MatLike:
+    copy_img = img.copy()
+    for i,_ in enumerate(copy_img):
+        if i in lines['rowLoc'].values:
+            for j,_ in enumerate(img[i,:]):
+                img[i,j] = [0,0,255]
+    
+    return copy_img
+
 def a():
     path = get_image("tests\\gf.pdf")
 
     img = cv2.imread(path)
+    #img = cv2.imread("tests\\hola.png")
     lineLocations = findHorizontalLines(path)
 
     df_lineLocations = pd.DataFrame(lineLocations.sum(axis=1)).reset_index()
@@ -41,13 +54,18 @@ def a():
     df_lineLocations.columns = ['rowLoc', 'LineLength']
     
     
-    a  = df_lineLocations[df_lineLocations['LineLength'] > 0]
-    
+    df_linesFound  = df_lineLocations[df_lineLocations['LineLength'] > 0]
+
+
+
     try:
-        cropped = img[0:int((a.iloc[0])['rowLoc'])]
-        print(pytesseract.image_to_string(cropped,"cat"))
-        plt.figure(figsize=(8,8))
-        plt.imsave("a.png",cropped)
+        cropped = img[0:int((df_linesFound.iloc[0])['rowLoc'])]
+        #map(lambda x: x if x in a['rowLoc'] else ,img)
+        #re_cropped = cropped[:,0:int(cropped.shape[1]/3)]
+        data = pytesseract.image_to_data(cropped,config=custom_config,output_type=pytesseract.Output.DATAFRAME)
+        print(data[data['text'].notna()]["text"])
+
+        #cv2.imwrite("hola.png",img)
 
     except Exception as e:
         print("fallo ", e)

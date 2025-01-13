@@ -1,5 +1,6 @@
 import fitz,cv2,pytesseract
-import numpy as np
+import numpy as np, pandas as pd
+
 pytesseract.pytesseract.tesseract_cmd = r"C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
 
 class CannotDetectOrientationException(Exception):
@@ -21,7 +22,7 @@ class Detect:
         self.piece_name = ""
 
     #Transform the pdf page into a gray scale array image
-    def preprocess(self,page:fitz.Page):
+    def preprocess(self,page:fitz.Page) -> cv2.typing.MatLike:
         # Render page to a Pixmap
         pixmap = page.get_pixmap(dpi=200) #type:ignore
 
@@ -32,6 +33,8 @@ class Detect:
         else:  # RGB
             image = np.frombuffer(pixmap.samples, dtype=np.uint8).reshape(pixmap.height, pixmap.width, 3)
             image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)  # Convert to grayscale
+        
+        image = cv2.threshold(image,30, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
         
         return image
     
@@ -61,9 +64,26 @@ class Detect:
 
         # Step 6: Determine main orientation
         return len(horizontal_lines) > len(vertical_lines)
-        
 
-    def get_top_zone():
+
+    #Get the zone upper the pentagrams
+    def get_top_zone(self,image:cv2.typing.MatLike) -> cv2.typing.MatLike:
+        
+        # define rectangle structure (line) to look for: width 200, hight 1
+        horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (200,1))
+        
+        # Find horizontal lines
+        lineLocations = cv2.morphologyEx(image, cv2.MORPH_OPEN, horizontal_kernel, iterations=1)
+        df_lineLocations = pd.DataFrame(lineLocations.sum(axis=1)).reset_index()
+        df_lineLocations.columns = ['rowLoc', 'LineLength']
+        
+        df_linesFound  = df_lineLocations[df_lineLocations['LineLength'] > 0]
+
+        #You can change the position of the iloc to select 
+        #the xth line detected that u want to use
+        cropped = image[0:int((df_linesFound.iloc[4])['rowLoc'])]
+
+        return cropped
 
 
     def detect(self,piece_name:str,pdf_path:str):# -> Piece_to_classify:   
@@ -78,7 +98,7 @@ class Detect:
                 
 
                 #Get top 
-
+                top_zone = self.get_top_zone(image)
 
                 cv2.imshow("h",image)
                 cv2.waitKey(0)
