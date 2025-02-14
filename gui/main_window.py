@@ -198,7 +198,8 @@ class Main_window(QtWidgets.QMainWindow):
         self.part_combo_box = QtWidgets.QComboBox()
         
         self.part_combo_box.currentIndexChanged.connect(lambda: self.update_preview(self.piece_search_bar.text(),self.part_combo_box.currentText()))
-
+        self.part_combo_box.setEnabled(False)
+        
         self.add_create_buttons = self.create_add_zone()
         
 
