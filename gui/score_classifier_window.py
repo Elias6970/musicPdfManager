@@ -157,7 +157,6 @@ class Score_classifier_window(QtWidgets.QDialog):
         Pop_up_window(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
     
     def close(self):
-        self.hide()
         raise StopClassifyingException()
 
 
@@ -186,7 +185,10 @@ class Score_classifier_window(QtWidgets.QDialog):
 class Piece_selector_to_classify_window(QtWidgets.QDialog):
     def __init__(self,archive:Archive,parent=None) -> None:
         super().__init__(parent)
-        
+
+        self.setWindowTitle(self.tr("Select pieces"))
+
+
         self.pieces_to_classify:list[str] = []
         self.archive = archive
         
@@ -254,7 +256,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
 
         if len(to_classify) > 0:
             try:
-                Score_classifier_window(to_classify,self.archive.db.update_parted)
+                Score_classifier_window(to_classify,self.archive.db.update_parted,parent=self)
             except StopClassifyingException:
                 pass
             except PdfNotFoundException as e:
