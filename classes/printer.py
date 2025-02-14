@@ -42,6 +42,11 @@ class Dossier:
     #Export the pdf dossier with the list of scores to be printed
     @staticmethod
     def export_pdf_dossier_to_print(data:list,new_pdf_path:str,extra_cover_text:str):
+        ENTRIES_PER_PAGE = 35
+        CLOSING_EMPTY_ROWS = 120
+        for _ in range(CLOSING_EMPTY_ROWS):
+            data.append(("","","","",""))
+        
         #Create a temp file because later we need to merge this pdf with the front page with the band logo
         temp_dossier = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
 
@@ -67,12 +72,19 @@ class Dossier:
         new_data = []
         counter = 0
         #Creates one table for each sheet
-        for i in data:
-            new_data.append(i)
+        for i,value in enumerate(data):
+            new_data.append(value)
 
             counter += 1
-            if counter >= 35 or data[len(data)-1] == i:
+            if counter >= ENTRIES_PER_PAGE or len(data) - 1 == i:
                 new_data.insert(0,("Digitalizada","Cod","Nombre","Autor","tipo")) #traducir
+
+                #Insert in the last page to don't have empty space
+                if len(data)-1 == i:
+                    for _ in range(ENTRIES_PER_PAGE - counter):
+                        new_data.append(("","","","",""))
+                
+                #Create the table and add the columns
                 aux_table = Table(new_data)
                 #Set table
                 aux_table._argW[0] = 60 #type:ignore
