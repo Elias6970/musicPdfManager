@@ -263,6 +263,7 @@ class Main_window(QtWidgets.QMainWindow):
     #Update the autocompleter list of the search bar
     def update_autocompleter_scores(self):
         #self.archive.update_pieces_in_dirs()
+        self.archive.update_pieces()
         self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
     
     

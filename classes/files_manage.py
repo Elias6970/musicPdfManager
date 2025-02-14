@@ -131,6 +131,8 @@ class Archive:
     def query(self):
         self.get_all_parsed_names()
     """
+
+    #Update the list of pieces with the db
     def update_pieces(self):
         self.pieces.update_pieces(self.db.get_all_cod_name_digitalized())
 

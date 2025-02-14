@@ -1,7 +1,5 @@
 from PyQt6 import QtCore, QtWidgets
-import os
 from classes.files_manage import Archive
-from gui.error_window import Error_window
 
 
 #Abstract window that have: (Is a false abstract window but it used like that)

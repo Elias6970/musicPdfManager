@@ -46,8 +46,8 @@ class Score_classifier_window(QtWidgets.QDialog):
         #Pdf viewer
         self.web_view = QWebEngineView()
         if isinstance(self.web_view,QWebEngineView):
-            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
-            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PdfViewerEnabled, True)
+            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True) #type: ignore
+            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PdfViewerEnabled, True) #type: ignore
         
         #Rotate area
 

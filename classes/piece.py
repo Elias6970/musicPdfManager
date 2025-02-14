@@ -53,14 +53,15 @@ class Pieces_list:
         self.pieces = []
     #Refactor to use Piece objects not a list of Dirs
     #parsed names is a list of cod-name, ej: 18-PETRER
-    def update_pieces_parsed_names(self,names:list):
+    def update_pieces_with_parsed_names(self,names:list):
         for i in names:
             self.pieces.append(Piece.from_parsed_name(i[0]))
     
-    def update_pieces(self,cod_names:list[tuple]):
+    #Get a list of tuples with (cod:int,name:str,digitalized:bool)
+    def update_pieces(self,cod_names:list[tuple[int|str,str,bool]]):
         self.pieces.clear()
         for i in cod_names:
-            self.add(i[0],i[1],digitalized=bool(i[2]))
+            self.add(int(i[0]),i[1],digitalized=bool(i[2]))
 
     #Return a list with digitalized parsed names
     def get_digitalized_parsed_names(self) -> list[str]:

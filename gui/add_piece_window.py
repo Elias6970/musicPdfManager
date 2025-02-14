@@ -6,8 +6,7 @@ from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
 from gui.abstract_windows import *
 from gui.score_classifier_window import Score_classifier_window
-from gui.gui_constants import *
-import sys
+
 #Window to add a new piece to the db. When you add the piece you must add the corresponding scores
 #Parameters:
 #   	archive: Archive object of the archive

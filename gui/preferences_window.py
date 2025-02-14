@@ -1,5 +1,5 @@
-import sys,os
-from PyQt6 import QtWidgets,QtCore
+import sys
+from PyQt6 import QtWidgets
 from classes.config import Configuration
 from gui.abstract_windows import Pop_up_window
 from gui.error_window import Error_window

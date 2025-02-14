@@ -1,5 +1,4 @@
 from PyQt6 import QtWidgets
-import os,shutil
 from classes.files_manage import Archive,Archive_file_manager
 from gui.abstract_windows import *
 from gui.error_window import Error_window

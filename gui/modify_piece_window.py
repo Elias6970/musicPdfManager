@@ -4,7 +4,6 @@ from classes.piece import Piece
 from classes.error import AvoidModificationException
 from gui.abstract_windows import *
 from gui.error_window import Error_window
-from gui.gui_constants import *
 from classes.constants import *
 
 
