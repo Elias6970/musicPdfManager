@@ -1,5 +1,5 @@
 
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 from classes.files_manage import Archive,File,Archive_file_manager,Dir
 from classes.constants import *
 from classes.error import PdfNotFoundException,StopClassifyingException
@@ -18,12 +18,16 @@ import sys
 #   
 class Add_piece_window(Abstract_fields_window):
     def __init__(self, archive: Archive, parent=None):
-        super().__init__(archive, "Add new piece", "Add", [HANDWRITTEN,DONT_ADD_SCORES],self.add_score, parent=parent)
+        super().__init__(archive, self.tr("Add new piece"), self.tr("Add"), [HANDWRITTEN,DONT_ADD_SCORES],self.add_score, parent=parent)
 
         self.line_cod.setText(str(self.archive.db.get_next_cod()))#cambiar
 
+        #Change checkboxes text to be tranlatable
+        self.checkboxes_dict[HANDWRITTEN].setText(self.tr("handwritten"))
+        self.checkboxes_dict[DONT_ADD_SCORES].setText(self.tr("Don't add scores"))
 
-        self.exec_()
+
+        self.exec()
 
     def add_score(self):
         cod = self.line_cod.text()
@@ -34,14 +38,14 @@ class Add_piece_window(Abstract_fields_window):
             
             #Open a dialog to select the files to be putted in the directory
             file_dialog = QtWidgets.QFileDialog()
-            file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFiles)  # Allow selecting any file type
+            file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)  # Allow selecting any file type
             file_dialog.setWindowTitle(self.tr("Select a folder or a file")) #traducir
-            file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)  # Set the dialog to save mode
+            file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
 
 
             
             
-            if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+            if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
                 Archive_file_manager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
                 
                 if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0,digitalized=1):
@@ -85,12 +89,12 @@ class Add_piece_window(Abstract_fields_window):
                         warning_window = Pop_up_window(warning_text,False,self)
                     
                     try:
-                        return warning_window.btn_confirm_pressed #type:ignore
+                        return warning_window.btn_confirm_pressed 
                     except UnboundLocalError as e: #if the pop up warning is not being showed(not similar names)
                         return True
             else:
-                alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"Warning","Already exists a score with this cod or \nname can't be empty",QtWidgets.QMessageBox.Ok,self) #traducir
-                alert.exec_()
+                alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Icon.NoIcon,"Warning","Already exists a score with this cod or \nname can't be empty",QtWidgets.QMessageBox.StandardButton.Ok,self) #traducir
+                alert.exec()
             
 
         except Exception as e:

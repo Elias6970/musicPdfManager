@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 from classes.files_manage import Archive,Archive_file_manager
 from classes.piece import Piece
 from classes.error import AvoidModificationException
@@ -18,15 +18,20 @@ class Modify_piece_window(QtWidgets.QDialog):
         container_layout = QtWidgets.QVBoxLayout()
 
         self.search_bar:Score_search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.validate_selection) # type: ignore
-        self.abstract_fields = Abstract_fields_window(archive,"Modify piece","Modify",[HANDWRITTEN,DIGITALIZED,PARTED],self.add_modification,self.close)
+        self.abstract_fields = Abstract_fields_window(archive,self.tr("Modify piece"),self.tr("Modify"),[HANDWRITTEN,DIGITALIZED,PARTED],self.add_modification,self.close)
 
         container_layout.addWidget(self.search_bar)
         container_layout.addWidget(self.abstract_fields)
 
+        #Change checkboxes text to be tranlatable
+        self.abstract_fields.checkboxes_dict[HANDWRITTEN].setText(self.tr("handwritten")) #traducir
+        self.abstract_fields.checkboxes_dict[PARTED].setText(self.tr("parted")) #traducir
+        self.abstract_fields.checkboxes_dict[DIGITALIZED].setText(self.tr("digitalized")) #traducir
+
         #self.setGeometry(0,0,400,200)
         #self.setBaseSize(400,200)
         self.setLayout(container_layout)
-        self.exec_()
+        self.exec()
 
     def add_modification(self):
         try:

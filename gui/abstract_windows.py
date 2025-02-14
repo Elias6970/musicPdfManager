@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtWidgets
+from PyQt6 import QtCore, QtWidgets
 import os
 from classes.files_manage import Archive
 from gui.error_window import Error_window
@@ -19,7 +19,7 @@ class Abstract_serch_bar_and_two_buttons_window(QtWidgets.QDialog):
         #self.setWindowTitle(window_title) #traducir
 
         self.archive = archive
-        self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
+        self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
         
         container_layout = QtWidgets.QVBoxLayout()
         
@@ -77,6 +77,7 @@ class Abstract_serch_bar_and_two_buttons_window(QtWidgets.QDialog):
 #   btn_lbl: text for the button that make something
 #   checkboxes_names: strings of the names of the checkboxes. They are stored 
 #                     in a dictionary with {"String in checkboxes_names",QtWidgets.QCheckbox}
+#                     that you can acced later to check if they are checked
 #   btn_function: pointer to the function linked to the button
 #   close_function: pointer to close function. By default is the close of the class
 #Window parts:
@@ -94,7 +95,7 @@ class Abstract_fields_window(QtWidgets.QDialog):
         
         self.checkboxes_names = checkboxes_names #names of the checkboxes
         
-        self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
+        self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
 
         container_layout = QtWidgets.QVBoxLayout()
         
@@ -152,7 +153,7 @@ class Abstract_fields_window(QtWidgets.QDialog):
     def create_checkboxes_layout(self,names:list[str]):
         self.checkboxes_dict:dict[str,QtWidgets.QCheckBox] = {}
         layout = QtWidgets.QVBoxLayout()
-        layout.setAlignment(QtCore.Qt.AlignLeft) #type: ignore
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
 
         for i in names:
             self.checkboxes_dict[i] = QtWidgets.QCheckBox(i)
@@ -174,7 +175,7 @@ class Abstract_fields_window(QtWidgets.QDialog):
             close_btn.clicked.connect(self.close)
 
         add_btn.clicked.connect(btn_function)
-        
+
         btns_layout.addWidget(add_btn)
         btns_layout.addWidget(close_btn)
         
@@ -207,8 +208,8 @@ class Score_search_bar(QtWidgets.QLineEdit):
 
         #Auto Completer
         self.auto_completer = QtWidgets.QCompleter(self.pieces_parsed_names)
-        self.auto_completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive) #type: ignore
-        self.auto_completer.setFilterMode(QtCore.Qt.MatchContains) #type: ignore
+        self.auto_completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
+        self.auto_completer.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
         
         self.setCompleter(self.auto_completer)
 
@@ -229,7 +230,7 @@ class Pop_up_window(QtWidgets.QDialog):
 
         self.btn_confirm_pressed = False #This values become true when no button is pressed
 
-        self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
+        self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
 
         container_layout = QtWidgets.QVBoxLayout()
 
@@ -263,7 +264,7 @@ class Pop_up_window(QtWidgets.QDialog):
 
         self.setLayout(container_layout)
 
-        self.exec_()
+        self.exec()
 
     def confirm(self):
         self.btn_confirm_pressed = True
@@ -281,13 +282,13 @@ class Status_console(QtWidgets.QScrollArea):
         status_console = QtWidgets.QWidget()
         self.status_console_layout = QtWidgets.QVBoxLayout()
         self.status_console_layout.setSpacing(0)
-        self.status_console_layout.setAlignment(QtCore.Qt.AlignTop) #type: ignore
+        self.status_console_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         #Create the labels that apear in the list
         status_console.setLayout(self.status_console_layout)
 
 
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn) #type: ignore
-        self.setAlignment(QtCore.Qt.AlignTop) #type: ignore
+        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
+        self.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
         self.setWidgetResizable(True)
         self.setWidget(status_console)
 

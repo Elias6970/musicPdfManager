@@ -1,5 +1,6 @@
-from PyQt5 import QtWidgets,QtCore,QtGui
-from PyQt5.QtWebEngineWidgets import  QWebEngineView,QWebEngineSettings
+from PyQt6 import QtWidgets,QtCore,QtGui
+from PyQt6.QtWebEngineWidgets import  QWebEngineView
+from PyQt6.QtWebEngineCore import QWebEngineSettings
 from  classes.files_manage import Dir
 from classes.constants import *
 from classes.classifier import *
@@ -23,7 +24,7 @@ class Score_classifier_window(QtWidgets.QDialog):
         #Open the fiirst page
         self.opener(self.classifier.first_page())
         
-        self.exec_()
+        self.exec()
 
 
     #Creates the user interface
@@ -34,7 +35,7 @@ class Score_classifier_window(QtWidgets.QDialog):
     
         #Menu bar
 
-        help_opt = QtWidgets.QAction(self.tr("Help"),self) #traducir
+        help_opt = QtGui.QAction(self.tr("Help"),self) #traducir
         help_opt.triggered.connect(self.help_opt_menu)
 
         menu = QtWidgets.QMenuBar()
@@ -44,8 +45,9 @@ class Score_classifier_window(QtWidgets.QDialog):
 
         #Pdf viewer
         self.web_view = QWebEngineView()
-        self.web_view.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True) #type: ignore
-        self.web_view.settings().setAttribute(QWebEngineSettings.PdfViewerEnabled, True) #type: ignore
+        if isinstance(self.web_view,QWebEngineView):
+            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
+            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PdfViewerEnabled, True)
         
         #Rotate area
 
@@ -72,7 +74,8 @@ class Score_classifier_window(QtWidgets.QDialog):
         rotate_btns_horizontal_layout.addWidget(btn_rotate_left)
         rotate_btns_horizontal_layout.addWidget(btn_rotate_right)
 
-        rotate_btns_layout.addWidget(QtWidgets.QLabel(self.tr("Rotate"),alignment=QtCore.Qt.AlignCenter)) #type:ignore #Traducir
+        
+        rotate_btns_layout.addWidget(QtWidgets.QLabel(self.tr("Rotate")).setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)) #Traducir
         rotate_btns_layout.addWidget(self.rotation_cb)
         rotate_btns_layout.addLayout(rotate_btns_horizontal_layout)
         
@@ -218,7 +221,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         
         self.setLayout(container_layout)
 
-        self.exec_()
+        self.exec()
 
 
     #Check if the piece selected is equals to one on the list

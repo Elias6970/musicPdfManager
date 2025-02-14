@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets,QtGui,QtCore
+from PyQt6 import QtWidgets,QtGui,QtCore
 from classes.constants import *
 from classes.files_manage import *
 from classes.config import PLAIN_TEXT_CONFIG_PATH
@@ -46,7 +46,7 @@ class Main_window(QtWidgets.QMainWindow):
         #This extra layout Align the left zone to the top 
         left_zone_layout = QtWidgets.QVBoxLayout()
         left_zone_layout.addWidget(self.create_left_zone())
-        left_zone_layout.setAlignment(QtCore.Qt.AlignTop) #type: ignore
+        left_zone_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
 
         container_layout.addLayout(left_zone_layout)
         container_layout.addWidget(self.create_preview())
@@ -61,44 +61,64 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Create the menu bar
     def create_menu_bar(self):
-        preferences_opt = QtWidgets.QAction(self.tr("Preferences"),self) #traducir
+        preferences_opt = QtGui.QAction(self.tr("Preferences"),self) #traducir
         preferences_opt.triggered.connect(self.show_preferences_window)
 
-        add_score_opt = QtWidgets.QAction(self.tr("Add score"),self) #traducir
+        add_score_opt = QtGui.QAction(self.tr("Add score"),self) #traducir
         add_score_opt.triggered.connect(self.show_add_scores_menu)
 
-        modify_score_opt = QtWidgets.QAction(self.tr("Modify score"),self) #traducir
+        modify_score_opt = QtGui.QAction(self.tr("Modify score"),self) #traducir
         modify_score_opt.triggered.connect(self.show_modify_piece_menu)
 
-        delete_score_opt = QtWidgets.QAction(self.tr("Delete score"),self) #traducir
+        delete_score_opt = QtGui.QAction(self.tr("Delete score"),self) #traducir
         delete_score_opt.triggered.connect(self.show_delete_score_menu)
 
-        add_score_to_piece_opt = QtWidgets.QAction(self.tr("Add score to piece"),self) #traducir
+        add_score_to_piece_opt = QtGui.QAction(self.tr("Add score to piece"),self) #traducir
         add_score_to_piece_opt.triggered.connect(self.show_add_scores_to_existing_piece_window)
         
-        export_dossier_opt = QtWidgets.QAction(self.tr("Export dossier"),self) #traducir
+        export_dossier_opt = QtGui.QAction(self.tr("Export dossier"),self) #traducir
         export_dossier_opt.triggered.connect(self.export_dossier)
         
-        clasify_scores_opt = QtWidgets.QAction(self.tr("Clasify scores"),self) #traducir
+        clasify_scores_opt = QtGui.QAction(self.tr("Clasify scores"),self) #traducir
         clasify_scores_opt.triggered.connect(self.clasify_scores)
 
-        delete_junk_files_opt = QtWidgets.QAction(self.tr("Delete junk files"),self)
+        delete_junk_files_opt = QtGui.QAction(self.tr("Delete junk files"),self)
         delete_junk_files_opt.triggered.connect(lambda: delete_junk_files(RELATIVE_ARCHIVE_PATH()))
 
-        about_opt = QtWidgets.QAction(self.tr("About"),self) #traducir
+        about_opt = QtGui.QAction(self.tr("About"),self) #traducir
         about_opt.triggered.connect(self.about_opt_menu)
 
+
+        #If something happend can create an empty menu due to the casts to QMenuBar
         menu = self.menuBar()
-        menu.addMenu(self.tr("Configuration")).addActions([preferences_opt]) #traducir
 
-        menu.addMenu(self.tr("Archive")).addActions([add_score_opt,modify_score_opt,delete_score_opt,menu.addSeparator(),add_score_to_piece_opt,menu.addSeparator(),clasify_scores_opt]) #traducir
-        
-        menu.addMenu(self.tr("Database")).addActions([export_dossier_opt]) #traducir
-        
-        menu.addMenu(self.tr("Tools")).addActions([delete_junk_files_opt])
+        if isinstance(menu,QtWidgets.QMenuBar):
+            config_menu = menu.addMenu(self.tr("Configuration"))
+            if config_menu:
+                config_menu.addActions([preferences_opt]) #traducir
 
-        menu.addMenu(self.tr("Help")).addActions([about_opt])
-        
+            archive_menu = menu.addMenu(self.tr("Archive"))
+            if archive_menu:
+                archive_menu.addActions([add_score_opt,
+                                        modify_score_opt,
+                                        delete_score_opt,
+                                        menu.addSeparator(),
+                                        add_score_to_piece_opt,
+                                        menu.addSeparator(),
+                                        clasify_scores_opt]) #traducir
+            
+            database_menu = menu.addMenu(self.tr("Database"))
+            if database_menu:
+                database_menu.addActions([export_dossier_opt]) #traducir
+            
+            tools_menu = menu.addMenu(self.tr("Tools"))
+            if tools_menu:
+                tools_menu.addActions([delete_junk_files_opt])
+
+            help_menu = menu.addMenu(self.tr("Help"))
+            if help_menu:
+                help_menu.addActions([about_opt])
+
         return menu
 
 
@@ -188,7 +208,7 @@ class Main_window(QtWidgets.QMainWindow):
         
         check_box_layout.addWidget(self.only_digitalized_cb)
         check_box_layout.addWidget(only_digitalized_lbl)
-        check_box_layout.setAlignment(QtCore.Qt.AlignLeft) #type: ignore
+        check_box_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
 
         select_zone_layout.addLayout(search_bar_layout)
         select_zone_layout.addLayout(check_box_layout)
@@ -293,10 +313,10 @@ class Main_window(QtWidgets.QMainWindow):
         file_dialog = QtWidgets.QFileDialog()
         
         file_dialog.setWindowTitle(self.tr("Select Folder and File Name")) #traducir
-        file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)  # Set the dialog to save mode
+        file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptSave)  # Set the dialog to save mode
         file_dialog.setDefaultSuffix(".pdf")
 
-        if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+        if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
             return file_dialog.selectedFiles()[0]
         else:
             return ""
@@ -399,7 +419,9 @@ class Main_window(QtWidgets.QMainWindow):
 
         translator.load(path)
 
-        QtWidgets.QApplication.instance().installTranslator(translator)
+        app = QtWidgets.QApplication.instance()
+        if app:
+            app.installTranslator(translator)
     
   
 #####################################################################

@@ -42,6 +42,12 @@ AUTHOR = "author"
 TYPE = "type"
 CREATED_DATE = "created_date"
 LAST_MODIFICATION = "last_modification"
+DIGITALIZED = "digitalized"
+HANDWRITTEN = "handwritten"
+PARTED = "parted"
+
+#Special const to don't add scores when you add a piece
+DONT_ADD_SCORES = "dont_add_scores" 
 
 #CAMBIE DIR_SCORE y DIR_EXTRAS de partituras a partituras. Alomejor luego pueden haber problemas por eso. Para tenerlo en cuenta
 

@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt6 import QtWidgets
 import os,shutil
 from classes.files_manage import Archive,Archive_file_manager
 from gui.abstract_windows import *
@@ -13,16 +13,16 @@ class Delete_piece_window(Abstract_serch_bar_and_two_buttons_window):
         self.setWindowTitle(self.tr("Delete piece"))
         self.func_btn.setText(self.tr("Delete"))
 
-        self.exec_()
+        self.exec()
 
     #Delete the selected score
     def delete_piece(self):
         if self.validate_selection(self.search_bar.text()):
             cod = Archive.extract_cod(self.piece_lbl.text())
             #Ask to be sure that the user want to delete this score
-            alert = QtWidgets.QMessageBox.question(self,self.tr("Warning"),self.tr("Are you sure that you want to delete \n{}".format(self.piece_lbl.text())),QtWidgets.QMessageBox.Yes,QtWidgets.QMessageBox.No) #traducir
+            alert = QtWidgets.QMessageBox.question(self,self.tr("Warning"),self.tr("Are you sure that you want to delete \n{}".format(self.piece_lbl.text())),QtWidgets.QMessageBox.StandardButton.Yes,QtWidgets.QMessageBox.StandardButton.No) #traducir
 
-            if alert == QtWidgets.QMessageBox.Yes:
+            if alert == QtWidgets.QMessageBox.StandardButton.Yes:
                 try:
                     self.archive.db.delete_score(int(cod)) #Delete from db
                     self.archive.pieces.remove(int(cod))
@@ -33,7 +33,7 @@ class Delete_piece_window(Abstract_serch_bar_and_two_buttons_window):
                         pass
 
                     
-                    alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.NoIcon,"",self.tr("{} has been correctly deleted".format(self.piece_lbl.text())),QtWidgets.QMessageBox.Ok,self) #traducir
+                    alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Icon.NoIcon,"",self.tr("{} has been correctly deleted".format(self.piece_lbl.text())),QtWidgets.QMessageBox.StandardButton.Ok,self) #traducir
                     self.search_bar.clear() #Clear the text
                     self.piece_lbl.clear()
                     self.update_autocompleter_scores()

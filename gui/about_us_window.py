@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets,QtCore,QtGui
+from PyQt6 import QtWidgets,QtCore,QtGui
 from classes.constants import VERSION,APP_AUTHOR,APP_NAME,GITHUB
 
 #Show a window with a description of the app
@@ -7,7 +7,7 @@ class About_us_window(QtWidgets.QDialog):
         super().__init__(parent)
 
         self.setWindowTitle(self.tr("About"))
-        self.setWindowModality(QtCore.Qt.WindowModal) #type: ignore
+        self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
 
         container_layout = QtWidgets.QVBoxLayout()
         
@@ -40,17 +40,17 @@ class About_us_window(QtWidgets.QDialog):
         github_page = QtWidgets.QLabel("<a href='{}'>{}</a>".format(GITHUB,GITHUB))
         github_page.setFont(font)
 
-        container_layout.addWidget(title,alignment=QtCore.Qt.AlignCenter) #type: ignore
+        container_layout.addWidget(title,alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         
 
-        container_layout.addWidget(version,alignment=QtCore.Qt.AlignCenter) #type: ignore
-        container_layout.addWidget(author,alignment=QtCore.Qt.AlignCenter) #type: ignore
-        container_layout.addWidget(github_page,alignment=QtCore.Qt.AlignCenter) #type: ignore
-        container_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding))
-        container_layout.addWidget(subtitle,alignment=QtCore.Qt.AlignCenter) #type: ignore
-        container_layout.addWidget(subtitle2,alignment=QtCore.Qt.AlignCenter) #type: ignore
+        container_layout.addWidget(version,alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        container_layout.addWidget(author,alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        container_layout.addWidget(github_page,alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        container_layout.addItem(QtWidgets.QSpacerItem(20, 20, QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Expanding))
+        container_layout.addWidget(subtitle,alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        container_layout.addWidget(subtitle2,alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
         
         self.setLayout(container_layout)
 
-        self.exec_()
+        self.exec()
 

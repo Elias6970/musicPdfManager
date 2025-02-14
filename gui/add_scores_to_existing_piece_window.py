@@ -1,4 +1,4 @@
-from PyQt5 import  QtWidgets
+from PyQt6 import  QtWidgets
 from classes.files_manage import Archive,Archive_file_manager,Dir
 from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException,StopClassifyingException
@@ -14,19 +14,19 @@ class Add_scores_to_existing_piece_window(Abstract_serch_bar_and_two_buttons_win
         self.setWindowTitle(self.tr("Add scores to existing piece"))
         self.func_btn.setText(self.tr("Add"))
         
-        self.exec_()
+        self.exec()
 
     #Add scores to existing pieces
     def add_score(self):
         file_dialog = QtWidgets.QFileDialog()
 
         if self.validate_selection(self.search_bar.text()):
-            file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFiles)  # Allow selecting any file type
+            file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)  # Allow selecting any file type
             file_dialog.setWindowTitle(self.tr("Select a folder or a file")) #traducir
-            file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)  # Set the dialog to save mode
+            file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
 
 
-        if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+        if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
             if self.validate_selection(self.search_bar.text()) and Archive_file_manager.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
                 try: 
                     Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.db.update_parted)

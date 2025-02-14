@@ -1,5 +1,5 @@
 import sys,os
-from PyQt5 import QtWidgets,QtCore
+from PyQt6 import QtWidgets,QtCore
 from classes.config import Configuration
 from gui.abstract_windows import Pop_up_window
 from gui.error_window import Error_window
@@ -15,7 +15,7 @@ class Preferences_window(QtWidgets.QDialog):
         self.init_ui()
         self.set_field_value()
 
-        self.exec_()
+        self.exec()
 
     def init_ui(self):
         container_layout = QtWidgets.QVBoxLayout()
@@ -92,17 +92,17 @@ class Preferences_window(QtWidgets.QDialog):
     def browse(self,type:str):
         file_dialog = QtWidgets.QFileDialog()
         file_dialog.setWindowTitle(self.tr("Select a folder")) #traducir
-        file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptOpen)  # Set the dialog to save mode
+        file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
         
         
         if type == "archive":
-            file_dialog.setFileMode(QtWidgets.QFileDialog.Directory)  # Allow selecting any file type
-            if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+            file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.Directory)  # Allow selecting any file type
+            if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
                 self.line_archive_path.setText(file_dialog.selectedFiles()[0])
 
         else:
-            file_dialog.setFileMode(QtWidgets.QFileDialog.ExistingFiles)  # Allow selecting any file type
-            if file_dialog.exec_() == QtWidgets.QFileDialog.Accepted:
+            file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)  # Allow selecting any file type
+            if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
                 self.line_cover_path.setText(file_dialog.selectedFiles()[0])
 
 
