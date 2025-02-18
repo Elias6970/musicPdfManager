@@ -6,8 +6,10 @@ from classes.constants import *
 from classes.classifier import *
 from classes.error import StopClassifyingException
 from classes.files_manage import Archive
+from classes.interactive_preview_conversor import InterctivePreviewConversor
 from gui.abstract_windows import Score_search_bar,Status_console,Pop_up_window
 from gui.error_window import Error_window
+from gui.interactive_preview import InteractivePreview
 import os
 
 
@@ -23,7 +25,8 @@ class Score_classifier_window(QtWidgets.QDialog):
 
         #Open the fiirst page
         self.opener(self.classifier.first_page())
-        
+        self.piece_name_lbl.setText(self.classifier.actual_piece_name)
+
         self.exec()
 
 
@@ -34,7 +37,6 @@ class Score_classifier_window(QtWidgets.QDialog):
         btns_layout = QtWidgets.QHBoxLayout()
     
         #Menu bar
-
         help_opt = QtGui.QAction(self.tr("Help"),self) #traducir
         help_opt.triggered.connect(self.help_opt_menu)
 
@@ -44,13 +46,10 @@ class Score_classifier_window(QtWidgets.QDialog):
 
 
         #Pdf viewer
-        self.web_view = QWebEngineView()
-        if isinstance(self.web_view,QWebEngineView):
-            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True) #type: ignore
-            self.web_view.settings().setAttribute(QWebEngineSettings.WebAttribute.PdfViewerEnabled, True) #type: ignore
-        
-        #Rotate area
+        self.view = InteractivePreview()
 
+
+        #Rotate area
         btn_rotate_left = QtWidgets.QPushButton()
         btn_rotate_left.clicked.connect(lambda: self.rotate(-90))
         btn_rotate_left.setToolTip(self.tr("Rotate the pdf 90º to the left"))
@@ -107,7 +106,7 @@ class Score_classifier_window(QtWidgets.QDialog):
 
         #Add widgets
         container_layout.addWidget(self.piece_name_lbl)
-        container_layout.addWidget(self.web_view)
+        container_layout.addWidget(self.view)
         container_layout.addLayout(rotate_btns_layout)
         container_layout.addWidget(instructions_lbl)
         container_layout.addWidget(self.line_edit) #Create the text box to input what is the part that you are seing
@@ -121,13 +120,14 @@ class Score_classifier_window(QtWidgets.QDialog):
 
     #Open a file
     def opener(self,path):
-        self.web_view.load(QtCore.QUrl.fromLocalFile(path))
+        self.view.load_img(InterctivePreviewConversor.pdf_to_qpixmap(path),
+                           InterctivePreviewConversor.get_pdf_rect(path))
 
 
     #Is called when you press enter
     def continue_btn(self):
         try:
-            self.classifier.classify(self.line_edit.text())
+            self.classifier.classify(self.line_edit.text(),self.view.get_rectangle_selection())
             self.opener(self.classifier.next_page_manager(self.rotation_cb.isChecked()))
             #Set labels
             self.piece_name_lbl.setText(self.classifier.actual_piece_name)
@@ -263,10 +263,12 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
                 pass
             except PdfNotFoundException as e:
                 Error_window.print_error(e,self.tr("The piece doesn't have any pdf")) #traducir
+                return
             except Exception as e:
                 Error_window.print_error(e,self.tr("An error ocurred when classifying")) #traducir 
         else:
             Error_window.print_error(self.tr("Any score to classify")) #traducir
+            return
         
         self.close()
 

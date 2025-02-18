@@ -17,4 +17,11 @@ class InterctivePreviewConversor:
 
         # Create QPixmap from QImage
         return QPixmap.fromImage(img)
+    
+    
+    #Return the size of the first page of the pdf
+    @staticmethod
+    def get_pdf_rect(pdf_path:str) -> fitz.Rect:
+        file = fitz.open(pdf_path)
+        return file[0].rect
         

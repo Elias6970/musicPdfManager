@@ -1,8 +1,9 @@
-from PyQt6.QtWidgets import QApplication, QGraphicsSceneMouseEvent, QMainWindow, QFileDialog, QGraphicsScene, QGraphicsView, QGraphicsPixmapItem, QGraphicsRectItem, QGraphicsEllipseItem
-from PyQt6.QtGui import QPixmap, QPen, QBrush, QColor, QImage
+from PyQt6.QtWidgets import QGraphicsScene, QGraphicsView, QGraphicsPixmapItem, QGraphicsRectItem
+from PyQt6.QtGui import QPixmap, QPen, QBrush, QColor
 from PyQt6.QtCore import Qt, QRectF, QPointF, QSizeF, QSize
 from classes.interactive_preview_conversor import  InterctivePreviewConversor
-
+from classes.crop_rectangle import CropRectangle
+import fitz
 # Custom rectangle class
 class MovableRectangle(QGraphicsRectItem):
     def __init__(self, *args, **kwargs):
@@ -22,7 +23,7 @@ class Scene(QGraphicsScene):
     
     #Load the image in the scene
     def load_image(self,qpixmap:QPixmap,graphics_view_size:QSize):
-        self.qpixmap = qpixmap.scaled(graphics_view_size, Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation)
+        self.qpixmap = qpixmap.scaled(graphics_view_size.width(), qpixmap.width(),Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation)
         self.image_item = QGraphicsPixmapItem(self.qpixmap)
         self.addItem(self.image_item)
         self.setSceneRect(self.image_item.boundingRect())
@@ -31,8 +32,11 @@ class Scene(QGraphicsScene):
 
 #Preview in which you can select a rectangle
 class InteractivePreview(QGraphicsView):
-    def __init__(self, parent=None):
+    def __init__(self,parent=None):
         super().__init__(parent)
+
+        self.pdf_rect = fitz.Rect()
+        self.rectangle = MovableRectangle()
 
         self.img_scene = Scene(self)
         self.setScene(self.img_scene)
@@ -42,7 +46,9 @@ class InteractivePreview(QGraphicsView):
         self.moving_offset = QPointF() # Offset to move the rectangle
 
     # Load the image in the preview
-    def load_img(self,qpixmap:QPixmap):
+    def load_img(self,qpixmap:QPixmap, pdf_rect:fitz.Rect):
+        self.rectangle = MovableRectangle()
+        self.pdf_rect = pdf_rect
         self.img_scene.load_image(qpixmap,self.size())
 
     def mousePressEvent(self, event):
@@ -107,3 +113,10 @@ class InteractivePreview(QGraphicsView):
     #Return the rectangle selected
     def get_rectangle(self) -> QRectF:
         return QRectF(self.rectangle.rect().topLeft() + self.rectangle.pos(),QSizeF(self.rectangle.rect().width(),self.rectangle.rect().height()))
+
+
+    #Return the rectangle selected to be scaled to the pdf size
+    def get_rectangle_selection(self) -> CropRectangle:
+        return CropRectangle(self.get_rectangle().toRect(),
+                                self.img_scene.qpixmap.size(),
+                                self.pdf_rect)

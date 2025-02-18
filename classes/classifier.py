@@ -3,6 +3,7 @@ from typing import List,Tuple
 from classes.error import *
 from classes.files_manage import File,Dir,Archive
 from classes.constants import DIR_SCORES
+from classes.crop_rectangle import CropRectangle
 import PyPDF2
 
 #Represents a pdf to be exported
@@ -16,8 +17,8 @@ class Exportable_pdf(File):
 
         self.actual_pdf_page:int = 0
 
-        #The list have tuples with (temp_file_path,new_name)
-        self.list_of_new_files:List[Tuple[str,str]] = []
+        #The list have tuples with (temp_file_path,new_name,cropRectangle)
+        self.list_of_new_files:List[Tuple[str,str,CropRectangle]] = []
 
 
     #Append a new page to an existing temp pdf in list_of_new_files
@@ -31,8 +32,12 @@ class Exportable_pdf(File):
 
     #Add a new page to the list of new files.
     #Appends the new pdf to the list with its name
-    def add_pdf_page(self,temp_file_path:str,new_name:str) -> None:  
-        self.list_of_new_files.append((temp_file_path,new_name))
+    def add_pdf_page(self,temp_file_path:str,new_name:str,crop_rectangle:CropRectangle) -> None:  
+        self.list_of_new_files.append((temp_file_path,new_name,crop_rectangle))
+        if crop_rectangle:
+            print(crop_rectangle.get())
+        else:
+            print("None")
     
     #Remove the latest page from the list
     def remove_latest_page(self) -> None:
@@ -44,6 +49,12 @@ class Exportable_pdf(File):
     
     def export(self):
         for i in self.list_of_new_files:
+            #Check if need to be cropped
+            if not i[2].is_empty():
+                m = i[2].crop(i[0],i[0])
+                shutil.copy(m,os.path.join(os.path.dirname(self.path),i[1])+".pdf")
+                continue
+            
             if os.path.isfile(os.path.join(os.path.dirname(self.path),i[1])+".pdf"):
                 self.append_page(os.path.join(os.path.dirname(self.path),i[1])+".pdf",i[0])
             else:
@@ -222,10 +233,10 @@ class Classifier:
 
             
     #Classify the input
-    def classify(self,input:str):
+    def classify(self,input:str,crop_rectangle:CropRectangle):
         input_analized = self.parse_input(input)
 
-        self.pdf_controller.get_actual_pdf().add_pdf_page(self.last_temp_file_path,input_analized)
+        self.pdf_controller.get_actual_pdf().add_pdf_page(self.last_temp_file_path,input_analized,crop_rectangle)
 
 
 
