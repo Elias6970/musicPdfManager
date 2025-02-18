@@ -341,6 +341,8 @@ class Main_window(QtWidgets.QMainWindow):
         self.scroll.update()
         self.piece_search_bar.clear()
         self.piece_lbl.clear()
+        self.num_copies.setCurrentIndex(0)
+        
         #Printer
         self.printer = Printer()
         self.archive.update_pieces()
@@ -358,15 +360,21 @@ class Main_window(QtWidgets.QMainWindow):
     
     #Move to the previous preview page 
     def mv_back_preview(self):
-        self.preview_controller.previous_page()
-        self.check_mv_btns_enableability()
-        self.change_preview_img()
+        try:
+            self.preview_controller.previous_page()
+            self.check_mv_btns_enableability()
+            self.change_preview_img()
+        except Exception as e:
+            pass
             
     #Move to the next preview page
     def mv_forward_preview(self):
-        self.preview_controller.next_page()
-        self.check_mv_btns_enableability()
-        self.change_preview_img()
+        try:
+            self.preview_controller.next_page()
+            self.check_mv_btns_enableability()
+            self.change_preview_img()
+        except Exception:
+            pass
 
     #Check if move preview buttons must be enabled or disabled
     def check_mv_btns_enableability(self):
