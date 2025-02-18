@@ -160,12 +160,11 @@ class Score_classifier_window(QtWidgets.QDialog):
         Pop_up_window(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
     
     def close(self):
-        raise StopClassifyingException()
+        self.hide()
 
 
     def closeEvent(self,event):
         event.accept()
-        raise StopClassifyingException()
 
     #For testing
     """def state(self):
@@ -264,6 +263,8 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
                 pass
             except PdfNotFoundException as e:
                 Error_window.print_error(e,self.tr("The piece doesn't have any pdf")) #traducir
+            except Exception as e:
+                Error_window.print_error(e,self.tr("An error ocurred when classifying")) #traducir 
         else:
             Error_window.print_error(self.tr("Any score to classify")) #traducir
         
