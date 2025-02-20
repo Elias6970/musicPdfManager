@@ -83,8 +83,7 @@ class Score_classifier_window(QtWidgets.QDialog):
         btn_next.clicked.connect(self.continue_btn)
         btn_close = QtWidgets.QPushButton(self.tr("Close")) #traducir
         btn_close.clicked.connect(self.close)
-        self.line_edit = QtWidgets.QLineEdit()
-        self.line_edit.returnPressed.connect(btn_next.click) #When you press enter pass to the next page
+
         btns_layout.addWidget(btn_prev)
         btns_layout.addWidget(btn_next)
         btns_layout.addWidget(btn_close)
@@ -96,19 +95,44 @@ class Score_classifier_window(QtWidgets.QDialog):
         font.setBold(True)
         self.piece_name_lbl.setFont(font)
 
-        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (z)bajo  t(u)ba  (p)ercusion""") #traducir
+        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion (cp)clarinete principal\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (z)bajo  t(u)ba  (p)ercusion""") #traducir
         font.setPointSize(12)
         instructions_lbl.setFont(font)
 
+        #Last classified
         self.last_classfied_lbl = QtWidgets.QLabel()
+        self.last_classfied_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.last_classfied_lbl.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        last_classfied_fixed_txt = QtWidgets.QLabel(self.tr("Last Name: ")) #traducir
+        last_classfied_fixed_txt.setFont(font)
+        last_classfied_fixed_txt.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        last_classfied_fixed_txt.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+
+
+        last_classfied_h_layout = QtWidgets.QHBoxLayout()
+        last_classfied_h_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignVCenter)
+        last_classfied_h_layout.addWidget(last_classfied_fixed_txt)
+        last_classfied_h_layout.addWidget(self.last_classfied_lbl)
+
+
+        #Writing line and instrument interpreter
+        self.line_edit = QtWidgets.QLineEdit()
+        self.line_edit.returnPressed.connect(btn_next.click) #When you press enter pass to the next page
+        self.line_edit.textChanged.connect(lambda: self.update_real_time_interpreted_txt(self.line_edit.text()))
+
+        self.interpreted_instrument_lbl = QtWidgets.QLabel()
+        self.interpreted_instrument_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        writing_line_h_layout = QtWidgets.QHBoxLayout()
+        writing_line_h_layout.addWidget(self.line_edit,3)
+        writing_line_h_layout.addWidget(self.interpreted_instrument_lbl,1)
 
         #Add widgets
         container_layout.addWidget(self.piece_name_lbl)
         container_layout.addWidget(self.view)
         container_layout.addLayout(rotate_btns_layout)
         container_layout.addWidget(instructions_lbl)
-        container_layout.addWidget(self.line_edit) #Create the text box to input what is the part that you are seing
-        container_layout.addWidget(self.last_classfied_lbl)
+        container_layout.addLayout(writing_line_h_layout)
+        container_layout.addLayout(last_classfied_h_layout)
 
         container_layout.addLayout(btns_layout)
         #self.setGeometry(0,0,500,400)
@@ -152,6 +176,12 @@ class Score_classifier_window(QtWidgets.QDialog):
     def rotate(self,degrees):
         self.classifier.rotate(degrees)
         self.opener(self.classifier.last_temp_file_path)
+
+    #Update the in real time QLabel interpreted text
+    def update_real_time_interpreted_txt(self,text:str):
+        txt = Text_analizer.analize(text)
+        self.interpreted_instrument_lbl.setText(txt)
+
 
     #Opens a pop up window with the instructions
     def help_opt_menu(self):

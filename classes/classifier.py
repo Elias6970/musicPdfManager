@@ -269,7 +269,8 @@ class Text_analizer():
     def __init__(self) -> None:
         pass
     
-    #Return a tuple with the (instrument,number) or none if not match with any re
+    #Return a tuple with the (instrument,number) or 
+    #raise a ValueError if doens't match any re (probably because input has not letters or numbers)
     @staticmethod
     def parse_input(text:str) -> Tuple[str,str|None]:
 
@@ -294,11 +295,12 @@ class Text_analizer():
         elif text == "":
             return ("",None)
         else:
-            raise ValueError()
+            raise ValueError("Only permited letters and numbers")
 
 
 
     #Analize the input and return the name of the file
+    #Can raise ValueError if doesn't match any re
     @staticmethod
     def analize(text:str):
         instrument,num = Text_analizer.parse_input(text)
