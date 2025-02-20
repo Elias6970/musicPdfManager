@@ -12,7 +12,7 @@ CONFIG_ATTRIBUTE_ARCHIVE_PATH = "ARCHIVE_PATH"
 CONFIG_ATTRIBUTE_DOSSIER_COVER = "DOSSIER_COVER_PATH"
 CONFIG_ATTRIBUTE_PRESETS = "PRESETS_PATH"
 CONFIG_ATTRIBUTE_LANGUAGE = "LANGUAGE"
-
+PRESETS_PATH = os.path.join("data","presets.json")
 
 #Idea of static class to get the configuration of the application
 class Configuration():
@@ -89,12 +89,12 @@ class Configuration():
 
     #Lenguage has to be in es_ES format
     @staticmethod
-    def save_config(archive_path:str,dossier_cover:str,language:str,presets_path:str):
+    def save_config(archive_path:str,dossier_cover:str,language:str):
         with open(PLAIN_TEXT_CONFIG_PATH,'w') as file:
             file.write(CONFIG_ATTRIBUTE_ARCHIVE_PATH+"="+archive_path+"\n")
             file.write(CONFIG_ATTRIBUTE_DOSSIER_COVER+"="+dossier_cover+"\n")
             file.write(CONFIG_ATTRIBUTE_LANGUAGE+"="+language+"\n")
-            file.write(CONFIG_ATTRIBUTE_PRESETS+"="+presets_path+"\n")
+            file.write(CONFIG_ATTRIBUTE_PRESETS+"="+PRESETS_PATH+"\n")
 
                        
 
