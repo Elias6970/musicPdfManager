@@ -1,6 +1,4 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
-from PyQt6.QtWebEngineWidgets import  QWebEngineView
-from PyQt6.QtWebEngineCore import QWebEngineSettings
 from  classes.files_manage import Dir
 from classes.constants import *
 from classes.classifier import *

@@ -1,43 +1,26 @@
 import json
-#from classes.classifier import Text_analizer
-#from classes.db_manage import Db_presets
-
-COPIES = "copies"
-OTHER_OPTIONS = "other_options"
+from constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 
 
+# Class that represents the
 class Preset:
     def __init__(self,name:str) -> None:
         self.name:str = name
         self.instruments:dict[str, dict[str, int|list[str]]] = {}
 
-
-    def set_preset(self,new_list:list[str]) -> bool:
-        try:
-            self.instruments = new_list
-            return True
-        except Exception:
-            return False
-    
-
+    # Add instrument to the preset
+    #   instrument: name of the instrument with the number
+    #   num: number of copies of this instrument
+    #   other_options: list to options to substitute this instrument if it doesn't exist in a piece. 
+    #                  The options are checked in order.
     def add_instrument(self,instrument:str,num:int|str,other_options:list[str]) -> bool:
         try:
-            self.instruments[instrument] = {COPIES:int(num),OTHER_OPTIONS:other_options}
+            self.instruments[instrument] = {PRESETS_COPIES:int(num),PRESETS_OTHER_OPTIONS:other_options}
             return True
         except Exception:
             return False
     
-    #This function search in the list of possibilities(instruments) the str that
-    #goes better with the instrument given.
-    #Strings returned by priority order:
-    #   1-Same instrument same number
-    #   2-Same instrument different number -> selects the closest lower number 
-    #   3-Same instrument without number -> only returns the instrument
-    #   4-Different instrument -> Raise an error that will show a window to select another insturment to print
-    @staticmethod
-    def solve(instrument:str,possibilities:list[str]) -> str:
-        pass
-
+# Class that manages all the presets
 class PresetManager():
     def __init__(self):
         self.presets:list[Preset] = []
@@ -91,6 +74,13 @@ if __name__ == "__main__":
     
 
 
+    #This function search in the list of possibilities(instruments) the str that
+    #goes better with the instrument given.
+    #Strings returned by priority order:
+    #   1-Same instrument same number
+    #   2-Same instrument different number -> selects the closest lower number 
+    #   3-Same instrument without number -> only returns the instrument
+    #   4-Different instrument -> Raise an error that will show a window to select another insturment to print
 
 
 """class Preset:

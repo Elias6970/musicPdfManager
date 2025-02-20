@@ -49,7 +49,11 @@ PARTED = "parted"
 #Special const to don't add scores when you add a piece
 DONT_ADD_SCORES = "dont_add_scores" 
 
-#CAMBIE DIR_SCORE y DIR_EXTRAS de partituras a partituras. Alomejor luego pueden haber problemas por eso. Para tenerlo en cuenta
+
+#Presets constants
+PRESETS_COPIES = "copies"
+PRESETS_OTHER_OPTIONS = "other_options"
+
 
 INSTRUCTIONS_SCORE_CLASSIFIER = """*******Herramienta clasificador de partituras*******
 
