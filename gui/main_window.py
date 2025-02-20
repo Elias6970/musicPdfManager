@@ -159,7 +159,6 @@ class Main_window(QtWidgets.QMainWindow):
         hbox.addWidget(self.btn_mv_back_preview)
         hbox.addWidget(self.btn_mv_forward_preview)
         obj.setLayout(hbox)
-        #obj.setStyleSheet("border: 1px solid red;")
         obj.setMaximumHeight(40)
         return obj
 
@@ -233,12 +232,10 @@ class Main_window(QtWidgets.QMainWindow):
         self.preview = Preview(self)
         
         scroll_arrows = self.create_preview_buttons()
-        #scroll_arrows.setStyleSheet("border: 1px solid black;")
         preview_layout.addWidget(self.preview)
         preview_layout.addWidget(scroll_arrows)
-       # preview_layout.setAlignment(QtCore.Qt.AlignBottom)
         preview.setLayout(preview_layout)
-        preview.setMinimumWidth(600)
+
         return preview
 
 
@@ -250,10 +247,9 @@ class Main_window(QtWidgets.QMainWindow):
         
         left_layout.addWidget(self.create_search_bars())
         left_layout.addWidget(self.scroll)
-        #left_layout.setAlignment(QtCore.Qt.AlignTop) #type: ignore
         self.setMinimumHeight(550)
         left.setLayout(left_layout)
-        left.setFixedSize(300,600)
+        left.setFixedWidth(300)
 
         return left
 
@@ -263,7 +259,6 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Update the autocompleter list of the search bar
     def update_autocompleter_scores(self):
-        #self.archive.update_pieces_in_dirs()
         self.archive.update_pieces()
         self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
     
@@ -306,7 +301,6 @@ class Main_window(QtWidgets.QMainWindow):
 
             #Update the labels of the down scores
             new_score_lbl = QtWidgets.QLabel(new_score_text)
-            #self.status_console_layout.addWidget(new_score_lbl)
             self.scroll.add_lbl(new_score_lbl)
     
 
