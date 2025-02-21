@@ -7,7 +7,7 @@ from classes.printer import Printer,Dossier
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from gui.error_window import Error_window
-from gui.abstract_windows import Score_search_bar,Status_console
+from gui.abstract_windows import Score_search_bar,StatusConsole,StatusConsoleItem
 from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
@@ -57,6 +57,8 @@ class Main_window(QtWidgets.QMainWindow):
         self.setCentralWidget(container)
         #self.setGeometry(100,80,200,200)
         self.setWindowTitle("AMRV archive manager") #traducir
+
+        self.printing()
 
 
     #Create the menu bar
@@ -243,7 +245,7 @@ class Main_window(QtWidgets.QMainWindow):
     def create_left_zone(self):
         left = QtWidgets.QWidget()
         left_layout = QtWidgets.QVBoxLayout()
-        self.scroll:Status_console = Status_console()
+        self.scroll:StatusConsole = StatusConsole()
         
         left_layout.addWidget(self.create_search_bars())
         left_layout.addWidget(self.scroll)
@@ -297,11 +299,16 @@ class Main_window(QtWidgets.QMainWindow):
     #Add the score to the list of added scores an update it in the labels list
     def add_score(self):
         if self.part_combo_box.isEnabled() and self.printer.add_score(self.part_combo_box.currentText(),int(self.num_copies.currentText()),self.archive.pieces.get_parsed_names()):
-            new_score_text = self.num_copies.currentText()+"x "+self.printer.actual_piece.name+"->"+self.part_combo_box.currentText()
+            #new_score_text = self.num_copies.currentText()+"x "+self.printer.actual_piece.name+"->"+self.part_combo_box.currentText()
 
             #Update the labels of the down scores
-            new_score_lbl = QtWidgets.QLabel(new_score_text)
-            self.scroll.add_lbl(new_score_lbl)
+            #new_score_lbl = QtWidgets.QLabel(new_score_text)
+            self.scroll.add_item(StatusConsoleItem(self.printer.actual_piece.name,
+                                                  self.part_combo_box.currentText(),
+                                                  int(self.num_copies.currentText()),
+                                                  self.printer.pdfs_added[-1].id,
+                                                  self.scroll.remove_item,
+                                                  self.printer.delete_pdf))
     
 
     #Display a window to select a location to save a pdf
@@ -477,3 +484,8 @@ class Main_window(QtWidgets.QMainWindow):
             except Exception as e:
                 Error_window.print_error(e)
 
+
+    def printing(self):
+        pass
+        #self.scroll.add_lbl(StatusConsoleItem("Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios","Adios",3,self.scroll.remove_item))
+        #self.scroll.add_lbl(StatusConsoleItem("Hola","Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios",3,self.scroll.remove_item))

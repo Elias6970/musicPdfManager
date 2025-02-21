@@ -5,7 +5,7 @@ from classes.classifier import *
 from classes.error import StopClassifyingException
 from classes.files_manage import Archive
 from classes.interactive_preview_conversor import InterctivePreviewConversor
-from gui.abstract_windows import Score_search_bar,Status_console,Pop_up_window
+from gui.abstract_windows import Score_search_bar,StatusConsole, StatusConsoleItem,Pop_up_window
 from gui.error_window import Error_window
 from gui.interactive_preview import InteractivePreview
 import os
@@ -221,13 +221,12 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
 
         self.pieces_to_classify:list[str] = []
         self.archive = archive
-        
 
         #Gui
         container_layout = QtWidgets.QVBoxLayout()
         
         self.search_bar = Score_search_bar(self.archive.pieces.get_digitalized_parsed_names(),self.validate_selection) #type: ignore
-        self.status_area = Status_console()
+        self.status_area = StatusConsole()
         
         #Butons
         btn_layout = QtWidgets.QHBoxLayout()
@@ -247,7 +246,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         container_layout.addWidget(self.status_area)
         
         self.setLayout(container_layout)
-
+        self.setGeometry(500,200,500,400)
         self.exec()
 
 
@@ -258,11 +257,18 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
                 return True
         return False
     
+    def remove_piece(self,piece:str):
+        self.pieces_to_classify.remove(piece)
 
     def btn_add(self):
         if self.validate_selection(self.search_bar.text()):
-            self.status_area.add_lbl(QtWidgets.QLabel(self.search_bar.text()))
             self.pieces_to_classify.append(self.search_bar.text())
+            self.status_area.add_item(StatusConsoleItem("",
+                                     self.search_bar.text(),
+                                     "",
+                                     self.search_bar.text(),
+                                     self.status_area.remove_item,
+                                     self.remove_piece))
 
             self.search_bar.clear()
 

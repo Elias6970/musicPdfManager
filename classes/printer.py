@@ -2,7 +2,7 @@ import PyPDF2,os,tempfile
 from reportlab.platypus import SimpleDocTemplate,Table,PageTemplate,Frame
 from reportlab.lib import pagesizes,colors
 from reportlab.pdfgen import canvas
-from classes.files_manage import Print_file,Dir
+from classes.files_manage import PrintFile,Dir
 from PyPDF2 import PdfWriter,PdfReader
 from classes.validate import Validate
 from classes.constants import DIR_SCORES,COVER_LIST_DOSSIER
@@ -11,21 +11,19 @@ from classes.constants import DIR_SCORES,COVER_LIST_DOSSIER
 class Printer:
     def __init__(self) -> None:
         self.actual_piece:Dir
-        self.pdfs_added:list[Print_file] = []
+        self.pdfs_added:list[PrintFile] = []
     
-    def set_actual_score(self,new_piece:Dir):
+    def set_actual_piece(self,new_piece:Dir):
         self.actual_piece = new_piece
 
     def add_score(self,score_path:str,num_copies:int,pieces:list[str]) -> bool:
         #Stops the user if try to add a score no existing
         if Validate.validate_selection(self.actual_piece.name,pieces):
 
-            self.pdfs_added.append(Print_file(os.path.join(self.actual_piece.path,DIR_SCORES,score_path),num_copies))
+            self.pdfs_added.append(PrintFile(os.path.join(self.actual_piece.path,DIR_SCORES,score_path),num_copies))
             return True
-        
         return False
     
-
     def create_pdf(self,path:str) -> None:
         merged_pdf = PyPDF2.PdfWriter()
         for i in self.pdfs_added:
@@ -35,6 +33,12 @@ class Printer:
         
         merged_pdf.write(path)
         merged_pdf.close()
+    
+    def delete_pdf(self,id:int) -> None:
+        for i in self.pdfs_added:
+            if i.id == id:
+                self.pdfs_added.remove(i)
+                break
 
 
 #This class represents a dossier(list with information of the db)
