@@ -304,17 +304,17 @@ class StatusConsoleItem(QtWidgets.QFrame):
         self.copies_lbl = QtWidgets.QLabel(str(copies))
         self.copies_lbl.setContentsMargins(0,0,3,0)
 
-        self.delete_button = QtWidgets.QPushButton()
-        self.delete_button.setIcon(QtGui.QIcon(os.path.join("data","img","trash.png")))
-        self.delete_button.setFixedSize(20, 25)
-        self.delete_button.setStyleSheet("background-color: #ff5555")
-        self.delete_button.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.delete_btn = QtWidgets.QPushButton()
+        self.delete_btn.setIcon(QtGui.QIcon(os.path.join("data","img","trash.png")))
+        self.delete_btn.setFixedSize(20, 25)
+        self.delete_btn.setStyleSheet("background-color: #ff5555")
+        self.delete_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
 
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(5,3,5,3)
         layout.addLayout(piece_layout)
         layout.addWidget(self.copies_lbl)
-        layout.addWidget(self.delete_button)
+        layout.addWidget(self.delete_btn)
         
         self.setFrameShape(QtWidgets.QFrame.Shape.Box)
         self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
@@ -322,7 +322,85 @@ class StatusConsoleItem(QtWidgets.QFrame):
         
         # Connect delete button
         #Remove the item from the StatusConsole and from the list of pdfs
-        self.delete_button.clicked.connect(lambda: remove_widget(self) or remove_from_list(self.item_id))
+        self.delete_btn.clicked.connect(lambda: remove_widget(self) or remove_from_list(self.item_id))
+
+
+#Item in a list with two buttons and one lbl
+#   name: name of the item. It's the identifier. Need to be unique
+#   edit_func: function that is called when you press edit button. Recive the preset_name as parameter
+#   delete_func: function that is called when you press delete button. Recive the preset_name as parameter
+class StatusConsoleItemWithTwoButtons(QtWidgets.QFrame):
+    def __init__(self, name:str, edit_func, delete_func,parent=None) -> None:
+        super().__init__(parent)
+
+        self.name = name
+
+        self.name_lbl = QtWidgets.QLabel(name)
+        self.name_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        self.name_lbl.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.name_lbl.setContentsMargins(7,0,0,0)
+        bold_font = QtGui.QFont()
+        bold_font.setBold(True)
+        self.name_lbl.setFont(bold_font)
+        
+
+
+
+        self.edit_btn = QtWidgets.QPushButton()
+        self.edit_btn.setIcon(QtGui.QIcon(os.path.join("data","img","edit.png")))
+        self.edit_btn.setFixedSize(20, 25)
+        #self.edit_btn.setStyleSheet("background-color: #ff5555")
+        self.edit_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.delete_btn = QtWidgets.QPushButton()
+        self.delete_btn.setIcon(QtGui.QIcon(os.path.join("data","img","trash.png")))
+        self.delete_btn.setFixedSize(20, 25)
+        self.delete_btn.setStyleSheet("background-color: #ff5555")
+        self.delete_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.setContentsMargins(5,3,5,3)
+        layout.addWidget(self.name_lbl)
+        layout.addWidget(self.edit_btn)
+        layout.addWidget(self.delete_btn)
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+        self.setFrameShape(QtWidgets.QFrame.Shape.Box)
+        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.setLayout(layout)
+        
+        # Connect delete button
+        #Remove the item from the StatusConsole and from the list of pdfs
+        self.edit_btn.clicked.connect(lambda: edit_func(name))
+        self.delete_btn.clicked.connect(lambda: delete_func(name))
+        
+#NOT finished
+class InfiniteFieldsItem(QtWidgets.QFrame):
+    def __init__(self,parent=None) -> None:
+        super().__init__(parent)
+
+        self.instruments:list[QtWidgets.QLineEdit] = []
+
+
+        layout = QtWidgets.QHBoxLayout()
+        layout.setContentsMargins(5,3,5,3)
+
+
+        layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        
+        self.setFrameShape(QtWidgets.QFrame.Shape.Box)
+        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.setLayout(layout)
+
+        #Add two first line edits
+        for i in range(2):
+            self.add_line()
+
+
+    def add_line(self):
+        l1 = QtWidgets.QLineEdit()
+        l1.textChanged.connect(lambda: self.add_line() if self.instruments.index(l1) == len(self.instruments) - 1 else None)
+        self.instruments.append(l1)
+        self.layout().addWidget(l1)
 
 
 
@@ -330,7 +408,7 @@ class StatusConsoleItem(QtWidgets.QFrame):
 class StatusConsole(QtWidgets.QScrollArea):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self.items:list[StatusConsoleItem] = []
+        self.items:list[QtWidgets.QFrame] = []
 
         status_console = QtWidgets.QWidget()
         self.status_console_layout = QtWidgets.QVBoxLayout()
@@ -345,11 +423,11 @@ class StatusConsole(QtWidgets.QScrollArea):
         self.setWidgetResizable(True)
         self.setWidget(status_console)
 
-    def add_item(self,item:StatusConsoleItem) -> None:
+    def add_item(self,item:QtWidgets.QFrame) -> None:
         self.status_console_layout.addWidget(item)
         self.items.append(item)
     
-    def remove_item(self,item:StatusConsoleItem) -> None:
+    def remove_item(self,item:QtWidgets.QFrame) -> None:
         self.status_console_layout.removeWidget(item)
         item.deleteLater()
         self.items.remove(item)

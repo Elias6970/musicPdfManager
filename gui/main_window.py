@@ -16,6 +16,7 @@ from gui.score_classifier_window import Piece_selector_to_classify_window
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
 from gui.previewer import Preview
+from gui.presets_window import PresetsWindow
 from tools.delete_junk_files import delete_junk_files
 
 class Main_window(QtWidgets.QMainWindow):
@@ -66,6 +67,9 @@ class Main_window(QtWidgets.QMainWindow):
         preferences_opt = QtGui.QAction(self.tr("Preferences"),self) #traducir
         preferences_opt.triggered.connect(self.show_preferences_window)
 
+        presets_opt = QtGui.QAction(self.tr("Presets"),self) #traducir
+        presets_opt.triggered.connect(self.show_presets_window)
+
         add_score_opt = QtGui.QAction(self.tr("Add score"),self) #traducir
         add_score_opt.triggered.connect(self.show_add_scores_menu)
 
@@ -97,7 +101,8 @@ class Main_window(QtWidgets.QMainWindow):
         if isinstance(menu,QtWidgets.QMenuBar):
             config_menu = menu.addMenu(self.tr("Configuration"))
             if config_menu:
-                config_menu.addActions([preferences_opt]) #traducir
+                config_menu.addActions([preferences_opt,
+                                        presets_opt]) #traducir
 
             archive_menu = menu.addMenu(self.tr("Archive"))
             if archive_menu:
@@ -441,6 +446,9 @@ class Main_window(QtWidgets.QMainWindow):
     #Show the config window
     def show_preferences_window(self):
         Preferences_window(False,self)
+
+    def show_presets_window(self):
+        PresetsWindow(self)
 
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):

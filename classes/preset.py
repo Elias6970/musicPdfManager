@@ -1,5 +1,5 @@
 import json
-from constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
+from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 
 
 # Class that represents the
@@ -27,6 +27,11 @@ class PresetManager():
 
     def add_preset(self,preset:Preset):
         self.presets.append(preset)
+
+    def remove_preset(self,preset_name:str):
+        for i in self.presets:
+            if i.name == preset_name:
+                self.presets.remove(i)
 
     # Dump the presets from a file
     def dump(self,path:str):
