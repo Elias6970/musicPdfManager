@@ -51,9 +51,11 @@ class Score_classifier_window(QtWidgets.QDialog):
         btn_rotate_left = QtWidgets.QPushButton()
         btn_rotate_left.clicked.connect(lambda: self.rotate(-90))
         btn_rotate_left.setToolTip(self.tr("Rotate the pdf 90º to the left"))
+        btn_rotate_left.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         btn_rotate_right = QtWidgets.QPushButton()
         btn_rotate_right.clicked.connect(lambda: self.rotate(90))
         btn_rotate_right.setToolTip(self.tr("Rotate the pdf 90º to the right"))
+        btn_rotate_right.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         
         try:
             if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
@@ -67,6 +69,7 @@ class Score_classifier_window(QtWidgets.QDialog):
         
         self.rotation_cb = QtWidgets.QCheckBox(self.tr("Keep rotation to next scores")) #traducir
         self.rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf is going to be rotated like the previous")) #traducir
+        self.rotation_cb.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         rotate_btns_horizontal_layout = QtWidgets.QHBoxLayout()
         rotate_btns_horizontal_layout.addWidget(btn_rotate_left)
         rotate_btns_horizontal_layout.addWidget(btn_rotate_right)
@@ -78,11 +81,13 @@ class Score_classifier_window(QtWidgets.QDialog):
         
         #buttons
         btn_prev = QtWidgets.QPushButton(self.tr("Previous")) #traducir
-        btn_prev.clicked.connect(self.previous_btn)       
+        btn_prev.clicked.connect(self.previous_btn)      
+        btn_prev.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus) 
         btn_next = QtWidgets.QPushButton(self.tr("Continue")) #traducir
         btn_next.clicked.connect(self.continue_btn)
         btn_close = QtWidgets.QPushButton(self.tr("Close")) #traducir
         btn_close.clicked.connect(self.close)
+        btn_close.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
 
         btns_layout.addWidget(btn_prev)
         btns_layout.addWidget(btn_next)
@@ -136,7 +141,7 @@ class Score_classifier_window(QtWidgets.QDialog):
 
         container_layout.addLayout(btns_layout)
         #self.setGeometry(0,0,500,400)
-        
+
         self.setLayout(container_layout)
 
 
@@ -179,8 +184,11 @@ class Score_classifier_window(QtWidgets.QDialog):
 
     #Update the in real time QLabel interpreted text
     def update_real_time_interpreted_txt(self,text:str):
-        txt = Text_analizer.analize(text)
-        self.interpreted_instrument_lbl.setText(txt)
+        try:
+            txt = Text_analizer.analize(text)
+            self.interpreted_instrument_lbl.setText(txt)
+        except ValueError as e:
+            self.interpreted_instrument_lbl.setText(self.tr(str(e)))
 
 
     #Opens a pop up window with the instructions
