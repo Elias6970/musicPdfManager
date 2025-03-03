@@ -184,11 +184,16 @@ class Score_classifier_window(QtWidgets.QDialog):
 
     #Update the in real time QLabel interpreted text
     def update_real_time_interpreted_txt(self,text:str):
-        try:
-            txt = Text_analizer.analize(text)
-            self.interpreted_instrument_lbl.setText(txt)
-        except ValueError as e:
-            self.interpreted_instrument_lbl.setText(self.tr(str(e)))
+        #Last classified
+        if text == "" or text == " ":
+            print(self.classifier.last_new_name)
+            self.interpreted_instrument_lbl.setText(self.classifier.last_new_name)
+        else:
+            try:
+                txt = Text_analizer.analize(text)
+                self.interpreted_instrument_lbl.setText(txt)
+            except ValueError as e:
+                self.interpreted_instrument_lbl.setText(self.tr(str(e)))
 
 
     #Opens a pop up window with the instructions
