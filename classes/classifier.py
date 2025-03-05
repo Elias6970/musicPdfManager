@@ -1,4 +1,4 @@
-import os,shutil,re,tempfile
+import os,shutil,re,tempfile,datetime
 from typing import List,Tuple
 from classes.error import *
 from classes.files_manage import File,Dir,Archive
@@ -100,11 +100,15 @@ class Pdf_controller():
 
     #Move the original to a new folder to have a backup 
     def move_originals(self):
-        if not os.path.exists(os.path.join(self.dir_path,"partituras_antiguo")):
-            os.mkdir(os.path.join(self.dir_path,"partituras_antiguo"))
-
+        if not os.path.exists(os.path.join(self.dir_path,"partituras_sin_clasificar")):
+            os.mkdir(os.path.join(self.dir_path,"partituras_sin_clasificar"))
+       
+        date = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        if not os.path.exists(os.path.join(self.dir_path,"partituras_sin_clasificar",date)):
+            os.mkdir(os.path.join(self.dir_path,"partituras_sin_clasificar",date))
+            
         for i in self.pdfs:
-            shutil.move(i.path,os.path.join(self.dir_path,"partituras_antiguo",os.path.basename(i.path)))
+            shutil.move(i.path,os.path.join(self.dir_path,"partituras_sin_clasificar",date,os.path.basename(i.path)))
 
 
     def export(self):
