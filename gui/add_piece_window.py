@@ -6,7 +6,7 @@ from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.pop_up_window import PopUpWindow
-from gui.score_classifier_window import Score_classifier_window
+from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
 
 #Window to add a new piece to the db. When you add the piece you must add the corresponding scores
 #Parameters:
@@ -50,7 +50,7 @@ class Add_piece_window(AbstractFieldsWindow):
                 
                 if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0,digitalized=1):
                     try:
-                        Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
+                        ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
                         self.archive.pieces.add(int(cod),name,parsed_name,True)
                     
                     except StopClassifyingException:

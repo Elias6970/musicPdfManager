@@ -14,7 +14,7 @@ from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
 from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
-from gui.score_classifier_window import Piece_selector_to_classify_window
+from gui.score_classifier.piece_selector_to_classify_window import PieceSelectorToClassifyWindow
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
 from gui.previewer import Preview
@@ -474,7 +474,7 @@ class Main_window(QtWidgets.QMainWindow):
 
     #Show the window to classify the scores
     def clasify_scores(self):
-        Piece_selector_to_classify_window(self.archive,self)
+        PieceSelectorToClassifyWindow(self.archive,self)
         self.update_autocompleter_scores()
 
     #Show about us window

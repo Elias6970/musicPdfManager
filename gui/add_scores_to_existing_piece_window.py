@@ -4,7 +4,7 @@ from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
 from gui.pop_up_window import PopUpWindow
-from gui.score_classifier_window import Score_classifier_window
+from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
 import os
 
 
@@ -32,7 +32,7 @@ class Add_scores_to_existing_piece_window(AbstractSerchBarAndTwoButtonsWindow):
         if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
             if self.validate_selection(self.search_bar.text()) and Archive_file_manager.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
                 try: 
-                    Score_classifier_window([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.db.update_parted)
+                    ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.db.update_parted)
                 except StopClassifyingException:
                     pass
                 except PdfNotFoundException: 
