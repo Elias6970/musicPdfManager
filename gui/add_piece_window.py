@@ -4,7 +4,8 @@ from classes.files_manage import Archive,File,Archive_file_manager,Dir
 from classes.constants import *
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
-from gui.abstract_windows import *
+from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
+from gui.pop_up_window import PopUpWindow
 from gui.score_classifier_window import Score_classifier_window
 
 #Window to add a new piece to the db. When you add the piece you must add the corresponding scores
@@ -15,7 +16,7 @@ from gui.score_classifier_window import Score_classifier_window
 #   Two buttons(add the piece, close the window)
 #   handwritten checkbox TODO: add posibility to not add scores
 #   
-class Add_piece_window(Abstract_fields_window):
+class Add_piece_window(AbstractFieldsWindow):
     def __init__(self, archive: Archive, parent=None):
         super().__init__(archive, self.tr("Add new piece"), self.tr("Add"), [HANDWRITTEN,DONT_ADD_SCORES],self.add_score, parent=parent)
 
@@ -58,10 +59,10 @@ class Add_piece_window(Abstract_fields_window):
                         pass
                     except Exception:
                         pass
-                    Pop_up_window(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
+                    PopUpWindow(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
                     self.reset_fields()
                 else:
-                    Pop_up_window(self.tr("Has been an error importing {}".format(parsed_name)),True,self)
+                    PopUpWindow(self.tr("Has been an error importing {}".format(parsed_name)),True,self)
                 
 
 
@@ -85,7 +86,7 @@ class Add_piece_window(Abstract_fields_window):
                             warning_text = warning_text + Archive.get_parsed_name(i[0],i[1]) + "\n"
                         
                         #Pop up the scores matched
-                        warning_window = Pop_up_window(warning_text,False,self)
+                        warning_window = PopUpWindow(warning_text,False,self)
                     
                     try:
                         return warning_window.btn_confirm_pressed 

@@ -2,7 +2,9 @@ from PyQt6 import QtWidgets
 from classes.files_manage import Archive,Archive_file_manager
 from classes.piece import Piece
 from classes.error import AvoidModificationException
-from gui.abstract_windows import *
+from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
+from gui.score_search_bar import ScoreSearchBar
+from gui.pop_up_window import PopUpWindow
 from gui.error_window import Error_window
 from classes.constants import *
 
@@ -16,8 +18,8 @@ class Modify_piece_window(QtWidgets.QDialog):
 
         container_layout = QtWidgets.QVBoxLayout()
 
-        self.search_bar:Score_search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.validate_selection) # type: ignore
-        self.abstract_fields = Abstract_fields_window(archive,self.tr("Modify piece"),self.tr("Modify"),[HANDWRITTEN,DIGITALIZED,PARTED],self.add_modification,self.close)
+        self.search_bar:Score_search_bar = ScoreSearchBar(self.archive.pieces.get_parsed_names(),self.validate_selection) # type: ignore
+        self.abstract_fields = AbstractFieldsWindow(archive,self.tr("Modify piece"),self.tr("Modify"),[HANDWRITTEN,DIGITALIZED,PARTED],self.add_modification,self.close)
 
         container_layout.addWidget(self.search_bar)
         container_layout.addWidget(self.abstract_fields)
@@ -36,7 +38,7 @@ class Modify_piece_window(QtWidgets.QDialog):
         try:
             #Ask the user if he want to modify the cod
             if self.old_piece.cod != int(self.abstract_fields.line_cod.text()):
-                confirmation = Pop_up_window(self.tr("Are you sure that you want to modify the cod?")+"\n"+self.tr("It is a sensitive  and essential part of the archive"),False,self)
+                confirmation = PopUpWindow(self.tr("Are you sure that you want to modify the cod?")+"\n"+self.tr("It is a sensitive  and essential part of the archive"),False,self)
                 if confirmation.btn_confirm_pressed == False:
                     raise AvoidModificationException()
             
@@ -56,7 +58,7 @@ class Modify_piece_window(QtWidgets.QDialog):
                 self.archive.pieces.update_cod_and_name(self.old_piece.cod,int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
                 
 
-                Pop_up_window(self.tr("Correctly modificated"),True,self) 
+                PopUpWindow(self.tr("Correctly modificated"),True,self) 
 
                 self.clear_form()
                 self.search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())

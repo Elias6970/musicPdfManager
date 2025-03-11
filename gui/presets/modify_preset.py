@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QStackedWidget, QLineEdit
 from PyQt6.QtCore import Qt
 from PyQt6.QtCore import pyqtSlot, QEvent
-from gui.abstract_windows import StatusConsole,InfiniteFieldsItem
+from gui.status_console import StatusConsole
+from gui.list_items.infinite_fields_item import InfiniteFieldsItem
 
 # This class is a QWidget that contains a scroll area with a list of InfiniteFieldsItem
 # The InfiniteFieldsItem is a QWidget that contains a copy number and a list of QLineEdit widgets

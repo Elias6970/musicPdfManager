@@ -1,10 +1,7 @@
-from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget, QLabel, QFrame, QGridLayout, QHBoxLayout
-from PyQt6.QtGui import QIcon
-from PyQt6.QtCore import Qt, QPoint
-import os
-from gui.abstract_windows import StatusConsole, StatusConsoleItemWithTwoButtons, InfiniteFieldsItem
+from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget
+from gui.status_console import StatusConsole
+from gui.list_items.status_conosle_item_with_two_buttons import StatusConsleItemWithTwoButtons
 from gui.presets.modify_preset import ModifyPresetView
-from classes.presets.preset import Preset
 from classes.presets.preset_manager import PresetManager
 from classes.config import PRESETS_PATH
 
@@ -12,7 +9,7 @@ class PresetsWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.preset_manager = PresetManager()
-        self.items:list[StatusConsoleItemWithTwoButtons] = []
+        self.items:list[StatusConsleItemWithTwoButtons] = []
 
         self.setWindowTitle(self.tr("Presets"))
 
@@ -28,7 +25,7 @@ class PresetsWindow(QDialog):
 
         self.setMinimumSize(400,300)
 
-        self.status_console.add_item(StatusConsoleItemWithTwoButtons("Preset 1",3,2))
+        self.status_console.add_item(StatusConsleItemWithTwoButtons("Preset 1",3,2))
 
 
         # Relleno de presets
@@ -67,7 +64,7 @@ class PresetsWindow(QDialog):
 
 
     def add_preset_to_the_view(self,name:str):
-        item = StatusConsoleItemWithTwoButtons(name,self.modify_preset,self.remove_preset)
+        item = StatusConsleItemWithTwoButtons(name,self.modify_preset,self.remove_preset)
         self.status_console.add_item(item)
         self.items.append(item)
 

@@ -5,7 +5,10 @@ from classes.classifier import *
 from classes.error import StopClassifyingException
 from classes.files_manage import Archive
 from classes.interactive_preview_conversor import InterctivePreviewConversor
-from gui.abstract_windows import Score_search_bar,StatusConsole, StatusConsoleItem,Pop_up_window
+from gui.status_console import StatusConsole
+from gui.score_search_bar import ScoreSearchBar
+from gui.pop_up_window import PopUpWindow
+from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
 from gui.error_window import Error_window
 from gui.interactive_preview import InteractivePreview
 import os
@@ -194,7 +197,7 @@ class Score_classifier_window(QtWidgets.QDialog):
 
     #Opens a pop up window with the instructions
     def help_opt_menu(self):
-        Pop_up_window(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
+        PopUpWindow(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
     
     def close(self):
         self.hide()
@@ -234,7 +237,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         #Gui
         container_layout = QtWidgets.QVBoxLayout()
         
-        self.search_bar = Score_search_bar(self.archive.pieces.get_digitalized_parsed_names(),self.validate_selection) #type: ignore
+        self.search_bar = ScoreSearchBar(self.archive.pieces.get_digitalized_parsed_names(),self.validate_selection) #type: ignore
         self.status_area = StatusConsole()
         
         #Butons
@@ -272,7 +275,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
     def btn_add(self):
         if self.validate_selection(self.search_bar.text()):
             self.pieces_to_classify.append(self.search_bar.text())
-            self.status_area.add_item(StatusConsoleItem("",
+            self.status_area.add_item(StatusConsleItemWithTwoTexts("",
                                      self.search_bar.text(),
                                      "",
                                      self.search_bar.text(),
@@ -295,7 +298,7 @@ class Piece_selector_to_classify_window(QtWidgets.QDialog):
         
         if not error_classified == "":
             for i in error_classified:
-                answer = Pop_up_window(i + self.tr(" is already splited,\n")+self.tr("do you want to redo it? "),False,self) #traducir
+                answer = PopUpWindow(i + self.tr(" is already splited,\n")+self.tr("do you want to redo it? "),False,self) #traducir
                 if answer.btn_confirm_pressed == True:
                     to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
 

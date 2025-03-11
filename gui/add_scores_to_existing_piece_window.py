@@ -2,11 +2,14 @@ from PyQt6 import  QtWidgets
 from classes.files_manage import Archive,Archive_file_manager,Dir
 from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException,StopClassifyingException
-from gui.abstract_windows import *
+from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
+from gui.pop_up_window import PopUpWindow
 from gui.score_classifier_window import Score_classifier_window
+import os
+
 
 #Creates a window to add scores to pieces existing in the archive directory or only in the db 
-class Add_scores_to_existing_piece_window(Abstract_serch_bar_and_two_buttons_window):
+class Add_scores_to_existing_piece_window(AbstractSerchBarAndTwoButtonsWindow):
     def __init__(self,archive:Archive,parent=None):
         super(Add_scores_to_existing_piece_window,self).__init__(archive,self.add_score,parent)
         self.archive = archive
@@ -34,4 +37,4 @@ class Add_scores_to_existing_piece_window(Abstract_serch_bar_and_two_buttons_win
                     pass
                 except PdfNotFoundException: 
                     pass
-                Pop_up_window(self.tr("Correctly imported"),True,self) #Traducir
+                PopUpWindow(self.tr("Correctly imported"),True,self) #Traducir

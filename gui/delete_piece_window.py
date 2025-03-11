@@ -1,11 +1,11 @@
 from PyQt6 import QtWidgets
 from classes.files_manage import Archive,Archive_file_manager
-from gui.abstract_windows import *
+from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
 from gui.error_window import Error_window
 from classes.constants import *
 
 #Creates a window that can delete scores with search bar and 2 buttons
-class Delete_piece_window(Abstract_serch_bar_and_two_buttons_window):
+class Delete_piece_window(AbstractSerchBarAndTwoButtonsWindow):
     def __init__(self,archive:Archive,parent=None):
         super(Delete_piece_window,self).__init__(archive,self.delete_piece,parent) #traducir
 

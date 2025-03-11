@@ -7,7 +7,9 @@ from classes.printer import Printer,Dossier
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from gui.error_window import Error_window
-from gui.abstract_windows import Score_search_bar,StatusConsole,StatusConsoleItem
+from gui.status_console import StatusConsole
+from gui.score_search_bar import ScoreSearchBar
+from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
 from gui.add_piece_window import Add_piece_window
 from gui.delete_piece_window import Delete_piece_window
 from gui.modify_piece_window import Modify_piece_window
@@ -194,7 +196,7 @@ class Main_window(QtWidgets.QMainWindow):
             pass
 
         #Search bar
-        self.piece_search_bar = Score_search_bar(self.archive.pieces.get_parsed_names(),self.set_option_of_instruments)
+        self.piece_search_bar = ScoreSearchBar(self.archive.pieces.get_parsed_names(),self.set_option_of_instruments)
 
         #Rest of widgets
         self.only_digitalized_cb = QtWidgets.QCheckBox()
@@ -308,7 +310,7 @@ class Main_window(QtWidgets.QMainWindow):
 
             #Update the labels of the down scores
             #new_score_lbl = QtWidgets.QLabel(new_score_text)
-            self.scroll.add_item(StatusConsoleItem(self.printer.actual_piece.name,
+            self.scroll.add_item(StatusConsleItemWithTwoTexts(self.printer.actual_piece.name,
                                                   self.part_combo_box.currentText(),
                                                   int(self.num_copies.currentText()),
                                                   self.printer.pdfs_added[-1].id,
@@ -495,5 +497,5 @@ class Main_window(QtWidgets.QMainWindow):
 
     def printing(self):
         pass
-        #self.scroll.add_lbl(StatusConsoleItem("Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios","Adios",3,self.scroll.remove_item))
-        #self.scroll.add_lbl(StatusConsoleItem("Hola","Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios",3,self.scroll.remove_item))
+        #self.scroll.add_lbl(StatusConsleItemWithTwoTexts("Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios","Adios",3,self.scroll.remove_item))
+        #self.scroll.add_lbl(StatusConsleItemWithTwoTexts("Hola","Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios",3,self.scroll.remove_item))
