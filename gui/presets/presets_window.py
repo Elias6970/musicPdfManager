@@ -1,8 +1,11 @@
-from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget, QLabel, QFrame
+from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget, QLabel, QFrame, QGridLayout, QHBoxLayout
 from PyQt6.QtGui import QIcon
+from PyQt6.QtCore import Qt, QPoint
 import os
 from gui.abstract_windows import StatusConsole, StatusConsoleItemWithTwoButtons, InfiniteFieldsItem
-from classes.preset import Preset,PresetManager
+from gui.presets.modify_preset import ModifyPresetView
+from classes.presets.preset import Preset
+from classes.presets.preset_manager import PresetManager
 from classes.config import PRESETS_PATH
 
 class PresetsWindow(QDialog):
@@ -28,14 +31,12 @@ class PresetsWindow(QDialog):
         self.status_console.add_item(StatusConsoleItemWithTwoButtons("Preset 1",3,2))
 
 
-        
+        # Relleno de presets
         self.preset_manager.load(PRESETS_PATH)
         for i in self.preset_manager.presets:
             self.add_preset_to_the_view(i.name)
 
-
-
-
+        self.stacked_widget.setCurrentWidget(self.modify_view)
 
         self.exec()
         
@@ -49,8 +50,10 @@ class PresetsWindow(QDialog):
         self.add_btn = QPushButton("+")
         self.add_btn.setFixedSize(30,30)
         self.add_btn.clicked.connect(lambda: self.stacked_widget.setCurrentWidget(self.modify_view))
-
+        
+       
         self.status_console = StatusConsole()
+        self.status_console.setContentsMargins(10,0,10,5)
         layout.addWidget(self.add_btn)
         layout.addWidget(self.status_console)
 
@@ -59,22 +62,17 @@ class PresetsWindow(QDialog):
 
 
     def create_modify_view(self) -> QWidget:
-        widget = QWidget()
-
-        self.modify_scroll = StatusConsole()
-        self.modify_scroll.add_item(InfiniteFieldsItem())
-        self.modify_scroll.add_item(InfiniteFieldsItem())
-
-        widget.setLayout(QVBoxLayout())
-        widget.layout().addWidget(self.modify_scroll)
+        widget = ModifyPresetView()
         return widget
 
 
     def add_preset_to_the_view(self,name:str):
-        item = StatusConsoleItemWithTwoButtons(name,"",self.remove_preset)
+        item = StatusConsoleItemWithTwoButtons(name,self.modify_preset,self.remove_preset)
         self.status_console.add_item(item)
         self.items.append(item)
 
+    def modify_preset(self,name:str):
+        pass
     
     def remove_preset(self,name:str):
         self.preset_manager.remove_preset(name)

@@ -1,5 +1,6 @@
 from PyQt6 import QtCore, QtWidgets, QtGui
 from classes.files_manage import Archive
+from classes.constants import TRASH_IMG_PATH,EDIT_IMG_PATH
 import os
 
 
@@ -217,6 +218,18 @@ class Score_search_bar(QtWidgets.QLineEdit):
         self.pieces_parsed_names =  pieces_parsed_names
         self.auto_completer.setModel(QtCore.QStringListModel(self.pieces_parsed_names))
 
+    def keyPressEvent(self, event):
+        """Override keyPressEvent to handle Enter key."""
+        if event.key() == QtCore.Qt.Key.Key_Enter or event.key() == QtCore.Qt.Key.Key_Return:
+            completer = self.auto_completer
+            
+            if completer and completer.model().rowCount() > 0:  # Check if there are suggestions
+                # Select the first suggestion
+                completer.setCurrentRow(0)  # First suggestion
+                self.setText(completer.currentCompletion())  # Set text to the first suggestion
+
+        # Call the base class to ensure default event processing
+        super().keyPressEvent(event)
 
 """
 Pop up a window that shows a message with buttons
@@ -305,7 +318,7 @@ class StatusConsoleItem(QtWidgets.QFrame):
         self.copies_lbl.setContentsMargins(0,0,3,0)
 
         self.delete_btn = QtWidgets.QPushButton()
-        self.delete_btn.setIcon(QtGui.QIcon(os.path.join("data","img","trash.png")))
+        self.delete_btn.setIcon(QtGui.QIcon(TRASH_IMG_PATH))
         self.delete_btn.setFixedSize(20, 25)
         self.delete_btn.setStyleSheet("background-color: #ff5555")
         self.delete_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
@@ -347,12 +360,12 @@ class StatusConsoleItemWithTwoButtons(QtWidgets.QFrame):
 
 
         self.edit_btn = QtWidgets.QPushButton()
-        self.edit_btn.setIcon(QtGui.QIcon(os.path.join("data","img","edit.png")))
+        self.edit_btn.setIcon(QtGui.QIcon(EDIT_IMG_PATH))
         self.edit_btn.setFixedSize(20, 25)
         #self.edit_btn.setStyleSheet("background-color: #ff5555")
         self.edit_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
         self.delete_btn = QtWidgets.QPushButton()
-        self.delete_btn.setIcon(QtGui.QIcon(os.path.join("data","img","trash.png")))
+        self.delete_btn.setIcon(QtGui.QIcon(TRASH_IMG_PATH))
         self.delete_btn.setFixedSize(20, 25)
         self.delete_btn.setStyleSheet("background-color: #ff5555")
         self.delete_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
@@ -373,35 +386,52 @@ class StatusConsoleItemWithTwoButtons(QtWidgets.QFrame):
         self.edit_btn.clicked.connect(lambda: edit_func(name))
         self.delete_btn.clicked.connect(lambda: delete_func(name))
         
-#NOT finished
+
 class InfiniteFieldsItem(QtWidgets.QFrame):
-    def __init__(self,parent=None) -> None:
+    def __init__(self,every_change_func,parent=None) -> None:
         super().__init__(parent)
-
+        self.default_lineEdits = 2
+        self.max_copies = 20
         self.instruments:list[QtWidgets.QLineEdit] = []
+        self.number_of_option = 1
+        self.every_change_func = every_change_func #Function that is called when the text of the line edit changes
 
+        self.num_copies = QtWidgets.QComboBox()
+        self.num_copies.setFixedWidth(48)
+        self.num_copies.addItems([str(i+1) for i in range(self.max_copies)])
+        #self.num_copies.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
 
         layout = QtWidgets.QHBoxLayout()
         layout.setContentsMargins(5,3,5,3)
-
-
         layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.num_copies)
+
+        
         
         self.setFrameShape(QtWidgets.QFrame.Shape.Box)
         self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
         self.setLayout(layout)
 
         #Add two first line edits
-        for i in range(2):
-            self.add_line()
+        for i in range(self.default_lineEdits):
+            self.add_lineEdit()
 
-
-    def add_line(self):
+    #Add a line edit to the layout
+    #The line edit add a new lineEdit if you write in the last one
+    def add_lineEdit(self):
         l1 = QtWidgets.QLineEdit()
-        l1.textChanged.connect(lambda: self.add_line() if self.instruments.index(l1) == len(self.instruments) - 1 else None)
+        l1.textChanged.connect(lambda: (self.add_lineEdit() if self.instruments.index(l1) == len(self.instruments) - 1 else None) or self.every_change_func(self))
+
+        if self.number_of_option == 1:
+            l1.setPlaceholderText(self.tr("Instrument"))
+        else:
+            l1.setPlaceholderText(self.tr("Option")+" "+str(self.number_of_option))
+            self.layout().addWidget(QtWidgets.QLabel("->"))
+        
         self.instruments.append(l1)
         self.layout().addWidget(l1)
 
+        self.number_of_option += 1
 
 
 #Scroll area where you can add QLabels 

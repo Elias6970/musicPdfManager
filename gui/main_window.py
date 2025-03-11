@@ -16,7 +16,7 @@ from gui.score_classifier_window import Piece_selector_to_classify_window
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
 from gui.previewer import Preview
-from gui.presets_window import PresetsWindow
+from gui.presets.presets_window import PresetsWindow
 from tools.delete_junk_files import delete_junk_files
 
 class Main_window(QtWidgets.QMainWindow):
@@ -189,7 +189,7 @@ class Main_window(QtWidgets.QMainWindow):
                 img_path = os.path.join(sys._MEIPASS,'data','img') #type: ignore
             else:
                 img_path = os.path.join('data','img')
-                self.refresh_button.setIcon(QtGui.QIcon(os.path.join(img_path,'refresh.png')))
+                self.refresh_button.setIcon(QtGui.QIcon(REFRESH_IMG_PATH))
         except Exception:
             pass
 

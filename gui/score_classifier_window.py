@@ -58,12 +58,8 @@ class Score_classifier_window(QtWidgets.QDialog):
         btn_rotate_right.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         
         try:
-            if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-                img_path = os.path.join(sys._MEIPASS,'data','img') #type: ignore
-            else:
-                img_path = os.path.join('data','img')
-            btn_rotate_left.setIcon(QtGui.QIcon(os.path.join(img_path,'rotate_left.png'))) #traducir
-            btn_rotate_right.setIcon(QtGui.QIcon(os.path.join(img_path,'rotate_right.png'))) #traducir
+            btn_rotate_left.setIcon(QtGui.QIcon(ROTATE_L_IMG_PATH)) #traducir
+            btn_rotate_right.setIcon(QtGui.QIcon(ROTATE_R_IMG_PATH)) #traducir
         except Exception:
             pass
         
