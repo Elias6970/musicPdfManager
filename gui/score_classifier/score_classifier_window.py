@@ -5,7 +5,7 @@ from classes.classifier import *
 from classes.interactive_preview_conversor import InterctivePreviewConversor
 from gui.pop_up_window import PopUpWindow
 from gui.error_window import Error_window
-from gui.interactive_preview import InteractivePreview
+from gui.interactive_previewer.interactive_previewer import InteractivePreviewer
 
 
 #Throw StopClassifyingException if the classification doesn't finish
@@ -41,7 +41,7 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
 
 
         #Pdf viewer
-        self.view = InteractivePreview()
+        self.view = InteractivePreviewer()
 
 
         #Rotate area
@@ -195,10 +195,12 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
     
     def close(self):
         self.hide()
+        exit(0)
 
 
     def closeEvent(self,event):
         event.accept()
+        exit(0)
 
     #For testing
     """def state(self):
