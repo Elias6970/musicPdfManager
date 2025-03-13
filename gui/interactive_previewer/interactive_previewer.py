@@ -23,7 +23,7 @@ class InteractivePreviewer(QGraphicsView):
         self.is_dragging = False # Flag to know if the user is moving the rectangle
         self.is_rotating = False
         self.moving_offset = QPointF() # Offset to move the rectangle
-        self.rotating_offset = QPointF # Offset to rotate the rectangle
+        self.rotating_offset = QPointF() # Offset to rotate the rectangle
 
     # Load the image in the preview
     def load_img(self,qpixmap:QPixmap, pdf_rect:fitz.Rect):
@@ -86,7 +86,7 @@ class InteractivePreviewer(QGraphicsView):
                 scene_pos = self.mapToScene(event.pos())
                 self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
             
-            print(self.rectangle.rect())
+            #print(self.rectangle.rect())
 
 
 

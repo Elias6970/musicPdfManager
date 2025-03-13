@@ -29,7 +29,20 @@ class CropRectangle:
     def crop(self,pdf_path:str,output_path:str) -> str:
         output_path2 = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
         file = fitz.open(pdf_path)
-        file[0].set_cropbox(self.get())
+        """print("CropBox:",file[0].cropbox)
+        print("CropBoxPosition:",file[0].cropbox_position)
+        print("MediBox:",file[0].mediabox)
+        print("MediaBOx size:", file[0].mediabox_size)
+        print("Corte:",self.get())"""
+        
+        #Add the cropbox initial position to the crop rectangle
+        crop_rect = self.get()
+        crop_rect.x0 += file[0].cropbox_position.x
+        crop_rect.x1 += file[0].cropbox_position.x
+        crop_rect.y0 += file[0].cropbox_position.y
+        crop_rect.y1 += file[0].cropbox_position.y
+
+        file[0].set_cropbox(crop_rect)
         file.save(output_path2)#,incremental=True,encryption=fitz.PDF_ENCRYPT_KEEP) #type: ignore
         file.close()
         return output_path2
