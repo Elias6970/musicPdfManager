@@ -24,6 +24,8 @@ class InteractivePreviewer(QGraphicsView):
         self.is_rotating = False
         self.moving_offset = QPointF() # Offset to move the rectangle
         self.rotating_offset = QPointF() # Offset to rotate the rectangle
+        self.initial_rotation_angle = 0.0
+        self.angle = 0.0
 
     # Load the image in the preview
     def load_img(self,qpixmap:QPixmap, pdf_rect:fitz.Rect):
@@ -75,11 +77,12 @@ class InteractivePreviewer(QGraphicsView):
                 delta_x = scene_pos.x() - self.rotating_offset.x()
                 delta_y = scene_pos.y() - self.rotating_offset.y()
                 #angle = math.degrees(math.atan2(delta_y, delta_x)/3)  # Convert to degrees
-                angle = math.degrees(-delta_x/40)
-
+                self.angle = self.initial_rotation_angle + math.degrees(-delta_x/40)
+                print("Initial:",self.initial_rotation_angle,",angle:",self.angle)
                 #self.rectangle.setTransformOriginPoint(self.rectangle.rect().width()/2,self.rectangle.rect().height()/2)
                 self.rectangle.setTransformOriginPoint(self.start_pos.x() + self.rectangle.rect().width()/2,self.start_pos.y() + self.rectangle.rect().height()/2)
-                self.rectangle.setRotation(angle)
+                self.rectangle.setRotation(self.angle)
+                
 
             #Create the rectangle
             elif self.is_creating_rect:
@@ -100,6 +103,7 @@ class InteractivePreviewer(QGraphicsView):
                 if isinstance(item_clicked, MovableRectangle) and self.is_dragging:
                     pass
                 
+
                 elif isinstance(item_clicked, RotationHandler) and self.is_rotating:
                     pass
 
@@ -114,6 +118,7 @@ class InteractivePreviewer(QGraphicsView):
             self.is_creating_rect = False
             self.is_dragging = False
             self.is_rotating = False
+            self.initial_rotation_angle = self.angle
     
     # Clean all the rectangles in the scene
     def clean_rectangles(self):
