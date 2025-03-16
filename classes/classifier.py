@@ -51,16 +51,16 @@ class Exportable_pdf(File):
         for i in self.list_of_new_files:
             #Check if need to be cropped
             if not i[2].is_empty():
-                m = i[2].crop(i[0],i[0])
-                shutil.copy(m,os.path.join(os.path.dirname(self.path),i[1])+".pdf")
-                continue
+                cropped_pdf = i[2].crop(i[0])
+                shutil.copy(cropped_pdf,os.path.join(os.path.dirname(self.path),i[1])+".pdf")
             
-            if os.path.isfile(os.path.join(os.path.dirname(self.path),i[1])+".pdf"):
+            elif os.path.isfile(os.path.join(os.path.dirname(self.path),i[1])+".pdf"):
                 self.append_page(os.path.join(os.path.dirname(self.path),i[1])+".pdf",i[0])
             else:
                 shutil.copy(i[0],os.path.join(os.path.dirname(self.path),i[1])+".pdf")
 
-
+    #Rotate all the pdf clockwise. 
+    #   Degrees need to be multiple of 90
     @staticmethod
     def rotate(degrees:int,path:str) -> None:
         reader = PyPDF2.PdfReader(path)
@@ -99,7 +99,8 @@ class Pdf_controller():
         return self.pdfs[self.actual_pdf_number]
 
     #Move the original to a new folder to have a backup 
-    def move_originals(self):
+    #Return the folder name
+    def move_originals(self) -> str:
         if not os.path.exists(os.path.join(self.dir_path,"partituras_sin_clasificar")):
             os.mkdir(os.path.join(self.dir_path,"partituras_sin_clasificar"))
        
@@ -110,13 +111,22 @@ class Pdf_controller():
         for i in self.pdfs:
             shutil.move(i.path,os.path.join(self.dir_path,"partituras_sin_clasificar",date,os.path.basename(i.path)))
 
+        return date
+
+    #Move from backup to scores and delete the original folder
+    def move_from_backup_to_partituras(self,folder_name:str):
+        for i in os.listdir(os.path.join(self.dir_path,"partituras_sin_clasificar",folder_name)):
+            if os.path.isfile(i):
+                shutil.move(i,os.path.join(self.dir_path,DIR_SCORES))
+        shutil.rmtree(folder_name)
 
     def export(self):
-        self.move_originals()
-
-        for i in self.pdfs:
-            i.export()
-        
+        backup_dir = self.move_originals()
+        try:
+            for i in self.pdfs:
+                i.export()
+        except:
+            self.move_from_backup_to_partituras(backup_dir)
         
 
 #This class manage how pieces are classified.

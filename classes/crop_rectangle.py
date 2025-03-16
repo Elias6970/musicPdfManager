@@ -26,8 +26,8 @@ class CropRectangle:
         return self.rect == self.empty_rectangle
     
     #Crop the pdf that gets by parameters with the rectangle that the obj has
-    def crop(self,pdf_path:str,output_path:str) -> str:
-        output_path2 = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
+    def crop(self,pdf_path:str) -> str:
+        output_path = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
         file = fitz.open(pdf_path)
         """print("CropBox:",file[0].cropbox)
         print("CropBoxPosition:",file[0].cropbox_position)
@@ -43,7 +43,7 @@ class CropRectangle:
         crop_rect.y1 += file[0].cropbox_position.y
 
         file[0].set_cropbox(crop_rect)
-        file.save(output_path2)#,incremental=True,encryption=fitz.PDF_ENCRYPT_KEEP) #type: ignore
+        file.save(output_path)#,incremental=True,encryption=fitz.PDF_ENCRYPT_KEEP) #type: ignore
         file.close()
-        return output_path2
+        return output_path
 
