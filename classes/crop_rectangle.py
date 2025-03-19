@@ -5,59 +5,30 @@ import numpy as np
 from gui.interactive_previewer.movable_rectangle import MovableRectangle
 
 # Class to save a crop to a rectangle
-# Zoom is the relation between the original pixmap and the printed in the InteractivePreviewer
-# Zoom = Original.width/Printed.width (we use width and not both because we are preserving the aspect ratio)
 class CropRectangle:
-    empty_rectangle = QRect(0,0,0,0)
-
-    def __init__(self,movable_rect_item:MovableRectangle,zoom:float) -> None:
-        self.zoom = zoom
-
-        self.movable_rect_item = MovableRectangle()
-        #self.movable_rect_item.setRect(movable_rect_item.rect())
-        self.movable_rect_item.setPos(movable_rect_item.pos())
-        self.movable_rect_item.setRotation(movable_rect_item.rotation())
-        #self.movable_rect_item.setScale(self.zoom)
-        
-        topLeft = movable_rect_item.rect().topLeft() * zoom
-        bottomRight = movable_rect_item.rect().bottomRight() * zoom
-
-        rect = QRectF(topLeft,bottomRight)
-        self.movable_rect_item.setRect(rect)
-
-
-    #Get the rectangle to crop in the pdf
-    #The rectangle is scaled to the pdf size
-    def get(self) -> fitz.Rect:
-        rect = self.movable_rect_item.get_rectangle().toRect()
-        return rect
+    def __init__(self,rectangle:QRectF,rotation:float) -> None:
+        self.rectangle = rectangle
+        self.rotation = rotation
     
     
     def is_empty(self) -> bool:
-        return self.movable_rect_item.get_rectangle().isEmpty()
+        return self.rectangle.isEmpty()
 
-    def get_rectangle_corners_2(self):
-        rect = self.movable_rect_item.get_rectangle()
-        
+
+    def get_rectangle_corners(self):
         local_corners = [
-            rect.topLeft(),
-            rect.topRight(),
-            rect.bottomRight(),
-            rect.bottomLeft(),
+            self.rectangle.topLeft(),
+            self.rectangle.topRight(),
+            self.rectangle.bottomRight(),
+            self.rectangle.bottomLeft(),
         ]
         rotated_corners = []
         
-        center_x = (rect.topLeft().x() + rect.bottomRight().x()) / 2
-        center_y = (rect.topLeft().y() + rect.bottomRight().y()) / 2
-        rotation = np.deg2rad(self.movable_rect_item.rotation())
-        cos = np.cos(rotation)
-        sin = np.sin(rotation)
-
-        for i in local_corners:
-            x = center_x + cos * (i.x() - center_x) - sin * (i.y() - center_y)
-            y = center_y + sin * (i.x() - center_x) - cos * (i.y() - center_y)
-            #rotated.append([x,y])
-
+        center_x = (self.rectangle.topLeft().x() + self.rectangle.bottomRight().x()) / 2
+        center_y = (self.rectangle.topLeft().y() + self.rectangle.bottomRight().y()) / 2
+        rotation_rad = np.deg2rad(self.rotation)
+        cos = np.cos(rotation_rad)
+        sin = np.sin(rotation_rad)
 
         rotation_matrix = np.array([
             [cos,-sin],
@@ -67,53 +38,11 @@ class CropRectangle:
             translated = np.array([i.x()-center_x,i.y()-center_y])
             rotated = rotation_matrix @ translated
             rotated_corners.append([rotated[0]+center_x,rotated[1]+center_y])
-            
-
-
-
 
         return np.array(rotated_corners)
 
 
-    def get_rectangle_corners(self):
-        """
-        Extracts the four corner points of a rotated QGraphicsRectItem.
 
-        :return: NumPy array of 4 corner points [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
-        """
-        # Get the rectangle (x, y, width, height)
-        rect = self.movable_rect_item.rect()
-
-        # Define rectangle corner points in local coordinates
-        local_corners = [
-            rect.topLeft(),
-            rect.topRight(),
-            rect.bottomRight(),
-            rect.bottomLeft(),
-        ]
-
-        # Get the transformation applied to the QGraphicsRectItem (rotation, scaling, etc.)
-        transform = self.movable_rect_item.sceneTransform() if hasattr(self.movable_rect_item, 'sceneTransform') else QTransform()
-
-        # Apply the transformation to each corner
-        transformed_corners = [transform.map(point) for point in local_corners]
-
-        # Convert to NumPy array
-        points_array = np.array([[p.x(), p.y()] for p in transformed_corners], dtype=np.float32)
-
-        return points_array
-
-    def check_points(self):
-        rect = self.movable_rect_item.get_rectangle()
-        
-        local_corners = [
-            rect.topLeft(),
-            rect.topRight(),
-            rect.bottomRight(),
-            rect.bottomLeft(),
-        ]
-
-        return local_corners
 
     def extract_and_warp_rect(self,pixmap:fitz.Pixmap) -> fitz.Pixmap:
         """
@@ -129,8 +58,8 @@ class CropRectangle:
         img = np.frombuffer(pixmap.samples, dtype=np.uint8).reshape(pixmap.h, pixmap.w, pixmap.n)
 
         # Ensure points are float32
-        points = self.get_rectangle_corners_2()
-        print("NotRotated:",self.check_points())
+        points = self.get_rectangle_corners()
+        #print("NotRotated:",self.check_points())
         #print("Rotated:",list(points))
         #points = self.check_points()
         #points = np.array([[36,95],[518,35],[539,205],[57,265]])
@@ -217,7 +146,7 @@ class CropRectangle:
 
 
     def print_points(self,pdf_path:str):
-        corners = self.get_rectangle_corners_2()
+        corners = self.get_rectangle_corners()
         file = fitz.open(pdf_path)
         original_pixmap = file[0].get_pixmap()
         file.close()

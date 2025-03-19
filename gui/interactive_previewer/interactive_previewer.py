@@ -68,16 +68,18 @@ class InteractivePreviewer(QGraphicsView):
                             self.start_pos = scene_pos
                             
                             self.rectangle = MovableRectangle(QRectF(scene_pos, scene_pos))
+                            self.rectangle.set_zoom(self.qpixmap.width(),self.img_scene.qpixmap.width())
                             self.img_scene.addItem(self.rectangle)
                             self.is_creating_rect = True
 
 
     def mouseMoveEvent(self, event):
-        if event and self.rectangle: 
+        if event and self.rectangle:
             #Move the rectangle
             if self.is_dragging:
                 scene_pos = self.mapToScene(event.pos())
                 new_pos = scene_pos - self.moving_offset
+                print("NewPos:",new_pos)
                 self.rectangle.setPos(new_pos)
             
             #Rotating rectangle
@@ -100,7 +102,8 @@ class InteractivePreviewer(QGraphicsView):
                 self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
             
             #print("Angle:",self.angle)
-
+            print("TopLeft:",self.rectangle.rect().topLeft(),"   Pos:",self.rectangle.pos()) 
+            print("FinalPos:",self.rectangle.get_rectangle())
 
 
     def mouseReleaseEvent(self, event):
@@ -147,10 +150,9 @@ class InteractivePreviewer(QGraphicsView):
 
     #Return the rectangle selected to be scaled to the pdf size
     def get_rectangle_selection(self) -> CropRectangle:
-        zoom = self.qpixmap.width() / self.img_scene.qpixmap.width()
-        #print("Calculated zoom:",zoom)
-        #print("ViewRect:",self.rectangle.get_rectangle())
-        return CropRectangle(self.rectangle,zoom)
+        
+
+        return CropRectangle(self.rectangle.get_rectangle(),self.rectangle.rotation())
     
 
     #If the rectangle is too small delete it

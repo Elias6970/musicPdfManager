@@ -14,18 +14,28 @@ class MovableRectangle(QGraphicsRectItem):
         
         self.rotation_handler = RotationHandler(self)
 
+        self.zoom = 1
+    
+    # Zoom is the relation between the original pixmap and the printed in the InteractivePreviewer
+    # Zoom = Original.width/Printed.width (we use width and not both because we are preserving the aspect ratio)
+    def set_zoom(self,original_pixmap_width:float,printed_pixmap_width):
+        self.zoom = original_pixmap_width / printed_pixmap_width
+
     #Draw the rotation handler
     def set_rotation_handler(self,rect:QPointF):
         ellipse_width = 23
         ellipse_height = 23
-        pos = rect
         new_x = rect.x() + (self.rect().width() / 2) - (ellipse_width / 2)
         new_y = rect.y() + self.rect().height() + 10
 
         self.rotation_handler.setRect(QRectF(new_x,new_y,ellipse_width,ellipse_height))
 
-    #Return the rectangle selected
+    #Return the rectangle selected for the original pixmap
+    # It multiplies the position by the zoom
     def get_rectangle(self) -> QRectF:
-        return QRectF(self.rect().topLeft() + self.pos(),QSizeF(self.rect().width(),self.rect().height()))
+        pos = (self.rect().topLeft() + self.pos()) * self.zoom
+        width = self.rect().width() * self.zoom
+        height = self.rect().height() * self.zoom
+        return QRectF(pos,QSizeF(width,height))
 
 
