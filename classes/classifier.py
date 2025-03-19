@@ -270,6 +270,7 @@ class Text_analizer():
             "n":"flautin",
             "r":"requinto",
             "c":"clarinete",
+            "cp":"clarinete_pral",
             "j":"clarinete_bajo",
             "s":"saxofon",
             "x":"saxofon_tenor",
@@ -294,21 +295,17 @@ class Text_analizer():
     @staticmethod
     def parse_input(text:str) -> Tuple[str,str|None]:
 
-        #Exception for principal clarinet
-        if text == "cp":
-            return ("clarinete_pral",None)
-        
-        elif re.fullmatch(fr'^[{Text_analizer.instruments_chars}]$', text,re.IGNORECASE):
+        if re.fullmatch(fr'^[{Text_analizer.instruments_chars}]$', text,re.IGNORECASE):
             return (text,None)
         
         elif re.fullmatch(fr'^[{Text_analizer.instruments_chars}]\d$', text,re.IGNORECASE):
             input = re.split(r"(\d+)",text)
             return (str(input[0]),str(input[1]))
 
-        elif re.fullmatch(r"[a-z]+$",text,re.IGNORECASE):
+        elif re.fullmatch(r"[a-zA-Z _]+$",text,re.IGNORECASE):
             return (text,None)
         
-        elif re.fullmatch(r'^[a-zA-Z]+\d+$',text,re.IGNORECASE):
+        elif re.fullmatch(r'^[a-zA-Z _]+\d+$',text,re.IGNORECASE):
             input = re.split(r"(\d+)",text)
             return (str(input[0]),str(input[1]))
 
@@ -324,18 +321,13 @@ class Text_analizer():
     @staticmethod
     def analize(text:str):
         instrument,num = Text_analizer.parse_input(text)
-        if num != None:
-            try:
-                return Text_analizer.instruments[instrument]+"_"+num
-            #If the name is not in the list but is correct
-            except KeyError:
-                return instrument.lower()+"_"+num
-        else:
-            try:
-                return Text_analizer.instruments[instrument]
-            #If the name is not in the list but is correct
-            except KeyError as e:
-                return instrument.lower()
+
+        num = "" if num == None else "_"+num
+        try:
+            return Text_analizer.instruments[instrument]+num
+        except KeyError as e:
+            return instrument.replace(' ','_').lower()+num
+        
     
 
     #Return a list with the internal names of the instruments
