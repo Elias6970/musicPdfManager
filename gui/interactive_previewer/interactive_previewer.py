@@ -1,12 +1,12 @@
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsRectItem
-from PyQt6.QtGui import QPixmap, QTransform
-from PyQt6.QtCore import Qt, QRectF, QPointF, QSizeF
+from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import Qt, QRectF, QPointF
 from classes.crop_rectangle import CropRectangle
 from gui.interactive_previewer.movable_rectangle import MovableRectangle
 from gui.interactive_previewer.rotation_handler import RotationHandler
 from gui.interactive_previewer.scene import Scene
 import fitz,math
-import numpy as np
+
 
 
 
@@ -33,15 +33,13 @@ class InteractivePreviewer(QGraphicsView):
         self.initial_rotation_angle = 0.0
         self.angle = 0.0
 
+
     # Load the image in the preview
     def load_img(self,qpixmap:QPixmap, pdf_rect:fitz.Rect):
         self.rectangle = MovableRectangle()
         self.qpixmap = qpixmap
         self.img_scene.load_image(qpixmap,self.size())
-        print("original: ",qpixmap.size())
-        print("printed: ",self.img_scene.qpixmap.size())
-        print("ZoomX:",qpixmap.width()/self.img_scene.qpixmap.width())
-        print("ZoomY:",qpixmap.height()/self.img_scene.qpixmap.height())
+
 
     def mousePressEvent(self, event):
             if event and self.img_scene.image_item:
@@ -79,31 +77,25 @@ class InteractivePreviewer(QGraphicsView):
             if self.is_dragging:
                 scene_pos = self.mapToScene(event.pos())
                 new_pos = scene_pos - self.moving_offset
-                print("NewPos:",new_pos)
                 self.rectangle.setPos(new_pos)
             
             #Rotating rectangle
             elif self.is_rotating:
-                scene_pos = self.mapToScene(event.pos())                
+                scene_pos = self.mapToScene(event.pos())  
+
                 # Calculate the angle change
                 delta_x = scene_pos.x() - self.rotating_offset.x()
                 delta_y = scene_pos.y() - self.rotating_offset.y()
-                #angle = math.degrees(math.atan2(delta_y, delta_x)/3)  # Convert to degrees
                 self.angle = self.initial_rotation_angle + math.degrees(-delta_x/40)
-                #print("Initial:",self.initial_rotation_angle,",angle:",self.angle)
-                #self.rectangle.setTransformOriginPoint(self.rectangle.rect().width()/2,self.rectangle.rect().height()/2)
+
                 self.rectangle.setTransformOriginPoint(self.start_pos.x() + self.rectangle.rect().width()/2,self.start_pos.y() + self.rectangle.rect().height()/2)
                 self.rectangle.setRotation(self.angle)
                 
-
             #Create the rectangle
             elif self.is_creating_rect:
                 scene_pos = self.mapToScene(event.pos())
                 self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
             
-            #print("Angle:",self.angle)
-            print("TopLeft:",self.rectangle.rect().topLeft(),"   Pos:",self.rectangle.pos()) 
-            print("FinalPos:",self.rectangle.get_rectangle())
 
 
     def mouseReleaseEvent(self, event):
@@ -116,7 +108,6 @@ class InteractivePreviewer(QGraphicsView):
                 if isinstance(item_clicked, MovableRectangle) and self.is_dragging:
                     pass
                 
-
                 elif isinstance(item_clicked, RotationHandler) and self.is_rotating:
                     pass
 
@@ -133,12 +124,6 @@ class InteractivePreviewer(QGraphicsView):
             self.is_rotating = False
             self.initial_rotation_angle = self.angle
 
-            #Prints
-            """print("Rectangle pos:",self.rectangle.get_rectangle())
-            print("Esquinas:",self.get_rectangle_selection().get_rectangle_corners())
-            m = self.get_rectangle_selection()
-            r = m.pixmap_size.width() / m.pdf_page_size.width
-            print("zoom:",r)"""
     
     # Clean all the rectangles in the scene
     def clean_rectangles(self):
@@ -150,13 +135,11 @@ class InteractivePreviewer(QGraphicsView):
 
     #Return the rectangle selected to be scaled to the pdf size
     def get_rectangle_selection(self) -> CropRectangle:
-        
-
         return CropRectangle(self.rectangle.get_rectangle(),self.rectangle.rotation())
     
 
     #If the rectangle is too small delete it
-    #Minimum size = 50x50
+    #Minimum size in the beginning of the class
     def rect_is_minimum_size(self):
         rect = self.rectangle.rect()
         if rect.width() < InteractivePreviewer.min_rect_width or rect.height() < InteractivePreviewer.min_rect_height:

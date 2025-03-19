@@ -1,5 +1,4 @@
-from PyQt6.QtCore import QRect, QSize, QRectF
-from PyQt6.QtGui import QTransform
+from PyQt6.QtCore import QRectF
 import fitz,tempfile,os,cv2
 import numpy as np
 from gui.interactive_previewer.movable_rectangle import MovableRectangle
@@ -15,6 +14,7 @@ class CropRectangle:
         return self.rectangle.isEmpty()
 
 
+    #Get the real 4 corners of the rectangle appliying the rotation
     def get_rectangle_corners(self):
         local_corners = [
             self.rectangle.topLeft(),
@@ -59,10 +59,6 @@ class CropRectangle:
 
         # Ensure points are float32
         points = self.get_rectangle_corners()
-        #print("NotRotated:",self.check_points())
-        #print("Rotated:",list(points))
-        #points = self.check_points()
-        #points = np.array([[36,95],[518,35],[539,205],[57,265]])
         rect = np.array(points, dtype="float32")
         
         # Compute the new width and height of the upright rectangle
@@ -87,9 +83,8 @@ class CropRectangle:
         warped_img = cv2.warpPerspective(img, matrix, (max_width, max_height))
         
         # Save or use the new pixmap
-        #warped_pixmap.save("warped_output.png")
         rgb_image = cv2.cvtColor(warped_img, cv2.COLOR_BGR2RGB)
-        #cv2.imwrite("output3332.png",rgb_image)
+
         #Encode the matlike img into png to be able to create the pixmap
         success, encoded_image = cv2.imencode('.png', rgb_image)
         if not success:
@@ -100,17 +95,20 @@ class CropRectangle:
 
         return pix
 
-
-    def crop(self,pdf_path:str) -> str:
-
-        #print("Transpolated Rect:",self.get())
-        #print("Points:",self.get_rectangle_corners())
-        
+    #Crop a pdf with the selected rectangle and add it to a new a4 white pdf.
+    #Your rectangle is scalled to fit the new pdf but keeping the aspect ratio.
+    #Save the cropped pdf and return the path as a str
+    #Can raise ValueError if appear errors in the pixmap of the pdf
+    #   landscape: Create the final pdf landscape or portrait mode
+    def crop(self,pdf_path:str,landscape:bool=True) -> str:
         output_path = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
         
         # A4 dimensions in points (1 point = 1/72 inch)
-        a4_width, a4_height = 842, 595 # A4 size in points (portrait mode)
-
+        if landscape:
+            a4_width, a4_height = 842, 595 # A4 size in points (landscape mode)
+        else:
+            a4_width, a4_height = 595, 842 # A4 size in points (portrait mode)
+            
         file = fitz.open(pdf_path)
         original_pixmap = file[0].get_pixmap()
         file.close()
@@ -140,12 +138,11 @@ class CropRectangle:
 
         # Save PDF
         pdf.save(output_path)
-        self.print_points(pdf_path)
         return output_path
     
 
-
-    def print_points(self,pdf_path:str):
+    #Testing function to print the 4 corners of the selected rectangle
+    def _print_points(self,pdf_path:str):
         corners = self.get_rectangle_corners()
         file = fitz.open(pdf_path)
         original_pixmap = file[0].get_pixmap()
@@ -156,7 +153,4 @@ class CropRectangle:
                 for k in range(-1,2):
                     original_pixmap.set_pixel(int(i[0]+j),int(i[1]+k),red)
         
-        #original_pixmap.set_pixel(30,30,(255,0,0))
         original_pixmap.save("salida.png")
-
-        #raise Exception("Todo bien")
