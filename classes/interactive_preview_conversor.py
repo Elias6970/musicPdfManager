@@ -7,7 +7,7 @@ class InterctivePreviewConversor:
     @staticmethod
     def pdf_to_qpixmap(pdf_path:str) -> QPixmap:
         file = fitz.open(pdf_path)
-        page_pixmap = file.load_page(0).get_pixmap(dpi=200) #type:ignore 
+        page_pixmap = file.load_page(0).get_pixmap() #type:ignore 
 
         img_data = page_pixmap.tobytes("png")  # Convert to PNG bytes
 

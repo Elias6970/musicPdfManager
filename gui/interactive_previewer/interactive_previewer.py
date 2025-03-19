@@ -1,19 +1,25 @@
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsRectItem
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QTransform
 from PyQt6.QtCore import Qt, QRectF, QPointF, QSizeF
 from classes.crop_rectangle import CropRectangle
 from gui.interactive_previewer.movable_rectangle import MovableRectangle
 from gui.interactive_previewer.rotation_handler import RotationHandler
 from gui.interactive_previewer.scene import Scene
 import fitz,math
+import numpy as np
+
 
 
 #Preview in which you can select a rectangle
 class InteractivePreviewer(QGraphicsView):
+    min_rect_width = 50
+    min_rect_height = 50
+
+
     def __init__(self,parent=None):
         super().__init__(parent)
 
-        self.pdf_rect = fitz.Rect()
+        self.qpixmap = QPixmap()
         self.rectangle = MovableRectangle()
 
         self.img_scene = Scene(self)
@@ -30,8 +36,12 @@ class InteractivePreviewer(QGraphicsView):
     # Load the image in the preview
     def load_img(self,qpixmap:QPixmap, pdf_rect:fitz.Rect):
         self.rectangle = MovableRectangle()
-        self.pdf_rect = pdf_rect
+        self.qpixmap = qpixmap
         self.img_scene.load_image(qpixmap,self.size())
+        print("original: ",qpixmap.size())
+        print("printed: ",self.img_scene.qpixmap.size())
+        print("ZoomX:",qpixmap.width()/self.img_scene.qpixmap.width())
+        print("ZoomY:",qpixmap.height()/self.img_scene.qpixmap.height())
 
     def mousePressEvent(self, event):
             if event and self.img_scene.image_item:
@@ -78,7 +88,7 @@ class InteractivePreviewer(QGraphicsView):
                 delta_y = scene_pos.y() - self.rotating_offset.y()
                 #angle = math.degrees(math.atan2(delta_y, delta_x)/3)  # Convert to degrees
                 self.angle = self.initial_rotation_angle + math.degrees(-delta_x/40)
-                print("Initial:",self.initial_rotation_angle,",angle:",self.angle)
+                #print("Initial:",self.initial_rotation_angle,",angle:",self.angle)
                 #self.rectangle.setTransformOriginPoint(self.rectangle.rect().width()/2,self.rectangle.rect().height()/2)
                 self.rectangle.setTransformOriginPoint(self.start_pos.x() + self.rectangle.rect().width()/2,self.start_pos.y() + self.rectangle.rect().height()/2)
                 self.rectangle.setRotation(self.angle)
@@ -89,7 +99,7 @@ class InteractivePreviewer(QGraphicsView):
                 scene_pos = self.mapToScene(event.pos())
                 self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
             
-            #print(self.rectangle.rect())
+            #print("Angle:",self.angle)
 
 
 
@@ -119,6 +129,13 @@ class InteractivePreviewer(QGraphicsView):
             self.is_dragging = False
             self.is_rotating = False
             self.initial_rotation_angle = self.angle
+
+            #Prints
+            """print("Rectangle pos:",self.rectangle.get_rectangle())
+            print("Esquinas:",self.get_rectangle_selection().get_rectangle_corners())
+            m = self.get_rectangle_selection()
+            r = m.pixmap_size.width() / m.pdf_page_size.width
+            print("zoom:",r)"""
     
     # Clean all the rectangles in the scene
     def clean_rectangles(self):
@@ -126,21 +143,19 @@ class InteractivePreviewer(QGraphicsView):
             if isinstance(item, QGraphicsRectItem):
                 self.img_scene.removeItem(item)
 
-    #Return the rectangle selected
-    def get_rectangle(self) -> QRectF:
-        return QRectF(self.rectangle.rect().topLeft() + self.rectangle.pos(),QSizeF(self.rectangle.rect().width(),self.rectangle.rect().height()))
 
 
     #Return the rectangle selected to be scaled to the pdf size
     def get_rectangle_selection(self) -> CropRectangle:
-        return CropRectangle(self.get_rectangle().toRect(),
-                                self.img_scene.qpixmap.size(),
-                                self.pdf_rect)
+        zoom = self.qpixmap.width() / self.img_scene.qpixmap.width()
+        #print("Calculated zoom:",zoom)
+        #print("ViewRect:",self.rectangle.get_rectangle())
+        return CropRectangle(self.rectangle,zoom)
     
 
     #If the rectangle is too small delete it
     #Minimum size = 50x50
     def rect_is_minimum_size(self):
         rect = self.rectangle.rect()
-        if rect.width() < 50 or rect.height() < 50:
+        if rect.width() < InteractivePreviewer.min_rect_width or rect.height() < InteractivePreviewer.min_rect_height:
             self.clean_rectangles()

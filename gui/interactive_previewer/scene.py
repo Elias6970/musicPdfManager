@@ -14,7 +14,8 @@ class Scene(QGraphicsScene):
     
     #Load the image in the scene
     def load_image(self,qpixmap:QPixmap,graphics_view_size:QSize):
-        self.qpixmap = qpixmap.scaled(graphics_view_size.width(), qpixmap.width(),Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation)
+        #self.qpixmap = qpixmap.scaled(graphics_view_size.width(), qpixmap.width(),Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation)
+        self.qpixmap = qpixmap.scaled(graphics_view_size.width(),graphics_view_size.height(),Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation)
         self.image_item = QGraphicsPixmapItem(self.qpixmap)
         self.addItem(self.image_item)
         self.setSceneRect(self.image_item.boundingRect())

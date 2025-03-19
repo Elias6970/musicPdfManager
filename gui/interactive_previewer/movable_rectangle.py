@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsRectItem
 from PyQt6.QtGui import QPen, QBrush, QColor
-from PyQt6.QtCore import Qt, QRectF, QPointF
+from PyQt6.QtCore import Qt, QRectF, QPointF, QSizeF
 from gui.interactive_previewer.rotation_handler import RotationHandler
 # Custom rectangle class
 class MovableRectangle(QGraphicsRectItem):
@@ -23,5 +23,9 @@ class MovableRectangle(QGraphicsRectItem):
         new_y = rect.y() + self.rect().height() + 10
 
         self.rotation_handler.setRect(QRectF(new_x,new_y,ellipse_width,ellipse_height))
+
+    #Return the rectangle selected
+    def get_rectangle(self) -> QRectF:
+        return QRectF(self.rect().topLeft() + self.pos(),QSizeF(self.rect().width(),self.rect().height()))
 
 

@@ -35,7 +35,8 @@ class Exportable_pdf(File):
     def add_pdf_page(self,temp_file_path:str,new_name:str,crop_rectangle:CropRectangle) -> None:  
         self.list_of_new_files.append((temp_file_path,new_name,crop_rectangle))
         if crop_rectangle:
-            print(crop_rectangle.get())
+            #print(crop_rectangle.get())
+            pass
         else:
             print("None")
     
@@ -115,17 +116,22 @@ class Pdf_controller():
 
     #Move from backup to scores and delete the original folder
     def move_from_backup_to_partituras(self,folder_name:str):
-        for i in os.listdir(os.path.join(self.dir_path,"partituras_sin_clasificar",folder_name)):
-            if os.path.isfile(i):
-                shutil.move(i,os.path.join(self.dir_path,DIR_SCORES))
-        shutil.rmtree(folder_name)
+        backup_folder_path = os.path.join(self.dir_path,"partituras_sin_clasificar",folder_name)
+        scores_folder_path = os.path.join(self.dir_path,DIR_SCORES)
+
+        for i in os.listdir(backup_folder_path):
+            if os.path.isfile(os.path.join(backup_folder_path,i)):
+                shutil.move(os.path.join(backup_folder_path,i),scores_folder_path)
+
+        shutil.rmtree(backup_folder_path)
 
     def export(self):
         backup_dir = self.move_originals()
         try:
             for i in self.pdfs:
                 i.export()
-        except:
+        except Exception as e:
+            print("Exception:", e," ",type(e))
             self.move_from_backup_to_partituras(backup_dir)
         
 
@@ -239,7 +245,7 @@ class Classifier:
             #Update the parted flag to 1 in the db
             self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_to_classify[self.actual_piece].name),True)
             self.pdf_controller.export()
-
+            input()
             raise NoMorePiecesToClassifyException()
 
         
