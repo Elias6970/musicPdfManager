@@ -1,5 +1,5 @@
 import PyPDF2,os,tempfile
-from reportlab.platypus import SimpleDocTemplate,Table,PageTemplate,Frame
+from reportlab.platypus import SimpleDocTemplate,Table
 from reportlab.lib import pagesizes,colors
 from reportlab.pdfgen import canvas
 from classes.files_management.print_file import PrintFile

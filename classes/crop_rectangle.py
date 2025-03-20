@@ -1,7 +1,6 @@
 from PyQt6.QtCore import QRectF
 import fitz,tempfile,os,cv2
 import numpy as np
-from gui.interactive_previewer.movable_rectangle import MovableRectangle
 
 # Class to save a crop to a rectangle
 class CropRectangle:

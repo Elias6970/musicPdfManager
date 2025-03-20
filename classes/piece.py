@@ -1,5 +1,4 @@
 from unidecode import unidecode
-from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PieceNotFoundException
 
 #Class that represents a piece
