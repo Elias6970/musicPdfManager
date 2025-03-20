@@ -1,7 +1,9 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
 from  classes.files_manage import Dir
 from classes.constants import *
-from classes.classifier import *
+from classes.error import EmptyInitialInputException,FirstPageException,NoMorePiecesToClassifyException
+from classes.classifier.text_analizer import TextAnalizer
+from classes.classifier.classifier import Classifier
 from classes.interactive_preview_conversor import InterctivePreviewConversor
 from gui.pop_up_window import PopUpWindow
 from gui.error_window import Error_window
@@ -61,14 +63,12 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
             pass
         
         self.rotation_cb = QtWidgets.QCheckBox(self.tr("Keep rotation to next scores")) #traducir
-        self.rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf is going to be rotated like the previous")) #traducir
+        self.rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf page is going to be rotated like the previous")) #traducir
         self.rotation_cb.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         rotate_btns_horizontal_layout = QtWidgets.QHBoxLayout()
         rotate_btns_horizontal_layout.addWidget(btn_rotate_left)
         rotate_btns_horizontal_layout.addWidget(btn_rotate_right)
 
-        
-        rotate_btns_layout.addWidget(QtWidgets.QLabel(self.tr("Rotate")).setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)) #Traducir
         rotate_btns_layout.addWidget(self.rotation_cb)
         rotate_btns_layout.addLayout(rotate_btns_horizontal_layout)
         
@@ -179,11 +179,10 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
     def update_real_time_interpreted_txt(self,text:str):
         #Last classified
         if text == "" or text == " ":
-            print(self.classifier.last_new_name)
             self.interpreted_instrument_lbl.setText(self.classifier.last_new_name)
         else:
             try:
-                txt = Text_analizer.analize(text)
+                txt = TextAnalizer.analize(text)
                 self.interpreted_instrument_lbl.setText(txt)
             except ValueError as e:
                 self.interpreted_instrument_lbl.setText(self.tr(str(e)))

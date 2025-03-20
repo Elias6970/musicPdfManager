@@ -1,8 +1,7 @@
 from PyQt6 import QtWidgets
 from  classes.files_manage import Dir
 from classes.constants import *
-from classes.classifier import *
-from classes.error import StopClassifyingException
+from classes.error import StopClassifyingException, PdfNotFoundException
 from classes.files_manage import Archive
 from gui.status_console import StatusConsole
 from gui.score_search_bar import ScoreSearchBar
