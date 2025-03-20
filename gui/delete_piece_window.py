@@ -1,5 +1,6 @@
 from PyQt6 import QtWidgets
-from classes.files_manage import Archive,Archive_file_manager
+from classes.files_management.archive import Archive
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
 from gui.error_window import Error_window
 from classes.constants import *
@@ -27,7 +28,7 @@ class Delete_piece_window(AbstractSerchBarAndTwoButtonsWindow):
                     self.archive.pieces.remove(int(cod))
 
                     try:
-                        Archive_file_manager.delete_piece(self.piece_lbl.text())
+                        ArchiveFileManager.delete_piece(self.piece_lbl.text())
                     except FileNotFoundError:
                         pass
 

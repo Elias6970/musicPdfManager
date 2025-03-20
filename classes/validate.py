@@ -1,5 +1,5 @@
 import os
-from classes.files_manage import Dir,Dir_Error
+from classes.files_management.dir import Dir,Dir_Error
 from classes.constants import RELATIVE_ARCHIVE_PATH
 class Validate():
     @staticmethod

@@ -1,6 +1,6 @@
 import os,shutil
 from typing import List,Tuple
-from classes.files_manage import File
+from classes.files_management.file import File
 from classes.crop_rectangle import CropRectangle
 import PyPDF2
 

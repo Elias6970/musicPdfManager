@@ -1,6 +1,8 @@
 
 from PyQt6 import QtWidgets
-from classes.files_manage import Archive,File,Archive_file_manager,Dir
+from classes.files_management.dir import Dir
+from classes.files_management.archive import Archive
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.constants import *
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
@@ -46,9 +48,9 @@ class Add_piece_window(AbstractFieldsWindow):
             
             
             if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-                Archive_file_manager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
+                ArchiveFileManager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
                 
-                if Archive_file_manager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0,digitalized=1):
+                if ArchiveFileManager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0,digitalized=1):
                     try:
                         ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
                         self.archive.pieces.add(int(cod),name,parsed_name,True)

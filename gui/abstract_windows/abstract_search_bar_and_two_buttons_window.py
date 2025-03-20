@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets,QtCore
 from gui.score_search_bar import ScoreSearchBar
-from classes.files_manage import Archive
+from classes.files_management.archive import Archive
 
 #Abstract window that have: (Is a false abstract window but it used like that)
 #   a search bar linked to all scores in the archive directory

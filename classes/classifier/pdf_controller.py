@@ -1,7 +1,7 @@
 import os,shutil,datetime
 from typing import List
 from classes.error import PdfNotFoundException
-from classes.files_manage import Dir
+from classes.files_management.dir import Dir
 from classes.constants import DIR_SCORES
 from classes.classifier.exportable_pdf import ExportablePdf
 

@@ -1,5 +1,7 @@
 from PyQt6 import  QtWidgets
-from classes.files_manage import Archive,Archive_file_manager,Dir
+from classes.files_management.dir import Dir
+from classes.files_management.archive import Archive
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
@@ -30,7 +32,7 @@ class Add_scores_to_existing_piece_window(AbstractSerchBarAndTwoButtonsWindow):
 
 
         if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-            if self.validate_selection(self.search_bar.text()) and Archive_file_manager.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
+            if self.validate_selection(self.search_bar.text()) and ArchiveFileManager.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
                 try: 
                     ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.db.update_parted)
                 except StopClassifyingException:

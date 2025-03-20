@@ -1,5 +1,6 @@
 from PyQt6 import QtWidgets
-from classes.files_manage import Archive,Archive_file_manager
+from classes.files_management.archive import Archive
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.piece import Piece
 from classes.error import AvoidModificationException
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
@@ -54,7 +55,7 @@ class Modify_piece_window(QtWidgets.QDialog):
         
 
             if insertion:
-                Archive_file_manager.change_piece_dir_name(self.old_piece.parsed_name,Piece.make_parsed_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text()))
+                ArchiveFileManager.change_piece_dir_name(self.old_piece.parsed_name,Piece.make_parsed_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text()))
                 self.archive.pieces.update_cod_and_name(self.old_piece.cod,int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
                 
 

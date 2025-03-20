@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtCore
-from classes.files_manage import Archive
+from classes.files_management.archive import Archive
 
 #Abstract class that shows a window with:
 #Parameters:

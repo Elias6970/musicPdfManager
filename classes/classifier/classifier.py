@@ -1,6 +1,7 @@
 import os,tempfile
 from classes.error import EmptyInitialInputException, FirstPageException, NoMorePiecesToClassifyException
-from classes.files_manage import Dir,Archive
+from classes.files_management.dir import Dir
+from classes.files_management.archive import Archive
 from classes.crop_rectangle import CropRectangle
 from classes.classifier.exportable_pdf import ExportablePdf
 from classes.classifier.text_analizer import TextAnalizer

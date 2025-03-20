@@ -2,7 +2,8 @@ import PyPDF2,os,tempfile
 from reportlab.platypus import SimpleDocTemplate,Table,PageTemplate,Frame
 from reportlab.lib import pagesizes,colors
 from reportlab.pdfgen import canvas
-from classes.files_manage import PrintFile,Dir
+from classes.files_management.print_file import PrintFile
+from classes.files_management.dir import Dir
 from PyPDF2 import PdfWriter,PdfReader
 from classes.validate import Validate
 from classes.constants import DIR_SCORES,COVER_LIST_DOSSIER
