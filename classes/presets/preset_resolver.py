@@ -2,6 +2,7 @@ from classes.presets.preset import Preset
 from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 import enum,re
 
+#Not implemented
 #Si no está el mismo devuelves uno por arriba,
 #Prioridades:
 #   El mismo

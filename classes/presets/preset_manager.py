@@ -36,3 +36,7 @@ class PresetManager():
                 preset = Preset(i)
                 preset.instruments = imported_json[i]
                 self.add_preset(preset)
+    
+    #Return the name of all presets
+    def get_names(self):
+        return [i.name for i in self.presets]
