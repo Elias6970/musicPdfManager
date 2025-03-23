@@ -225,9 +225,9 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         
         if self.part_combo_box.isEnabled() and validation:
 
-            p = PrinteableFile(path=os.path.join(self.printer.actual_piece.path,DIR_SCORES,self.part_combo_box.currentText()),
-                                             copies=int(self.num_copies.currentText()))
-            self.printer.add(p)
+            path=os.path.join(self.printer.actual_piece.path,DIR_SCORES,self.part_combo_box.currentText())
+            copies=int(self.num_copies.currentText())
+            self.printer.add(path,copies)
 
             #Update the labels of the down scores
             self.scroll.add_item(StatusConsleItemWithTwoTexts(self.printer.actual_piece.name,
