@@ -1,9 +1,9 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants import MAX_COPIES,REFRESH_IMG_PATH
+from classes.constants import MAX_COPIES,REFRESH_IMG_PATH, RELATIVE_ARCHIVE_PATH
 from classes.files_management.archive import Archive
-from classes.files_management.dir import Dir_Error
+from classes.files_management.dir import Dir,Dir_Error
 from classes.validate import Validate
-from classes.printer import Printer
+from classes.printers.presets_printer import PresetsPrinter
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from classes.presets.preset_manager import PresetManager
@@ -14,15 +14,16 @@ from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwo
 from gui.previewer import Preview
 import os
 
-class IndividualSelectionWindow(QtWidgets.QWidget):
+class MultipleSelectionWindow(QtWidgets.QWidget):
     def __init__(self,archive:Archive):
-        super(IndividualSelectionWindow,self).__init__()
+        super(MultipleSelectionWindow,self).__init__()
 
 
         #Init the Archive 
         self.archive = archive
-        self.printer = Printer()
+        self.printer = PresetsPrinter()
         self.preset_manager = PresetManager()
+        self.preset_manager.load()
 
         container_layout = QtWidgets.QHBoxLayout()
         
@@ -76,6 +77,11 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         vbox = QtWidgets.QVBoxLayout()
         hbox = QtWidgets.QHBoxLayout()
         
+        self.instruments_combo_box = QtWidgets.QComboBox()
+        self.instruments_combo_box.setMaximumHeight(20)
+        self.instruments_combo_box.currentTextChanged.connect(lambda: self.update_preview(self.piece_search_bar.text(),self.instruments_combo_box.currentText()))
+        self.instruments_combo_box.setEnabled(False)
+
         self.btn_mv_back_preview = QtWidgets.QPushButton("<")
         self.btn_mv_forward_preview = QtWidgets.QPushButton(">")
         
@@ -85,11 +91,11 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         hbox.addWidget(self.btn_mv_back_preview)
         hbox.addWidget(self.btn_mv_forward_preview)
 
-        vbox.addWidget()
+        vbox.addWidget(self.instruments_combo_box)
         vbox.addLayout(hbox)
 
         obj.setLayout(vbox)
-        obj.setMaximumHeight(40)
+        obj.setMaximumHeight(70)
         return obj
 
 
@@ -122,7 +128,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         self.piece_lbl = QtWidgets.QLabel()
         self.presets_combo_box = QtWidgets.QComboBox()
         
-        self.presets_combo_box.currentIndexChanged.connect(lambda: self.update_preview(self.piece_search_bar.text(),self.presets_combo_box.currentText()))
+        #self.presets_combo_box.currentIndexChanged.connect(lambda: self.update_preview(self.piece_search_bar.text(),self.presets_combo_box.currentText()))
         self.presets_combo_box.setEnabled(False)
         
         self.add_create_buttons = self.create_add_zone()
@@ -206,33 +212,63 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
                     raise NoScoresException()
                 
                 self.presets_combo_box.setEnabled(True)
-                self.presets_combo_box.addItems(self.preset_manager)
+                self.presets_combo_box.addItems(self.preset_manager.get_names())
+
                 self.piece_lbl.setText(piece.name)
                 self.printer.actual_piece = piece
+
+                self.instruments_combo_box.setEnabled(True)
+                self.instruments_combo_box.addItems(scores)
             
             #if the piece is not in the digital archive
             except FileNotFoundError:
                 self.presets_combo_box.setEnabled(False)
                 self.presets_combo_box.insertItem(0,self.tr("NOT DIGITALIZED")) #TRADUCIR
+                self.instruments_combo_box.setEnabled(False)
+                self.instruments_combo_box.clear()
             except NoScoresException:
                 self.presets_combo_box.setEnabled(False)
                 self.presets_combo_box.insertItem(0,self.tr("NO SCORES")) #TRADUCIR
+                self.instruments_combo_box.setEnabled(False)
+                self.instruments_combo_box.clear()
+        
+        else:
+            self.instruments_combo_box.clear()
+            self.instruments_combo_box.setEnabled(False)
+            self.presets_combo_box.clear()
+            self.presets_combo_box.setEnabled(False)
 
 
 
     #Add the score to the list of added scores an update it in the labels list
     def add_score(self):
-        if self.presets_combo_box.isEnabled() and self.printer.add_score(self.presets_combo_box.currentText(),int(self.num_copies.currentText()),self.archive.pieces.get_parsed_names()):
-            #new_score_text = self.num_copies.currentText()+"x "+self.printer.actual_piece.name+"->"+self.presets_combo_box.currentText()
+        try:
+            validation = Validate.validate_selection(self.printer.actual_piece.name,self.archive.pieces.get_parsed_names())
+        except AttributeError:
+            return
+        
+        if self.presets_combo_box.isEnabled() and validation:
+            preset = self.preset_manager.get_preset(self.presets_combo_box.currentText())
+            if preset == None:
+                return
+            
+            copies = int(self.num_copies.currentText())
+            dir = self.printer.actual_piece
+
+            scrolleable_item_id = self.printer.add(copies,
+                                                  preset,
+                                                  dir)
+            
 
             #Update the labels of the down scores
-            #new_score_lbl = QtWidgets.QLabel(new_score_text)
-            self.scroll.add_item(StatusConsleItemWithTwoTexts(self.printer.actual_piece.name,
+            self.scroll.add_item(StatusConsleItemWithTwoTexts(dir.name,
                                                   self.presets_combo_box.currentText(),
-                                                  int(self.num_copies.currentText()),
-                                                  self.printer.pdfs_added[-1].id,
+                                                  copies,
+                                                  scrolleable_item_id,
                                                   self.scroll.remove_item,
-                                                  self.printer.delete_pdf))
+                                                  self.printer.remove))
+        
+        print(self.printer.items)
     
 
     #Display a window to select a location to save a pdf
@@ -252,9 +288,9 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
     #Create one pdf with all the selected pdfs merged
     def create_pdf(self):     
         try:
-            if self.printer.pdfs_added:
+            if self.printer.items:
                 pdf_path = self.dialog_window_select_new_pdf()
-                self.printer.create_pdf(pdf_path)
+                self.printer.export(pdf_path)
         
         except Exception as e:
             Error_window.print_error(e)
@@ -269,7 +305,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         self.num_copies.setCurrentIndex(0)
         
         #Printer
-        self.printer = Printer()
+        self.printer = PresetsPrinter()
         self.archive.update_pieces()
         #Preview
         self.preview.clear()
@@ -328,7 +364,9 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
                 try:
                     if piece_parsed_name == self.preview_controller.piece_parsed_name:
                         self.preview_controller.instrument = instrument
+                        self.preview_controller.page_number = 0
                         self.preview_controller.update_path()
+                        self.check_mv_btns_enableability() # Update the buttons states
                     else:
                         self.preview_controller = Preview_controller(piece_parsed_name,instrument)
                 except Exception:

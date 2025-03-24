@@ -68,10 +68,8 @@ class Configuration():
             return LAN_ENG
 
     @staticmethod
-    def get_presets() -> dict:
-        with open(CONFIG_ATTRIBUTE_PRESETS, "r") as file:
-            my_dict = json.load(file)
-        return my_dict
+    def get_presets_path() -> str:
+        return Configuration.get_attribute(CONFIG_ATTRIBUTE_PRESETS)
 
 
     #If the language is not supported return an empty string

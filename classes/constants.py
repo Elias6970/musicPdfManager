@@ -14,7 +14,8 @@ def COVER_LIST_DOSSIER():
     return Configuration.get_dossier_cover_path() 
 def LANGUAGE():
     return Configuration.get_language()
-
+def PRESETS_PATH():
+    return Configuration.get_presets_path()
 
 DB_FILE_NAME = "archivo.db"
 DB_NAME = "AMVR_archive"

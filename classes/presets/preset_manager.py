@@ -1,4 +1,5 @@
 from classes.presets.preset import Preset
+from classes.constants import PRESETS_PATH
 import json
 
 
@@ -19,7 +20,11 @@ class PresetManager():
 
 
     # Dump the presets from a file
-    def dump(self,path:str):
+    #If it's empty use the default path
+    def dump(self,path:str|None=None):
+        if path == None:
+            path = PRESETS_PATH()
+
         export_json = {}
         for i in self.presets:
             export_json[i.name] = i.instruments
@@ -29,7 +34,11 @@ class PresetManager():
     
 
     # Save the presets in a file
-    def load(self,path:str):
+    #If it's empty use the default path
+    def load(self,path:str|None=None):
+        if path == None:
+            path = PRESETS_PATH()
+        
         with open(path,'r') as file:
             imported_json = json.load(file)
             for i in imported_json.keys():
@@ -40,3 +49,11 @@ class PresetManager():
     #Return the name of all presets
     def get_names(self):
         return [i.name for i in self.presets]
+    
+    #Return the first preset obj with the same name
+    #If not return None
+    def get_preset(self,name:str) -> Preset|None:
+        for i in self.presets:
+            if i.name == name:
+                return i
+        return None
