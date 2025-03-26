@@ -1,4 +1,10 @@
 from PyQt6 import QtWidgets,QtCore
+import enum
+
+class TypeOfExport(enum.Enum):
+    ALL_IN_ONE = 0
+    BY_PIECES = 1
+    BY_INSTRUMENTS = 2
 
 """
 Pop up a window that shows a message with checkboxes
@@ -7,67 +13,98 @@ Pop up a window that shows a message with checkboxes
 
 """
 class TypeOfExportWindow(QtWidgets.QDialog):
-    def __init__(self,parent) -> None:
+    def __init__(self,parent=None) -> None:
         super(TypeOfExportWindow,self).__init__(parent)
 
-        self.is_by_instruments = True 
+        self.type_of_export:TypeOfExport
+        self.sort_alphabetically:bool = False
+        self.ignore_preset_copies:bool = False
 
         self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
+        self.setWindowTitle(self.tr("Export configuration"))
 
         _container_layout = QtWidgets.QVBoxLayout()
 
         #labels
         _warning_lbl = QtWidgets.QLabel(self.tr("How do you want to create the pdfs?"))
         
-        #Two options
-        self._by_instruments_cb = QtWidgets.QCheckBox()
-        self._by_instruments_cb.setText(self.tr("Splitted by instruments"))
-        self._by_instruments_cb.setToolTip(self.tr("Create one pdf for each instrument in the preset. Each pdf has all the pieces in the list for one instrument."))
-        self._by_instruments_cb.setChecked(True)
-        self._by_instruments_cb.clicked.connect(self.set_by_instruments)
+    
+        #Type of export
+        self._all_in_one_rb = QtWidgets.QRadioButton()
+        self._all_in_one_rb.setText(self.tr("All in one."))
+        self._all_in_one_rb.setToolTip(self.tr("Create one pdf with the instruments in the preset of all selected pieces.\nSorted by pieces (not by instruments)."))
 
-        self._by_pieces_cb = QtWidgets.QCheckBox()
-        self._by_pieces_cb.setText(self.tr("Splitted by pieces"))
-        self._by_pieces_cb.setToolTip(self.tr("Create one pdf for each piece in the list. Each pdf has all the scores for the selected preset fro this piece."))
-        self._by_pieces_cb.setChecked(False)
-        self._by_pieces_cb.clicked.connect(self.set_by_pieces)
-        self._by_instruments_cb.setStyleSheet("""
-            QCheckBox::indicator {
-                width: 20px;
-                height: 20px;
-                border-radius: 10px;
-                border: 2px solid black;
-                background-color: white;
-            }
-            QCheckBox::indicator:checked {
-                background-color: black;
-            }
-        """)
+        self._by_instruments_rb = QtWidgets.QRadioButton()
+        self._by_instruments_rb.setText(self.tr("Splitted by instruments."))
+        self._by_instruments_rb.setToolTip(self.tr("Create one pdf for each instrument in the preset.\nEach pdf has all the pieces in the list for one instrument.\nBy default the pdfs are created in the order that you added the pieces."))
+
+        self._by_pieces_rb = QtWidgets.QRadioButton()
+        self._by_pieces_rb.setText(self.tr("Splitted by pieces."))
+        self._by_pieces_rb.setToolTip(self.tr("Create one pdf for each piece in the list.\nEach pdf has all the scores for the selected preset fro this piece.\n Each pdf has the instruments exported in the preset instrument order."))
+
+        _export_types_group = QtWidgets.QButtonGroup()
+        _export_types_group.addButton(self._all_in_one_rb)
+        _export_types_group.addButton(self._by_instruments_rb)
+        _export_types_group.addButton(self._by_pieces_rb)
+        _export_types_group.buttonClicked.connect(self.manage_btns_enableability)
+
+
+        self._sort_alphabetically_cb = QtWidgets.QCheckBox()
+        self._sort_alphabetically_cb.setText(self.tr("Sort the pdfs alphabetically."))
+        self._sort_alphabetically_cb.setToolTip(self.tr("Sort the pieces in each pdf alphabetically.\nOnly when exporting by instrument."))
+        self._sort_alphabetically_cb.setEnabled(False)
+        self._sort_alphabetically_cb.setStyleSheet("padding-left: 25px;")
+
+
+        #Ignore preset copies
+        self._ignore_preset_copies_cb = QtWidgets.QCheckBox()
+        self._ignore_preset_copies_cb.setText(self.tr("Ignore preset's instrument copies."))
+        self._ignore_preset_copies_cb.setToolTip(self.tr("Ignore the number of copies for each instrument in the preset and\ngenerate only one copy per instrument in the preset."))
+
+
         #Confirm button
         _confirm_btn = QtWidgets.QPushButton(self.tr("Confirm")) #traducir
-        _confirm_btn.clicked.connect(self.hide)
+        _confirm_btn.clicked.connect(self.confirm)
 
-        
-        
+        _h_line = QtWidgets.QFrame()
+        _h_line.setFrameShape(QtWidgets.QFrame.Shape.HLine)  # Set the frame shape to horizontal line
+        _h_line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)  # Optionally, add a shadow effect
+
+
         _container_layout.addWidget(_warning_lbl)
-        _container_layout.addWidget(self._by_instruments_cb)
-        _container_layout.addWidget(self._by_pieces_cb)
+        _container_layout.addWidget(self._all_in_one_rb)
+        _container_layout.addWidget(self._by_pieces_rb)
+        _container_layout.addWidget(self._by_instruments_rb)
+        _container_layout.addWidget(self._sort_alphabetically_cb)
+        _container_layout.addWidget(_h_line)
+        _container_layout.addWidget(self._ignore_preset_copies_cb)
         _container_layout.addWidget(_confirm_btn)
 
         self.setLayout(_container_layout)
 
         self.exec()
+        quit()
 
 
-    #Change the 
-    def set_by_instruments(self):
-        self._by_instruments_cb.setChecked(True)
-        self._by_pieces_cb.setChecked(False)
-        self.is_by_instruments = True
+    def manage_btns_enableability(self):
+        if self._by_instruments_rb.isChecked():
+            self._sort_alphabetically_cb.setEnabled(True)
+        else:
+            self._sort_alphabetically_cb.setEnabled(False)
+            self._sort_alphabetically_cb.setChecked(False)
 
-    def set_by_pieces(self):
-        self._by_instruments_cb.setChecked(False)
-        self._by_pieces_cb.setChecked(True)
-        self.is_by_instruments = False
+    
 
+    #Save the options in variables
+    def confirm(self):
+        if self._all_in_one_rb.isChecked():
+            self.type_of_export = TypeOfExport.ALL_IN_ONE
+        elif self._by_pieces_rb.isChecked():
+            self.type_of_export = TypeOfExport.BY_PIECES
+        elif self._by_instruments_rb.isChecked():
+            self.type_of_export = TypeOfExport.BY_INSTRUMENTS
+            self.sort_alphabetically = self._sort_alphabetically_cb.isChecked()
 
+        self.ignore_preset_copies = self._ignore_preset_copies_cb.isChecked()
+
+        self.hide()
