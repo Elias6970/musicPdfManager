@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants import MAX_COPIES,REFRESH_IMG_PATH, RELATIVE_ARCHIVE_PATH
+from classes.constants import MAX_COPIES,REFRESH_IMG_PATH
 from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir,Dir_Error
 from classes.validate import Validate
@@ -8,6 +8,7 @@ from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from classes.presets.preset_manager import PresetManager
 from gui.error_window import Error_window
+from gui.pop_up_windows.type_of_export_window import TypeOfExportWindow
 from gui.status_console import StatusConsole
 from gui.score_search_bar import ScoreSearchBar
 from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
@@ -41,6 +42,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
 
         self.setLayout(container_layout)
 
+        self.set_presets()
 
         #self.setGeometry(100,80,200,200)
 
@@ -51,10 +53,11 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
     def create_add_zone(self):
         obj = QtWidgets.QWidget()
         layout = QtWidgets.QHBoxLayout()
-
+        
         self.num_copies = QtWidgets.QComboBox()
         self.num_copies.setFixedWidth(50)
         self.num_copies.addItems([str(i+1) for i in range(MAX_COPIES)])
+        self.num_copies.setToolTip(self.tr("Number of copies"))
         
         btn1 = QtWidgets.QPushButton(self.tr("Add")) #traducir
         btn2 = QtWidgets.QPushButton(self.tr("Create Pdf")) #traducir
@@ -119,18 +122,29 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
             pass
 
         #Search bar
-        self.piece_search_bar = ScoreSearchBar(self.archive.pieces.get_parsed_names(),self.set_options_of_presets)
+        self.piece_search_bar = ScoreSearchBar(self.archive.pieces.get_parsed_names(),self.set_options_of_instruments)
 
         #Rest of widgets
         self.only_digitalized_cb = QtWidgets.QCheckBox()
         self.only_digitalized_cb.clicked.connect(self.only_digitalized)
         only_digitalized_lbl = QtWidgets.QLabel(self.tr("Only digitalized")) #traducir
         self.piece_lbl = QtWidgets.QLabel()
+
+
+        presets_lbl = QtWidgets.QLabel(self.tr("Preset")+":")
+        presets_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft|QtCore.Qt.AlignmentFlag.AlignVCenter)
+        presets_lbl.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
         self.presets_combo_box = QtWidgets.QComboBox()
-        
-        #self.presets_combo_box.currentIndexChanged.connect(lambda: self.update_preview(self.piece_search_bar.text(),self.presets_combo_box.currentText()))
-        self.presets_combo_box.setEnabled(False)
-        
+        self.presets_combo_box.setToolTip(self.tr("Select the preset"))
+        self.presets_combo_box.setPlaceholderText(" ")
+        self.presets_combo_box.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
+
+        self.hbox_presets = QtWidgets.QHBoxLayout()
+        self.hbox_presets.addWidget(presets_lbl)
+        self.hbox_presets.addWidget(self.presets_combo_box)
+
+
+
         self.add_create_buttons = self.create_add_zone()
         
 
@@ -142,10 +156,11 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         check_box_layout.addWidget(only_digitalized_lbl)
         check_box_layout.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
 
+        select_zone_layout.addLayout(self.hbox_presets)
+        select_zone_layout.addSpacing(10)
         select_zone_layout.addLayout(search_bar_layout)
         select_zone_layout.addLayout(check_box_layout)
         select_zone_layout.addWidget(self.piece_lbl)
-        select_zone_layout.addWidget(self.presets_combo_box)
         select_zone_layout.addWidget(self.add_create_buttons)
         
         search_bars.setLayout(select_zone_layout)
@@ -194,12 +209,21 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         self.archive.update_pieces()
         self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
     
-    
-    #Set the option of the instruments to the combo box
-    def set_options_of_presets(self,text):
+    #Set the options of the presets in the combo box
+    def set_presets(self):
         #Clear the old options
         for i in range(self.presets_combo_box.count()):
                 self.presets_combo_box.removeItem(0)
+        
+        self.presets_combo_box.setEnabled(True)
+        self.presets_combo_box.addItems(self.preset_manager.get_names())
+    
+
+    #Set the option of the instruments to the combo box
+    def set_options_of_instruments(self,text):
+        #Clear the old options
+        for i in range(self.instruments_combo_box.count()):
+                self.instruments_combo_box.removeItem(0)
 
         #set instruments
         piece = Validate.select_window_validate_selection(text,self.archive.pieces.get_parsed_names())
@@ -211,9 +235,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 if not scores:
                     raise NoScoresException()
                 
-                self.presets_combo_box.setEnabled(True)
-                self.presets_combo_box.addItems(self.preset_manager.get_names())
-
+                #For the printer
                 self.piece_lbl.setText(piece.name)
                 self.printer.actual_piece = piece
 
@@ -222,21 +244,17 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
             
             #if the piece is not in the digital archive
             except FileNotFoundError:
-                self.presets_combo_box.setEnabled(False)
-                self.presets_combo_box.insertItem(0,self.tr("NOT DIGITALIZED")) #TRADUCIR
+                self.instruments_combo_box.insertItem(0,self.tr("NOT DIGITALIZED")) #TRADUCIR
                 self.instruments_combo_box.setEnabled(False)
                 self.instruments_combo_box.clear()
             except NoScoresException:
-                self.presets_combo_box.setEnabled(False)
-                self.presets_combo_box.insertItem(0,self.tr("NO SCORES")) #TRADUCIR
+                self.instruments_combo_box.insertItem(0,self.tr("NO SCORES")) #TRADUCIR
                 self.instruments_combo_box.setEnabled(False)
                 self.instruments_combo_box.clear()
         
         else:
             self.instruments_combo_box.clear()
             self.instruments_combo_box.setEnabled(False)
-            self.presets_combo_box.clear()
-            self.presets_combo_box.setEnabled(False)
 
 
 
@@ -247,7 +265,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         except AttributeError:
             return
         
-        if self.presets_combo_box.isEnabled() and validation:
+        if self.preset_manager.exist(self.presets_combo_box.currentText()) and validation:
             preset = self.preset_manager.get_preset(self.presets_combo_box.currentText())
             if preset == None:
                 return
@@ -267,8 +285,9 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                                                   scrolleable_item_id,
                                                   self.scroll.remove_item,
                                                   self.printer.remove))
-        
-        print(self.printer.items)
+
+            #Block the presets combobox
+            self.presets_combo_box.setEnabled(False)
     
 
     #Display a window to select a location to save a pdf
@@ -287,6 +306,10 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
 
     #Create one pdf with all the selected pdfs merged
     def create_pdf(self):     
+        #Ask for the type of creation. By instruments or by pieces
+        window = TypeOfExportWindow(self)
+        print(window.is_by_instruments)
+
         try:
             if self.printer.items:
                 pdf_path = self.dialog_window_select_new_pdf()
@@ -309,6 +332,9 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         self.archive.update_pieces()
         #Preview
         self.preview.clear()
+
+        #Presets
+        self.set_presets()
 
 
     #Controlls the pieces showed in the search bar

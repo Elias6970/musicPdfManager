@@ -1,7 +1,7 @@
 import sys
 from PyQt6 import QtWidgets
 from classes.config import Configuration
-from gui.pop_up_window import PopUpWindow
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.error_window import Error_window
 
 #Window to set the paths of the archive and the cover to export the list of pieces
@@ -111,7 +111,7 @@ class Preferences_window(QtWidgets.QDialog):
             Configuration.save_config(self.line_archive_path.text(),
                                       self.line_cover_path.text(),
                                       Configuration.name_to_cod_language(self.language_combobox.currentText()))
-            PopUpWindow(self.tr("Changes saved succesfully")+"\n"+self.tr("If you have changed the language you need to restart the app"),True,self) #translate
+            YesNoWindow(self.tr("Changes saved succesfully")+"\n"+self.tr("If you have changed the language you need to restart the app"),True,self) #translate
         
         except Exception as e:
             Error_window.print_error(e,"Error saving the changes")

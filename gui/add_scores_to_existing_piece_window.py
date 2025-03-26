@@ -5,7 +5,7 @@ from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
-from gui.pop_up_window import PopUpWindow
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
 import os
 
@@ -39,4 +39,4 @@ class Add_scores_to_existing_piece_window(AbstractSerchBarAndTwoButtonsWindow):
                     pass
                 except PdfNotFoundException: 
                     pass
-                PopUpWindow(self.tr("Correctly imported"),True,self) #Traducir
+                YesNoWindow(self.tr("Correctly imported"),True,self) #Traducir

@@ -7,7 +7,7 @@ from classes.constants import *
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
-from gui.pop_up_window import PopUpWindow
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
 
 #Window to add a new piece to the db. When you add the piece you must add the corresponding scores
@@ -61,10 +61,10 @@ class Add_piece_window(AbstractFieldsWindow):
                         pass
                     except Exception:
                         pass
-                    PopUpWindow(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
+                    YesNoWindow(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
                     self.reset_fields()
                 else:
-                    PopUpWindow(self.tr("Has been an error importing {}".format(parsed_name)),True,self)
+                    YesNoWindow(self.tr("Has been an error importing {}".format(parsed_name)),True,self)
                 
 
 
@@ -88,7 +88,7 @@ class Add_piece_window(AbstractFieldsWindow):
                             warning_text = warning_text + Archive.get_parsed_name(i[0],i[1]) + "\n"
                         
                         #Pop up the scores matched
-                        warning_window = PopUpWindow(warning_text,False,self)
+                        warning_window = YesNoWindow(warning_text,False,self)
                     
                     try:
                         return warning_window.btn_confirm_pressed 

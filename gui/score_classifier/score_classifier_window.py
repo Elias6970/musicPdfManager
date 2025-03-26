@@ -5,7 +5,7 @@ from classes.error import EmptyInitialInputException,FirstPageException,NoMorePi
 from classes.classifier.text_analizer import TextAnalizer
 from classes.classifier.classifier import Classifier
 from classes.interactive_preview_conversor import InterctivePreviewConversor
-from gui.pop_up_window import PopUpWindow
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.error_window import Error_window
 from gui.interactive_previewer.interactive_previewer import InteractivePreviewer
 
@@ -190,7 +190,7 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
 
     #Opens a pop up window with the instructions
     def help_opt_menu(self):
-        PopUpWindow(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
+        YesNoWindow(INSTRUCTIONS_SCORE_CLASSIFIER,True,self)
     
     def close(self):
         self.hide()

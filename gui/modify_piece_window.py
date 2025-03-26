@@ -5,7 +5,7 @@ from classes.piece import Piece
 from classes.error import AvoidModificationException
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.score_search_bar import ScoreSearchBar
-from gui.pop_up_window import PopUpWindow
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.error_window import Error_window
 from classes.constants import *
 
@@ -39,7 +39,7 @@ class Modify_piece_window(QtWidgets.QDialog):
         try:
             #Ask the user if he want to modify the cod
             if self.old_piece.cod != int(self.abstract_fields.line_cod.text()):
-                confirmation = PopUpWindow(self.tr("Are you sure that you want to modify the cod?")+"\n"+self.tr("It is a sensitive  and essential part of the archive"),False,self)
+                confirmation = YesNoWindow(self.tr("Are you sure that you want to modify the cod?")+"\n"+self.tr("It is a sensitive  and essential part of the archive"),False,self)
                 if confirmation.btn_confirm_pressed == False:
                     raise AvoidModificationException()
             
@@ -59,7 +59,7 @@ class Modify_piece_window(QtWidgets.QDialog):
                 self.archive.pieces.update_cod_and_name(self.old_piece.cod,int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
                 
 
-                PopUpWindow(self.tr("Correctly modificated"),True,self) 
+                YesNoWindow(self.tr("Correctly modificated"),True,self) 
 
                 self.clear_form()
                 self.search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())

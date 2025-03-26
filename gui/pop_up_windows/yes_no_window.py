@@ -5,11 +5,11 @@ Pop up a window that shows a message with buttons
     If only_yes_btn:bool = 0 there are yes or no
     if only_yes_btn:bool = 1 there are only yes
 """
-class PopUpWindow(QtWidgets.QDialog):
+class YesNoWindow(QtWidgets.QDialog):
     def __init__(self,text:str,only_yes_btn:bool,parent) -> None:
-        super(PopUpWindow,self).__init__(parent)
+        super(YesNoWindow,self).__init__(parent)
 
-        self.btn_confirm_pressed = False #This values become true when no button is pressed
+        self.btn_confirm_pressed = False #This values become true when yes is pressed
 
         self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
 

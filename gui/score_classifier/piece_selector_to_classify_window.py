@@ -5,7 +5,7 @@ from classes.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import StopClassifyingException, PdfNotFoundException
 from gui.status_console import StatusConsole
 from gui.score_search_bar import ScoreSearchBar
-from gui.pop_up_window import PopUpWindow
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
 from gui.error_window import Error_window
 from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
@@ -90,7 +90,7 @@ class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
         
         if not error_classified == "":
             for i in error_classified:
-                answer = PopUpWindow(i + self.tr(" is already splited,\n")+self.tr("do you want to redo it? "),False,self) #traducir
+                answer = YesNoWindow(i + self.tr(" is already splited,\n")+self.tr("do you want to redo it? "),False,self) #traducir
                 if answer.btn_confirm_pressed == True:
                     to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
 
