@@ -57,3 +57,11 @@ class PresetManager():
             if i.name == name:
                 return i
         return None
+    
+    #Return if a preset exist in the list
+    def exist(self,name:str) -> bool:
+        for i in self.presets:
+            if i.name == name:
+                return True
+        
+        return False

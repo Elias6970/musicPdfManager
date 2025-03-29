@@ -16,3 +16,9 @@ class PrinteablePreset(PrinteableElement):
     def set_dir(self,dir:Dir):
         self.dir = dir
         
+    #Custom method less than to order by name of the dir
+    def __lt__(self,other):
+        if isinstance(other, PrinteablePreset):
+            self.dir.get_name_without_cod() < other.dir.get_name_without_cod()
+        
+        super().__lt__(self,other)#Different types

@@ -1,4 +1,4 @@
-import os,shutil
+import os,shutil,re
 from classes.files_management.file import File
 from classes.db_manage import Db_archive
 from classes.constants import DIR_SCORES,DIR_EXTRAS, DB_NAME
@@ -53,6 +53,11 @@ class Dir(File):
         
         file_dirs.close()
         file_db.close()
+
+    #Return the name of the 
+    def get_name_without_cod(self) -> str:
+        return re.sub(r'^\d+-','',self.name)
+    
 
 #Class for returning errors
 class Dir_Error(Dir):

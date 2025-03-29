@@ -1,6 +1,9 @@
 from classes.presets.preset import Preset
 from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
-import enum,re
+from classes.presets.preset_resolver_states import PresetResolverStates
+from classes.presets.resolved_preset_instrument import ResolvedPresetInstrument
+from classes.files_management.dir import Dir
+import re,os
 
 #Not implemented
 #Si no está el mismo devuelves uno por arriba,
@@ -10,11 +13,6 @@ import enum,re
 #   Mismo nombre uno por debajo
 #   Mismo nombre sin número
 
-
-class PresetResolverStates(enum.Enum):
-    RESOLVED = 1 #Resolved with a direct user input (same name or name in other options)
-    AUTO_RESOLVED = 2 #Resolved by the program logic like the same instrument with other name
-    NOT_RESOLVED = 3 #Not resolved with any option
 
 class PresetResolver():
     # Check if there is the same instrument with a lower number or no number 
@@ -45,29 +43,39 @@ class PresetResolver():
     
     #Decide the scores that will be printed with the preset
     #   preset: Preset to resolve
-    #   scores: List of scores to resolve
+    #   dir: dir to get the scores and the name of the piece
+    #   ignore_copies: boolean to ignore the number of copies of each instrument.
+    #                   if false copies=1
     #
-    # Returns a list in which each element is an instrument in the preset:
-    #   1- int: State of the preset resolution
-    #   2- int: Number of copies of the instrument
-    #   3- str: Preset's instrument
-    #   4- str|None: Resolved score related to the preset. If the state is NOT_RESOLVED it is None
+    #Return a ResolvedPresetInstrument object 
     @staticmethod
-    def resolve(preset:Preset,scores:list[str]) -> list[tuple[int,int,str,str|None]]:
+    def resolve(preset:Preset,dir:Dir,ignore_copies:bool) -> list[ResolvedPresetInstrument]:
         result = []
+        scores = dir.get_scores()
         for i in preset.instruments.keys():
             founded_in_other_options = False
-
+            if ignore_copies:
+                copies = 1
+            else:
+                copies = preset.instruments[i][PRESETS_COPIES]
             # Check if there is the exact same instrument
             if i in scores:
-                result.append((PresetResolverStates.RESOLVED,preset.instruments[i][PRESETS_COPIES],i,i))
+                result.append(ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                                                       copies,
+                                                       dir.name,
+                                                       i,
+                                                       os.path.join(dir.path,i)))
                 continue
         
             # Check the other options for the instrument
             for j in preset.instruments[i][PRESETS_OTHER_OPTIONS]:
                 
                 if j in scores:
-                    result.append((PresetResolverStates.RESOLVED,preset.instruments[i][PRESETS_COPIES],i,j))
+                    result.append(ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                                                           copies,
+                                                           dir.name,
+                                                           i,
+                                                           os.path.join(dir.path,j)))
                     founded_in_other_options = True
                     break
             if founded_in_other_options:
@@ -83,6 +91,9 @@ class PresetResolver():
             #Special options like principal clarinet
 
             #Unresolved
-            result.append((PresetResolverStates.NOT_RESOLVED,preset.instruments[i][PRESETS_COPIES],i))
-
+            result.append(ResolvedPresetInstrument(PresetResolverStates.NOT_RESOLVED,
+                                                   copies,
+                                                   dir.name,
+                                                   i))
+            
         return result

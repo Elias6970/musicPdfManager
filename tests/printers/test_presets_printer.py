@@ -1,8 +1,9 @@
 from classes.presets.preset import Preset
 from classes.printers.presets_printer import PresetsPrinter
-from classes.printers.printeable_preset import PrinteablePreset
+from classes.presets.resolved_preset_instrument import ResolvedPresetInstrument
+from classes.presets.preset_resolver_states import PresetResolverStates
 from classes.files_management.dir import Dir
-import pytest
+import pytest,os
 
 
 def test_create_and_remove_presets_printer():
@@ -61,3 +62,318 @@ def test_create_create_and_remove_presets_printer():
     assert pp.items[1].copies == 2
     assert pp.items[1].preset == p3
     assert pp.items[1].dir == dir2
+
+
+
+def test_export_by_instruments_one_pdf_file():
+    oboe = "oboe"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    solution = {
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument
+        }
+    }
+    try:
+        os.mkdir("sol")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("sol\\test1")
+    except FileExistsError:
+        pass
+
+    pp.export_by_instruments(solution,"sol\\test1")
+
+
+def test_export_by_instruments_two_instruments_one_piece_when_order_default():
+    oboe = "oboe"
+    clarinete = "clarinete"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+    p.add_instrument(clarinete,1)
+
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             clarinete,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Clarinete 1º.pdf")
+    
+    solution = {
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument
+        },
+        clarinete : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument2
+        }
+    }
+
+    try:
+        os.mkdir("sol")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("sol\\test2")
+    except FileExistsError:
+        pass
+    
+    pp.export_by_instruments(solution,"sol\\test2")
+
+
+def test_export_by_instruments_one_instrument_two_times_same_piece_when_order_default():
+    oboe = "oboe"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+    printeable_id = pp.add(1,p,dir)
+    
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Clarinete 1º.pdf")
+    
+    solution = {
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument
+        },
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument2
+        }
+    }
+
+    try:
+        os.mkdir("sol")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("sol\\test3")
+    except FileExistsError:
+        pass
+    
+    pp.export_by_instruments(solution,"sol\\test3")
+
+
+def test_export_by_instruments_two_instruments_one_piece_when_order_default():
+    oboe = "oboe"
+    clarinete = "clarinete"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+    p.add_instrument(clarinete,1)
+
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             clarinete,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Clarinete 1º.pdf")
+    
+    solution = {
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument
+        },
+        clarinete : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument2
+        }
+    }
+
+    try:
+        os.mkdir("sol")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("sol\\test2")
+    except FileExistsError:
+        pass
+    
+    pp.export_by_instruments(solution,"sol\\test2")
+
+
+def test_export_by_instruments_one_instrument_two_different_pieces_when_order_default():
+    oboe = "oboe"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+    dir2 = Dir("..\\archivodigital\\1650-GTRT")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+    printeable_id = pp.add(1,p,dir2)
+    
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "GTRT",
+                             oboe,
+                             "..\\archivodigital\\1650-GTRT\\partituras\\p.pdf")
+    
+    solution = {
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument,
+            "GTRT" : resolved_instrument2
+        }
+    }
+
+    try:
+        os.mkdir("sol")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("sol\\test4")
+    except FileExistsError:
+        pass
+    
+    pp.export_by_instruments(solution,"sol\\test4")
+
+
+def test_export_by_instruments_one_instrument_two_times_different_pieces_when_order_alphabetic():
+    oboe = "oboe"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+    dir2 = Dir("..\\archivodigital\\1650-GTRT")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+    printeable_id = pp.add(1,p,dir2)
+    
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "GTRT",
+                             oboe,
+                             "..\\archivodigital\\1650-GTRT\\partituras\\p.pdf")
+    
+    solution = {
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument,
+            "GTRT" : resolved_instrument2
+        }
+    }
+
+    try:
+        os.mkdir("sol")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("sol\\test5")
+    except FileExistsError:
+        pass
+    
+    pp.set_export_sorted(True)
+    pp.export_by_instruments(solution,"sol\\test5")
+
+
+
+
+def test_export_by_instruments_two_instrument_two_different_pieces_each_instrument_when_order_default():
+    oboe = "oboe"
+    clarinete = "clarinete"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+    p.add_instrument(clarinete,1)
+
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+    dir2 = Dir("..\\archivodigital\\1650-GTRT")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+    printeable_id = pp.add(1,p,dir2)
+    
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "GTRT",
+                             oboe,
+                             "..\\archivodigital\\1650-GTRT\\partituras\\p.pdf")
+    resolved_instrument_clar = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "LA BODA DE LUIS ALONSO",
+                             clarinete,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Caja.pdf")
+    resolved_instrument_clar2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "GTRT",
+                             clarinete,
+                             "..\\archivodigital\\1650-GTRT\\partituras\\imprimir.pdf")
+    
+    solution = {
+        oboe : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument,
+            "GTRT" : resolved_instrument2
+        },
+        clarinete : {
+            "LA BODA DE LUIS ALONSO" : resolved_instrument_clar,
+            "GTRT" : resolved_instrument_clar2            
+        }
+    }
+
+    try:
+        os.mkdir("sol")
+    except FileExistsError:
+        pass
+    try:
+        os.mkdir("sol\\test6")
+    except FileExistsError:
+        pass
+    
+    pp.export_by_instruments(solution,"sol\\test6")

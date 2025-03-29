@@ -86,6 +86,7 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         quit()
 
 
+    #Control the activation of the buttons
     def manage_btns_enableability(self):
         if self._by_instruments_rb.isChecked():
             self._sort_alphabetically_cb.setEnabled(True)
