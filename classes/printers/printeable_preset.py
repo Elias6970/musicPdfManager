@@ -21,4 +21,4 @@ class PrinteablePreset(PrinteableElement):
         if isinstance(other, PrinteablePreset):
             self.dir.get_name_without_cod() < other.dir.get_name_without_cod()
         
-        super().__lt__(self,other)#Different types
+        return super().__lt__(other)#Different types

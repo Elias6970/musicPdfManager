@@ -377,3 +377,134 @@ def test_export_by_instruments_two_instrument_two_different_pieces_each_instrume
         pass
     
     pp.export_by_instruments(solution,"sol\\test6")
+
+
+def test_preprocess_export_should_one_instrument_one_piece_when_one_instrument():
+    oboe = "Oboes"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "71-LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    
+    solution = pp.preprocess_export()
+    expected = {
+        oboe : {
+            "71-LA BODA DE LUIS ALONSO" : resolved_instrument
+        }
+    }
+
+    assert len(solution[1]) == 0
+
+    assert expected.get(oboe).keys() == solution[0].get(oboe).keys()
+
+    assert expected.get(oboe)["71-LA BODA DE LUIS ALONSO"].resolution == solution[0].get(oboe)["71-LA BODA DE LUIS ALONSO"].resolution
+
+
+
+
+def test_preprocess_export_should_one_instrument_two_pieces_when_one_instrument():
+    oboe = "Oboes"
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+    dir2 = Dir("..\\archivodigital\\1650-GTRT")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+    printeable_id = pp.add(1,p,dir2)
+
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "71-LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "1650-GTRT",
+                             oboe,
+                             "..\\archivodigital\\1650-GTRT\\partituras\\Oboes.pdf")
+    
+    solution = pp.preprocess_export()
+    expected = {
+        oboe : {
+            "71-LA BODA DE LUIS ALONSO" : resolved_instrument,
+            "1650-GTRT" : resolved_instrument2
+        }
+    }
+
+    assert len(solution[1]) == 0
+
+    assert expected.get(oboe).keys() == solution[0].get(oboe).keys()
+
+    assert expected.get(oboe)["71-LA BODA DE LUIS ALONSO"].resolution == solution[0].get(oboe)["71-LA BODA DE LUIS ALONSO"].resolution
+    assert expected.get(oboe)["1650-GTRT"].resolution == solution[0].get(oboe)["1650-GTRT"].resolution
+
+
+def test_preprocess_export_should_one_instrument_two_pieces_when_two_instruments():
+    oboe = "Oboes"
+    clarinete = "Clarinete 1º"
+
+    p = Preset("Primero")
+    p.add_instrument(oboe,1)
+    p.add_instrument(clarinete,1)
+
+    dir = Dir("..\\archivodigital\\71-LA BODA DE LUIS ALONSO")
+    dir2 = Dir("..\\archivodigital\\1650-GTRT")
+
+    pp = PresetsPrinter()
+    printeable_id = pp.add(1,p,dir)
+    printeable_id = pp.add(1,p,dir2)
+
+    resolved_instrument = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "71-LA BODA DE LUIS ALONSO",
+                             oboe,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Oboes.pdf")
+    resolved_instrument2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "1650-GTRT",
+                             oboe,
+                             "..\\archivodigital\\1650-GTRT\\partituras\\Oboes.pdf")
+    resolved_instrument_clar = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "71-LA BODA DE LUIS ALONSO",
+                             clarinete,
+                             "..\\archivodigital\\71-LA BODA DE LUIS ALONSO\\partituras\\Clarinete 1º.pdf")
+    resolved_instrument_clar2 = ResolvedPresetInstrument(PresetResolverStates.RESOLVED,
+                             1,
+                             "1650-GTRT",
+                             clarinete,
+                             "..\\archivodigital\\1650-GTRT\\partituras\\Clarinete 1º.pdf")
+    
+    
+    solution = pp.preprocess_export()
+    expected = {
+        oboe : {
+            "71-LA BODA DE LUIS ALONSO" : resolved_instrument,
+            "1650-GTRT" : resolved_instrument2
+        },
+        clarinete : {
+            "71-LA BODA DE LUIS ALONSO" : resolved_instrument_clar,
+            "1650-GTRT" : resolved_instrument_clar2
+        }
+
+    }
+
+    assert len(solution[1]) == 0
+
+    assert expected.get(oboe).keys() == solution[0].get(oboe).keys()
+
+    assert expected.get(oboe)["71-LA BODA DE LUIS ALONSO"].resolution == solution[0].get(oboe)["71-LA BODA DE LUIS ALONSO"].resolution
+    assert expected.get(oboe)["1650-GTRT"].resolution == solution[0].get(oboe)["1650-GTRT"].resolution
+    assert expected.get(clarinete)["71-LA BODA DE LUIS ALONSO"].resolution == solution[0].get(clarinete)["71-LA BODA DE LUIS ALONSO"].resolution
+    assert expected.get(clarinete)["1650-GTRT"].resolution == solution[0].get(clarinete)["1650-GTRT"].resolution

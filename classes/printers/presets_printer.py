@@ -46,9 +46,10 @@ class PresetsPrinter(Printer):
     #Return a tuple with:
     #   -dict of the valid solutions. Key=instrument string : value=dictionary with (key=piece_name string : value=ResolvedPresetInstrument)     
     #   -list of of ResolvedPresetInstrument that has been errors (not pdf founded for that instrument). 
-    def preprocess_export(self) -> tuple[dict,list]:
+    def preprocess_export(self) -> tuple[dict[str,dict[str,ResolvedPresetInstrument]],list]:
         preset_resolver = PresetResolver()
-        solution = defaultdict(dict)
+        #solution = defaultdict(dict)
+        solution:dict = {}
         errors = []
         for i in self.items:
             resolution = preset_resolver.resolve(preset=i.preset, 
@@ -58,7 +59,11 @@ class PresetsPrinter(Printer):
             for j in resolution:
                 if resolution != None and (j.state == PresetResolverStates.RESOLVED or
                                            j.state == PresetResolverStates.AUTO_RESOLVED):
-                    solution[j.instrument][j.piece] = j   
+                    
+                    if j.instrument in solution:
+                        solution[j.instrument][j.piece] = j 
+                    else:
+                        solution[j.instrument] = {j.piece:j}
 
                 else:
                     errors.append(j)

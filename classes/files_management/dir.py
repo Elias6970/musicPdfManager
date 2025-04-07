@@ -21,6 +21,12 @@ class Dir(File):
     def get_extras(self):
         return self.get_names(os.path.join(self.path,DIR_EXTRAS))
     
+    
+    def get_scores_names(self):
+        """Return the score names without the extension (always .pdf)"""
+        return [os.path.splitext(i)[0] for i in self.get_scores()]
+    
+
     def change_name(self,new_name):
         try:
             shutil.move(self.path,os.path.join(os.path.dirname(self.path),new_name))

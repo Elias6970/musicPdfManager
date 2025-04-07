@@ -10,4 +10,13 @@ class ResolvedPresetInstrument:
         self.instrument:str = instrument
         self.resolution:str|None = resolution #Path to the pdf for this instrument
     
+    def __eq__(self, value):
+        if isinstance(value,ResolvedPresetInstrument):
+            return (self.state == value.state and
+                   self.copies == value.copies and
+                   self.piece == value.piece and
+                   self.instrument == value.instrument and
+                   self.resolution == value.resolution)
+        
+        return super().__eq__(value)
     

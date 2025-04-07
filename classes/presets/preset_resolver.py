@@ -1,5 +1,5 @@
 from classes.presets.preset import Preset
-from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
+from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS,DIR_SCORES
 from classes.presets.preset_resolver_states import PresetResolverStates
 from classes.presets.resolved_preset_instrument import ResolvedPresetInstrument
 from classes.files_management.dir import Dir
@@ -51,7 +51,7 @@ class PresetResolver():
     @staticmethod
     def resolve(preset:Preset,dir:Dir,ignore_copies:bool) -> list[ResolvedPresetInstrument]:
         result = []
-        scores = dir.get_scores()
+        scores = dir.get_scores_names()
         for i in preset.instruments.keys():
             founded_in_other_options = False
             if ignore_copies:
@@ -64,7 +64,7 @@ class PresetResolver():
                                                        copies,
                                                        dir.name,
                                                        i,
-                                                       os.path.join(dir.path,i)))
+                                                       os.path.join(dir.path,DIR_SCORES,i+".pdf")))
                 continue
         
             # Check the other options for the instrument
@@ -75,7 +75,7 @@ class PresetResolver():
                                                            copies,
                                                            dir.name,
                                                            i,
-                                                           os.path.join(dir.path,j)))
+                                                           os.path.join(dir.path,DIR_SCORES,j+".pdf")))
                     founded_in_other_options = True
                     break
             if founded_in_other_options:
