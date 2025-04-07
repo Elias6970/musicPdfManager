@@ -1,8 +1,19 @@
 from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 
-# Class that represents a fixed amount of different instruments 
-# Each instrument has the name, the number of copies and a list with other options if the instrument doesn't exit
+
 class Preset:
+    """
+    Class that represents a fixed amount of different instruments 
+    Each instrument has the name, the number of copies and a list with other options if the instrument doesn't exit
+    Example preset:
+    {
+        "oboe" : {
+            PRESETS_COPIES : 3,
+            PRESETS_OTHER_OPTIONS : ["flauta_1","clarinete_1"]
+        }
+    }
+    """
+
     def __init__(self,name:str) -> None:
         self.name:str = name
         self.instruments:dict[str, dict[str, int|list[str]]] = {}
@@ -18,3 +29,13 @@ class Preset:
             return True
         except Exception:
             return False
+    
+
+    def print(self) -> str:
+        """Return a string to print the preset"""
+
+        out = ""
+        for i in self.instruments.keys():
+            out += "   " + str(self.instruments[i][PRESETS_COPIES]) + "x " + str(i) + "\n"
+
+        return out

@@ -216,7 +216,11 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 self.presets_combo_box.removeItem(0)
         
         self.presets_combo_box.setEnabled(True)
-        self.presets_combo_box.addItems(self.preset_manager.get_names())
+        for i,value in enumerate(self.preset_manager.presets):
+            self.presets_combo_box.addItem(value.name)
+            preview_text = value.name + " preview:\n" + value.print()
+            self.presets_combo_box.setItemData(i,preview_text,QtCore.Qt.ItemDataRole.ToolTipRole)
+        #self.presets_combo_box.addItems(self.preset_manager.get_names())
     
 
     #Set the option of the instruments to the combo box

@@ -4,7 +4,8 @@ from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
 from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.validate import Validate
-from classes.printer import Printer,Dossier
+from classes.printer import Printer
+from classes.printers.dossier import Dossier
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from gui.error_window import Error_window
