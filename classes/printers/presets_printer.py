@@ -4,8 +4,7 @@ from classes.presets.preset import Preset
 from classes.files_management.dir import Dir
 from classes.presets.preset_resolver import PresetResolver, PresetResolverStates
 from classes.presets.resolved_preset_instrument import ResolvedPresetInstrument
-import pypdf,os,shutil
-from collections import defaultdict
+import pypdf,os
 
 #This class represents a printer saving a list of pdfs to print
 class PresetsPrinter(Printer):
@@ -14,12 +13,14 @@ class PresetsPrinter(Printer):
     def __init__(self) -> None:
         super().__init__()
         self.items:list[PrinteablePreset] = []
-        #self.export_by_instruments = True #Default option
-        self.export_sorted = False #Tell if the 
+        self.sorted_export = False #Tell if the 
         self.ignore_preset_copies = False
-    
-    def set_export_sorted(self,t:bool) -> None:
-        self.export_sorted = t
+
+        #
+        self._solution:dict[str,dict[str,ResolvedPresetInstrument]] = {}
+
+    def set_sorted_export(self,t:bool) -> None:
+        self.sorted_export = t
 
     #Return the printeablePreset id to remove it from a list
     def add(self,copies:int,preset:Preset,dir:Dir) -> int:
@@ -40,16 +41,25 @@ class PresetsPrinter(Printer):
         #Resolve presets
         #Merge them
         pass
+
+
+    def add_to_solution(self,resolved_preset_instrument:ResolvedPresetInstrument):
+        """Add a resolved_preset_instrument to the solution"""
+
+        if resolved_preset_instrument.instrument in self._solution:
+            self._solution[resolved_preset_instrument.instrument][resolved_preset_instrument.piece] = resolved_preset_instrument
+        else:
+            self._solution[resolved_preset_instrument.instrument] = {resolved_preset_instrument.piece:resolved_preset_instrument}
+
     
-    
-    #Preprocess to export the pdf
-    #Return a tuple with:
-    #   -dict of the valid solutions. Key=instrument string : value=dictionary with (key=piece_name string : value=ResolvedPresetInstrument)     
-    #   -list of of ResolvedPresetInstrument that has been errors (not pdf founded for that instrument). 
-    def preprocess_export(self) -> tuple[dict[str,dict[str,ResolvedPresetInstrument]],list]:
+
+    def preprocess_export(self) -> list[ResolvedPresetInstrument]:
+        """
+        Preprocess all the added pieces to check if exist score for all the preset's instruments
+        It return a list of ResolvedPresetInstrument with all the presets instruments that don't have a score related
+        """
+
         preset_resolver = PresetResolver()
-        #solution = defaultdict(dict)
-        solution:dict = {}
         errors = []
         for i in self.items:
             resolution = preset_resolver.resolve(preset=i.preset, 
@@ -59,23 +69,21 @@ class PresetsPrinter(Printer):
             for j in resolution:
                 if resolution != None and (j.state == PresetResolverStates.RESOLVED or
                                            j.state == PresetResolverStates.AUTO_RESOLVED):
-                    
-                    if j.instrument in solution:
-                        solution[j.instrument][j.piece] = j 
-                    else:
-                        solution[j.instrument] = {j.piece:j}
+                
+                    self.add_to_solution(j)
 
                 else:
                     errors.append(j)
-        
-        return (solution,errors)
+
+        return errors
 
 
-    #Generate the pdfs to be printed
-    def export_by_instruments(self,printeables:dict[str,dict[str,ResolvedPresetInstrument]],path:str):
+    def export_by_instruments(self,path:str):
+        """Generate all the pdf to print splitted by instruments"""
+
         #Get the exporting order by the order added
-        exporting_order:list = [i.dir.get_name_without_cod() for i in self.items]
-        if self.export_sorted:
+        exporting_order:list = [i.dir.name for i in self.items]
+        if self.sorted_export:
             exporting_order.sort()
 
         #Create folder in the path selected
@@ -86,12 +94,13 @@ class PresetsPrinter(Printer):
             pass
 
         #Export the pieces in each pdf sorted by name
-        for i in printeables.keys():
+        #for i in printeables.keys():
+        for i in self._solution.keys():
             merge_pdf = pypdf.PdfWriter()
 
             for j in exporting_order:
-                for _ in range(printeables[i][j].copies):
-                    merge_pdf.append(printeables[i][j].resolution)
+                for _ in range(self._solution[i][j].copies):
+                    merge_pdf.append(self._solution[i][j].resolution)
 
             merge_pdf.write(os.path.join(exporting_folder,i)+".pdf")
             merge_pdf.close()         
