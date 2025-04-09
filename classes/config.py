@@ -1,4 +1,4 @@
-import os,sys,locale,ctypes,json
+import os,sys,locale,ctypes
 
 #Config files location
 PLAIN_TEXT_CONFIG_PATH = os.path.join("data","config.yml")

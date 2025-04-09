@@ -122,3 +122,8 @@ class Preferences_window(QtWidgets.QDialog):
         if self.first_time:
             sys.exit()
         self.hide()
+    
+
+    def closeEvent(self, a0):
+        self.close()
+        return super().closeEvent(a0)

@@ -98,10 +98,6 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 
 `Translate classifying instructions`
 
-`Translate text main_window and modify window and Translate the line 75 of Dossier class(printer file) which is showed when you create the dossier`
-
-`Modify pop_up_window to change 'do you want to keep adding it?' to be variable`
-
 `Maybe we can add a window that shows all the instruments selected  when you finish a piece in classify window`
 
 `Implement a tool for getting logs to detect future errors`

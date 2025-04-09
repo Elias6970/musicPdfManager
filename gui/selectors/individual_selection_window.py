@@ -4,7 +4,6 @@ from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate
 from classes.printers.default_printer import DefualtPrinter
-from classes.printers.printeable_file import PrinteableFile
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from classes.constants import DIR_SCORES

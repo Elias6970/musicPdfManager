@@ -6,7 +6,7 @@ from classes.crop_rectangle import CropRectangle
 from classes.classifier.exportable_pdf import ExportablePdf
 from classes.classifier.text_analizer import TextAnalizer
 from classes.classifier.pdf_controller import PdfController
-import PyPDF2
+import pypdf
 
 #This class manage how pieces are classified.
 class Classifier:
@@ -58,8 +58,8 @@ class Classifier:
             pass
 
         temp_path = self.generate_temp()
-        reader = PyPDF2.PdfReader(self.pdf_controller.get_actual_pdf().path)
-        writer = PyPDF2.PdfWriter()
+        reader = pypdf.PdfReader(self.pdf_controller.get_actual_pdf().path)
+        writer = pypdf.PdfWriter()
         writer.add_page(reader.pages[self.pdf_controller.get_actual_pdf().actual_pdf_page])
         writer.write(temp_path)
 

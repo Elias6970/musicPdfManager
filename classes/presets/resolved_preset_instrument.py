@@ -1,5 +1,4 @@
 from classes.presets.preset_resolver_states import PresetResolverStates
-import re
 
 #Class to wrap the resolution of an instrument + score
 class ResolvedPresetInstrument:

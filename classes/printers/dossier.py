@@ -2,7 +2,7 @@ import os,tempfile
 from reportlab.platypus import SimpleDocTemplate,Table
 from reportlab.lib import pagesizes,colors
 from reportlab.pdfgen import canvas
-from PyPDF2 import PdfWriter,PdfReader
+from pypdf import PdfWriter,PdfReader
 from classes.constants import COVER_LIST_DOSSIER
 
 

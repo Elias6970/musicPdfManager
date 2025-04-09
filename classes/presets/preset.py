@@ -35,7 +35,10 @@ class Preset:
         """Return a string to print the preset"""
 
         out = ""
-        for i in self.instruments.keys():
-            out += "   " + str(self.instruments[i][PRESETS_COPIES]) + "x " + str(i) + "\n"
+        for i,value in enumerate(self.instruments.keys()):
+            out += "   " + str(self.instruments[value][PRESETS_COPIES]) + "x " + str(value)
+            
+            if i+1 < len(self.instruments):
+                out += "\n"
 
         return out

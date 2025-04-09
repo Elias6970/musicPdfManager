@@ -2,7 +2,7 @@ import os,shutil
 from typing import List,Tuple
 from classes.files_management.file import File
 from classes.crop_rectangle import CropRectangle
-import PyPDF2
+import pypdf
 
 #Represents a pdf to be exported
 #   have a path to the original pdf
@@ -11,7 +11,7 @@ class ExportablePdf(File):
     def __init__(self,path) -> None:
         super().__init__(path)
 
-        self.num_pages:int = len(PyPDF2.PdfReader(path).pages)
+        self.num_pages:int = len(pypdf.PdfReader(path).pages)
 
         self.actual_pdf_page:int = 0
 
@@ -22,9 +22,9 @@ class ExportablePdf(File):
     #Append a new page to an existing temp pdf in list_of_new_files
     @staticmethod
     def append_page(file_src:str,to_append:str):
-        merger = PyPDF2.PdfMerger()
-        merger.append(PyPDF2.PdfReader(open(file_src, 'rb')))
-        merger.append(PyPDF2.PdfReader(open(to_append, 'rb')))
+        merger = pypdf.PdfMerger()
+        merger.append(pypdf.PdfReader(open(file_src, 'rb')))
+        merger.append(pypdf.PdfReader(open(to_append, 'rb')))
         merger.write(file_src)
 
 
@@ -57,8 +57,8 @@ class ExportablePdf(File):
     #   Degrees need to be multiple of 90
     @staticmethod
     def rotate(degrees:int,path:str) -> None:
-        reader = PyPDF2.PdfReader(path)
-        writer = PyPDF2.PdfWriter()
+        reader = pypdf.PdfReader(path)
+        writer = pypdf.PdfWriter()
 
         for i in range(len(reader.pages)):
             page = reader.pages[i]
