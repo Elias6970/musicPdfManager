@@ -17,12 +17,13 @@ class Dir(File):
         return [i for i in list if i != ".DS_Store"]
 
     def get_scores(self):
+        """Return the score names with the extension (always .pdf)"""
         return self.get_names(os.path.join(self.path,DIR_SCORES))
     def get_extras(self):
         return self.get_names(os.path.join(self.path,DIR_EXTRAS))
     
     
-    def get_scores_names(self):
+    def get_score_names_without_extension(self):
         """Return the score names without the extension (always .pdf)"""
         return [os.path.splitext(i)[0] for i in self.get_scores()]
     

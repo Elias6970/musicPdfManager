@@ -1,4 +1,5 @@
 from classes.presets.preset_resolver_states import PresetResolverStates
+from classes.files_management.dir import Dir
 
 #Class to wrap the resolution of an instrument + score
 class ResolvedPresetInstrument:
@@ -8,6 +9,7 @@ class ResolvedPresetInstrument:
         self.piece:str = piece
         self.instrument:str = instrument
         self.resolution:str|None = resolution #Path to the pdf for this instrument
+        self.dir:Dir = None #Can be set but only is always set in errors
     
     def __eq__(self, value):
         if isinstance(value,ResolvedPresetInstrument):

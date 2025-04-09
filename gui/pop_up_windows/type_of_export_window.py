@@ -1,10 +1,12 @@
 from PyQt6 import QtWidgets,QtCore
+from gui.error_window import ShowError
 import enum
 
 class TypeOfExport(enum.Enum):
     ALL_IN_ONE = 0
     BY_PIECES = 1
     BY_INSTRUMENTS = 2
+    CANCELLED = 3 #When you close the window
 
 """
 Pop up a window that shows a message with checkboxes
@@ -63,8 +65,8 @@ class TypeOfExportWindow(QtWidgets.QDialog):
 
 
         #Confirm button
-        _confirm_btn = QtWidgets.QPushButton(self.tr("Confirm")) #traducir
-        _confirm_btn.clicked.connect(self.confirm)
+        self._btn_confirm = QtWidgets.QPushButton(self.tr("Confirm")) #traducir
+        self._btn_confirm.clicked.connect(self.confirm)
 
         _h_line = QtWidgets.QFrame()
         _h_line.setFrameShape(QtWidgets.QFrame.Shape.HLine)  # Set the frame shape to horizontal line
@@ -78,12 +80,11 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         _container_layout.addWidget(self._sort_alphabetically_cb)
         _container_layout.addWidget(_h_line)
         _container_layout.addWidget(self._ignore_preset_copies_cb)
-        _container_layout.addWidget(_confirm_btn)
+        _container_layout.addWidget(self._btn_confirm)
 
         self.setLayout(_container_layout)
 
         self.exec()
-        quit()
 
 
     #Control the activation of the buttons
@@ -105,7 +106,14 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         elif self._by_instruments_rb.isChecked():
             self.type_of_export = TypeOfExport.BY_INSTRUMENTS
             self.sort_alphabetically = self._sort_alphabetically_cb.isChecked()
-
+        else:
+            ShowError.show_tooltip_error(self.tr("You need to select the type of export"),5000,self._btn_confirm)
+            return #You need to select an option
         self.ignore_preset_copies = self._ignore_preset_copies_cb.isChecked()
 
+        self.hide()
+    
+
+    def closeEvent(self, a0):
+        self.type_of_export = TypeOfExport.CANCELLED
         self.hide()

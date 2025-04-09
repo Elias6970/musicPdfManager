@@ -51,7 +51,7 @@ class PresetResolver():
     @staticmethod
     def resolve(preset:Preset,dir:Dir,ignore_copies:bool) -> list[ResolvedPresetInstrument]:
         result = []
-        scores = dir.get_scores_names()
+        scores = dir.get_score_names_without_extension()
         for i in preset.instruments.keys():
             founded_in_other_options = False
             if ignore_copies:
@@ -91,9 +91,11 @@ class PresetResolver():
             #Special options like principal clarinet
 
             #Unresolved
-            result.append(ResolvedPresetInstrument(PresetResolverStates.NOT_RESOLVED,
-                                                   copies,
-                                                   dir.name,
-                                                   i))
+            error = ResolvedPresetInstrument(PresetResolverStates.NOT_RESOLVED,
+                                            copies,
+                                            dir.name,
+                                            i)
+            error.dir = dir
+            result.append(error)
             
         return result

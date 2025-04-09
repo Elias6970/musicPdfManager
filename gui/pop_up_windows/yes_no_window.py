@@ -6,7 +6,7 @@ Pop up a window that shows a message with buttons
     if only_yes_btn:bool = 1 there are only yes
 """
 class YesNoWindow(QtWidgets.QDialog):
-    def __init__(self,text:str,only_yes_btn:bool,parent) -> None:
+    def __init__(self,text:str,only_yes_btn:bool,parent=None) -> None:
         super(YesNoWindow,self).__init__(parent)
 
         self.btn_confirm_pressed = False #This values become true when yes is pressed

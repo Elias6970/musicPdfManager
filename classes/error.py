@@ -25,3 +25,6 @@ class AvoidModificationException(Exception):
 
 class StopClassifyingException(Exception):
     pass
+
+class MoreScoresThanPresetsException(Exception):
+    pass

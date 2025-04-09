@@ -4,11 +4,13 @@ from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate
 from classes.printers.presets_printer import PresetsPrinter
-from classes.error import NoScoresException
+from classes.error import NoScoresException, MoreScoresThanPresetsException
 from classes.preview_controller import Preview_controller
 from classes.presets.preset_manager import PresetManager
-from gui.error_window import Error_window
-from gui.pop_up_windows.type_of_export_window import TypeOfExportWindow
+from gui.error_window import Error_window, ShowError
+from gui.pop_up_windows.type_of_export_window import TypeOfExportWindow, TypeOfExport
+from gui.presets.resolve_not_matched_presets import ResolveNotMatchedPresets
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.status_console import StatusConsole
 from gui.score_search_bar import ScoreSearchBar
 from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
@@ -59,15 +61,15 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         self.num_copies.addItems([str(i+1) for i in range(MAX_COPIES)])
         self.num_copies.setToolTip(self.tr("Number of copies"))
         
-        btn1 = QtWidgets.QPushButton(self.tr("Add")) #traducir
-        btn2 = QtWidgets.QPushButton(self.tr("Create Pdf")) #traducir
+        self.btn_add = QtWidgets.QPushButton(self.tr("Add")) #traducir
+        self.btn_confirm = QtWidgets.QPushButton(self.tr("Create Pdf")) #traducir
 
-        btn1.clicked.connect(self.add_score)
-        btn2.clicked.connect(self.create_pdf)
+        self.btn_add.clicked.connect(self.add_score)
+        self.btn_confirm.clicked.connect(self.create_pdf)
 
         layout.addWidget(self.num_copies)
-        layout.addWidget(btn1)
-        layout.addWidget(btn2)
+        layout.addWidget(self.btn_add)
+        layout.addWidget(self.btn_confirm)
 
         obj.setLayout(layout)
         return obj
@@ -295,29 +297,48 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
     
 
     #Display a window to select a location to save a pdf
-    def dialog_window_select_new_pdf(self):
-        file_dialog = QtWidgets.QFileDialog()
-        
-        file_dialog.setWindowTitle(self.tr("Select Folder and File Name")) #traducir
-        file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptSave)  # Set the dialog to save mode
-        file_dialog.setDefaultSuffix(".pdf")
-
-        if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-            return file_dialog.selectedFiles()[0]
-        else:
-            return ""
+    def dialog_window_select_exporting_path(self):
+        return QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Select Folder to export"))
 
 
     #Create one pdf with all the selected pdfs merged
     def create_pdf(self):     
-        #Ask for the type of creation. By instruments or by pieces
-        window = TypeOfExportWindow(self)
-        print(window.is_by_instruments)
 
         try:
+            
             if self.printer.items:
-                pdf_path = self.dialog_window_select_new_pdf()
-                self.printer.export(pdf_path)
+                #Ask for the type of creation. By instruments or by pieces
+                window = TypeOfExportWindow(self)
+                if window.type_of_export == TypeOfExport.ALL_IN_ONE:
+                    YesNoWindow("Not implemented yet",True,self)
+                elif window.type_of_export == TypeOfExport.BY_PIECES:
+                    YesNoWindow("Not implemented yet",True,self)
+                elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
+                    self.printer.set_sorted_export(window.sort_alphabetically)
+                    self.printer.set_ignore_presets_copies(window.ignore_preset_copies)
+
+                    #Make the preporcess and solve the errros
+                    errors = self.printer.preprocess_export()
+                    r = ResolveNotMatchedPresets(errors,self)
+
+                    if len(r.resolved) < len(errors):
+                        return #Not all scores selected
+                    if len(r.resolved) > len(errors):
+                        raise MoreScoresThanPresetsException(self.tr("Something went wrong during the selection of the presets"))
+                    
+                    #Add resolution to the solution
+                    for i in r.resolved:
+                        self.printer.add_to_solution(i)
+
+                    #Export and save
+                    pdf_path = self.dialog_window_select_exporting_path()
+                    self.printer.export_by_instruments(pdf_path)
+            
+            else:
+                error = self.tr("*You need to add some piece")
+                ShowError.show_tooltip_error(error,5000,self.btn_confirm)
+
+                
         
         except Exception as e:
             Error_window.print_error(e)

@@ -22,6 +22,10 @@ class PresetsPrinter(Printer):
     def set_sorted_export(self,t:bool) -> None:
         self.sorted_export = t
 
+    def set_ignore_presets_copies(self,t:bool) -> None:
+        self.ignore_preset_copies = t
+
+        
     #Return the printeablePreset id to remove it from a list
     def add(self,copies:int,preset:Preset,dir:Dir) -> int:
         p = PrinteablePreset(copies)

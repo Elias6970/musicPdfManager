@@ -1,6 +1,6 @@
 import os,tempfile,fitz
 from classes.constants import RELATIVE_ARCHIVE_PATH,DIR_SCORES
-import PyPDF2
+import pypdf
 
 #Class that controlls the preview.
 #The preview extract the pdf page and returns a png image
@@ -26,7 +26,7 @@ class Preview_controller:
     
     #Return the num of pages
     def num_of_pages(self):
-        return len(PyPDF2.PdfReader(self.path).pages)
+        return len(pypdf.PdfReader(self.path).pages)
     
 
     #Pass the page to the next
