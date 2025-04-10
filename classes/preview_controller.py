@@ -1,5 +1,5 @@
 import os,tempfile,fitz
-from classes.constants import RELATIVE_ARCHIVE_PATH,DIR_SCORES
+from classes.constants.constants import RELATIVE_ARCHIVE_PATH,DIR_SCORES
 import pypdf
 
 #Class that controlls the preview.

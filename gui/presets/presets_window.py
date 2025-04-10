@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget
 from gui.status_console import StatusConsole
 from gui.list_items.status_conosle_item_with_two_buttons import StatusConsleItemWithTwoButtons
-from gui.presets.modify_preset import ModifyPresetView
+from gui.presets.abstract_modifying_preset_widget import AbstractModifyingPresetWidget
 from classes.presets.preset_manager import PresetManager
 from classes.config import PRESETS_PATH
 
@@ -59,7 +59,7 @@ class PresetsWindow(QDialog):
 
 
     def create_modify_view(self) -> QWidget:
-        widget = ModifyPresetView()
+        widget = AbstractModifyingPresetWidget()
         return widget
 
 

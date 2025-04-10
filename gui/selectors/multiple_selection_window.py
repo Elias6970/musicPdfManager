@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants import MAX_COPIES,REFRESH_IMG_PATH
+from classes.constants.constants import MAX_COPIES,REFRESH_IMG_PATH
 from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate

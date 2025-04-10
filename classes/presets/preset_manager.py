@@ -1,5 +1,5 @@
 from classes.presets.preset import Preset
-from classes.constants import PRESETS_PATH
+from classes.constants.constants import PRESETS_PATH
 import json
 
 

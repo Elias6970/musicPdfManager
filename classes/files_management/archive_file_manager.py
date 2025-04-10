@@ -1,7 +1,7 @@
 import os,shutil
 from classes.files_management.file import File
 from gui.error_window import Error_window
-from classes.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH
+from classes.constants.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH
 
 #This class make all the interactions with the files on the archive path
 class ArchiveFileManager:

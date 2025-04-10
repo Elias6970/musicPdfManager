@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
-from classes.constants import EDIT_IMG_PATH, TRASH_IMG_PATH
+from classes.constants.constants import EDIT_IMG_PATH, TRASH_IMG_PATH
 
 #Item in a list with two buttons and one lbl
 #   name: name of the item. It's the identifier. Need to be unique

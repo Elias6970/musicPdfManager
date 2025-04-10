@@ -1,6 +1,6 @@
 import os
 from classes.files_management.dir import Dir,Dir_Error
-from classes.constants import RELATIVE_ARCHIVE_PATH
+from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 class Validate():
     @staticmethod
     def validate_selection(src_txt:str,list_of_texts:list[str]) -> bool:

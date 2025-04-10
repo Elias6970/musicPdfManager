@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
-from classes.constants import TRASH_IMG_PATH
+from classes.constants.constants import TRASH_IMG_PATH
 
 #Item in the status console
 # item_id: id to delete the item from a list

@@ -7,7 +7,7 @@ from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.score_search_bar import ScoreSearchBar
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.error_window import Error_window
-from classes.constants import *
+from classes.constants.constants import *
 
 
 

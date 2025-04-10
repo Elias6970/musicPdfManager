@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
 from  classes.files_management.dir import Dir
-from classes.constants import *
+from classes.constants.constants import *
 from classes.error import EmptyInitialInputException,FirstPageException,NoMorePiecesToClassifyException
 from classes.classifier.text_analizer import TextAnalizer
 from classes.classifier.classifier import Classifier

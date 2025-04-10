@@ -2,7 +2,7 @@ from PyQt6 import  QtWidgets
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
-from classes.constants import RELATIVE_ARCHIVE_PATH
+from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
 from gui.pop_up_windows.yes_no_window import YesNoWindow

@@ -3,7 +3,7 @@ from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
 from gui.error_window import Error_window
-from classes.constants import *
+from classes.constants.constants import *
 
 #Creates a window that can delete scores with search bar and 2 buttons
 class Delete_piece_window(AbstractSerchBarAndTwoButtonsWindow):

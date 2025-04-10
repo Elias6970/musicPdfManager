@@ -3,7 +3,7 @@ from PyQt6 import QtWidgets
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
-from classes.constants import *
+from classes.constants.constants import *
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow

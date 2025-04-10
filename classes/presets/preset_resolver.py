@@ -1,5 +1,5 @@
 from classes.presets.preset import Preset
-from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS,DIR_SCORES
+from classes.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS,DIR_SCORES
 from classes.presets.preset_resolver_states import PresetResolverStates
 from classes.presets.resolved_preset_instrument import ResolvedPresetInstrument
 from classes.files_management.dir import Dir

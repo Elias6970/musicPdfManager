@@ -314,7 +314,7 @@ def test_export_by_instruments_one_instrument_two_times_different_pieces_when_or
     except FileExistsError:
         pass
     
-    pp.set_export_sorted(True)
+    pp.set_sorted_export(True)
     pp.export_by_instruments(solution,"sol\\test5")
 
 

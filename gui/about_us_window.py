@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
-from classes.constants import VERSION,APP_AUTHOR,APP_NAME,GITHUB
+from classes.constants.constants import VERSION,APP_AUTHOR,APP_NAME,GITHUB
 
 #Show a window with a description of the app
 class About_us_window(QtWidgets.QDialog):

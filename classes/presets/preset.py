@@ -1,4 +1,4 @@
-from classes.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
+from classes.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 
 
 class Preset:

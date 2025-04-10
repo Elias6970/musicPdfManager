@@ -1,7 +1,7 @@
 import os,shutil,re
 from classes.files_management.file import File
 from classes.db_manage import Db_archive
-from classes.constants import DIR_SCORES,DIR_EXTRAS, DB_NAME
+from classes.constants.constants import DIR_SCORES,DIR_EXTRAS, DB_NAME
 
 class Dir(File):
     def __init__(self, path,name=None):

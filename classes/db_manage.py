@@ -1,5 +1,5 @@
 import sqlite3,xlrd,openpyxl
-from classes.constants import DB_PATH
+from classes.constants.constants import DB_PATH
 from gui.error_window import Error_window
 
 

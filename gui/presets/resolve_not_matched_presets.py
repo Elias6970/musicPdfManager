@@ -4,7 +4,7 @@ from gui.list_items.status_console_item_with_two_texts_and_one_field import Stat
 from classes.presets.resolved_preset_instrument import ResolvedPresetInstrument
 from classes.presets.preset_resolver_states import PresetResolverStates
 from classes.files_management.dir import Dir
-from classes.constants import DIR_SCORES
+from classes.constants.constants import DIR_SCORES
 import os
 
 class ResolveNotMatchedPresets(QtWidgets.QDialog):

@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants import *
+from classes.constants.constants import *
 from classes.files_management.archive import Archive
 from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.printers.dossier import Dossier

@@ -1,7 +1,7 @@
 import os,unidecode
 from classes.files_management.dir import Dir
 from classes.db_manage import Db_archive
-from classes.constants import DB_NAME,HYPHEN,IGNORE_FILES,RELATIVE_ARCHIVE_PATH
+from classes.constants.constants import DB_NAME,HYPHEN,IGNORE_FILES,RELATIVE_ARCHIVE_PATH
 from classes.piece import Pieces_list
 
 #The connection with the db is started when the obj is created with the super.
