@@ -3,6 +3,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtCore import pyqtSlot, QEvent
 from gui.status_console import StatusConsole
 from gui.list_items.infinite_comboboxes_item import InfiniteComboBoxesItem
+from classes.presets.preset_manager import PresetManager
 
 # This class is a QWidget that contains a scroll area with a list of InfiniteFieldsItem
 # The InfiniteComboBoxesItem is a QWidget that contains a copy number and a list of QComboboxes widgets
@@ -12,9 +13,12 @@ class AbstractModifyingPresetWidget(QWidget):
         
         self.setMinimumSize(600,400)
 
-
+        self.preset_manager = PresetManager()
+        self.preset_manager.load()
         self.items:list[InfiniteComboBoxesItem] = []
 
+        self.preset_name = QLineEdit()
+        self.preset_name.setPlaceholderText(self.tr("New preset name"))
 
         self.status_console = StatusConsole()
 
@@ -28,6 +32,7 @@ class AbstractModifyingPresetWidget(QWidget):
 
 
         _layout = QVBoxLayout()
+        _layout.addWidget(self.preset_name)
         _layout.addWidget(self.status_console)
         _layout.addLayout(_btns_layout)
         self.setLayout(_layout)

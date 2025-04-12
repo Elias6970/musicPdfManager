@@ -36,6 +36,8 @@ class PresetManager():
     # Save the presets in a file
     #If it's empty use the default path
     def load(self,path:str|None=None):
+        self.presets.clear()
+        
         if path == None:
             path = PRESETS_PATH()
         

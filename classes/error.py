@@ -28,3 +28,6 @@ class StopClassifyingException(Exception):
 
 class MoreScoresThanPresetsException(Exception):
     pass
+
+class FileCouldNotBeReadException(Exception):
+    pass

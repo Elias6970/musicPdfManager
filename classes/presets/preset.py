@@ -1,5 +1,5 @@
-from classes.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
-
+from classes.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS,PRESETS_PATH
+import json
 
 class Preset:
     """
@@ -42,3 +42,18 @@ class Preset:
                 out += "\n"
 
         return out
+
+
+
+    def dump(self,path:str|None=None):
+        """Save or update. If there is a preset with the same name it will overwrite it"""
+        if path == None:
+            path = PRESETS_PATH()
+        
+        with open(path,'r+') as file:
+            data = json.load(file)
+            data[self.name] = self.instruments
+
+            file.seek(0)
+            json.dump(data,file,indent=4)
+            file.truncate()

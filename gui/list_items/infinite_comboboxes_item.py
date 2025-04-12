@@ -45,6 +45,7 @@ class InstrumentAndNumber(QtWidgets.QFrame):
         super().__init__(parent)
 
         self.instrument = QtWidgets.QComboBox()
+        self.instrument.addItem("")
         self.instrument.addItems(InstrumentAndNumber.INSTRUMENT_NAMES)
         self.instrument.setCurrentIndex(-1)
         self.instrument.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
@@ -54,14 +55,17 @@ class InstrumentAndNumber(QtWidgets.QFrame):
         self.number.addItem("")
         self.number.addItems([str(i) for i in range(1,6)])
         self.number.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+        self.number.setFixedWidth(40)
 
         _layout = QtWidgets.QHBoxLayout()
         _layout.addWidget(self.instrument)
         _layout.addWidget(self.number)
 
         self.setLayout(_layout)
+        self.setFrameShape(QtWidgets.QFrame.Shape.Box)
+        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
+        self.setFixedWidth(self.instrument.width() + self.number.width() + 30)
 
-    
     def is_empty(self):
         """Only is empty if the instrument is not selected"""
         return self.instrument.currentIndex() == -1
@@ -78,6 +82,15 @@ class InstrumentAndNumber(QtWidgets.QFrame):
 
         # Add extra space for the dropdown arrow and padding
         combo.setFixedWidth(max_width + 40)
+    
+
+    def get_instrument_and_number(self) -> tuple[str,str]:
+        """
+        Return a tuple with the instrument and number. Number can be 
+        Example: ("oboe","2")
+        """
+
+        return (self.instrument.currentText(),self.number.currentText())
 
 
 
@@ -85,10 +98,9 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
 
     def __init__(self,every_change_func,parent=None) -> None:
         super().__init__(parent)
-        self.default_lineEdits = 2
+        self.default_instrument_combos = 2
         self.max_copies = 20
         self.instruments:list[InstrumentAndNumber] = []
-        self.number_of_option = 1
         self.every_change_func = every_change_func #Function that is called when the text of the line edit changes
 
         self.num_copies = QtWidgets.QComboBox()
@@ -115,8 +127,9 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
         self.setLayout(layout)
 
         #Add two first line edits
-        for i in range(self.default_lineEdits):
+        for i in range(self.default_instrument_combos):
             self.add_instrument_combo()
+
 
     #Add a line edit to the layout
     #The line edit add a new lineEdit if you write in the last one
@@ -124,11 +137,7 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
         l1 = InstrumentAndNumber()
         l1.instrument.currentIndexChanged.connect(lambda: ((self.add_instrument_combo() if self.instruments.index(l1) == len(self.instruments) - 1 else None), self.every_change_func(self)))
 
-        if self.number_of_option == 1:
-            #l1.instrument.setPlaceholderText(self.tr("Instrument"))
-            pass
-        else:
-            #l1.instrument.setPlaceholderText(self.tr("Option")+" "+str(self.number_of_option))
+        if len(self.instruments) > 0:
             _arrow_font = QtGui.QFont()
             _arrow_font.setPointSize(12)
             _arrow = QtWidgets.QLabel("  ->  ")
@@ -136,8 +145,22 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
             _arrow.setAlignment(QtCore.Qt.AlignmentFlag.AlignHCenter|QtCore.Qt.AlignmentFlag.AlignVCenter)
             self.layout().addWidget(_arrow)
         
-        self.instruments.append(l1)
+
+        #Delete the streach and add it at the end of the layout
+        for i in reversed(range(self.layout().count())):
+            item = self.layout().itemAt(i)
+            if item.spacerItem():
+                self.layout().takeAt(i)
+                break
         self.layout().addWidget(l1)
+        self.layout().addStretch()
+        
+        self.instruments.append(l1)
 
-        self.number_of_option += 1
 
+    def is_empty(self) -> bool:
+        """Return true if any QCombobox instrument is selected"""
+        for i in self.instruments:
+            if not i.is_empty():
+                return False
+        return True
