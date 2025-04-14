@@ -1,106 +1,22 @@
 from PyQt6 import QtWidgets,QtCore, QtGui
-from classes.constants.instruments_names import *
-
-class InstrumentAndNumber(QtWidgets.QFrame):
-    INSTRUMENT_NAMES = [
-        GUION,
-        OBOE,
-        DULZAINA,
-        CORNO_INGLES,
-        FLAUTA,
-        FLAUTIN,
-        REQUINTO,
-        CLARINETE,
-        CLARINETE_PRAL,
-        CLARINETE_BAJO,
-        SAXOFON_SOPRANO,
-        SAXOFON,
-        SAXOFON_TENOR,
-        SAXOFON_BARITONO,
-        FAGOT,
-        TROMPA,
-        FLISCORNO,
-        TROMPETA,
-        TROMBON,
-        TROMBON_BAJO,
-        BOMBARDINO,
-        BAJO,
-        TUBA,
-        PLATOS,
-        BOMBO,
-        CAJA,
-        TIMBALES,
-        GONG,
-        PERCUSION,
-        MARIMBA,
-        XILOFONO,
-        LIRA,
-        VIBRAFONO,
-        GUITARRA,
-        CHELLO,
-        CONTRABAJO,
-    ]
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.instrument = QtWidgets.QComboBox()
-        self.instrument.addItem("")
-        self.instrument.addItems(InstrumentAndNumber.INSTRUMENT_NAMES)
-        self.instrument.setCurrentIndex(-1)
-        self.instrument.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
-        self.set_combobox_width_to_largest_item(self.instrument)
-        
-        self.number = QtWidgets.QComboBox()
-        self.number.addItem("")
-        self.number.addItems([str(i) for i in range(1,6)])
-        self.number.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
-        self.number.setFixedWidth(40)
-
-        _layout = QtWidgets.QHBoxLayout()
-        _layout.addWidget(self.instrument)
-        _layout.addWidget(self.number)
-
-        self.setLayout(_layout)
-        self.setFrameShape(QtWidgets.QFrame.Shape.Box)
-        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
-        self.setFixedWidth(self.instrument.width() + self.number.width() + 30)
-
-    def is_empty(self):
-        """Only is empty if the instrument is not selected"""
-        return self.instrument.currentIndex() == -1
-    
-    
-    def set_combobox_width_to_largest_item(self, combo: QtWidgets.QComboBox):
-        font_metrics = QtGui.QFontMetrics(combo.font())
-        max_width = 0
-
-        for i in range(combo.count()):
-            text = combo.itemText(i)
-            text_width = font_metrics.horizontalAdvance(text)
-            max_width = max(max_width, text_width)
-
-        # Add extra space for the dropdown arrow and padding
-        combo.setFixedWidth(max_width + 40)
-    
-
-    def get_instrument_and_number(self) -> tuple[str,str]:
-        """
-        Return a tuple with the instrument and number. Number can be 
-        Example: ("oboe","2")
-        """
-
-        return (self.instrument.currentText(),self.number.currentText())
-
-
+from gui.list_items.instrument_and_number_item import InstrumentAndNumberItem
 
 class InfiniteComboBoxesItem(QtWidgets.QFrame):
 
-    def __init__(self,every_change_func,parent=None) -> None:
+    def __init__(self,every_change_func,initial_combos:int|None=None,parent=None) -> None:
+        """Item for a list with generative comboboxes. When you edit the last combobox in the item it generates a new one.
+            :param change_func: function called when any combobox change.
+            :param initial_combos: number of comboboxes that are generated when you create the object"""
+
+
         super().__init__(parent)
-        self.default_instrument_combos = 2
+        if initial_combos == None:
+            self.default_instrument_combos = 2
+        else:
+            self.default_instrument_combos = initial_combos
+        
         self.max_copies = 20
-        self.instruments:list[InstrumentAndNumber] = []
+        self.instruments:list[InstrumentAndNumberItem] = []
         self.every_change_func = every_change_func #Function that is called when the text of the line edit changes
 
         self.num_copies = QtWidgets.QComboBox()
@@ -133,8 +49,8 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
 
     #Add a line edit to the layout
     #The line edit add a new lineEdit if you write in the last one
-    def add_instrument_combo(self):
-        l1 = InstrumentAndNumber()
+    def add_instrument_combo(self,instrument:str|None=None,number:str|int|None=None):
+        l1 = InstrumentAndNumberItem(instrument,number)
         l1.instrument.currentIndexChanged.connect(lambda: ((self.add_instrument_combo() if self.instruments.index(l1) == len(self.instruments) - 1 else None), self.every_change_func(self)))
 
         if len(self.instruments) > 0:

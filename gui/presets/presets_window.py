@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStacked
 from gui.status_console import StatusConsole
 from gui.list_items.status_conosle_item_with_two_buttons import StatusConsleItemWithTwoButtons
 from gui.presets.add_preset_widget import AddPresetWidget
+from gui.presets.modify_preset_widget import ModifyPresetWidget
 from classes.presets.preset_manager import PresetManager
 from classes.config import PRESETS_PATH
 
@@ -9,6 +10,7 @@ class PresetsWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.preset_manager = PresetManager()
+        self.preset_manager.load(PRESETS_PATH)
         self.items:list[StatusConsleItemWithTwoButtons] = []
 
         self.setWindowTitle(self.tr("Presets"))
@@ -29,7 +31,6 @@ class PresetsWindow(QDialog):
 
 
         # Relleno de presets
-        self.preset_manager.load(PRESETS_PATH)
         for i in self.preset_manager.presets:
             self.add_preset_to_the_view(i.name)
 
@@ -60,6 +61,7 @@ class PresetsWindow(QDialog):
 
     def create_modify_view(self) -> QWidget:
         widget = AddPresetWidget(self)
+        #widget = ModifyPresetWidget(self.preset_manager.get_preset("nuevo3"),self)
         return widget
 
 
