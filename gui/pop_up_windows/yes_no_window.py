@@ -31,7 +31,7 @@ class YesNoWindow(QtWidgets.QDialog):
             btn_layout.addWidget(yes_btn)
             btn_layout.addWidget(no_btn)
 
-            confirmation_lbl = QtWidgets.QLabel(self.tr("Do you want to keep adding it?"))#traducir
+            confirmation_lbl = QtWidgets.QLabel(self.tr("Do you want to continue?"))#traducir
             container_layout.addWidget(confirmation_lbl)
         
         else:

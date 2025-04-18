@@ -5,16 +5,14 @@ from classes.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 
 
 class ModifyPresetWidget(AbstractModifyingPresetWidget):
-    """Widget to modify an existing preset"""
+    """
+    Widget to modify an existing preset
+        :param close_func: function called when you finish (added or cancelled) working with the preset.
+    """
 
-    def __init__(self, preset:Preset,parent=None):
-        super().__init__(parent)
+    def __init__(self, close_func, parent=None):
+        super().__init__(close_func,parent)
         self.setWindowTitle(self.tr("Modify preset"))
-
-        self.fill(preset)
-        #Remove the preset to add the new one. 
-        #If the window is closed never happend because we are editing the obj not the presets.json 
-        self.preset_manager.remove_preset(preset.name) 
 
 
     def fill(self,preset:Preset):
@@ -36,7 +34,20 @@ class ModifyPresetWidget(AbstractModifyingPresetWidget):
         added_correctly = super().confirm()
 
         if added_correctly:
+            self.reset()
             YesNoWindow(self.tr("Preset modified correctly"),True,self)
-            self.hide()
-
+            
         return added_correctly
+    
+
+    def reset(self):
+        super().reset()
+    
+
+    def load(self,preset:Preset):
+        """Load a preset in the view"""
+        self.fill(preset)
+        #Remove the preset to add the new one. 
+        #If the window is closed never happend because we are editing the obj not the presets.json 
+        self.preset_manager.remove_preset(preset.name) 
+

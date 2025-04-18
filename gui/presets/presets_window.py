@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget
 from gui.status_console import StatusConsole
 from gui.list_items.status_conosle_item_with_two_buttons import StatusConsleItemWithTwoButtons
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.presets.add_preset_widget import AddPresetWidget
 from gui.presets.modify_preset_widget import ModifyPresetWidget
 from classes.presets.preset_manager import PresetManager
@@ -17,9 +18,11 @@ class PresetsWindow(QDialog):
 
         self.stacked_widget = QStackedWidget()
         self.display_view = self.create_display_view()
-        self.modify_view = self.create_modify_view()
+        self.add_preset_view = self.create_add_preset_view()
+        self.modify_preset_view = self.create_modify_view()
         self.stacked_widget.addWidget(self.display_view)
-        self.stacked_widget.addWidget(self.modify_view)
+        self.stacked_widget.addWidget(self.add_preset_view)
+        self.stacked_widget.addWidget(self.modify_preset_view)
         
         layout = QVBoxLayout()
         layout.addWidget(self.stacked_widget)
@@ -27,27 +30,23 @@ class PresetsWindow(QDialog):
 
         self.setMinimumSize(400,300)
 
-        self.status_console.add_item(StatusConsleItemWithTwoButtons("Preset 1",3,2))
 
+        self.load_presets_in_the_console()
 
-        # Relleno de presets
-        for i in self.preset_manager.presets:
-            self.add_preset_to_the_view(i.name)
-
-        self.stacked_widget.setCurrentWidget(self.modify_view)
+        self.stacked_widget.setCurrentWidget(self.display_view)
 
         self.exec()
         
         
 
-    
     def create_display_view(self) -> QWidget:
         widget = QWidget()
         layout = QVBoxLayout()
 
         self.add_btn = QPushButton("+")
         self.add_btn.setFixedSize(30,30)
-        self.add_btn.clicked.connect(lambda: self.stacked_widget.setCurrentWidget(self.modify_view))
+        self.add_btn.clicked.connect(lambda: self.show_add_preset_view())
+        self.add_btn.setToolTip(self.tr("Add a new preset"))
         
        
         self.status_console = StatusConsole()
@@ -59,30 +58,64 @@ class PresetsWindow(QDialog):
         return widget
 
 
-    def create_modify_view(self) -> QWidget:
-        widget = AddPresetWidget(self)
-        #widget = ModifyPresetWidget(self.preset_manager.get_preset("nuevo3"),self)
-        return widget
+    def create_add_preset_view(self) -> AddPresetWidget:
+        return AddPresetWidget(self.show_display_view,self)
+    
+    def create_modify_view(self) -> ModifyPresetWidget:
+        return  ModifyPresetWidget(self.show_display_view,self)
 
 
-    def add_preset_to_the_view(self,name:str):
-        item = StatusConsleItemWithTwoButtons(name,self.modify_preset,self.remove_preset)
+    def load_presets_in_the_console(self):
+        """Load all the presets in the preset_manager into the status_console"""
+        # Relleno de presets
+        for i in self.preset_manager.presets:
+            self.add_preset_item_to_console(i.name,i.print())
+
+    def add_preset_item_to_console(self,name:str,tool_tip:str):
+        """Add a preset item to the list in the display view"""
+        item = StatusConsleItemWithTwoButtons(name,tool_tip,self.show_modify_preset_view,self.delete_preset)
         self.status_console.add_item(item)
         self.items.append(item)
 
-    def modify_preset(self,name:str):
-        pass
-    
-    def remove_preset(self,name:str):
-        self.preset_manager.remove_preset(name)
-        for i in self.items:
-            if i.name == name:
-                self.status_console.remove_item(i)
-                self.items.remove(i)
-        
-        print(self.preset_manager.presets)
+
+    def show_add_preset_view(self):
+        """Load the add preset view"""
+        self.add_preset_view.reset()
+        self.stacked_widget.setCurrentWidget(self.add_preset_view)
+
+
+    def show_modify_preset_view(self,name:str):
+        """Load the modifying preset view"""
+        preset = self.preset_manager.get_preset(name)
+
+        self.modify_preset_view.reset()
+        self.modify_preset_view.load(preset)
+        self.stacked_widget.setCurrentWidget(self.modify_preset_view)
+
+
+    def show_display_view(self):
+        """Load the display view"""
+        #Reset the preset_manager and the list of presets
+        self.preset_manager = PresetManager()
+        self.preset_manager.load()
+        self.items.clear()
+        self.status_console.clear()
+        self.load_presets_in_the_console()
+
+        self.stacked_widget.setCurrentWidget(self.display_view)
 
     
+    def delete_preset(self,name:str):
+        """Delete a preset"""
+        confirmation = YesNoWindow(self.tr("Are you sure that you want to delete preset ") + name, False, self)
+        if confirmation.btn_confirm_pressed:
+            self.preset_manager.remove_preset(name)
+            self.preset_manager.dump()
+            for i in self.items:
+                if i.name == name:
+                    self.status_console.remove_item(i)
+                    self.items.remove(i)
+        
 
     def closeEvent(self, a0):
         quit(0)

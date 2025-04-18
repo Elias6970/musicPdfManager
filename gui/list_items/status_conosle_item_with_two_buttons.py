@@ -3,10 +3,11 @@ from classes.constants.constants import EDIT_IMG_PATH, TRASH_IMG_PATH
 
 #Item in a list with two buttons and one lbl
 #   name: name of the item. It's the identifier. Need to be unique
+#   tool_tip: tooltip for the item
 #   edit_func: function that is called when you press edit button. Recive the preset_name as parameter
 #   delete_func: function that is called when you press delete button. Recive the preset_name as parameter
 class StatusConsleItemWithTwoButtons(QtWidgets.QFrame):
-    def __init__(self, name:str, edit_func, delete_func,parent=None) -> None:
+    def __init__(self, name:str, tool_tip:str, edit_func, delete_func,parent=None) -> None:
         super().__init__(parent)
 
         self.name = name
@@ -18,19 +19,20 @@ class StatusConsleItemWithTwoButtons(QtWidgets.QFrame):
         bold_font = QtGui.QFont()
         bold_font.setBold(True)
         self.name_lbl.setFont(bold_font)
+        self.name_lbl.setToolTip(tool_tip)
         
-
 
 
         self.edit_btn = QtWidgets.QPushButton()
         self.edit_btn.setIcon(QtGui.QIcon(EDIT_IMG_PATH))
         self.edit_btn.setFixedSize(20, 25)
-        #self.edit_btn.setStyleSheet("background-color: #ff5555")
+        self.edit_btn.setToolTip(self.tr("Edit this preset."))
         self.edit_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
         self.delete_btn = QtWidgets.QPushButton()
         self.delete_btn.setIcon(QtGui.QIcon(TRASH_IMG_PATH))
+        self.delete_btn.setToolTip(self.tr("Delete this preset."))
         self.delete_btn.setFixedSize(20, 25)
-        self.delete_btn.setStyleSheet("background-color: #ff5555")
+        self.delete_btn.setStyleSheet("QPushButton {background-color: #ff5555;}")
         self.delete_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
 
         layout = QtWidgets.QHBoxLayout()

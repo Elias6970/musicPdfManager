@@ -9,10 +9,15 @@ import re
 # This class is a QWidget that contains a scroll area with a list of InfiniteFieldsItem
 # The InfiniteComboBoxesItem is a QWidget that contains a copy number and a list of QComboboxes widgets
 class AbstractModifyingPresetWidget(QWidget):
-    def __init__(self, parent = None):
+    """
+    Abstract window to add/modify presets
+        :param close_func: function called when you finish (added or cancelled) working with the preset.
+    """
+    def __init__(self, close_func, parent = None):
         super().__init__(parent)
         
         self.setMinimumSize(600,400)
+        self.close_func = close_func
 
         self.preset_manager = PresetManager()
         self.preset_manager.load()
@@ -104,6 +109,11 @@ class AbstractModifyingPresetWidget(QWidget):
         for i in self.items:
             if not i.is_empty():
                 instrument = self.parse_std_name(i.instruments[0].get_instrument_and_number())
+
+                if instrument.strip() == "":
+                    ShowError.show_tooltip_error(self.tr("The main instrument can't be empty"),5000,i.instruments[0])
+                    return False
+
                 copies = i.num_copies.currentText()
                 other_options:list[str] = []
 
@@ -118,11 +128,25 @@ class AbstractModifyingPresetWidget(QWidget):
 
         self.preset_manager.add_preset(preset)
         self.preset_manager.dump()
-
+        
+        self.close()
+        
         return True
 
     def close(self):
-        self.hide()
+        self.close_func()
+
+
+
+    def reset(self):
+        """Reset the widget to the initial state."""
+        self.preset_manager = PresetManager()
+        self.preset_manager.load()
+        self.items.clear()
+
+        self.preset_name.clear()
+        self.status_console.clear()
+
 
 
     """
