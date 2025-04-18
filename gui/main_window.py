@@ -193,6 +193,10 @@ class Main_window(QtWidgets.QMainWindow):
 #----------------------------APP LOGIC -----------------------------#
 #####################################################################
 
+    def update_autocompleter_scores(self):
+        """Update the autocompleter in both selector windows"""
+        self.individual_selection_window.update_autocompleter_scores()
+        self.multiple_selection_window.update_autocompleter_scores()
 
     def change_language(self,language):
         translator = QtCore.QTranslator(self)
@@ -252,7 +256,15 @@ class Main_window(QtWidgets.QMainWindow):
     def export_dossier(self):
         extra_cover = QtWidgets.QInputDialog.getText(self,self.tr("Additional conver info"),self.tr("Enter additional info to be added to the cover:(max 9 chars)")) #traducir
         if extra_cover[1]:
-            pdf_path = self.dialog_window_select_new_pdf()
+            pdf_path = QtWidgets.QFileDialog.getSaveFileName(self, 
+                                                             self.tr("Select Folder and File Name"),
+                                                             "",
+                                                             "PDF Files (*.pdf);;All Files (*)")
+            if not pdf_path[0]: 
+                return
+            
+            if not pdf_path[0].endswith(".pdf"):
+                pdf_path += ".pdf"
             
             try:
                 Dossier.export_pdf_dossier_to_print(self.archive.db.get_all_to_print(),pdf_path,extra_cover[0])

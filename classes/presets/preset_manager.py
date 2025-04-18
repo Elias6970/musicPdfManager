@@ -33,9 +33,11 @@ class PresetManager():
             json.dump(export_json,file,indent=4)
     
 
-    # Save the presets in a file
-    #If it's empty use the default path
     def load(self,path:str|None=None):
+        """
+        Load all the presets in this object 
+            :param path: Path where the presets are. If it's None use the default path.
+        """
         self.presets.clear()
         
         if path == None:

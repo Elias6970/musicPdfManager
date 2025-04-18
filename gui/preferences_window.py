@@ -9,6 +9,7 @@ class Preferences_window(QtWidgets.QDialog):
     def __init__(self,first_time:bool,parent=None):
         super(Preferences_window,self).__init__(parent)  
         self.setWindowTitle(self.tr("Preferences")) #traducir
+        self.setMinimumWidth(600)
 
         self.first_time = first_time
 
@@ -18,26 +19,37 @@ class Preferences_window(QtWidgets.QDialog):
         self.exec()
 
     def init_ui(self):
-        container_layout = QtWidgets.QVBoxLayout()
+        """Create all the ui"""
 
-        #Fields
-        fields_layout = QtWidgets.QVBoxLayout()
-
+        #Archive path config
         self.line_archive_path = QtWidgets.QLineEdit()
-        self.line_cover_path = QtWidgets.QLineEdit()
-
-
-        #Browse Buttons
-        archive_path_layout = QtWidgets.QHBoxLayout()
-        archive_path_layout.setSpacing(0)
+        self.line_archive_path.setReadOnly(True)
         archive_path_btn = QtWidgets.QPushButton(self.tr("Browse")) #traducir
         archive_path_btn.clicked.connect(lambda: self.browse("archive"))
-
+        
+        archive_path_layout = QtWidgets.QHBoxLayout()
+        archive_path_layout.setSpacing(0)
         archive_path_layout.addWidget(QtWidgets.QLabel(self.tr("Archive path  *"))) #traducir
         archive_path_layout.addWidget(self.line_archive_path)
         archive_path_layout.addWidget(archive_path_btn)
         
-        #Browse Buttons
+
+        #Presets path config
+        self.line_presets_path = QtWidgets.QLineEdit()
+        self.line_presets_path.setReadOnly(True)
+        presets_path_btn = QtWidgets.QPushButton(self.tr("Browse")) #traducir
+        presets_path_btn.clicked.connect(lambda: self.browse("preset"))
+
+        presets_path_layout = QtWidgets.QHBoxLayout()
+        presets_path_layout.setSpacing(0)
+        presets_path_layout.addWidget(QtWidgets.QLabel(self.tr("Presets path  "))) #traducir
+        presets_path_layout.addWidget(self.line_presets_path)
+        presets_path_layout.addWidget(presets_path_btn)
+
+
+        #Dossier path config
+        self.line_cover_path = QtWidgets.QLineEdit()
+        self.line_cover_path.setReadOnly(True)
         cover_path_btn = QtWidgets.QPushButton(self.tr("Browse")) #traducir
         cover_path_btn.clicked.connect(lambda: self.browse("cover"))
 
@@ -47,7 +59,9 @@ class Preferences_window(QtWidgets.QDialog):
         cover_path_layout.addWidget(self.line_cover_path)
         cover_path_layout.addWidget(cover_path_btn)
         
+        fields_layout = QtWidgets.QVBoxLayout()
         fields_layout.addLayout(archive_path_layout)
+        fields_layout.addLayout(presets_path_layout)
         fields_layout.addLayout(cover_path_layout)
 
         #Save and close Buttons
@@ -72,7 +86,7 @@ class Preferences_window(QtWidgets.QDialog):
         language_layout.addWidget(self.language_combobox)
         
 
-
+        container_layout = QtWidgets.QVBoxLayout()
         container_layout.addLayout(fields_layout)
         container_layout.addLayout(language_layout)
         container_layout.addLayout(btns_layout)
@@ -84,9 +98,11 @@ class Preferences_window(QtWidgets.QDialog):
     #Set the value that have 
     def set_field_value(self):
         self.line_archive_path.setText(Configuration.get_archive_path())
+        self.line_presets_path.setText(Configuration.get_presets_path())
         self.line_cover_path.setText(Configuration.get_dossier_cover_path())
         self.language_combobox.setCurrentText(Configuration.get_language())
     
+
     #Appear a file dialog to select a file or a folder. This path is saved in the correct field.
     #Two buttons use the same function
     def browse(self,type:str):
@@ -100,6 +116,11 @@ class Preferences_window(QtWidgets.QDialog):
             if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
                 self.line_archive_path.setText(file_dialog.selectedFiles()[0])
 
+        elif type == "preset":
+            file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)  # Allow selecting any file type
+            if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
+                self.line_cover_path.setText(file_dialog.selectedFiles()[0])            
+
         else:
             file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)  # Allow selecting any file type
             if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
@@ -109,6 +130,7 @@ class Preferences_window(QtWidgets.QDialog):
     def save(self):
         try:
             Configuration.save_config(self.line_archive_path.text(),
+                                      self.line_presets_path.text(),
                                       self.line_cover_path.text(),
                                       Configuration.name_to_cod_language(self.language_combobox.currentText()))
             YesNoWindow(self.tr("Changes saved succesfully")+"\n"+self.tr("If you have changed the language you need to restart the app"),True,self) #translate

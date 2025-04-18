@@ -1,7 +1,9 @@
 import os,sys,locale,ctypes
 
 #Config files location
-PLAIN_TEXT_CONFIG_PATH = os.path.join("data","config.yml")
+DATA_FOLDER = os.path.join("data")
+PLAIN_TEXT_CONFIG_PATH = os.path.join(DATA_FOLDER,"config.yml")
+DEFAULT_PRESETS_PATH = os.path.join(DATA_FOLDER,"presets.json")
 
 #Languages
 LAN_ESP = "Espanol"
@@ -12,12 +14,16 @@ CONFIG_ATTRIBUTE_ARCHIVE_PATH = "ARCHIVE_PATH"
 CONFIG_ATTRIBUTE_DOSSIER_COVER = "DOSSIER_COVER_PATH"
 CONFIG_ATTRIBUTE_PRESETS = "PRESETS_PATH"
 CONFIG_ATTRIBUTE_LANGUAGE = "LANGUAGE"
-PRESETS_PATH = os.path.join("data","presets.json")
 
 #Idea of static class to get the configuration of the application
 class Configuration():
     @staticmethod
     def get_attribute(attribute):
+        """
+        Return the value of the attribute in the confing file.
+        If it doesn't exist, it returns an empty string ("") 
+        """
+
         try:
             with open(PLAIN_TEXT_CONFIG_PATH,'r') as file:
                 for i in file.readlines():
@@ -69,7 +75,10 @@ class Configuration():
 
     @staticmethod
     def get_presets_path() -> str:
-        return Configuration.get_attribute(CONFIG_ATTRIBUTE_PRESETS)
+        path = Configuration.get_attribute(CONFIG_ATTRIBUTE_PRESETS)
+        if path == "": #It is not in the config file
+            return DEFAULT_PRESETS_PATH
+        return path
 
 
     #If the language is not supported return an empty string
@@ -87,12 +96,12 @@ class Configuration():
 
     #Lenguage has to be in es_ES format
     @staticmethod
-    def save_config(archive_path:str,dossier_cover:str,language:str):
+    def save_config(archive_path:str,presets_path:str,dossier_cover:str,language:str):
         with open(PLAIN_TEXT_CONFIG_PATH,'w') as file:
             file.write(CONFIG_ATTRIBUTE_ARCHIVE_PATH+"="+archive_path+"\n")
             file.write(CONFIG_ATTRIBUTE_DOSSIER_COVER+"="+dossier_cover+"\n")
             file.write(CONFIG_ATTRIBUTE_LANGUAGE+"="+language+"\n")
-            file.write(CONFIG_ATTRIBUTE_PRESETS+"="+PRESETS_PATH+"\n")
+            file.write(CONFIG_ATTRIBUTE_PRESETS+"="+presets_path+"\n")
 
                        
 

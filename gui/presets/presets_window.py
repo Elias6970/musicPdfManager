@@ -5,13 +5,12 @@ from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.presets.add_preset_widget import AddPresetWidget
 from gui.presets.modify_preset_widget import ModifyPresetWidget
 from classes.presets.preset_manager import PresetManager
-from classes.config import PRESETS_PATH
 
 class PresetsWindow(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.preset_manager = PresetManager()
-        self.preset_manager.load(PRESETS_PATH)
+        self.preset_manager.load()
         self.items:list[StatusConsleItemWithTwoButtons] = []
 
         self.setWindowTitle(self.tr("Presets"))
@@ -115,11 +114,6 @@ class PresetsWindow(QDialog):
                 if i.name == name:
                     self.status_console.remove_item(i)
                     self.items.remove(i)
-        
-
-    def closeEvent(self, a0):
-        quit(0)
-
 
 
 if __name__ == "__main__":
