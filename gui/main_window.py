@@ -55,7 +55,6 @@ class Main_window(QtWidgets.QMainWindow):
         #self.setGeometry(100,80,200,200)
         self.setWindowTitle("AMRV archive manager") #traducir
         self.setWindowIcon(QtGui.QIcon(ICON_PATH))
-
         #self.printing()
 
 
@@ -187,6 +186,20 @@ class Main_window(QtWidgets.QMainWindow):
             self.btn_multiple_selection.setStyleSheet(clicked_sytle)
 
 
+    def center_on_screen(self):
+        # Get the screen geometry
+        screen = QtWidgets.QApplication.primaryScreen()
+        screen_geometry = screen.availableGeometry()
+        screen_center = screen_geometry.center()
+
+        # Get the window size (without decorations yet, because it's not shown)
+        window_size = self.size()
+
+        # Calculate top-left point so that window center = screen center
+        x = screen_center.x() - window_size.width() // 2
+        y = screen_center.y() - window_size.height() // 2
+
+        self.move(x, y)
 
 
 #####################################################################

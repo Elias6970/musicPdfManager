@@ -5,6 +5,7 @@ def main():
     app = gui.QtWidgets.QApplication(sys.argv)
     w = gui.Main_window()
     w.show()
+    w.center_on_screen()
     sys.exit(app.exec())
     
 if __name__ == "__main__":
