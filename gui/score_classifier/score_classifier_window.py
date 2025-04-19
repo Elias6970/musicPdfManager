@@ -194,12 +194,6 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
     
     def close(self):
         self.hide()
-        exit(0)
-
-
-    def closeEvent(self,event):
-        event.accept()
-        exit(0)
 
     #For testing
     """def state(self):

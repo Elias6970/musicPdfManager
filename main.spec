@@ -3,10 +3,21 @@
 
 a = Analysis(
     ['main.py'],
-    pathex=['C:\\Users\\Elias6970\\Desktop\\archivo\\projecto\\'],
+    pathex=[],
     binaries=[],
-    datas=[('data\\img\\icon.ico','data\\img'),('data\\img\\rotate_left.png','data\\img'),('data\\img\\rotate_right.png','data\\img'),('data\\portada_dossier_partituras.pdf','data'),('translate\\ca_VA\\compiled\\ca_VA.qm','translate\\ca_VA\\compiled\\'),('translate\\en_US\\compiled\\en_US.qm','translate\\en_US\\compiled'),('translate\\es_ES\\compiled\\es_ES.qm','translate\\es_ES\\compiled')],
-    hiddenimports=['PyQt5', 'PyQtWebEngine', 'openpyxl', 'xlrd', 'unidecode', 'rarfile', 'reportlab', 'PyPDF2', 'pdf2image'],
+    datas=[
+        ('data\\img\\edit.png','data\\img'),
+        ('data\\img\\icon.ico','data\\img'),
+        ('data\\img\\refresh.png','data\\img'),
+        ('data\\img\\rotate_left.png','data\\img'),
+        ('data\\img\\rotate_right.png','data\\img'),
+        ('data\\img\\trash.png','data\\img'),
+        ('data\\portada_dossier_partituras.pdf','data'),
+        ('translate\\ca_VA\\compiled\\ca_VA.qm','translate\\ca_VA\\compiled'),
+        ('translate\\en_US\\compiled\\en_US.qm','translate\\en_US\\compiled'),
+        ('translate\\es_ES\\compiled\\es_ES.qm','translate\\es_ES\\compiled')
+        ],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
