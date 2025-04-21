@@ -3,12 +3,13 @@ from PyQt6 import QtWidgets
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
-from classes.constants.constants import *
+from classes.constants.constants import RELATIVE_ARCHIVE_PATH,HANDWRITTEN,DONT_ADD_SCORES,DONT_CLASSIFY_NOW
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
+import os
 
 #Window to add a new piece to the db. When you add the piece you must add the corresponding scores
 #Parameters:
@@ -16,55 +17,71 @@ from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
 #Window parts:
 #   4 fields to fill(code,name,author,type)
 #   Two buttons(add the piece, close the window)
-#   handwritten checkbox TODO: add posibility to not add scores
+#   handwritten checkbox
 #   
 class Add_piece_window(AbstractFieldsWindow):
     def __init__(self, archive: Archive, parent=None):
-        super().__init__(archive, self.tr("Add new piece"), self.tr("Add"), [HANDWRITTEN,DONT_ADD_SCORES],self.add_score, parent=parent)
+        super().__init__(archive, self.tr("Add new piece"), self.tr("Add"), [HANDWRITTEN,DONT_ADD_SCORES,DONT_CLASSIFY_NOW],self.add_score, parent=parent)
 
         self.line_cod.setText(str(self.archive.db.get_next_cod()))#cambiar
 
         #Change checkboxes text to be tranlatable
-        self.checkboxes_dict[HANDWRITTEN].setText(self.tr("handwritten"))
+        self.checkboxes_dict[HANDWRITTEN].setText(self.tr("Handwritten"))
         self.checkboxes_dict[DONT_ADD_SCORES].setText(self.tr("Don't add scores"))
+        self.checkboxes_dict[DONT_CLASSIFY_NOW].setText(self.tr("Don't classify now"))
 
 
         self.exec()
 
     def add_score(self):
+        """Add a score to the database and move the files to the archive."""
         cod = self.line_cod.text()
         name = self.line_name.text()
         parsed_name = Archive.get_parsed_name(cod,name)
-        
+        classified = False
+
         if self.verifications(cod,name):
-            
-            #Open a dialog to select the files to be putted in the directory
-            file_dialog = QtWidgets.QFileDialog()
-            file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)  # Allow selecting any file type
-            file_dialog.setWindowTitle(self.tr("Select a folder or a file")) #traducir
-            file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
 
+            if not self.checkboxes_dict[DONT_ADD_SCORES].isChecked():
+                #Open a dialog to select the files to be putted in the directory
+                file_dialog = QtWidgets.QFileDialog()
+                file_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.ExistingFiles)  # Allow selecting any file type
+                file_dialog.setWindowTitle(self.tr("Select a folder or a file")) #traducir
+                file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
+    
+                if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
+                    ArchiveFileManager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
+                    are_moved = ArchiveFileManager.move_files(parsed_name,file_dialog.selectedFiles())
 
-            
-            
-            if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-                ArchiveFileManager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
-                
-                if ArchiveFileManager.move_files(parsed_name,file_dialog.selectedFiles()) and self.archive.db.insert(int(cod),name,self.line_author.text(),self.line_type.text(),handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),parted=0,digitalized=1):
-                    try:
-                        ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
-                        self.archive.pieces.add(int(cod),name,parsed_name,True)
-                    
-                    except StopClassifyingException:
-                        self.archive.pieces.add(int(cod),name,parsed_name)
-                    except PdfNotFoundException: 
-                        pass
-                    except Exception:
-                        pass
-                    YesNoWindow(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
-                    self.reset_fields()
+                    if are_moved:
+                        if not self.checkboxes_dict[DONT_CLASSIFY_NOW].isChecked():
+                            try:
+                                ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
+                                classified = True                        
+                            except Exception:
+                                pass
+                    else:
+                        YesNoWindow(self.tr("There has been an error importing {}".format(parsed_name)),True,self)
+                        return
                 else:
-                    YesNoWindow(self.tr("Has been an error importing {}".format(parsed_name)),True,self)
+                    YesNoWindow(self.tr("There has been an error selecting the files"),True,self)
+                    return
+
+
+            is_inserted = self.archive.db.insert(int(cod),
+                                                 name,
+                                                 self.line_author.text(),
+                                                 self.line_type.text(),
+                                                 handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),
+                                                 parted=0,
+                                                 digitalized=1)
+
+            if is_inserted:
+                self.archive.pieces.add(int(cod),name,parsed_name,classified)
+
+                YesNoWindow(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
+                self.reset_fields()
+
                 
 
 

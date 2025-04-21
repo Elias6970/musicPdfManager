@@ -1,5 +1,5 @@
 import os,tempfile
-from reportlab.platypus import SimpleDocTemplate,Table
+from reportlab.platypus import SimpleDocTemplate,Table,PageBreak
 from reportlab.lib import pagesizes,colors
 from reportlab.pdfgen import canvas
 from pypdf import PdfWriter,PdfReader
@@ -13,7 +13,7 @@ class Dossier:
     @staticmethod
     def export_pdf_dossier_to_print(data:list,new_pdf_path:str,extra_cover_text:str):
         ENTRIES_PER_PAGE = 35
-        CLOSING_EMPTY_ROWS = 120
+        CLOSING_EMPTY_ROWS = 80
         for _ in range(CLOSING_EMPTY_ROWS):
             data.append(("","","","",""))
         
@@ -67,7 +67,7 @@ class Dossier:
                 aux_table.setStyle(style)
 
                 tables.append(aux_table)
-
+                tables.append(PageBreak())
                 counter = 0
                 new_data = []
 
@@ -75,7 +75,7 @@ class Dossier:
         #Modify the front page to put a string
         temp_overlay = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
         canvas_overlay = canvas.Canvas(temp_overlay)
-        canvas_overlay.setFont("Helvetica-Bold",30)
+        canvas_overlay.setFont("Helvetica-Bold",25)
         canvas_overlay.drawString(453,70,extra_cover_text)
         canvas_overlay.save()
         

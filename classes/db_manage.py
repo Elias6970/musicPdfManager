@@ -155,6 +155,8 @@ class Db_archive(Db):
     #Get the next cod to the db
     def get_next_cod(self):
         next_cod = self.cur.execute("SELECT MAX(cod) FROM {}".format(self.table_name)).fetchone()
+        if next_cod[0] == None or str(next_cod[0]).strip() == "":
+            return 1 #When the db is empty
         return int(next_cod[0])+1
 
 

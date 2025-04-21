@@ -40,9 +40,8 @@ class AbstractFieldsWindow(QtWidgets.QDialog):
         container_layout.addLayout(self.create_buttons_layout(btn_lbl,btn_function,close_function))
         
 
-        #self.setGeometry(0,0,400,200)
-        self.setFixedSize(400,200)
         self.setLayout(container_layout)
+        self.setMinimumWidth(400)
 
         
 

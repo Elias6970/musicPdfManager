@@ -55,7 +55,7 @@ PARTED = "parted"
 
 #Special const to don't add scores when you add a piece
 DONT_ADD_SCORES = "dont_add_scores" 
-
+DONT_CLASSIFY_NOW = "dont_classify_now"
 
 #Presets constants
 PRESETS_COPIES = "copies"

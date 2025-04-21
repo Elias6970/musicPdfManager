@@ -52,10 +52,8 @@ class Main_window(QtWidgets.QMainWindow):
 
         
         self.setCentralWidget(container)
-        #self.setGeometry(100,80,200,200)
-        self.setWindowTitle("AMRV archive manager") #traducir
+        self.setWindowTitle("AMRV archive manager v" + str(VERSION)) #traducir
         self.setWindowIcon(QtGui.QIcon(ICON_PATH))
-        #self.printing()
 
 
     def create_menu_bar(self):
@@ -187,6 +185,7 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     def center_on_screen(self):
+        """Center the window in the middle of the screen."""
         # Get the screen geometry
         screen = QtWidgets.QApplication.primaryScreen()
         screen_geometry = screen.availableGeometry()
@@ -211,7 +210,9 @@ class Main_window(QtWidgets.QMainWindow):
         self.individual_selection_window.update_autocompleter_scores()
         self.multiple_selection_window.update_autocompleter_scores()
 
+
     def change_language(self,language):
+        """Change the language of all the windows"""
         translator = QtCore.QTranslator(self)
 
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
@@ -225,6 +226,7 @@ class Main_window(QtWidgets.QMainWindow):
         if app:
             app.installTranslator(translator)
     
+  
   
 #####################################################################
 #------------------------SHOW OTHER WINDOWS ------------------------#
@@ -280,14 +282,9 @@ class Main_window(QtWidgets.QMainWindow):
                 pdf_path += ".pdf"
             
             try:
-                Dossier.export_pdf_dossier_to_print(self.archive.db.get_all_to_print(),pdf_path,extra_cover[0])
+                Dossier.export_pdf_dossier_to_print(self.archive.db.get_all_to_print(),pdf_path[0],extra_cover[0])
             except ValueError as e:
                 Error_window.print_error(message="Incorrect file name",e=e) #traducir
             except Exception as e:
                 Error_window.print_error(e)
 
-
-    def printing(self):
-        pass
-        #self.scroll.add_lbl(StatusConsleItemWithTwoTexts("Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios","Adios",3,self.scroll.remove_item))
-        #self.scroll.add_lbl(StatusConsleItemWithTwoTexts("Hola","Adlsdjfalsdjfalsdjflasdjflakdjfalkdjlsadjflkdsjfldfjdlkjflskadjflakfjlios",3,self.scroll.remove_item))
