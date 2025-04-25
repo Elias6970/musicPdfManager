@@ -23,12 +23,12 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         self.ignore_preset_copies:bool = False
 
         self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
-        self.setWindowTitle(self.tr("Export configuration"))
+        self.setWindowTitle(self.tr("Exporting configuration"))
 
         _container_layout = QtWidgets.QVBoxLayout()
 
         #labels
-        _warning_lbl = QtWidgets.QLabel(self.tr("How do you want to create the pdfs?"))
+        _warning_lbl = QtWidgets.QLabel(self.tr("How do you want to export the pdfs?"))
         
     
         #Type of export

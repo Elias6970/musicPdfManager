@@ -359,6 +359,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         self.preview.clear()
 
         #Presets
+        self.preset_manager.load() #Update the presets
         self.set_presets()
 
 
