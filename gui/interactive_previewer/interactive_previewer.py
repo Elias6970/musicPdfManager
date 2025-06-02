@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsRectItem
 from PyQt6.QtGui import QPixmap
-from PyQt6.QtCore import Qt, QRectF, QPointF
+from PyQt6.QtCore import Qt, QRectF, QPointF, QPoint
 from classes.crop_rectangle import CropRectangle
 from gui.interactive_previewer.movable_rectangle import MovableRectangle
 from gui.interactive_previewer.rotation_handler import RotationHandler
@@ -18,7 +18,8 @@ class InteractivePreviewer(QGraphicsView):
 
     def __init__(self,parent=None):
         super().__init__(parent)
-
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMaximizeButtonHint)
+        
         self.qpixmap = QPixmap()
         self.rectangle = MovableRectangle()
 
@@ -60,7 +61,7 @@ class InteractivePreviewer(QGraphicsView):
 
                     # Create a rectangle
                     else:
-                        if not self.is_rotating and not self.is_dragging:
+                        if not self.is_rotating and not self.is_dragging and self.is_pos_inside_image(event.pos()):
                             self.clean_rectangles()
 
                             self.start_pos = scene_pos
@@ -74,7 +75,9 @@ class InteractivePreviewer(QGraphicsView):
     def mouseMoveEvent(self, event):
         if event and self.rectangle:
             #Move the rectangle
-            if self.is_dragging:
+            if self.is_dragging and self.is_pos_inside_image(event.pos()):
+                if not self.is_pos_inside_image(event.pos()):
+                    return
                 scene_pos = self.mapToScene(event.pos())
                 new_pos = scene_pos - self.moving_offset
                 self.rectangle.setPos(new_pos)
@@ -92,9 +95,11 @@ class InteractivePreviewer(QGraphicsView):
                 self.rectangle.setRotation(self.angle)
                 
             #Create the rectangle
-            elif self.is_creating_rect:
+            elif self.is_creating_rect and self.is_pos_inside_image(event.pos()):
+                print("Pos:", event.pos())
                 scene_pos = self.mapToScene(event.pos())
                 self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
+
             
 
 
@@ -112,11 +117,11 @@ class InteractivePreviewer(QGraphicsView):
                     pass
 
                 #Create the rectangle
-                elif self.is_creating_rect:
-                    self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
-                    self.rectangle.set_rotation_handler(self.start_pos)
-                    
-                    self.rect_is_minimum_size()
+                elif self.is_creating_rect and self.is_pos_inside_image(event.pos()):
+                        self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
+                        self.rectangle.set_rotation_handler(self.rectangle.rect().topLeft())
+                        
+                        self.rect_is_minimum_size()
                     #Mensaje de alerta
             
             self.is_creating_rect = False
@@ -141,6 +146,18 @@ class InteractivePreviewer(QGraphicsView):
     #If the rectangle is too small delete it
     #Minimum size in the beginning of the class
     def rect_is_minimum_size(self):
-        rect = self.rectangle.rect()
+        rect = self.get_rectangle_selection().rectangle
         if rect.width() < InteractivePreviewer.min_rect_width or rect.height() < InteractivePreviewer.min_rect_height:
             self.clean_rectangles()
+    
+
+    def is_pos_inside_image(self,pos:QPoint) -> bool:
+        """Check if the position is inside the image in the scene."""
+        if not self.img_scene.image_item:
+            return False
+        
+        scene_initial_pos = self.mapFromScene(0,0)
+        scene_rect = QRectF(self.img_scene.image_item.boundingRect())
+        scene_rect.moveTo(scene_initial_pos.x(), scene_initial_pos.y())
+
+        return scene_rect.contains(QPointF(pos))
