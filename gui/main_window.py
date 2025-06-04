@@ -1,5 +1,6 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants.constants import *
+from classes.constants.constants import DB_NAME, RELATIVE_ARCHIVE_PATH, ICON_PATH, VERSION
+from classes.config import Configuration
 from classes.files_management.archive import Archive
 from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.printers.dossier import Dossier
@@ -13,10 +14,9 @@ from gui.add_scores_to_existing_piece_window import Add_scores_to_existing_piece
 from gui.score_classifier.piece_selector_to_classify_window import PieceSelectorToClassifyWindow
 from gui.about_us_window import About_us_window
 from gui.preferences_window import Preferences_window
-from gui.previewer import Preview
 from gui.presets.presets_window import PresetsWindow
 from tools.delete_junk_files import delete_junk_files
-
+import sys, os
 class Main_window(QtWidgets.QMainWindow):
     def __init__(self):
 

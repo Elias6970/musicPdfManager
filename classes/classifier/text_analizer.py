@@ -1,30 +1,9 @@
 import os,re
 from typing import Tuple
+from classes.instruments_names_manager import InstrumentsNamesManager
 
 class TextAnalizer():
-    instruments = {
-            "w":"general",
-            "g":"guion",
-            "o":"oboe",
-            "f":"flauta",
-            "n":"flautin",
-            "r":"requinto",
-            "c":"clarinete",
-            "cp":"clarinete_pral",
-            "j":"clarinete_bajo",
-            "s":"saxofon",
-            "x":"saxofon_tenor",
-            "b":"saxofon_baritono",
-            "a":"fagot",
-            "t":"trompa",
-            "l":"fliscorno",
-            "e":"trompeta",
-            "m":"trombon",
-            "d":"bombardino",
-            "z":"bajo",
-            "u":"tuba",
-            "p":"percusion"
-        }
+    instruments = InstrumentsNamesManager.get_shortcuts_and_instruments()
     instruments_chars = ','.join(list(instruments.keys()))
 
     def __init__(self) -> None:

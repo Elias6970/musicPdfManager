@@ -1,0 +1,274 @@
+{
+    "guion" : {
+        "translations" : {
+            "es_ES" : "Guion",
+            "en_US" : "Score",
+            "ca_VA" : "Guió"
+        },
+        "classifier_hotkey" : "g"
+    },
+    "oboe" : {
+        "translations" : {
+            "es_ES" : "Oboe",
+            "en_US" : "Oboe",
+            "ca_VA" : "Oboé"
+        },
+        "classifier_hotkey" : "o"
+    },
+    "corno_ingles" : {
+        "translations" : {
+            "es_ES" : "Corno inglés",
+            "en_US" : "English_horn",
+            "ca_VA" : "Corn anglès"
+        },
+        "classifier_hotkey" : ""
+    },
+    "flauta" : {
+        "translations" : {
+            "es_ES" : "Flauta",
+            "en_US" : "Flute",
+            "ca_VA" : "Flauta"
+        },
+        "classifier_hotkey" : "f"
+    },
+    "flautin" : {
+        "translations" : {
+            "es_ES" : "Flautín",
+            "en_US" : "Piccolo",
+            "ca_VA" : "Flautí"
+        },
+        "classifier_hotkey" : "n"
+    },
+    "requinto" : {
+        "translations" : {
+            "es_ES" : "Requinto",
+            "en_US" : "E-flat clarinet",
+            "ca_VA" : "Requint"
+        },
+        "classifier_hotkey" : "r"
+    },
+    "clarinete" : {
+        "translations" : {
+            "es_ES" : "Clarinete",
+            "en_US" : "Clarinet",
+            "ca_VA" : "Clarinet"
+        },
+        "classifier_hotkey" : "c"
+    },
+    "clarinete_bajo" : {
+        "translations" : {
+            "es_ES" : "Clarinete bajo",
+            "en_US" : "Clarinete bajo",
+            "ca_VA" : "guió"
+        },
+        "classifier_hotkey" : "j"
+    },
+    "saxofon_soprano" : {
+        "translations" : {
+            "es_ES" : "Saxofón soprano",
+            "en_US" : "Soprano saxophone",
+            "ca_VA" : "Saxòfon soprano"
+        },
+        "classifier_hotkey" : ""
+    },
+    "saxofon_alto" : {
+        "translations" : {
+            "es_ES" : "Saxofón",
+            "en_US" : "Saxophone",
+            "ca_VA" : "Saxòfon"
+        },
+        "classifier_hotkey" : "s"
+    },
+    "saxofon_tenor" : {
+        "translations" : {
+            "es_ES" : "Saxofón tenor",
+            "en_US" : "Tenor saxophone",
+            "ca_VA" : "Saxòfon tenor"
+        },
+        "classifier_hotkey" : "x"
+    },
+    "saxofon_baritono" : {
+        "translations" : {
+            "es_ES" : "Saxofón barítono",
+            "en_US" : "Baritone Saxophone",
+            "ca_VA" : "Saxòfon bariton"
+        },
+        "classifier_hotkey" : "b"
+    },
+    "fagot" : {
+        "translations" : {
+            "es_ES" : "Fagot",
+            "en_US" : "Basson",
+            "ca_VA" : "Fagot"
+        },
+        "classifier_hotkey" : "a"
+    },
+    "trompa" : {
+        "translations" : {
+            "es_ES" : "Trompa",
+            "en_US" : "Horn",
+            "ca_VA" : "Trompa"
+        },
+        "classifier_hotkey" : "t"
+    },
+    "fliscorno" : {
+        "translations" : {
+            "es_ES" : "Fliscorno",
+            "en_US" : "Flugelhorn",
+            "ca_VA" : "Fliscorn"
+        },
+        "classifier_hotkey" : ""
+    },
+    "trompeta" : {
+        "translations" : {
+            "es_ES" : "Trompeta",
+            "en_US" : "Trumpet",
+            "ca_VA" : "Trompeta"
+        },
+        "classifier_hotkey" : "e"
+    },
+    "trombon" : {
+        "translations" : {
+            "es_ES" : "Saxofón",
+            "en_US" : "Saxophone",
+            "ca_VA" : "Saxòfon"
+        },
+        "classifier_hotkey" : "s"
+    },
+    "trombon_bajo" : {
+        "translations" : {
+            "es_ES" : "Trombón bajo",
+            "en_US" : "Bass trombone",
+            "ca_VA" : "Trombó baix"
+        },
+        "classifier_hotkey" : ""
+    },
+    "bombardino" : {
+        "translations" : {
+            "es_ES" : "Bombardino",
+            "en_US" : "Euphonium",
+            "ca_VA" : "Bombardino"
+        },
+        "classifier_hotkey" : ""
+    },
+    "tuba" : {
+        "translations" : {
+            "es_ES" : "Tuba",
+            "en_US" : "Tuba",
+            "ca_VA" : "Tuba"
+        },
+        "classifier_hotkey" : "u"
+    },
+    "platos" : {
+        "translations" : {
+            "es_ES" : "Platos",
+            "en_US" : "Cymbals",
+            "ca_VA" : "Plats"
+        },
+        "classifier_hotkey" : ""
+    },
+    "bombo" : {
+        "translations" : {
+            "es_ES" : "Bombo",
+            "en_US" : "Bass drum",
+            "ca_VA" : "Bombo"
+        },
+        "classifier_hotkey" : ""
+    },
+    "caja" : {
+        "translations" : {
+            "es_ES" : "Caja",
+            "en_US" : "Snare drum",
+            "ca_VA" : "Caixa"
+        },
+        "classifier_hotkey" : ""
+    },
+    "timbales" : {
+        "translations" : {
+            "es_ES" : "Timbales",
+            "en_US" : "Timpani",
+            "ca_VA" : "Timbals"
+        },
+        "classifier_hotkey" : ""
+    },
+    "gong" : {
+        "translations" : {
+            "es_ES" : "Gong",
+            "en_US" : "Gong",
+            "ca_VA" : "Gong"
+        },
+        "classifier_hotkey" : ""
+    },
+    "percusion" : {
+        "translations" : {
+            "es_ES" : "Percusión",
+            "en_US" : "Percussion",
+            "ca_VA" : "Percussió"
+        },
+        "classifier_hotkey" : ""
+    },
+    "marimba" : {
+        "translations" : {
+            "es_ES" : "Marimba",
+            "en_US" : "Marimba",
+            "ca_VA" : "Marimba"
+        },
+        "classifier_hotkey" : ""
+    },
+    "xilofono" : {
+        "translations" : {
+            "es_ES" : "Xilófono",
+            "en_US" : "Xylophone",
+            "ca_VA" : "Xilòfon"
+        },
+        "classifier_hotkey" : ""
+    },
+    "lira" : {
+        "translations" : {
+            "es_ES" : "Lira",
+            "en_US" : "Glockenspiel",
+            "ca_VA" : "Lira"
+        },
+        "classifier_hotkey" : ""
+    },
+    "vibrafono" : {
+        "translations" : {
+            "es_ES" : "Vibráfono",
+            "en_US" : "Vibraphone",
+            "ca_VA" : "Vibrafon"
+        },
+        "classifier_hotkey" : ""
+    },
+    "dulzaina" : {
+        "translations" : {
+            "es_ES" : "Dulzaina",
+            "en_US" : "Dulzaina",
+            "ca_VA" : "Dolçaina"
+        },
+        "classifier_hotkey" : ""
+    },
+    "guitarra" : {
+        "translations" : {
+            "es_ES" : "Guitarra",
+            "en_US" : "Guitar",
+            "ca_VA" : "Guitarra"
+        },
+        "classifier_hotkey" : ""
+    },
+    "chello" : {
+        "translations" : {
+            "es_ES" : "Violoncelo",
+            "en_US" : "Cello",
+            "ca_VA" : "Violoncel"
+        },
+        "classifier_hotkey" : ""
+    },
+    "contrabajo" : {
+        "translations" : {
+            "es_ES" : "Contrabajo",
+            "en_US" : "Double bass",
+            "ca_VA" : "Contrabaix"
+        },
+        "classifier_hotkey" : ""
+    }
+}

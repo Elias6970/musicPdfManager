@@ -4,16 +4,18 @@ import os,sys,locale,ctypes
 DATA_FOLDER = os.path.join("data")
 PLAIN_TEXT_CONFIG_PATH = os.path.join(DATA_FOLDER,"config.yml")
 DEFAULT_PRESETS_PATH = os.path.join(DATA_FOLDER,"presets.json")
+DEFAULT_INSTRUMENTS_PATH = os.path.join(DATA_FOLDER,"instruments.json")
 
 #Languages
 LAN_ESP = "Espanol"
 LAN_ENG = "English"
-LAN_VAL = "Valencià"
+LAN_VAL = "Valencia"
 
 CONFIG_ATTRIBUTE_ARCHIVE_PATH = "ARCHIVE_PATH"
 CONFIG_ATTRIBUTE_DOSSIER_COVER = "DOSSIER_COVER_PATH"
 CONFIG_ATTRIBUTE_PRESETS = "PRESETS_PATH"
 CONFIG_ATTRIBUTE_LANGUAGE = "LANGUAGE"
+CONFIG_ATTRIBUTE_INSTRUMENTS = "INSTRUMENTS"
 
 #Idea of static class to get the configuration of the application
 class Configuration():
@@ -80,6 +82,16 @@ class Configuration():
             return DEFAULT_PRESETS_PATH
         return path
 
+    @staticmethod
+    def get_instruments_path() -> str:
+        """
+        Get the path to the instruments file.
+        If it doesn't exist, it returns the default path. 
+        """
+        path = Configuration.get_attribute(CONFIG_ATTRIBUTE_INSTRUMENTS)
+        if path == "":
+            return DEFAULT_INSTRUMENTS_PATH
+        return path
 
     #If the language is not supported return an empty string
     @staticmethod

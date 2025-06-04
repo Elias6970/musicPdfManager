@@ -1,10 +1,11 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
 from  classes.files_management.dir import Dir
-from classes.constants.constants import *
+from classes.constants.constants import ROTATE_L_IMG_PATH,ROTATE_R_IMG_PATH,INSTRUCTIONS_SCORE_CLASSIFIER
 from classes.error import EmptyInitialInputException,FirstPageException,NoMorePiecesToClassifyException
 from classes.classifier.text_analizer import TextAnalizer
 from classes.classifier.classifier import Classifier
 from classes.interactive_preview_conversor import InterctivePreviewConversor
+from classes.instruments_names_manager import InstrumentsNamesManager
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.error_window import Error_window
 from gui.interactive_previewer.interactive_previewer import InteractivePreviewer
@@ -39,7 +40,6 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
 
         menu = QtWidgets.QMenuBar()
         menu.addAction(help_opt)
-        container_layout.setMenuBar(menu)
 
 
         #Pdf viewer
@@ -88,14 +88,11 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
         
         #Labels
         self.piece_name_lbl = QtWidgets.QLabel()
+        self.piece_name_lbl
         font = QtGui.QFont()
-        font.setPointSize(20)
+        font.setPointSize(16)
         font.setBold(True)
         self.piece_name_lbl.setFont(font)
-
-        instructions_lbl = QtWidgets.QLabel("""(w)general  (g)uion (cp)clarinete principal\n(o)boe  (f)lauta  flauti(n)  (r)equinto  (c)larinete  clarinete_ba(j)o\n(s)axo  sa(x)o_tenor  saxo_(b)aritono f(a)got  (t)rompa  f(l)iscorno \ntromp(e)ta  tro(m)bon  bombar(d)ino  (z)bajo  t(u)ba  (p)ercusion""") #traducir
-        font.setPointSize(12)
-        instructions_lbl.setFont(font)
 
         #Last classified
         self.last_classfied_lbl = QtWidgets.QLabel()
@@ -128,14 +125,45 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
         container_layout.addWidget(self.piece_name_lbl)
         container_layout.addWidget(self.view)
         container_layout.addLayout(rotate_btns_layout)
-        container_layout.addWidget(instructions_lbl)
         container_layout.addLayout(writing_line_h_layout)
         container_layout.addLayout(last_classfied_h_layout)
 
         container_layout.addLayout(btns_layout)
         #self.setGeometry(0,0,500,400)
 
-        self.setLayout(container_layout)
+        # Shortcuts instructions
+        instructions_lbl = QtWidgets.QLabel(InstrumentsNamesManager.get_instruments_and_shortcuts_as_str())
+        instructions_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignTop)
+        font_metrics = QtGui.QFontMetrics(instructions_lbl.font())
+        instructions_lbl_width = max(font_metrics.horizontalAdvance(line) for line in instructions_lbl.text().split('\n'))
+        instructions_lbl_width += 20 # Add some padding
+
+        shortcuts_scroll_area = QtWidgets.QScrollArea()
+        shortcuts_scroll_area.setWidgetResizable(True)
+        shortcuts_scroll_area.setWidget(instructions_lbl)
+        shortcuts_scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        shortcuts_scroll_area.setMinimumWidth(instructions_lbl_width)
+
+        shortcuts_lbl = QtWidgets.QLabel(self.tr("Shortcuts"))
+        shortcuts_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        shortcuts_lbl.setContentsMargins(0, 0, 0, 2)
+
+        shortcuts_layout = QtWidgets.QVBoxLayout()
+        shortcuts_layout.addWidget(shortcuts_lbl)
+        shortcuts_layout.addWidget(shortcuts_scroll_area)
+
+        line = QtWidgets.QFrame()
+        line.setFrameShape(QtWidgets.QFrame.Shape.VLine)
+        line.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+
+        main_layout = QtWidgets.QHBoxLayout()
+        main_layout.setSpacing(5)
+        main_layout.addLayout(shortcuts_layout)
+        main_layout.addWidget(line)
+        main_layout.addLayout(container_layout)
+        main_layout.setMenuBar(menu)
+        main_layout.setContentsMargins(10, 0, 10, 10)
+        self.setLayout(main_layout)
 
 
     #Open a file
@@ -194,7 +222,10 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
     
     def close(self):
         self.hide()
-
+        quit()
+    
+    def closeEvent(self, a0):
+        self.close()
     #For testing
     """def state(self):
         print("Actual piece index: ",self.classifier.actual_piece)

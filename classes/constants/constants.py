@@ -16,6 +16,8 @@ def LANGUAGE():
     return Configuration.get_language()
 def PRESETS_PATH():
     return Configuration.get_presets_path()
+def INSTRUMENTS_PATH():
+    return Configuration.get_instruments_path()
 
 DB_FILE_NAME = "archivo.db"
 DB_NAME = "AMVR_archive"
