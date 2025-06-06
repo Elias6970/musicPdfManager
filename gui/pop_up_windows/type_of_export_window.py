@@ -21,6 +21,8 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         self.type_of_export:TypeOfExport
         self.sort_alphabetically:bool = False
         self.ignore_preset_copies:bool = False
+        self.add_piece_numbers:bool = False
+        self.add_cover_page:bool = False
 
         self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
         self.setWindowTitle(self.tr("Exporting configuration"))
@@ -56,7 +58,18 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         self._sort_alphabetically_cb.setToolTip(self.tr("Sort the pieces in each pdf alphabetically.\nOnly when exporting by instrument."))
         self._sort_alphabetically_cb.setEnabled(False)
         self._sort_alphabetically_cb.setStyleSheet("padding-left: 25px;")
+        
+        self._add_piece_numbers_cb = QtWidgets.QCheckBox()
+        self._add_piece_numbers_cb.setText(self.tr("Add number to each piece."))
+        self._add_piece_numbers_cb.setToolTip(self.tr("Add a number in the bottom-right corner to \neach piece like the page number."))
+        self._add_piece_numbers_cb.setEnabled(False)
+        self._add_piece_numbers_cb.setStyleSheet("padding-left: 25px;")
 
+        self._add_cover_page_cb = QtWidgets.QCheckBox()
+        self._add_cover_page_cb.setText(self.tr("Add cover page to each pdf."))
+        self._add_cover_page_cb.setToolTip(self.tr("Add a cover page to each pdf with the name of the instrument \nand an optional text for the name"))
+        self._add_cover_page_cb.setEnabled(False)
+        self._add_cover_page_cb.setStyleSheet("padding-left: 25px;")
 
         #Ignore preset copies
         self._ignore_preset_copies_cb = QtWidgets.QCheckBox()
@@ -78,6 +91,8 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         _container_layout.addWidget(self._by_pieces_rb)
         _container_layout.addWidget(self._by_instruments_rb)
         _container_layout.addWidget(self._sort_alphabetically_cb)
+        _container_layout.addWidget(self._add_piece_numbers_cb)
+        _container_layout.addWidget(self._add_cover_page_cb)
         _container_layout.addWidget(_h_line)
         _container_layout.addWidget(self._ignore_preset_copies_cb)
         _container_layout.addWidget(self._btn_confirm)
@@ -91,9 +106,15 @@ class TypeOfExportWindow(QtWidgets.QDialog):
     def manage_btns_enableability(self):
         if self._by_instruments_rb.isChecked():
             self._sort_alphabetically_cb.setEnabled(True)
+            self._add_piece_numbers_cb.setEnabled(True)
+            self._add_cover_page_cb.setEnabled(True)
         else:
             self._sort_alphabetically_cb.setEnabled(False)
             self._sort_alphabetically_cb.setChecked(False)
+            self._add_piece_numbers_cb.setEnabled(False)
+            self._add_piece_numbers_cb.setChecked(False)
+            self._add_cover_page_cb.setEnabled(False)
+            self._add_cover_page_cb.setChecked(False)
 
     
 
@@ -106,6 +127,8 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         elif self._by_instruments_rb.isChecked():
             self.type_of_export = TypeOfExport.BY_INSTRUMENTS
             self.sort_alphabetically = self._sort_alphabetically_cb.isChecked()
+            self.add_piece_numbers = self._add_piece_numbers_cb.isChecked()
+            self.add_cover_page = self._add_cover_page_cb.isChecked()
         else:
             ShowError.show_tooltip_error(self.tr("You need to select the type of export"),5000,self._btn_confirm)
             return #You need to select an option

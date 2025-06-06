@@ -301,11 +301,10 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         return QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Select Folder to export"))
 
 
-    #Create one pdf with all the selected pdfs merged
+    
     def create_pdf(self):     
-
+        """Generate the pdf with the selected presets and pieces"""
         try:
-            
             if self.printer.items:
                 #Ask for the type of creation. By instruments or by pieces
                 window = TypeOfExportWindow(self)
@@ -316,6 +315,8 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
                     self.printer.set_sorted_export(window.sort_alphabetically)
                     self.printer.set_ignore_presets_copies(window.ignore_preset_copies)
+                    self.printer.set_add_piece_numbers(window.add_piece_numbers)
+                    self.printer.set_add_cover_page(window.add_cover_page)
 
                     #Make the preporcess and solve the errros
                     errors = self.printer.preprocess_export()
