@@ -17,6 +17,7 @@ from gui.preferences_window import Preferences_window
 from gui.presets.presets_window import PresetsWindow
 from tools.delete_junk_files import delete_junk_files
 import sys, os
+
 class Main_window(QtWidgets.QMainWindow):
     def __init__(self):
 
@@ -185,20 +186,24 @@ class Main_window(QtWidgets.QMainWindow):
 
 
     def center_on_screen(self):
-        """Center the window in the middle of the screen."""
+        """
+        enter the window in the middle of the screen.
+        If any error ocurrs, it doesn't move the window
+        """
         # Get the screen geometry
         screen = QtWidgets.QApplication.primaryScreen()
-        screen_geometry = screen.availableGeometry()
-        screen_center = screen_geometry.center()
+        if isinstance(screen, QtGui.QScreen):
+            screen_geometry = screen.availableGeometry()
+            screen_center = screen_geometry.center()
 
-        # Get the window size (without decorations yet, because it's not shown)
-        window_size = self.size()
+            # Get the window size (without decorations yet, because it's not shown)
+            window_size = self.size()
 
-        # Calculate top-left point so that window center = screen center
-        x = screen_center.x() - window_size.width() // 2
-        y = screen_center.y() - window_size.height() // 2
+            # Calculate top-left point so that window center = screen center
+            x = screen_center.x() - window_size.width() // 2
+            y = screen_center.y() - window_size.height() // 2
 
-        self.move(x, y)
+            self.move(x, y)
 
 
 #####################################################################
@@ -237,6 +242,7 @@ class Main_window(QtWidgets.QMainWindow):
 
     def show_presets_window(self):
         PresetsWindow(self)
+        self.multiple_selection_window.refresh_presets_list()
 
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
@@ -277,9 +283,10 @@ class Main_window(QtWidgets.QMainWindow):
                                                              "PDF Files (*.pdf);;All Files (*)")
             if not pdf_path[0]: 
                 return
-            
+
+            #I think the code never enter here because getSaveFileName add the extension autocatically        
             if not pdf_path[0].endswith(".pdf"):
-                pdf_path += ".pdf"
+                pdf_path = (pdf_path[0] + ".pdf", pdf_path[1])
             
             try:
                 Dossier.export_pdf_dossier_to_print(self.archive.db.get_all_to_print(),pdf_path[0],extra_cover[0])

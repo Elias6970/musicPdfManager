@@ -212,8 +212,10 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
     
     #Set the options of the presets in the combo box
-    def set_presets(self):
+    def set_presets(self, keep_current_index:bool = False):
         #Clear the old options
+        index = self.presets_combo_box.currentIndex()
+
         for i in range(self.presets_combo_box.count()):
                 self.presets_combo_box.removeItem(0)
         
@@ -223,6 +225,12 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
             preview_text = value.name + " preview:\n" + value.print()
             self.presets_combo_box.setItemData(i,preview_text,QtCore.Qt.ItemDataRole.ToolTipRole)
         #self.presets_combo_box.addItems(self.preset_manager.get_names())
+
+        if keep_current_index:
+            #If the index is valid, set it
+            if index < self.presets_combo_box.count():
+                self.presets_combo_box.setCurrentIndex(index)
+            
     
 
     #Set the option of the instruments to the combo box
@@ -344,6 +352,10 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         except Exception as e:
             Error_window.print_error(e)
 
+    
+    def refresh_presets_list(self):
+        self.preset_manager.load() #Update the presets
+        self.set_presets(keep_current_index=True)
 
     #Refresh the list of pieces and delete the info in the printer  
     def refresh(self):
@@ -359,9 +371,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         #Preview
         self.preview.clear()
 
-        #Presets
-        self.preset_manager.load() #Update the presets
-        self.set_presets()
+        self.refresh_presets_list()
 
 
     #Controlls the pieces showed in the search bar
