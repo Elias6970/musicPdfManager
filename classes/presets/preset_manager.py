@@ -1,6 +1,6 @@
 from classes.presets.preset import Preset
 from classes.constants.constants import PRESETS_PATH
-import json
+import json,os
 
 
 # Class that manages all the presets
@@ -35,13 +35,16 @@ class PresetManager():
 
     def load(self,path:str|None=None):
         """
-        Load all the presets in this object 
+        Load all the presets in this object removing the old ones.
             :param path: Path where the presets are. If it's None use the default path.
         """
         self.presets.clear()
         
         if path == None:
             path = PRESETS_PATH()
+
+        if os.path.exists(path) == False:
+            return
         
         with open(path,'r') as file:
             imported_json = json.load(file)

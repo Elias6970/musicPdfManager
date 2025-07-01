@@ -17,4 +17,5 @@ dist
 *.yml
 *.db
 presets.json
+pieces_presets.json
 .pytest_cache

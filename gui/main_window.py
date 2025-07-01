@@ -31,7 +31,6 @@ class Main_window(QtWidgets.QMainWindow):
         #Init the Archive 
         self.archive = Archive(DB_NAME,RELATIVE_ARCHIVE_PATH())
 
-        self.setMenuBar(self.create_menu_bar())        
         
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()
@@ -46,12 +45,13 @@ class Main_window(QtWidgets.QMainWindow):
         self.selectors.addWidget(self.individual_selection_window)
         self.selectors.addWidget(self.multiple_selection_window)
 
+        self.setMenuBar(self.create_menu_bar())
 
         container_layout.addLayout(self.create_buttons_for_selectors())
         container_layout.addWidget(self.selectors)
         container.setLayout(container_layout)
 
-        
+               
         self.setCentralWidget(container)
         self.setWindowTitle("AMRV archive manager v" + str(VERSION)) #traducir
         self.setWindowIcon(QtGui.QIcon(ICON_PATH))
@@ -64,6 +64,16 @@ class Main_window(QtWidgets.QMainWindow):
 
         presets_opt = QtGui.QAction(self.tr("Presets"),self) #traducir
         presets_opt.triggered.connect(self.show_presets_window)
+
+        #Create the submenus for save and load pieces presets
+        self._save_pieces_preset_opt = QtGui.QAction(self.tr("Save pieces preset"),self) #traducir
+        self._save_pieces_preset_opt.triggered.connect(lambda: (self.multiple_selection_window.save_pieces_preset(), self.update_pieces_presets_list()))
+
+        self._load_pieces_preset_opt = QtWidgets.QMenu(self.tr("Load pieces preset"),self) #traducir
+        #self._load_pieces_preset_opt.triggered.connect(lambda: None)
+
+        #Load all the piecee presets in the menu
+        self.update_pieces_presets_list()
 
         add_score_opt = QtGui.QAction(self.tr("Add score"),self) #traducir
         add_score_opt.triggered.connect(self.show_add_scores_menu)
@@ -98,6 +108,11 @@ class Main_window(QtWidgets.QMainWindow):
             if config_menu:
                 config_menu.addActions([preferences_opt,
                                         presets_opt]) #traducir
+                
+            edit_menu = menu.addMenu(self.tr("Edit"))
+            if edit_menu:
+                edit_menu.addActions([self._save_pieces_preset_opt])
+                edit_menu.addMenu(self._load_pieces_preset_opt)
 
             archive_menu = menu.addMenu(self.tr("Archive"))
             if archive_menu:
@@ -180,10 +195,17 @@ class Main_window(QtWidgets.QMainWindow):
         if clicked == self.btn_individual_selection:
             self.btn_individual_selection.setStyleSheet(clicked_sytle)
             self.btn_multiple_selection.setStyleSheet(not_clicked_style)
+
+            #Disable the save and load pieces preset options
+            self._save_pieces_preset_opt.setEnabled(False)
+            self._load_pieces_preset_opt.setEnabled(False)
+
         else:
             self.btn_individual_selection.setStyleSheet(not_clicked_style)
             self.btn_multiple_selection.setStyleSheet(clicked_sytle)
 
+            self._save_pieces_preset_opt.setEnabled(True)
+            self._load_pieces_preset_opt.setEnabled(True)
 
     def center_on_screen(self):
         """
@@ -231,8 +253,39 @@ class Main_window(QtWidgets.QMainWindow):
         if app:
             app.installTranslator(translator)
     
-  
-  
+    
+    def update_pieces_presets_list(self):
+        """Update the pieces presets list in the menu bar"""
+        self._load_pieces_preset_opt.clear()  # Clear the existing actions
+
+        for i in self.multiple_selection_window.piece_preset_manager.get_names():
+            action = QtGui.QAction(i,self._load_pieces_preset_opt)
+            action.triggered.connect(lambda: self.multiple_selection_window.load_pieces_preset(i))
+            self._load_pieces_preset_opt.addAction(action)
+    
+
+    #Create a pdf dossier with a list of all the scores in the db as an index
+    def export_dossier(self):
+        extra_cover = QtWidgets.QInputDialog.getText(self,self.tr("Additional conver info"),self.tr("Enter additional info to be added to the cover:(max 9 chars)")) #traducir
+        if extra_cover[1]:
+            pdf_path = QtWidgets.QFileDialog.getSaveFileName(self, 
+                                                             self.tr("Select Folder and File Name"),
+                                                             "",
+                                                             "PDF Files (*.pdf);;All Files (*)")
+            if not pdf_path[0]: 
+                return
+
+            #I think the code never enter here because getSaveFileName add the extension autocatically        
+            if not pdf_path[0].endswith(".pdf"):
+                pdf_path = (pdf_path[0] + ".pdf", pdf_path[1])
+            
+            try:
+                Dossier.export_pdf_dossier_to_print(self.archive.db.get_all_to_print(),pdf_path[0],extra_cover[0])
+            except ValueError as e:
+                Error_window.print_error(message="Incorrect file name",e=e) #traducir
+            except Exception as e:
+                Error_window.print_error(e)
+
 #####################################################################
 #------------------------SHOW OTHER WINDOWS ------------------------#
 #####################################################################
@@ -272,26 +325,4 @@ class Main_window(QtWidgets.QMainWindow):
     #Show about us window
     def about_opt_menu(self):
         About_us_window(self)
-
-    #Create a pdf dossier with a list of all the scores in the db as an index
-    def export_dossier(self):
-        extra_cover = QtWidgets.QInputDialog.getText(self,self.tr("Additional conver info"),self.tr("Enter additional info to be added to the cover:(max 9 chars)")) #traducir
-        if extra_cover[1]:
-            pdf_path = QtWidgets.QFileDialog.getSaveFileName(self, 
-                                                             self.tr("Select Folder and File Name"),
-                                                             "",
-                                                             "PDF Files (*.pdf);;All Files (*)")
-            if not pdf_path[0]: 
-                return
-
-            #I think the code never enter here because getSaveFileName add the extension autocatically        
-            if not pdf_path[0].endswith(".pdf"):
-                pdf_path = (pdf_path[0] + ".pdf", pdf_path[1])
-            
-            try:
-                Dossier.export_pdf_dossier_to_print(self.archive.db.get_all_to_print(),pdf_path[0],extra_cover[0])
-            except ValueError as e:
-                Error_window.print_error(message="Incorrect file name",e=e) #traducir
-            except Exception as e:
-                Error_window.print_error(e)
 

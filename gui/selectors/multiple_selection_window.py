@@ -7,6 +7,8 @@ from classes.printers.presets_printer import PresetsPrinter
 from classes.error import NoScoresException, MoreScoresThanPresetsException
 from classes.preview_controller import Preview_controller
 from classes.presets.preset_manager import PresetManager
+from classes.presets.pieces_preset.pieces_preset_manager import PiecesPresetManager
+from classes.presets.pieces_preset.pieces_preset import PiecesPreset
 from gui.error_window import Error_window, ShowError
 from gui.pop_up_windows.type_of_export_window import TypeOfExportWindow, TypeOfExport
 from gui.presets.resolve_not_matched_presets import ResolveNotMatchedPresets
@@ -25,8 +27,10 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         #Init the Archive 
         self.archive = archive
         self.printer = PresetsPrinter()
-        self.preset_manager = PresetManager()
+        self.preset_manager = PresetManager() #Mange the instruments presets
         self.preset_manager.load()
+        self.piece_preset_manager = PiecesPresetManager() #Manage the pieces presets
+        self.piece_preset_manager.load()
 
         container_layout = QtWidgets.QHBoxLayout()
         
@@ -445,3 +449,36 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
 
     
 
+    def save_pieces_preset(self):
+        """Save the pieces preset with the selected preset and all the pieces with their presets added"""
+
+        if self.printer.items:
+            #Ask for the name of the preset
+            preset_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Save pieces preset"), self.tr("Preset name:"))
+            if ok and preset_name:
+                pieces_to_add:list[tuple[str,str]] = []
+                for i in self.printer.items:
+                    pieces_to_add.append((i.dir.name, i.preset.name))
+
+                was_added = self.piece_preset_manager.add_preset_by_elements(preset_name, i.preset.name, i.copies, pieces_to_add)
+                
+                if not was_added:
+                    Error_window.print_error(message=self.tr("Preset with this name already exists"))
+
+    
+    def load_pieces_preset(self, preset_name:str):
+        """Load a pieces preset by the name in the mulple selection window"""
+        if self.piece_preset_manager.exist(preset_name):
+            preset = self.piece_preset_manager.get_preset(preset_name)
+            if isinstance(preset, PiecesPreset):
+                combobox_id = self.presets_combo_box.findText(preset.preset_name)
+                if combobox_id != -1:
+                    self.presets_combo_box.setCurrentIndex(combobox_id)
+                else:
+                    ShowError.show_tooltip_error(self.tr(f"Preset {preset.preset_name} not found in the list"),5000,self.presets_combo_box)
+                    self.presets_combo_box.setCurrentIndex(-1)
+                
+                for i in preset.pieces:
+                    self.
+
+                

@@ -16,6 +16,8 @@ def LANGUAGE():
     return Configuration.get_language()
 def PRESETS_PATH():
     return Configuration.get_presets_path()
+def PIECES_PRESETS_PATH():
+    return Configuration.get_pieces_presets_path()
 def INSTRUMENTS_PATH():
     return Configuration.get_instruments_path()
 
@@ -33,7 +35,7 @@ DB_PATH = os.path.join('data',DB_FILE_NAME)
 #The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
 #Every time you execute the application a temp folder is created
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    IMAGES_PATH = os.path.join(sys._MEIPASS,'data','img')
+    IMAGES_PATH = os.path.join(sys._MEIPASS,'data','img') #type: ignore
 else:
     IMAGES_PATH = os.path.join('data','img')
     
@@ -63,6 +65,10 @@ DONT_CLASSIFY_NOW = "dont_classify_now"
 PRESETS_COPIES = "copies"
 PRESETS_OTHER_OPTIONS = "other_options"
 
+#Pieces preset constants
+PIECES_PRESETS_PRESET = "preset" 
+PIECES_PRESETS_PIECES = "pieces"
+PIECES_PRESETS_COPIES = "copies"
 
 INSTRUCTIONS_SCORE_CLASSIFIER = """*******Herramienta clasificador de partituras*******
 
