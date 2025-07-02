@@ -10,10 +10,14 @@ class Validate():
             
         return False
     
-    #Check if the name exist in the list of pieces
-    #Return a Dir object. If it is not found, it return a Dir_Error obj
+
+
     @staticmethod
-    def select_window_validate_selection(src_txt:str,list_of_pieces:list[str]) -> Dir:
+    def check_if_exist_dir(src_txt:str,list_of_pieces:list[str]) -> Dir:
+        """"Check if the src_txt is in the list_of_pieces.
+        If it is, return a Dir object with the path and name.
+        If it is not, return a Dir_Error object.
+        """
         for i in list_of_pieces:
             if src_txt == i:
                 return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i),i)

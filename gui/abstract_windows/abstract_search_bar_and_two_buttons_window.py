@@ -52,7 +52,6 @@ class AbstractSerchBarAndTwoButtonsWindow(QtWidgets.QDialog):
     
     #Update the autocompleter list of the search
     def update_autocompleter_scores(self):
-        #self.archive.update_pieces_in_dirs()
         self.search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names()) #type: ignore
     
     
