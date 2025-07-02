@@ -2,11 +2,11 @@ from classes.constants.constants import PIECES_PRESETS_PIECES, PIECES_PRESETS_PR
 
 class PiecesPreset:
     """Class to save preset of selected pieces.
+    pieces is a list of tuples because with this strucutre we can save the same piece with different presets and copies.
     Example:
         "name" : {
             "preset" : "preset_name",
-            "copies" : "copies",
-            "pieces" : [("piece_std_name_1", "preset"), ("piece_std_name_2", "preset"),...]
+            "pieces" : [("piece_std_name_1", "preset", "copies"), ("piece_std_name_2", "preset", "copies"),...]
         }
     """
 
@@ -17,13 +17,12 @@ class PiecesPreset:
         """
         self.name:str = name
         self.preset_name:str = preset_name
-        self.pieces:list[tuple[str,str]] = []
-        self.copies:int = 1
+        self.pieces:list[tuple[str,str,str]] = []
 
-    def add_piece(self, piece_std_name:str, preset_name:str) -> bool:
+    def add_piece(self, piece_std_name:str, preset_name:str, copies:int|str) -> bool:
         """Add a piece to the pieces preset"""
         try:
-            self.pieces.append((piece_std_name, preset_name))
+            self.pieces.append((piece_std_name, preset_name, str(copies)))
             return True
         except Exception:
             return False
@@ -34,7 +33,10 @@ class PiecesPreset:
         return {
             self.name: {
                 PIECES_PRESETS_PRESET: self.preset_name,
-                PIECES_PRESETS_COPIES: str(self.copies),
                 PIECES_PRESETS_PIECES: self.pieces
             }
         }
+
+    def __str__(self) -> str:
+        """String representation of the preset"""
+        return f"PiecesPreset(name={self.name}, preset_name={self.preset_name}, pieces={self.pieces})"

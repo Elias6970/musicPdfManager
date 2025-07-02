@@ -190,7 +190,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
                 self.part_combo_box.removeItem(0)
 
         #set instruments
-        piece = Validate.select_window_validate_selection(text,self.archive.pieces.get_parsed_names())
+        piece = Validate.check_if_exist_dir(text,self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
                 piece.path = os.path.join(self.archive.archive_path,piece.name)
@@ -322,7 +322,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
     #Manage the preview controller
     def update_preview(self,piece_parsed_name:str,instrument:str) -> None:
         #Check if a piece and instrument is selected
-        piece = Validate.select_window_validate_selection(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
+        piece = Validate.check_if_exist_dir(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
                 if not piece.get_scores():

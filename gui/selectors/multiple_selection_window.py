@@ -1,9 +1,11 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
 from classes.constants.constants import MAX_COPIES,REFRESH_IMG_PATH
 from classes.files_management.archive import Archive
+from classes.files_management.dir import Dir
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate
 from classes.printers.presets_printer import PresetsPrinter
+from classes.presets.preset import Preset
 from classes.error import NoScoresException, MoreScoresThanPresetsException
 from classes.preview_controller import Preview_controller
 from classes.presets.preset_manager import PresetManager
@@ -68,7 +70,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         self.btn_add = QtWidgets.QPushButton(self.tr("Add")) #traducir
         self.btn_confirm = QtWidgets.QPushButton(self.tr("Create Pdf")) #traducir
 
-        self.btn_add.clicked.connect(self.add_score)
+        self.btn_add.clicked.connect(self.add_score_gui)
         self.btn_confirm.clicked.connect(self.create_pdf)
 
         layout.addWidget(self.num_copies)
@@ -244,7 +246,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 self.instruments_combo_box.removeItem(0)
 
         #set instruments
-        piece = Validate.select_window_validate_selection(text,self.archive.pieces.get_parsed_names())
+        piece = Validate.check_if_exist_dir(text,self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
                 piece.path = os.path.join(self.archive.archive_path,piece.name)
@@ -259,53 +261,72 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
 
                 self.instruments_combo_box.setEnabled(True)
                 self.instruments_combo_box.addItems(scores)
+                self.instruments_combo_box.addItem("PEcuario")
             
             #if the piece is not in the digital archive
             except FileNotFoundError:
+                self.instruments_combo_box.clear()
                 self.instruments_combo_box.insertItem(0,self.tr("NOT DIGITALIZED")) #TRADUCIR
                 self.instruments_combo_box.setEnabled(False)
-                self.instruments_combo_box.clear()
             except NoScoresException:
+                self.instruments_combo_box.clear()
                 self.instruments_combo_box.insertItem(0,self.tr("NO SCORES")) #TRADUCIR
                 self.instruments_combo_box.setEnabled(False)
-                self.instruments_combo_box.clear()
         
         else:
             self.instruments_combo_box.clear()
             self.instruments_combo_box.setEnabled(False)
 
 
+    def add_score_gui(self):
+        """
+        Add the score with all the data from the widgets. 
+        This function is called when you click the add button.
+        It validates the selection and if it's valid, it calls the add_score function.
+        """
+
+        try:
+            dir = self.printer.actual_piece
+            preset_name = self.presets_combo_box.currentText()
+            copies = int(self.num_copies.currentText())
+
+            validation = Validate.validate_selection(dir.name,self.archive.pieces.get_parsed_names())
+            if validation:
+
+                preset = self.preset_manager.get_preset(preset_name)
+                if preset == None:
+                    ShowError.show_tooltip_error(self.tr("Preset not found"),5000,self.presets_combo_box)
+                    self.presets_combo_box.setCurrentIndex(-1)
+                    return False
+            
+                return self.add_score(dir, preset, copies)
+            
+        except AttributeError:
+            ShowError.show_tooltip_error(self.tr("You need to select a piece with scores associated"),5000,self.piece_search_bar)
+        return False
+        
+        
 
     #Add the score to the list of added scores an update it in the labels list
-    def add_score(self):
-        try:
-            validation = Validate.validate_selection(self.printer.actual_piece.name,self.archive.pieces.get_parsed_names())
-        except AttributeError:
-            return
+    def add_score(self, dir:Dir, preset:Preset, copies:int) -> bool:
+        """Add the score to the printer and update the scroll area"""
+
+        scrolleable_item_id = self.printer.add(copies,
+                                                preset,
+                                                dir)
         
-        if self.preset_manager.exist(self.presets_combo_box.currentText()) and validation:
-            preset = self.preset_manager.get_preset(self.presets_combo_box.currentText())
-            if preset == None:
-                return
-            
-            copies = int(self.num_copies.currentText())
-            dir = self.printer.actual_piece
 
-            scrolleable_item_id = self.printer.add(copies,
-                                                  preset,
-                                                  dir)
-            
+        #Update the labels of the down scores
+        self.scroll.add_item(StatusConsleItemWithTwoTexts(dir.name,
+                                                preset.name,
+                                                copies,
+                                                scrolleable_item_id,
+                                                self.scroll.remove_item,
+                                                self.printer.remove))
 
-            #Update the labels of the down scores
-            self.scroll.add_item(StatusConsleItemWithTwoTexts(dir.name,
-                                                  self.presets_combo_box.currentText(),
-                                                  copies,
-                                                  scrolleable_item_id,
-                                                  self.scroll.remove_item,
-                                                  self.printer.remove))
-
-            #Block the presets combobox
-            self.presets_combo_box.setEnabled(False)
+        #Block the presets combobox
+        self.presets_combo_box.setEnabled(False)
+        return True
     
 
     #Display a window to select a location to save a pdf
@@ -357,9 +378,9 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
             Error_window.print_error(e)
 
     
-    def refresh_presets_list(self):
+    def refresh_presets_list(self, keep_current_index:bool = False):
         self.preset_manager.load() #Update the presets
-        self.set_presets(keep_current_index=True)
+        self.set_presets(keep_current_index=keep_current_index)
 
     #Refresh the list of pieces and delete the info in the printer  
     def refresh(self):
@@ -423,7 +444,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
     #Manage the preview controller
     def update_preview(self,piece_parsed_name:str,instrument:str) -> None:
         #Check if a piece and instrument is selected
-        piece = Validate.select_window_validate_selection(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
+        piece = Validate.check_if_exist_dir(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
                 if not piece.get_scores():
@@ -456,29 +477,66 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
             #Ask for the name of the preset
             preset_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Save pieces preset"), self.tr("Preset name:"))
             if ok and preset_name:
-                pieces_to_add:list[tuple[str,str]] = []
+                pieces_to_add:list[tuple[str,str,str]] = []
                 for i in self.printer.items:
-                    pieces_to_add.append((i.dir.name, i.preset.name))
+                    pieces_to_add.append((i.dir.name, i.preset.name, str(i.copies)))
 
-                was_added = self.piece_preset_manager.add_preset_by_elements(preset_name, i.preset.name, i.copies, pieces_to_add)
+                was_added = self.piece_preset_manager.add_preset_by_elements(preset_name, i.preset.name, pieces_to_add)
                 
                 if not was_added:
                     Error_window.print_error(message=self.tr("Preset with this name already exists"))
+                else:
+                    self.piece_preset_manager.dump() #Save the presets to the file
 
     
     def load_pieces_preset(self, preset_name:str):
         """Load a pieces preset by the name in the mulple selection window"""
+        self.refresh()
+        print("preset_name",preset_name)
+        print(self.sender())
+        [print(i) for i in self.piece_preset_manager.presets]
+        dir_error_msg:str = self.tr("This pieces are not found:\n")
+        dir_error:bool = False
+        preset_error_msg:str = self.tr("This presets are not found:\n")
+        preset_error:bool = False
+
         if self.piece_preset_manager.exist(preset_name):
-            preset = self.piece_preset_manager.get_preset(preset_name)
-            if isinstance(preset, PiecesPreset):
-                combobox_id = self.presets_combo_box.findText(preset.preset_name)
+            piece_preset = self.piece_preset_manager.get_preset(preset_name)
+            if isinstance(piece_preset, PiecesPreset):
+                #Set the instrument preset in the combo box
+                combobox_id = self.presets_combo_box.findText(piece_preset.preset_name)
                 if combobox_id != -1:
                     self.presets_combo_box.setCurrentIndex(combobox_id)
                 else:
-                    ShowError.show_tooltip_error(self.tr(f"Preset {preset.preset_name} not found in the list"),5000,self.presets_combo_box)
+                    ShowError.show_tooltip_error(self.tr(f"Preset {piece_preset.preset_name} not found in the list"),5000,self.presets_combo_box)
                     self.presets_combo_box.setCurrentIndex(-1)
                 
-                for i in preset.pieces:
-                    self.
+                #Set the elements in the printer (piece + instrument preset)
+                for i in piece_preset.pieces:
+                    dir = Validate.check_if_exist_dir(i[0],self.archive.pieces.get_parsed_names())
+                    if not isinstance(dir, Dir_Error):
+                        
+                        instrument_preset = self.preset_manager.get_preset(i[1])
+                        if instrument_preset != None:
+                            self.add_score(dir, instrument_preset, int(i[2]))
+                        else:
+                            preset_error_msg += f"{i[1]}\n"
+                            preset_error = True
+                    else:
+                        dir_error_msg += f"{i[0]}\n"
+                        dir_error = True
+        
+        
+        #Show the error message if there are errors
+        error:str = ""
+        if dir_error:
+            error += dir_error_msg
+            if preset_error:
+                error += "\n" + preset_error_msg
+        else:
+            if preset_error:
+                error += preset_error_msg
+        if error != "":
+            Error_window.print_error(message="\n"+error)
 
                 

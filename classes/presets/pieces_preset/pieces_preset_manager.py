@@ -1,5 +1,5 @@
 from classes.presets.pieces_preset.pieces_preset import PiecesPreset
-from classes.constants.constants import PIECES_PRESETS_PATH, PIECES_PRESETS_PIECES, PIECES_PRESETS_PRESET, PIECES_PRESETS_COPIES
+from classes.constants.constants import PIECES_PRESETS_PATH, PIECES_PRESETS_PIECES, PIECES_PRESETS_PRESET
 import json,os
 
 
@@ -16,7 +16,7 @@ class PiecesPresetManager:
         self.presets.append(preset)
         return True
 
-    def add_preset_by_elements(self,name:str, instrument_preset_name:str, copies:int|str, pieces:list[tuple[str,str]]):
+    def add_preset_by_elements(self,name:str, instrument_preset_name:str, pieces:list[tuple[str,str]]) -> bool:
         """
         Add a preset using a printeable preset object from the printer (used in the selector windows).
             :param name: Name of the preset
@@ -25,8 +25,7 @@ class PiecesPresetManager:
         """
         preset = PiecesPreset(name, instrument_preset_name)
         preset.pieces = pieces 
-        preset.copies = int(copies)
-        self.add_preset(preset)
+        return self.add_preset(preset)
         
     
     def remove_preset(self,preset_name:str):
@@ -65,10 +64,8 @@ class PiecesPresetManager:
             with open(path,'r') as file:
                 imported_json = json.load(file)
                 for i in imported_json.keys():
-                    print(i)
                     preset = PiecesPreset(i, imported_json[i][PIECES_PRESETS_PRESET])
                     preset.pieces = [tuple(item) for item in imported_json[i][PIECES_PRESETS_PIECES]] #Convert the list of list (json format) to list of tuples
-                    preset.copies = int(imported_json[i][PIECES_PRESETS_COPIES])
                     self.add_preset(preset)
         except json.JSONDecodeError:
             print("Error loading pieces presets from file. The file is not a valid JSON.")

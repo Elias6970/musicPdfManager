@@ -260,7 +260,7 @@ class Main_window(QtWidgets.QMainWindow):
 
         for i in self.multiple_selection_window.piece_preset_manager.get_names():
             action = QtGui.QAction(i,self._load_pieces_preset_opt)
-            action.triggered.connect(lambda: self.multiple_selection_window.load_pieces_preset(i))
+            action.triggered.connect(lambda _, i=i: self.multiple_selection_window.load_pieces_preset(i))
             self._load_pieces_preset_opt.addAction(action)
     
 
@@ -295,7 +295,7 @@ class Main_window(QtWidgets.QMainWindow):
 
     def show_presets_window(self):
         PresetsWindow(self)
-        self.multiple_selection_window.refresh_presets_list()
+        self.multiple_selection_window.refresh_presets_list(keep_current_index=True)
 
     #Show the add_scores_window hiding the main menu
     def show_add_scores_menu(self):
