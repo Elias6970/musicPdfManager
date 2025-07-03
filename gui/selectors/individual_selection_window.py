@@ -3,7 +3,7 @@ from classes.constants.constants import MAX_COPIES,REFRESH_IMG_PATH
 from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate
-from classes.printers.default_printer import DefualtPrinter
+from classes.printers.default_printer import DefaultPrinter
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from classes.constants.constants import DIR_SCORES
@@ -22,7 +22,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
 
         #Init the Archive 
         self.archive = archive
-        self.printer = DefualtPrinter()
+        self.printer = DefaultPrinter()
 
         container_layout = QtWidgets.QHBoxLayout()
         
@@ -271,7 +271,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         self.num_copies.setCurrentIndex(0)
         
         #Printer
-        self.printer = DefualtPrinter()
+        self.printer = DefaultPrinter()
         self.archive.update_pieces()
         #Preview
         self.preview.clear()

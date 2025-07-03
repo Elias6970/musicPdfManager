@@ -1,4 +1,4 @@
-import os
+import os,re
 from unidecode import unidecode
 from classes.files_management.dir import Dir
 from classes.db_manage import Db_archive
@@ -36,9 +36,15 @@ class Archive:
         one = name.split("-",1)[0]
         two = name.split(" ",1)[0]
         if len(one) < len(two):
-            return one
-        return two
+            return int(one)
+        return int(two)
     
+
+    @staticmethod
+    def extract_name(std_name:str) -> str:
+        """Extract the name given parsed name (cod+name), e.g. "1591-ATMURAF" --> "ATMURAF" """
+        return re.sub(r'^\d+-','',std_name)
+
 
     #Stablish the name to the folders get from the db to standarize the names
     #"cod-name" in capital leters and without accents

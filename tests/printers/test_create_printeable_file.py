@@ -1,5 +1,5 @@
 from classes.printers.printeable_file import PrinteableFile
-from classes.printers.default_printer import DefualtPrinter
+from classes.printers.default_printer import DefaultPrinter
 import pytest
 
 def test_create_printeable_files():
@@ -21,7 +21,7 @@ def test_create_default_printer():
     t2 = "M"
     copies2 = 3
 
-    dp = DefualtPrinter()
+    dp = DefaultPrinter()
     i1 = dp.add(t1,copies1)
     i2 = dp.add(t2,copies2)
 

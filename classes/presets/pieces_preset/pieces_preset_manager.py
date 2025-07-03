@@ -16,7 +16,7 @@ class PiecesPresetManager:
         self.presets.append(preset)
         return True
 
-    def add_preset_by_elements(self,name:str, instrument_preset_name:str, pieces:list[tuple[str,str]]) -> bool:
+    def add_preset_by_elements(self,name:str, instrument_preset_name:str, pieces:list[tuple[str,str,str]]) -> bool:
         """
         Add a preset using a printeable preset object from the printer (used in the selector windows).
             :param name: Name of the preset
