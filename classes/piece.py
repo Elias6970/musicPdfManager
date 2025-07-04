@@ -1,5 +1,7 @@
 from unidecode import unidecode
+from classes.utils.name_manager import NameManager
 from classes.error import PieceNotFoundException
+from classes.utils.name_manager import NameManager
 
 #Class that represents a piece
 #raise PathNotFoundException if the path doesn't exits unless is None
@@ -18,32 +20,15 @@ class Piece:
     #Constructor overload that gets the parsed name
     @classmethod
     def from_parsed_name(cls,std_name:str,digitalized:bool=False):
-        cod = Piece.extract_cod(std_name)
-        name = Piece.extract_name(std_name)
+        cod = int(NameManager.get_cod(std_name))
+        name = NameManager.get_name(std_name)
         return cls(cod,name,std_name,digitalized)
     
     
     def update_parsed_name(self) -> str:
-        return str(self.cod) + "-" + unidecode(self.name).upper()
+        return NameManager.get_std_name(self.cod,self.name)
 
-    
-    #Return the cod of a parsed name
-    @staticmethod
-    def extract_cod(std_name:str) -> int:
-        one = std_name.split("-",1)[0]
-        two = std_name.split(" ",1)[0]
-        if len(one) < len(two):
-            return int(one)
-        return int(two)
-    
-    #Return the name of a parsed name
-    @staticmethod
-    def extract_name(std_name:str) -> str:
-        return std_name.split("-",maxsplit=1)[1]
-    
-    @staticmethod
-    def make_parsed_name(cod,name) -> str:
-        return str(cod) + "-" + name
+
 
 #List of pieces
 class Pieces_list:
@@ -80,8 +65,9 @@ class Pieces_list:
         self.pieces.append(Piece.from_parsed_name(parsed_name,digitalized))
         return True
 
-    #Raise ValueError if Piece doesn't exists
+
     def remove(self,cod:int) -> bool:
+        """Raise ValueError if Piece doesn't exists"""
         for i in self.pieces:
             if i.cod == cod:
                 self.pieces.remove(i)
@@ -90,7 +76,11 @@ class Pieces_list:
     
     #Raise ValueError if Piece doesn't exists
     def remove_parsed(self,parsed_name:str) -> bool:
-        return self.remove(Piece.extract_cod(parsed_name))
+        """
+        Remove a piece by its parsed name (cod-name)
+        Raise ValueError if Piece doesn't exists
+        """
+        return self.remove(int(NameManager.get_cod(parsed_name)))
     
     #Return a copy of an element. Raise PieceNotFoundException if the piece doesn't exists
     def get(self,cod:int):

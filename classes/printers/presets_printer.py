@@ -1,3 +1,4 @@
+from classes.utils.name_manager import NameManager
 from classes.printers.printer import Printer
 from classes.printers.printeable_preset import PrinteablePreset
 from classes.presets.preset import Preset
@@ -122,7 +123,7 @@ class PresetsPrinter(Printer):
         #Export the pieces in each pdf sorted by name
         for i in self._solution.keys():
             merge_pdf = pypdf.PdfWriter()
-            merge_pdf.append(self._create_index([Archive.extract_name(m) for m in exporting_order], title="Índice de pasodobles"))
+            merge_pdf.append(self._create_index([NameManager.get_name(m) for m in exporting_order], title="Índice de pasodobles"))
 
             for j in exporting_order:
                 for _ in range(self._solution[i][j].copies):

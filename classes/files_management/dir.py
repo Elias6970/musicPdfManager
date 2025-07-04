@@ -1,5 +1,7 @@
 import os,shutil,re
+from classes.utils.name_manager import NameManager
 from classes.files_management.file import File
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.db_manage import Db_archive
 from classes.constants.constants import DIR_SCORES,DIR_EXTRAS, DB_NAME
 
@@ -11,16 +13,25 @@ class Dir(File):
         else:
             self.name = name
 
-    #Returns the names of the files inside it avoiding .DS_Store
-    def get_names(self,path):
-        list = os.listdir(path)
-        return [i for i in list if i != ".DS_Store"]
+    def search_and_set_path(self) -> bool:
+        """
+        Try to search if the path exists in the archive path using the cod of the dir
+        If the path exists, set the path to the dir and return True
+        If the path does not exist, return False
+        """
+        path = ArchiveFileManager.get_piece_path(NameManager.get_cod(self.name))
+        if path != "":
+            self.set_path(path)
+            return True
+        return False
 
     def get_scores(self):
-        """Return the score names with the extension (always .pdf)"""
-        return self.get_names(os.path.join(self.path,DIR_SCORES))
+        """Return the scores names with the extension (always .pdf)"""
+        return ArchiveFileManager.get_scores(self.path)
+    
     def get_extras(self):
-        return self.get_names(os.path.join(self.path,DIR_EXTRAS))
+        """Return the extras names with the extensions"""
+        return ArchiveFileManager.get_extras(self.path)
     
     
     def get_score_names_without_extension(self):
@@ -28,17 +39,14 @@ class Dir(File):
         return [os.path.splitext(i)[0] for i in self.get_scores()]
     
 
-    def change_name(self,new_name):
-        try:
-            shutil.move(self.path,os.path.join(os.path.dirname(self.path),new_name))
-            self.set_path(os.path.join(os.path.dirname(self.path),new_name))
-            return True
+    def change_name(self,new_name:str) -> bool:
+        """Change the name of the dir"""
+        path = ArchiveFileManager.move_files(self.path,new_name)
         
-        except Exception as e:
-            if self.path == os.path.join(os.path.dirname(self.path),new_name): # if the name is the same
-                return True
-        
-        return False
+        if path == "":
+            return False
+        self.set_path(path)
+        return True
 
     #-------Unused function made to test the db-----------------
     #Get the names from the database and the names from the dirs to check if are equals
@@ -61,9 +69,6 @@ class Dir(File):
         file_dirs.close()
         file_db.close()
 
-    #Return the name of the 
-    def get_name_without_cod(self) -> str:
-        return re.sub(r'^\d+-','',self.name)
     
 
 #Class for returning errors

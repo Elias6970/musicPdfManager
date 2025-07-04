@@ -1,10 +1,10 @@
 
 from PyQt6 import QtWidgets
+from classes.utils.name_manager import NameManager
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH,HANDWRITTEN,DONT_ADD_SCORES,DONT_CLASSIFY_NOW
-from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.pop_up_windows.yes_no_window import YesNoWindow
@@ -37,7 +37,7 @@ class Add_piece_window(AbstractFieldsWindow):
         """Add a score to the database and move the files to the archive."""
         cod = self.line_cod.text()
         name = self.line_name.text()
-        parsed_name = Archive.get_parsed_name(cod,name)
+        parsed_name = NameManager.get_std_name(cod,name)
         classified = False
 
         if self.verifications(cod,name):
@@ -51,7 +51,7 @@ class Add_piece_window(AbstractFieldsWindow):
     
                 if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
                     ArchiveFileManager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
-                    are_moved = ArchiveFileManager.move_files(parsed_name,file_dialog.selectedFiles())
+                    are_moved = ArchiveFileManager.move_files_to_piece_dir(parsed_name,file_dialog.selectedFiles())
 
                     if are_moved:
                         if not self.checkboxes_dict[DONT_CLASSIFY_NOW].isChecked():
@@ -102,7 +102,7 @@ class Add_piece_window(AbstractFieldsWindow):
                     if name_matches != []:
                         warning_text = "This score is called similar like these ones:\n" #traducir
                         for i in name_matches:
-                            warning_text = warning_text + Archive.get_parsed_name(i[0],i[1]) + "\n"
+                            warning_text = warning_text + NameManager.get_std_name(i[0],i[1]) + "\n"
                         
                         #Pop up the scores matched
                         warning_window = YesNoWindow(warning_text,False,self)

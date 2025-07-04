@@ -1,4 +1,5 @@
 from PyQt6 import QtWidgets
+from classes.utils.name_manager import NameManager
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.piece import Piece
@@ -19,7 +20,7 @@ class Modify_piece_window(QtWidgets.QDialog):
 
         container_layout = QtWidgets.QVBoxLayout()
 
-        self.search_bar:Score_search_bar = ScoreSearchBar(self.archive.pieces.get_parsed_names(),self.validate_selection) # type: ignore
+        self.search_bar:ScoreSearchBar = ScoreSearchBar(self.archive.pieces.get_parsed_names(),self.validate_selection) # type: ignore
         self.abstract_fields = AbstractFieldsWindow(archive,self.tr("Modify piece"),self.tr("Modify"),[HANDWRITTEN,DIGITALIZED,PARTED],self.add_modification,self.close)
 
         container_layout.addWidget(self.search_bar)
@@ -55,7 +56,7 @@ class Modify_piece_window(QtWidgets.QDialog):
         
 
             if insertion:
-                ArchiveFileManager.change_piece_dir_name(self.old_piece.parsed_name,Piece.make_parsed_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text()))
+                ArchiveFileManager.change_piece_dir_name(self.old_piece.parsed_name,NameManager.get_std_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text()))
                 self.archive.pieces.update_cod_and_name(self.old_piece.cod,int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
                 
 
@@ -74,7 +75,7 @@ class Modify_piece_window(QtWidgets.QDialog):
         for i in self.search_bar.pieces_parsed_names:
             if text == i:
                 try:
-                    getted = self.archive.db.get_with_equals(COD,self.archive.extract_cod(text),",".join([COD,NAME,AUTHOR,TYPE,HANDWRITTEN,DIGITALIZED,PARTED]))[0] 
+                    getted = self.archive.db.get_with_equals(COD,NameManager.get_cod(text),",".join([COD,NAME,AUTHOR,TYPE,HANDWRITTEN,DIGITALIZED,PARTED]))[0] 
                 except Exception as e:
                     Error_window.print_error(e,self.tr("Piece doesn't found")) #traducir
                     return False

@@ -193,16 +193,18 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         piece = Validate.check_if_exist_dir(text,self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
-                piece.path = os.path.join(self.archive.archive_path,piece.name)
-                scores = piece.get_scores()
-                #Raise the error if the scores dir is empty
-                if not scores:
-                    raise NoScoresException()
-                
-                self.part_combo_box.setEnabled(True)
-                self.part_combo_box.addItems(piece.get_scores())
-                self.piece_lbl.setText(piece.name)
-                self.printer.actual_piece = piece
+                if piece.search_and_set_path():
+                    print(piece.path)
+                    print(piece.get_scores())
+                    scores = piece.get_scores()
+                    #Raise the error if the scores dir is empty
+                    if not scores:
+                        raise NoScoresException()
+                    
+                    self.part_combo_box.setEnabled(True)
+                    self.part_combo_box.addItems(piece.get_scores())
+                    self.piece_lbl.setText(piece.name)
+                    self.printer.actual_piece = piece
             
             #if the piece is not in the digital archive
             except FileNotFoundError:

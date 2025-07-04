@@ -23,9 +23,10 @@ class ArchiveFileManager:
     def parse_name_to_file_manager(parsed_name:str) -> str:
         return parsed_name.replace("\\","^").replace("/","^").replace(":","_").replace("*","+").replace("?","¿").replace('"',"'").replace("<","^").replace(">","^").replace("|","^")
     
-    #Move the files to the internal archive deppending if there are scores or extras
+    #
     @staticmethod
-    def move_files(piece_path:str,files:list):
+    def move_files_to_piece_dir(piece_path:str,files:list):
+        """Move the files to the internal folder deppending if there are scores or extras"""
         try:
             for i in files:
                 if File.is_pdf(i):
@@ -39,25 +40,55 @@ class ArchiveFileManager:
         
         return False
     
-    #If the piece doesn't exist or doesn't have any score it returns an empty list
     @staticmethod
-    def get_scores(piece_path:str,normalized_name:str) -> list[str]:
+    def move_files(path:str,new_path:str) -> str:
+        """
+        Move a file, files of folder from path to new_path
+        Returns the new path if the file was moved successfully
+        If the file is already in the new path, it returns the same path
+        If the file couldn't be moved, it returns an empty string
+        """
         try:
-            list = os.listdir(piece_path)
+            shutil.move(path,os.path.join(os.path.dirname(path),new_path))
+            return os.path.join(os.path.dirname(path),new_path)
+        
+        except Exception as e:
+            if path == os.path.join(os.path.dirname(path),new_path): # if the name is the same
+                return path
+        
+        return ""
+
+
+    @staticmethod
+    def _get_names(path:str) -> list[str]:
+        """
+        Get the names of the files inside a path avoiding .DS_Store.
+        If the path doesn't exist or doesn't have anything inside it returns an empty list
+        """
+        try:
+            list = os.listdir(path)
             return [i for i in list if i != ".DS_Store"]
         except FileNotFoundError:
             return []
+        
+    
+    @staticmethod
+    def get_scores(piece_path:str) -> list[str]:
+        """
+        Get the path of the piece without the Scores dir extension  
+        and return the list of scores inside it
+        """
+        return ArchiveFileManager._get_names(os.path.join(piece_path,DIR_SCORES))
 
 
     #If the piece doesn't exist or doesn't have any exta it returns an empty list
     @staticmethod
-    def get_extras(piece_path:str,normalized_name:str) -> list[str]:
-        try:
-            list = os.listdir(piece_path)
-            return [i for i in list if i != ".DS_Store"]
-        except FileNotFoundError:
-            return []
-
+    def get_extras(piece_path:str) -> list[str]:
+        """
+        Get the path of the piece without the Extras dir extension
+        and return the list of extras inside it
+        """
+        return ArchiveFileManager._get_names(os.path.join(piece_path,DIR_EXTRAS))
 
     #Create the dirs and return the path
     @staticmethod
@@ -81,4 +112,16 @@ class ArchiveFileManager:
     @staticmethod
     def change_piece_dir_name(old_name:str,new_name:str):
         os.rename(os.path.join(RELATIVE_ARCHIVE_PATH(),old_name),os.path.join(RELATIVE_ARCHIVE_PATH(),new_name))
+
+    
+    @staticmethod
+    def get_piece_path(cod:str) -> str:
+        """
+        Get the piece path in the archive directory using only the cod (it only checks cod- the name is not checked)
+        If the piece doesn't exist it returns an empty string
+        """
+        for i in os.listdir(RELATIVE_ARCHIVE_PATH()):
+            if i.startswith(str(cod) + "-"):
+                return os.path.join(RELATIVE_ARCHIVE_PATH(),i)
+        return ""
 

@@ -1,4 +1,5 @@
 from PyQt6 import QtWidgets
+from classes.utils.name_manager import NameManager
 from  classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
@@ -13,7 +14,6 @@ import os
 
 
 #Window to select the pieces to classify with the score_classifier tool:
-#   pieces_in_dirs: list of Dir objects with the pieces in the file system archive
 #   update_parted_flag_db_function: pointer to the function that update the flag 
 #           parted in the db. This function is used in the ScoreClassifierWindow
 class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
@@ -83,7 +83,7 @@ class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
         to_classify:list[Dir] = [] 
         error_classified:list[str] = [] #This list is of pieces that are already classified
         for i in self.pieces_to_classify:
-            if self.archive.db.is_parted(str(Archive.extract_cod(i))):
+            if self.archive.db.is_parted(str(NameManager.get_cod(i))):
                 error_classified.append(i)
             else:
                 to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
