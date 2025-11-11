@@ -1,5 +1,6 @@
 import os,tempfile
 from classes.error import EmptyInitialInputException, FirstPageException, NoMorePiecesToClassifyException
+from classes.utils.name_manager import NameManager
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.crop_rectangle import CropRectangle
@@ -108,7 +109,7 @@ class Classifier:
         
         elif self.actual_piece+1 < len(self.pieces_to_classify):
             #Update the parted flag to 1 in the db
-            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_to_classify[self.actual_piece].name),True)
+            self.update_parted_flag_db_function(NameManager.get_cod(self.pieces_to_classify[self.actual_piece].name),True)
             
             self.pdf_controller.export()
             self.next_piece()
@@ -116,7 +117,7 @@ class Classifier:
         #Finish classifing all the list
         else: 
             #Update the parted flag to 1 in the db
-            self.update_parted_flag_db_function(Archive.extract_cod(self.pieces_to_classify[self.actual_piece].name),True)
+            self.update_parted_flag_db_function(NameManager.get_cod(self.pieces_to_classify[self.actual_piece].name),True)
             self.pdf_controller.export()
             input()
             raise NoMorePiecesToClassifyException()

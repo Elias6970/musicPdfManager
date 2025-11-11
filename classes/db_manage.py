@@ -105,7 +105,7 @@ class Db_archive(Db):
         for i in range(1,sheet.nrows):
             row = sheet.row_values(i)
             try:
-                self.insert(row[0],str(row[1]),row[2],row[3])
+                self.insert(int(row[0]),str(row[1]),row[2],row[3])
             except Exception as e:
                 Error_window.print_error(e,"Error inserting: "+str(row))
 
@@ -141,7 +141,7 @@ class Db_archive(Db):
 
 
     #Make the get but comparing with '=' not with LIKE % %
-    def get_with_equals(self,camp_to_compare:str,value,returned_camps='*'):
+    def get_with_equals(self,camp_to_compare:str,value:str,returned_camps='*'):
         try:
             extracted = self.cur.execute("SELECT {} FROM {} WHERE {} = '{}'".format(returned_camps,self.table_name,camp_to_compare,value))
 
@@ -193,8 +193,8 @@ class Db_archive(Db):
 
 
     #Update parted flag of one piece
-    def update_parted(self,cod,parted:bool=True):
-        self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.table_name),(int(parted),cod))
+    def update_parted(self,cod:str|int,parted:bool=True):
+        self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.table_name),(int(parted),str(cod)))
         self.con.commit()
         return True
 

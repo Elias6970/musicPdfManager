@@ -11,6 +11,7 @@ dist
 *.txt
 *.jpg
 *.pdf
+!tests/**/*.pdf
 !instrucciones_clasificador.txt
 !portada_dossier_partituras.pdf
 *.exe

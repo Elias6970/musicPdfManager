@@ -3,7 +3,7 @@ from classes.printers.printeable_file import PrinteableFile
 from classes.printers.printer import Printer
 
 #This class represents a printer saving a list of pdfs to print
-class DefualtPrinter(Printer):
+class DefaultPrinter(Printer):
     def __init__(self) -> None:
         super().__init__()
         self.items:list[PrinteableFile] = []

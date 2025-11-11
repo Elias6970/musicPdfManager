@@ -1,4 +1,5 @@
 from PyQt6 import QtWidgets
+from classes.utils.name_manager import NameManager
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
@@ -18,7 +19,7 @@ class Delete_piece_window(AbstractSerchBarAndTwoButtonsWindow):
     #Delete the selected score
     def delete_piece(self):
         if self.validate_selection(self.search_bar.text()):
-            cod = Archive.extract_cod(self.piece_lbl.text())
+            cod = NameManager.get_cod(self.piece_lbl.text())
             #Ask to be sure that the user want to delete this score
             alert = QtWidgets.QMessageBox.question(self,self.tr("Warning"),self.tr("Are you sure that you want to delete \n{}".format(self.piece_lbl.text())),QtWidgets.QMessageBox.StandardButton.Yes,QtWidgets.QMessageBox.StandardButton.No) #traducir
 
