@@ -19,3 +19,5 @@ dist
 presets.json
 pieces_presets.json
 .pytest_cache
+data/logs/
+tests/**/data

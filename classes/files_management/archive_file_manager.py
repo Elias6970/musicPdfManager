@@ -23,9 +23,13 @@ class ArchiveFileManager:
     def parse_name_to_file_manager(parsed_name:str) -> str:
         return parsed_name.replace("\\","^").replace("/","^").replace(":","_").replace("*","+").replace("?","¿").replace('"',"'").replace("<","^").replace(">","^").replace("|","^")
     
-    #Move the files to the internal archive deppending if there are scores or extras
     @staticmethod
     def move_files(piece_path:str,files:list):
+        """
+        Copy the files to the internal archive deppending if they are scores or extras
+            :param piece_path: name of the piece in the internal archive (without the relative archive path, only the name)
+            :param files: list of strs with the absolute path of each file
+        """
         try:
             for i in files:
                 if File.is_pdf(i):
