@@ -106,6 +106,10 @@ class Configuration():
             return DEFAULT_INSTRUMENTS_PATH
         return path
 
+    @staticmethod
+    def get_logs_path() -> str:
+        return os.path.join(DATA_FOLDER,"logs")
+    
     #If the language is not supported return an empty string
     @staticmethod
     def name_to_cod_language(name:str) -> str:

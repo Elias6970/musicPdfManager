@@ -20,6 +20,8 @@ def PIECES_PRESETS_PATH():
     return Configuration.get_pieces_presets_path()
 def INSTRUMENTS_PATH():
     return Configuration.get_instruments_path()
+def LOGS_PATH():
+    return Configuration.get_logs_path()
 
 DB_FILE_NAME = "archivo.db"
 DB_NAME = "AMVR_archive"
