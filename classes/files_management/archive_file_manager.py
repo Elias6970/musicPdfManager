@@ -24,7 +24,7 @@ class ArchiveFileManager:
         return parsed_name.replace("\\","^").replace("/","^").replace(":","_").replace("*","+").replace("?","¿").replace('"',"'").replace("<","^").replace(">","^").replace("|","^")
     
     @staticmethod
-    def move_files(piece_path:str,files:list):
+    def copy_files_in_archive(piece_path:str,files:list):
         """
         Copy the files to the internal archive deppending if they are scores or extras
             :param piece_path: name of the piece in the internal archive (without the relative archive path, only the name)

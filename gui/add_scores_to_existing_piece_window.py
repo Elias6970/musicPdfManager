@@ -32,7 +32,7 @@ class Add_scores_to_existing_piece_window(AbstractSerchBarAndTwoButtonsWindow):
 
 
         if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-            if self.validate_selection(self.search_bar.text()) and ArchiveFileManager.move_files(self.search_bar.text(),file_dialog.selectedFiles()):
+            if self.validate_selection(self.search_bar.text()) and ArchiveFileManager.copy_files_in_archive(self.search_bar.text(),file_dialog.selectedFiles()):
                 try: 
                     ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.db.update_parted)
                 except StopClassifyingException:

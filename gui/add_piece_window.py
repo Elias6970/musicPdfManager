@@ -51,7 +51,7 @@ class Add_piece_window(AbstractFieldsWindow):
     
                 if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
                     ArchiveFileManager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
-                    are_moved = ArchiveFileManager.move_files(parsed_name,file_dialog.selectedFiles())
+                    are_moved = ArchiveFileManager.copy_files_in_archive(parsed_name,file_dialog.selectedFiles())
 
                     if are_moved:
                         if not self.checkboxes_dict[DONT_CLASSIFY_NOW].isChecked():
