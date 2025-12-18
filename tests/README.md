@@ -1,0 +1,2 @@
+# TESTS
+To execute the test (in windows at least, linux testing hasn't been tested) you need to install the requierements in `requirements.txt` and run the next command `python -m pytest <file_with_the_test_or_keep_it_blank_to_run_alls> -s`
