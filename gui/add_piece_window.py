@@ -50,7 +50,7 @@ class Add_piece_window(AbstractFieldsWindow):
                 file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
     
                 if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-                    ArchiveFileManager.make_dir(RELATIVE_ARCHIVE_PATH(),parsed_name)
+                    ArchiveFileManager.make_dir(parsed_name)
                     are_moved = ArchiveFileManager.copy_files_in_archive(parsed_name,file_dialog.selectedFiles())
 
                     if are_moved:

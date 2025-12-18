@@ -1,4 +1,4 @@
-import os,shutil
+import os,shutil,hashlib
 from classes.files_management.file import File
 from gui.error_window import Error_window
 from classes.constants.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH
@@ -40,6 +40,7 @@ class ArchiveFileManager:
         
         except Exception as e:
             Error_window.print_error(e)
+            #TODO: It need to throw an error but not open a window because it need to be independient from the gui
         
         return False
     
@@ -93,16 +94,19 @@ class ArchiveFileManager:
         """
         return ArchiveFileManager._get_names(os.path.join(piece_path,DIR_EXTRAS))
 
-    #Create the dirs and return the path
+
     @staticmethod
-    def make_dir(archive_path,name):
+    def make_dir(name):
+        """Create a dir for a piece in the archive path"""
+        print("archive_path",RELATIVE_ARCHIVE_PATH())
+        print(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_SCORES))
         try:
-            os.makedirs(os.path.join(archive_path,name,DIR_SCORES)) #Create partituras
-        except:
-            pass
+            os.makedirs(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_SCORES)) #Create partituras
+        except Exception as e:
+            print(e, type(e))
 
         try:
-            os.makedirs(os.path.join(archive_path,name,DIR_EXTRAS)) #Create extras
+            os.makedirs(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_EXTRAS)) #Create extras
         except:
             pass
     
@@ -127,4 +131,28 @@ class ArchiveFileManager:
             if i.startswith(str(cod) + "-"):
                 return os.path.join(RELATIVE_ARCHIVE_PATH(),i)
         return ""
+    
+    @staticmethod
+    def __md5_hash(file_path):
+                hash_md5 = hashlib.md5()
+                with open(file_path, "rb") as f:
+                    for chunk in iter(lambda: f.read(4096), b""):
+                        hash_md5.update(chunk)
+                return hash_md5.hexdigest()
+
+
+    @staticmethod
+    def are_the_same(path1:str,path2:str) -> bool:
+        """
+        Check if two files are the sameones using md5
+        
+        :param path1: first file abs path
+        :type path1: str
+        :param path2: second file abs path
+        :type path2: str
+        :return: If the files are the sameones return True
+        :rtype: bool
+        """
+        return ArchiveFileManager.__md5_hash(path1) == ArchiveFileManager.__md5_hash(path2)
+        
 
