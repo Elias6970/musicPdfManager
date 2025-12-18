@@ -167,7 +167,6 @@ class MassiveImporter:
 
             imported.append(dir_path.name)
 
-            #TODO: check with md5, if two files are the same, import only one
         
         return imported
 
