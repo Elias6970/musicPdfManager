@@ -27,30 +27,30 @@ class FileDecompressor:
 
         return f"{base}_{counter}{ext}"
     
-    
-    def decompress_zip_without_folders(self,zip_path:str, out_dir:str) -> list[str]:
+
+    def decompress_zip_without_folders(self,zip_path:str, out_dir_path:str) -> list[str]:
         """
         Extract all the files without the folder structure inside a zip. Only the files.
         Ignore also junk files like .DS_Store.
         """
         files_extracted:list[str] = []
-
+        out_dir = Path(out_dir_path)
+        out_dir.mkdir(parents=True, exist_ok=True)
+        
         with zipfile.ZipFile(zip_path, "r") as z:
-            self.logger.info("Extracting zip without folder %s...",zip_path)
+            self.logger.info("Extracting zip without folders %s...",zip_path)
 
             for member in z.infolist():
                 if not member.is_dir():  # skip directories
                     # Get only the filename (ignore folders inside the zip)
-                    filename = os.path.basename(member.filename)
+                    filename = Path(member.filename).name
                     if filename:  # avoid empty names
-                        filename = self.get_unique_filename(out_dir, filename)
-                        target_path = os.path.join(out_dir, filename)
-                        if not os.path.exists(out_dir):
-                            os.makedirs(out_dir)
+                        filename = self.get_unique_filename(out_dir.absolute(), filename)
+                        target_path = out_dir / filename
 
-                        with z.open(member) as source, open(target_path, "wb") as target:
+                        with z.open(member) as source, target_path.open("wb") as target:
                             target.write(source.read())
-                            files_extracted.append(target_path)
+                            files_extracted.append(target_path.absolute())
                             self.logger.info("Extracted %s into %s", filename, target_path)
        
         return files_extracted

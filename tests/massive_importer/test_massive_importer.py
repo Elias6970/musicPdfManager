@@ -55,6 +55,12 @@ def clean_where_to_import():
                     "expected_scores": ["blank.pdf"],
                     "expected_extras": []
                 }
+            }),
+            ("test_5",IMPORT_FOLDER,{
+                "5-CINCO": {
+                    "expected_scores": ["blank.pdf","empty.pdf","5_blank_pages.pdf"],
+                    "expected_extras": []
+                }
             })
         ]
 )

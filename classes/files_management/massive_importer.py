@@ -85,9 +85,9 @@ class MassiveImporter:
         :param pieces_to_import: absolut path to the folder where pieces to import are. 
             At this folder, each folder inside is consider as a piece. The name of the folders need to be in a standard way (cod-name).
             All the folders inside a piece are ignored and only the files are imported. Also junk files like .DS_Store aren't imported
-        :param overwrite: overwrite the pieces that already exist in the archieve
+        :param overwrite: overwrite the pieces that already exist in the archive (NOT IMPLEMENTED)
         :param use_db_name: If it is true it search the id of the piece in the db and uses that name (if it doesn't exist it takes the folder's name). If not, the folder's name is used. 
-        :return: List of imported pieces
+        :return: List of imported pieces with the imported name
         """
         imported:list[str] = []
     
@@ -110,7 +110,7 @@ class MassiveImporter:
                     to_import = self.__manage_a_file(i,temp_dir)
                     files_to_import.extend(to_import)
 
-
+            print("ORIGINAL NAMEESSSS",files_to_import)
             #Iter the temp_dir to find compresed files
             #If found, extract files and delete the compressed file
             compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z")]
@@ -120,16 +120,20 @@ class MassiveImporter:
                     if i not in did_it:
                         to_import = self.__manage_a_file(i, temp_dir)
                         files_to_import.extend(to_import)
+                        print("NAMEEEE:",i.resolve())
+                        print("Actual files to import:",files_to_import)
+                        files_to_import.remove(i.absolute())
                         did_it.append(i)
-                        self.logger.info("File decompressed %s",i)  
+                        self.logger.info("File decompressed %s",i) 
+                        print(f"DID IT: {did_it}") 
                 
-                compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z")]
+                compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z") and f not in did_it]
 
-
+            print("He salido del while")
 
             #Delete duplicated elements in the list with md5
             files_to_import = self.__delete_duplicated_elements(files_to_import)
-
+            print(f"Files to import: {files_to_import}")
 
 
             self.logger.info("Exporting next files: %s",str(len(files_to_import)))
