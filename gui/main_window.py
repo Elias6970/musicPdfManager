@@ -30,7 +30,7 @@ class Main_window(QtWidgets.QMainWindow):
 
         #Init the Archive 
         self.archive = Archive(DB_NAME,RELATIVE_ARCHIVE_PATH())
-
+        self.archive.add_digitalized_mark()
         
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()

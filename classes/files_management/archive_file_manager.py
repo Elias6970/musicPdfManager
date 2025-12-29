@@ -1,6 +1,5 @@
 import os,shutil,hashlib
 from classes.files_management.file import File
-from gui.error_window import Error_window
 from classes.constants.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH
 
 #This class make all the interactions with the files on the archive path
@@ -24,7 +23,7 @@ class ArchiveFileManager:
         return parsed_name.replace("\\","^").replace("/","^").replace(":","_").replace("*","+").replace("?","¿").replace('"',"'").replace("<","^").replace(">","^").replace("|","^")
     
     @staticmethod
-    def copy_files_in_archive(piece_path:str,files:list):
+    def copy_files_in_archive(piece_path:str,files:list) -> bool:
         """
         Copy the files to the internal archive deppending if they are scores or extras
             :param piece_path: name of the piece in the internal archive (without the relative archive path, only the name)
@@ -39,8 +38,7 @@ class ArchiveFileManager:
             return True
         
         except Exception as e:
-            Error_window.print_error(e)
-            #TODO: It need to throw an error but not open a window because it need to be independient from the gui
+            print(f"{type(e)}:{e}")
         
         return False
     

@@ -1,7 +1,6 @@
 import sqlite3,xlrd,openpyxl
 from classes.constants.constants import DB_PATH
-from gui.error_window import Error_window
-
+from classes.error import IncorrectCodOrNameError, CodAlreadyExistsError
 
 #Abstraction of a class that represets a db
 class Db:
@@ -49,7 +48,10 @@ class Db_archive(Db):
 
 
     #Insert a score in the db
-    def insert(self,cod:int, name:str, author:str, type,handwritten=0,parted=0,digitalized=0):
+    def insert(self,cod:int, name:str, author:str="", type="",handwritten=0,parted=0,digitalized=0) -> bool:
+        """
+        Insert a piece into the db. It can raise IncorrectCodOrNameError and CodAlreadyExistsError exceptions
+        """
         try: 
             #Check if cod>0 and have name
             if cod > 0 and name is not None and len(name.strip()) > 0:
@@ -59,14 +61,15 @@ class Db_archive(Db):
                 return True
             
             else:
-                Error_window.print_error(message="Error en el código o nombre de la obra")#traducir
-                raise #Jump to the except statement
+                print("Error inserting: Incorrect code or name")
+                raise IncorrectCodOrNameError("Incorrect code or name")#Jump to the except statement
 
         except sqlite3.IntegrityError as e: #cod repited
-            Error_window.print_error(e,"Error, ya existe esa obra: "+ str(cod))#traducir
+            print("Error inserting: This piece already exists")
+            raise CodAlreadyExistsError("This piece already exists")
 
-        except Exception as e:
-            Error_window.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
+        except Exception:
+            pass
 
         return False
 
@@ -91,7 +94,7 @@ class Db_archive(Db):
                 
                 self.insert(int(str(row_values[0])),str(row_values[1]),str(row_values[2]),row_values[3])
             except Exception as e:
-                Error_window.print_error(e,"Error inserting: "+str(row_values))
+                print(f"Error inserting: {str(row_values)}")
             
             i+=1         
 
@@ -107,7 +110,7 @@ class Db_archive(Db):
             try:
                 self.insert(int(row[0]),str(row[1]),row[2],row[3])
             except Exception as e:
-                Error_window.print_error(e,"Error inserting: "+str(row))
+                print(f"Error inserting {str(row)}")
 
         self.cur.close()
 
@@ -134,7 +137,7 @@ class Db_archive(Db):
             extracted = self.cur.execute("SELECT {} FROM {} WHERE {} LIKE '%{}%'".format(returned_camps,self.table_name,camp_to_compare,value))
 
         except Exception as e:
-            Error_window.print_error(e)
+            print(f"{type(e)}:{e}")
             return ["0"]
         
         return extracted.fetchall()
@@ -146,7 +149,7 @@ class Db_archive(Db):
             extracted = self.cur.execute("SELECT {} FROM {} WHERE {} = '{}'".format(returned_camps,self.table_name,camp_to_compare,value))
 
         except Exception as e:
-            Error_window.print_error(e)
+            print(f"{type(e)}:{e}")
             return ["0"]
         
         return extracted.fetchall()
@@ -179,15 +182,14 @@ class Db_archive(Db):
             if cod > 0 and name is not None and len(name.strip()) > 0 and old_cod != cod:
                 self.cur.execute("DELETE FROM {} WHERE cod = {} ".format(self.table_name,old_cod))
                 self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 1, ?, ?)".format(self.table_name), (cod, name, author, type,handwritten,parted))
-                self.con.commit()
-                return True
             else:
                 self.cur.execute("UPDATE {} SET cod=?,name=?,author=?,type=?,last_modification=CURRENT_TIMESTAMP,digitalized=?,handwritten=?,parted=? WHERE cod=?".format(self.table_name),(cod,name,author,type,digitalized,handwritten,parted,cod))
-                self.con.commit()
-                return True
+            
+            self.con.commit()
+            return True
         
         except Exception as e:
-            Error_window.print_error(e,"Error introduciendo la obra: "+ str(name))#traducir
+            print(e,"Error introduciendo la obra: "+ str(name))#traducir
 
         return False
 

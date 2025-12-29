@@ -4,7 +4,8 @@ from classes.db_manage import Db_archive
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 from classes.loggers.massive_importer_logger import MassiveImporterLogger
 from classes.utils.name_manager import NameManager
-import os, shutil, zipfile, rarfile, tarfile, tempfile
+from classes.error import CodAlreadyExistsError, IncorrectCodOrNameError
+import os, shutil, zipfile, rarfile, tempfile
 from pathlib import Path
 
 class MassiveImporter:
@@ -76,10 +77,27 @@ class MassiveImporter:
         
         return pieces_list
     
-
-    def import_only__into_archive(self, pieces_to_import:str, overwrite=False, use_db_name=True) -> list[str]:
+    def __generate_report(self,imported:list[str],not_imported:list[str]) -> str:
         """
-        Imports only the pieces to the archive (RELATIVE_ARCHIVE_PATH()) without registering them in the db.
+        Generate a string with imported and not imported pieces
+        """
+        out = """
+        ################################
+        ########IMPORTING REPORT########
+        ################################\n
+        """
+        out += "Imported pieces:\n" if imported else ""
+        for i in imported:
+            out += "\t" + i + "\n"
+        out += "Not Imported:\n" if not_imported else ""
+        for i in not_imported:
+            out += "\t" + i + "\n"
+
+        return out
+
+    def import_only__into_archive(self, pieces_to_import:str, overwrite=False, use_db_name=True) -> tuple[list[str],list[str]]:
+        """
+        It imports only the pieces to the archive (RELATIVE_ARCHIVE_PATH()) without registering them in the db.
         Use only if the pieces are already in the db.
         
         :param pieces_to_import: absolut path to the folder where pieces to import are. 
@@ -87,92 +105,127 @@ class MassiveImporter:
             All the folders inside a piece are ignored and only the files are imported. Also junk files like .DS_Store aren't imported
         :param overwrite: overwrite the pieces that already exist in the archive (NOT IMPLEMENTED)
         :param use_db_name: If it is true it search the id of the piece in the db and uses that name (if it doesn't exist it takes the folder's name). If not, the folder's name is used. 
-        :return: List of imported pieces with the imported name
+        :return: Return a tuple with two list.The first is the imported pieces with the imported name and the second the not imported pieces due to errors.
+        :rtype: tuple[list[str],list[str]]
         """
         imported:list[str] = []
-    
+        not_imported:list[str] = []
+
         for dir_path in Path(pieces_to_import).iterdir():
-            self.logger.info("Importing %s...", dir_path)
+            try:
+                self.logger.info("Importing %s...", dir_path)
 
-            if not dir_path.is_dir():
-                self.logger.info("%s is not a path", dir_path)
-                continue
-            
-            temp_dir = Path(tempfile.gettempdir()) / os.urandom(24).hex()
-            temp_dir.mkdir(parents=True, exist_ok=True)
-            self.logger.info("Creating temp dir in %s",temp_dir)
-
-            files_to_import:list[str] = []
-
-            # Iterate all the files over the dir
-            for i in dir_path.rglob("*"):
-                if i.is_file():
-                    to_import = self.__manage_a_file(i,temp_dir)
-                    files_to_import.extend(to_import)
-
-            print("ORIGINAL NAMEESSSS",files_to_import)
-            #Iter the temp_dir to find compresed files
-            #If found, extract files and delete the compressed file
-            compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z")]
-            did_it = [] # Files already decompressed
-            while compressed != []:
-                for i in compressed:
-                    if i not in did_it:
-                        to_import = self.__manage_a_file(i, temp_dir)
-                        files_to_import.extend(to_import)
-                        print("NAMEEEE:",i.resolve())
-                        print("Actual files to import:",files_to_import)
-                        files_to_import.remove(i.absolute())
-                        did_it.append(i)
-                        self.logger.info("File decompressed %s",i) 
-                        print(f"DID IT: {did_it}") 
+                if not dir_path.is_dir():
+                    self.logger.error("%s is not a path", dir_path)
+                    continue
                 
-                compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z") and f not in did_it]
+                temp_dir = Path(tempfile.gettempdir()) / os.urandom(24).hex()
+                temp_dir.mkdir(parents=True, exist_ok=True)
+                self.logger.info("Creating temp dir in %s",temp_dir)
 
-            print("He salido del while")
+                files_to_import:list[str] = []
 
-            #Delete duplicated elements in the list with md5
-            files_to_import = self.__delete_duplicated_elements(files_to_import)
-            print(f"Files to import: {files_to_import}")
+                # Iterate all the files over the dir
+                for i in dir_path.rglob("*"):
+                    if i.is_file():
+                        to_import = self.__manage_a_file(i,temp_dir)
+                        files_to_import.extend(to_import)
+
+                #Iter the temp_dir to find compresed files
+                #If found, extract files and delete the compressed file
+                compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z")]
+                did_it = [] # Files already decompressed
+                while compressed != []:
+                    for i in compressed:
+                        if i not in did_it:
+                            to_import = self.__manage_a_file(i, temp_dir)
+                            files_to_import.extend(to_import)
+                            files_to_import.remove(i.absolute())
+                            did_it.append(i)
+                            self.logger.info("File decompressed %s",i) 
+                    
+                    compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z") and f not in did_it]
 
 
-            self.logger.info("Exporting next files: %s",str(len(files_to_import)))
-            list(map(lambda x: self.logger.info("Exporting %s",x),files_to_import))
+                #Delete duplicated elements in the list with md5
+                files_to_import = self.__delete_duplicated_elements(files_to_import)
 
-            #Copy all the files
-            self.logger.info("Coping the files")
-            if use_db_name:
-                self.logger.info("Using db name...")
-                cod = NameManager.get_cod(dir_path.name)
-                name = self.db.get_with_equals("cod",cod,"cod,name")
-                std_name = NameManager.get_std_name(cod,name[0][1]) if name else None
-                if std_name == None:
-                    self.logger.error("use_db_name flag enabled but cod is not in the db for %s. Using this name",dir_path.name)
-                    dir_name = dir_path.name
+
+                self.logger.info("Exporting next files: %s",str(len(files_to_import)))
+                list(map(lambda x: self.logger.info("Exporting %s",x),files_to_import))
+
+                #Copy all the files
+                self.logger.info("Coping the files")
+                if use_db_name:
+                    self.logger.info("Using db name...")
+                    cod = NameManager.get_cod(dir_path.name)
+                    name = self.db.get_with_equals("cod",cod,"cod,name")
+                    std_name = NameManager.get_std_name(cod,name[0][1]) if name else None
+                    if std_name == None:
+                        self.logger.error("use_db_name flag enabled but cod is not in the db for %s. Using this name",dir_path.name)
+                        dir_name = dir_path.name
+                    else:
+                        dir_name = std_name
                 else:
-                    dir_name = std_name
-            else:
-                dir_name = dir_path.name
-            
-            ArchiveFileManager.make_dir(dir_name)
-            self.logger.info("Dir created in the archive")
-            are_imported = ArchiveFileManager.copy_files_in_archive(dir_name,files_to_import)
+                    dir_name = dir_path.name
+                
+                ArchiveFileManager.make_dir(dir_name)
+                self.logger.info("Dir created in the archive")
+                are_imported = ArchiveFileManager.copy_files_in_archive(dir_name,files_to_import)
 
-            if are_imported:
-                self.logger.info("Files coppied correctly")
-            else:
-                self.logger.error("Error copying the files, somethig went wrong")
-
-
-            #Delete temp dir with all the files
-            self.logger.info("Removing temporally dir")
-            #shutil.rmtree(temp_dir)
+                if are_imported:
+                    self.logger.info("Files coppied correctly")
+                else:
+                    self.logger.error(f"Error copying the files for piece {dir_name}. Skipping this import.")
+                    ArchiveFileManager.delete_piece(dir_name)
+                    not_imported.append(dir_path.name)
 
 
-            imported.append(dir_path.name)
+                #Delete temp dir with all the files
+                self.logger.info("Removing temporally dir")
+                shutil.rmtree(temp_dir)
 
+
+                imported.append(dir_path.name)
+
+            except Exception as e:
+                self.logger.error(f"Error importing piece {dir_path.name}. {type(e)}:{e}")
+                not_imported.append(dir_path.name)
+
+
+        print(self.__generate_report(imported,not_imported))
+        return (imported,not_imported)
+
+
+    def simple_import(self, pieces_to_import:str, overwrite:bool=False, use_db_name:bool=False) ->  tuple[list[str],list[str],list[str]]:
+        """
+        It imports the pieces into the archive and db using only the archive piece names.
         
-        return imported
+        :param pieces_to_import: absolut path to the folder where pieces to import are. 
+            At this folder, each folder inside is consider as a piece. The name of the folders need to be in a standard way (cod-name).
+            All the folders inside a piece are ignored and only the files are imported. Also junk files like .DS_Store aren't imported
+        :type pieces_to_import: str
+        :param overwrite: overwrite the pieces that already exist in the archive (NOT IMPLEMENTED)
+        :type overwrite: bool
+        :param use_db_name: If it is true it search the id of the piece in the db and uses that name (if it doesn't exist it takes the folder's name). If not, the folder's name is used. 
+        :type use_db_name: bool
+        :return: Return a tuple with two list.The first is the imported pieces with the imported name and the second the not imported pieces due to errors.
+        :rtype:  tuple[list[str],list[str]]
+        """
+        imported_pieces,not_imported_pieces = self.import_only__into_archive(pieces_to_import, overwrite, use_db_name)
+        imported_in_db = []
+        #Import into the db
+        for i in imported_pieces:
+            cod = NameManager.get_cod(i)
+            name = NameManager.get_name(i)
+            try:
+                self.db.insert(cod=cod,name=name)
+                imported_in_db.append(NameManager.get_std_name(cod,name))
+            except (IncorrectCodOrNameError, CodAlreadyExistsError) as e:
+                self.logger.error(f"Error inserting {NameManager.get_std_name(cod,name)} in the db")
+
+
+        return (imported_pieces,not_imported_pieces,imported_in_db)
 
 
 

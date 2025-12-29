@@ -5,6 +5,7 @@ from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH,HANDWRITTEN,DONT_ADD_SCORES,DONT_CLASSIFY_NOW
+from classes.error import IncorrectCodOrNameError, CodAlreadyExistsError
 from gui.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.pop_up_windows.yes_no_window import YesNoWindow
@@ -67,14 +68,16 @@ class Add_piece_window(AbstractFieldsWindow):
                     YesNoWindow(self.tr("There has been an error selecting the files"),True,self)
                     return
 
-
-            is_inserted = self.archive.db.insert(int(cod),
-                                                 name,
-                                                 self.line_author.text(),
-                                                 self.line_type.text(),
-                                                 handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),
-                                                 parted=0,
-                                                 digitalized=1)
+            try:
+                is_inserted = self.archive.db.insert(int(cod),
+                                                    name,
+                                                    self.line_author.text(),
+                                                    self.line_type.text(),
+                                                    handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),
+                                                    parted=0,
+                                                    digitalized=1)
+            except (CodAlreadyExistsError,IncorrectCodOrNameError) as e:
+                Error_window.print_error(e)
 
             if is_inserted:
                 self.archive.pieces.add(int(cod),name,parsed_name,classified)

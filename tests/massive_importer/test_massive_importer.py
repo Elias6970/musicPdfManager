@@ -76,7 +76,7 @@ def test_massive_importer(to_import:list[str],where_to_import:str,expected_piece
     monkey_patch = pytest.MonkeyPatch()
     #monkey_patch.setattr(classes.constants.constants, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)  
     monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
-    imported = mi.import_only__into_archive(to_import,False,False)
+    imported = mi.import_only__into_archive(to_import,False,False)[0]
 
     #Check that all the pieces has been imported
     assert len(imported) == len(expected_pieces)

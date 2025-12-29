@@ -31,3 +31,9 @@ class MoreScoresThanPresetsException(Exception):
 
 class FileCouldNotBeReadException(Exception):
     pass
+
+class IncorrectCodOrNameError(Exception):
+    pass
+
+class CodAlreadyExistsError(Exception):
+    pass

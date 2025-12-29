@@ -64,7 +64,9 @@ class Modify_piece_window(QtWidgets.QDialog):
 
                 self.clear_form()
                 self.search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
-
+            else:
+                Error_window.print_error(None,f"Error introduciendo la obra {self.abstract_fields.line_name.text()}")
+                
         except AvoidModificationException:
             pass
         except Exception as e:
