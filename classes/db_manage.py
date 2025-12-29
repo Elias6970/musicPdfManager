@@ -54,9 +54,9 @@ class Db_archive(Db):
         """
         try: 
             #Check if cod>0 and have name
-            if cod > 0 and name is not None and len(name.strip()) > 0:
+            if int(cod) > 0 and name is not None and len(name.strip()) > 0:
 
-                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?)".format(self.table_name), (cod, name, author, type,digitalized,handwritten,parted))
+                self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?)".format(self.table_name), (str(cod), str(name), str(author), str(type),digitalized,handwritten,parted))
                 self.con.commit()
                 return True
             
@@ -68,8 +68,8 @@ class Db_archive(Db):
             print("Error inserting: This piece already exists")
             raise CodAlreadyExistsError("This piece already exists")
 
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"Exception inserting: {e}")
 
         return False
 

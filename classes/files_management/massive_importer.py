@@ -219,8 +219,12 @@ class MassiveImporter:
             cod = NameManager.get_cod(i)
             name = NameManager.get_name(i)
             try:
-                self.db.insert(cod=cod,name=name)
-                imported_in_db.append(NameManager.get_std_name(cod,name))
+                imported = self.db.insert(cod=cod,name=name)
+                if imported:
+                    imported_in_db.append(NameManager.get_std_name(cod,name))
+                    self.logger.info(f"Imported {NameManager.get_std_name(cod,name)} into db")
+                else:
+                    raise IncorrectCodOrNameError()
             except (IncorrectCodOrNameError, CodAlreadyExistsError) as e:
                 self.logger.error(f"Error inserting {NameManager.get_std_name(cod,name)} in the db")
 
