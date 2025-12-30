@@ -9,7 +9,7 @@ from classes.utils.name_manager import NameManager
 #########ALL FILES NEED TO BE IN THE ASSETS FOLDER###########
 
 IMPORT_FOLDER = "imports"
-DB_NAME = "prueba.db"
+DB_NAME = ":memory:"
 TABLE_NAME = "prueba"
 
 root = os.path.dirname(os.path.abspath(__file__))
@@ -33,8 +33,7 @@ def db_conn():
     con = sqlite3.connect(DB_NAME)
     yield con
     con.close()
-    os.remove(DB_NAME)
-
+    #os.remove(DB_NAME)
 
 
 @pytest.mark.parametrize(
@@ -84,11 +83,11 @@ def db_conn():
         ]
 )
 def test_import_only_into_archive(to_import:list[str],where_to_import:str,expected_pieces:dict[str,dict[str,list[str]]]):
-    mi = MassiveImporter(None)
 
     monkey_patch = pytest.MonkeyPatch()
-    #monkey_patch.setattr(classes.constants.constants, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)  
     monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
+    
+    mi = MassiveImporter(None)
     imported = mi.import_only__into_archive(to_import,False,False)[0]
 
     #Check that all the pieces has been imported
@@ -180,11 +179,15 @@ def test_import_only_into_archive(to_import:list[str],where_to_import:str,expect
         ]
 )
 def test_simple_import_using_archive_names(db_conn:sqlite3.Connection,to_import:list[str],where_to_import:str,expected_pieces:dict[str,dict[str,list[str]]]):
+    def open_db_with_fixture(self):
+        self.con = db_conn
+        self.cur = self.con.cursor()
 
     monkey_patch = pytest.MonkeyPatch()
     #monkey_patch.setattr(classes.constants.constants, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)  
     monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
     monkey_patch.setattr(classes.db_manage,"DB_PATH", DB_NAME)
+    monkey_patch.setattr(classes.db_manage.Db_archive,"open_db", open_db_with_fixture)
     
     db = classes.db_manage.Db_archive(TABLE_NAME)
     mi = MassiveImporter(db)
