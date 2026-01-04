@@ -131,12 +131,12 @@ class ArchiveFileManager:
         return ""
     
     @staticmethod
-    def __md5_hash(file_path):
-                hash_md5 = hashlib.md5()
-                with open(file_path, "rb") as f:
-                    for chunk in iter(lambda: f.read(4096), b""):
-                        hash_md5.update(chunk)
-                return hash_md5.hexdigest()
+    def md5_hash(file_path):
+        hash_md5 = hashlib.md5()
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(65536), b""):
+                hash_md5.update(chunk)
+        return hash_md5.hexdigest()
 
 
     @staticmethod
@@ -151,6 +151,6 @@ class ArchiveFileManager:
         :return: If the files are the sameones return True
         :rtype: bool
         """
-        return ArchiveFileManager.__md5_hash(path1) == ArchiveFileManager.__md5_hash(path2)
+        return ArchiveFileManager.md5_hash(path1) == ArchiveFileManager.md5_hash(path2)
         
 

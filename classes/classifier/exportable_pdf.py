@@ -22,7 +22,7 @@ class ExportablePdf(File):
     #Append a new page to an existing temp pdf in list_of_new_files
     @staticmethod
     def append_page(file_src:str,to_append:str):
-        merger = pypdf.PdfMerger()
+        merger = pypdf.PdfWriter()
         merger.append(pypdf.PdfReader(open(file_src, 'rb')))
         merger.append(pypdf.PdfReader(open(to_append, 'rb')))
         merger.write(file_src)

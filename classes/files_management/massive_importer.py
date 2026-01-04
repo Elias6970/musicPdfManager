@@ -69,13 +69,15 @@ class MassiveImporter:
         :return: The list without any duplicated file
         :rtype: list[str]
         """
-        for i,item in enumerate(pieces_list):
-            for j in pieces_list[i+1:]: #TODO: Check if the expresion is the correct one
-                if ArchiveFileManager.are_the_same(item,j):
-                    pieces_list.remove(j)
-                    return self.__delete_duplicated_elements(pieces_list)
-        
-        return pieces_list
+        seen_hashes = set()
+        unique_pieces = []
+        for i in pieces_list:
+            file_hash = ArchiveFileManager.md5_hash(i)
+            if file_hash not in seen_hashes:
+                seen_hashes.add(file_hash)
+                unique_pieces.append(i)
+        return unique_pieces
+    
     
     def __generate_report(self,imported:list[str],not_imported:list[str]) -> str:
         """
@@ -142,8 +144,8 @@ class MassiveImporter:
                             files_to_import.extend(to_import)
                             files_to_import.remove(i.absolute())
                             did_it.append(i)
-                            self.logger.info("File decompressed %s",i) 
-                    
+                            self.logger.info("File decompressed %s",i)
+
                     compressed = [f for f in temp_dir.iterdir() if f.is_file() and f.suffix.lower() in (".zip", ".rar",".tar.gz",".tar",".7z") and f not in did_it]
 
 
