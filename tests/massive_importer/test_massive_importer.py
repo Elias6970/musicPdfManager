@@ -1,8 +1,6 @@
 import pytest,os, tempfile, hashlib,shutil, sqlite3
 from pathlib import Path
 from classes.files_management.massive_importer import MassiveImporter
-from classes.loggers.massive_importer_logger import MassiveImporterLogger
-import classes.constants.constants
 import classes.files_management.archive_file_manager
 import classes.db_manage
 from classes.utils.name_manager import NameManager
@@ -78,6 +76,12 @@ def db_conn():
                 "6-SEIS": {
                     "expected_scores": ["blank.pdf","empty.pdf","5_blank_pages.pdf"],
                     "expected_extras": []
+                }
+            }),
+            ("test_7",IMPORT_FOLDER,{
+                "7-SIETE": {
+                    "expected_scores": ["blank.pdf","empty.pdf","5_blank_pages.pdf"],
+                    "expected_extras": ["nada.txt"]
                 }
             })
         ]

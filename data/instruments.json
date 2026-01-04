@@ -47,6 +47,14 @@
         },
         "classifier_hotkey" : "r"
     },
+    "clarinete_principal" : {
+        "translations" : {
+            "es_ES" : "Clarinete principal",
+            "en_US" : "Principal clarinet",
+            "ca_VA" : "Clarinet principal"
+        },
+        "classifier_hotkey" : "cp"
+    },
     "clarinete" : {
         "translations" : {
             "es_ES" : "Clarinete",
@@ -58,8 +66,8 @@
     "clarinete_bajo" : {
         "translations" : {
             "es_ES" : "Clarinete bajo",
-            "en_US" : "Clarinete bajo",
-            "ca_VA" : "guió"
+            "en_US" : "Bass clarinet",
+            "ca_VA" : "Clarinet baix"
         },
         "classifier_hotkey" : "j"
     },

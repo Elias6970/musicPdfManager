@@ -4,7 +4,7 @@ from classes.constants.constants import ROTATE_L_IMG_PATH,ROTATE_R_IMG_PATH,INST
 from classes.error import EmptyInitialInputException,FirstPageException,NoMorePiecesToClassifyException
 from classes.classifier.text_analizer import TextAnalizer
 from classes.classifier.classifier import Classifier
-from classes.interactive_preview_conversor import InterctivePreviewConversor
+from gui.interactive_previewer.interactive_preview_conversor import InterctivePreviewConversor
 from classes.instruments_names_manager import InstrumentsNamesManager
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.error_window import Error_window
@@ -142,7 +142,7 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
         shortcuts_scroll_area.setWidgetResizable(True)
         shortcuts_scroll_area.setWidget(instructions_lbl)
         shortcuts_scroll_area.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        shortcuts_scroll_area.setMinimumWidth(instructions_lbl_width)
+        shortcuts_scroll_area.setFixedWidth(instructions_lbl_width)
 
         shortcuts_lbl = QtWidgets.QLabel(self.tr("Shortcuts"))
         shortcuts_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -222,10 +222,10 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
     
     def close(self):
         self.hide()
-        quit()
     
     def closeEvent(self, a0):
         self.close()
+    
     #For testing
     """def state(self):
         print("Actual piece index: ",self.classifier.actual_piece)

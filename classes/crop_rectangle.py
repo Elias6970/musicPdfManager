@@ -2,6 +2,9 @@ from PyQt6.QtCore import QRectF
 import fitz,tempfile,os,cv2
 import numpy as np
 
+# Use a higher DPI than the preview so crops rely on the original PDF quality
+RENDER_DPI = 300
+
 # Class to save a crop to a rectangle
 class CropRectangle:
     def __init__(self,rectangle:QRectF,rotation:float) -> None:
@@ -43,13 +46,13 @@ class CropRectangle:
 
 
 
-    def extract_and_warp_rect(self,pixmap:fitz.Pixmap) -> fitz.Pixmap:
+    def extract_and_warp_rect(self,pixmap:fitz.Pixmap, scale:float=1.0) -> fitz.Pixmap:
         """
         Extracts a rotated rectangle from a fitz.Pixmap and warps it to be upright.
         Can raise ValueError if the encoding is not good
 
         :param pixmap: fitz.Pixmap (input image)
-        :param points: 4x2 NumPy array of the rectangle's corner points (clockwise or counter-clockwise)
+        :param scale: scale factor applied when rendering the pixmap (dpi/72)
         :return: Warped fitz.Pixmap
         """
 
@@ -57,7 +60,7 @@ class CropRectangle:
         img = np.frombuffer(pixmap.samples, dtype=np.uint8).reshape(pixmap.h, pixmap.w, pixmap.n)
 
         # Ensure points are float32
-        points = self.get_rectangle_corners()
+        points = self.get_rectangle_corners() * scale
         rect = np.array(points, dtype="float32")
         
         # Compute the new width and height of the upright rectangle
@@ -108,11 +111,17 @@ class CropRectangle:
         else:
             a4_width, a4_height = 595, 842 # A4 size in points (portrait mode)
             
+        # Render the page at higher DPI to avoid reusing the low‑res preview
+        zoom = RENDER_DPI / 72  # PyMuPDF default is 72 dpi
         file = fitz.open(pdf_path)
-        original_pixmap = file[0].get_pixmap()
-        file.close()
-        
-        warped_pixmap:fitz.Pixmap = self.extract_and_warp_rect(original_pixmap)
+        try:
+            page = file[0]
+            render_matrix = fitz.Matrix(zoom, zoom)
+            original_pixmap = page.get_pixmap(matrix=render_matrix)
+        finally:
+            file.close()
+
+        warped_pixmap:fitz.Pixmap = self.extract_and_warp_rect(original_pixmap, scale=zoom)
         #warped_pixmap.save("prueba.png")
         # Get original image size
         img_width = warped_pixmap.width

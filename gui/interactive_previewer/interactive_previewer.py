@@ -96,7 +96,7 @@ class InteractivePreviewer(QGraphicsView):
                 
             #Create the rectangle
             elif self.is_creating_rect and self.is_pos_inside_image(event.pos()):
-                print("Pos:", event.pos())
+                #print("Pos:", event.pos())
                 scene_pos = self.mapToScene(event.pos())
                 self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
 

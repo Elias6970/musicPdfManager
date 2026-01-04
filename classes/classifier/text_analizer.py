@@ -4,7 +4,7 @@ from classes.instruments_names_manager import InstrumentsNamesManager
 
 class TextAnalizer():
     instruments = InstrumentsNamesManager.get_shortcuts_and_instruments()
-    instruments_chars = ','.join(list(instruments.keys()))
+    instruments_pattern = '|'.join(map(re.escape, list(instruments.keys())))
 
     def __init__(self) -> None:
         pass
@@ -14,10 +14,10 @@ class TextAnalizer():
     @staticmethod
     def parse_input(text:str) -> Tuple[str,str|None]:
 
-        if re.fullmatch(fr'^[{TextAnalizer.instruments_chars}]$', text,re.IGNORECASE):
+        if re.fullmatch(fr'^(?:{TextAnalizer.instruments_pattern})$', text, re.IGNORECASE):
             return (text,None)
         
-        elif re.fullmatch(fr'^[{TextAnalizer.instruments_chars}]\d$', text,re.IGNORECASE):
+        elif re.fullmatch(fr'^(?:{TextAnalizer.instruments_pattern})\d$', text, re.IGNORECASE):
             input = re.split(r"(\d+)",text)
             return (str(input[0]),str(input[1]))
 

@@ -119,7 +119,6 @@ class Classifier:
             #Update the parted flag to 1 in the db
             self.update_parted_flag_db_function(NameManager.get_cod(self.pieces_to_classify[self.actual_piece].name),True)
             self.pdf_controller.export()
-            input()
             raise NoMorePiecesToClassifyException()
 
         
