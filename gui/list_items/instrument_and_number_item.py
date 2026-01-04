@@ -1,46 +1,10 @@
 from PyQt6 import QtWidgets, QtGui
 from classes.constants.instruments_names import *
+from classes.instruments_names_manager import InstrumentsNamesManager
 
 class InstrumentAndNumberItem(QtWidgets.QFrame):
-    INSTRUMENT_NAMES = [
-        GUION,
-        OBOE,
-        DULZAINA,
-        CORNO_INGLES,
-        FLAUTA,
-        FLAUTIN,
-        REQUINTO,
-        CLARINETE,
-        CLARINETE_PRAL,
-        CLARINETE_BAJO,
-        SAXOFON_SOPRANO,
-        SAXOFON,
-        SAXOFON_TENOR,
-        SAXOFON_BARITONO,
-        FAGOT,
-        TROMPA,
-        FLISCORNO,
-        TROMPETA,
-        TROMBON,
-        TROMBON_BAJO,
-        BOMBARDINO,
-        BAJO,
-        TUBA,
-        PLATOS,
-        BOMBO,
-        CAJA,
-        TIMBALES,
-        GONG,
-        PERCUSION,
-        MARIMBA,
-        XILOFONO,
-        LIRA,
-        VIBRAFONO,
-        GUITARRA,
-        CHELLO,
-        CONTRABAJO,
-    ]
-
+    INSTRUMENT_NAMES = InstrumentsNamesManager.get_instruments()
+    
     def __init__(self, instrument:str|None=None, number:str|int|None=None, parent=None):
         super().__init__(parent)
         self.max_number = 5

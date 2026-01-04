@@ -71,13 +71,13 @@
         },
         "classifier_hotkey" : "j"
     },
-    "saxofon_soprano" : {
+    "fagot" : {
         "translations" : {
-            "es_ES" : "Saxofón soprano",
-            "en_US" : "Soprano saxophone",
-            "ca_VA" : "Saxòfon soprano"
+            "es_ES" : "Fagot",
+            "en_US" : "Basson",
+            "ca_VA" : "Fagot"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "a"
     },
     "saxofon_alto" : {
         "translations" : {
@@ -101,15 +101,15 @@
             "en_US" : "Baritone Saxophone",
             "ca_VA" : "Saxòfon bariton"
         },
-        "classifier_hotkey" : "b"
+        "classifier_hotkey" : "sb"
     },
-    "fagot" : {
+    "saxofon_soprano" : {
         "translations" : {
-            "es_ES" : "Fagot",
-            "en_US" : "Basson",
-            "ca_VA" : "Fagot"
+            "es_ES" : "Saxofón soprano",
+            "en_US" : "Soprano saxophone",
+            "ca_VA" : "Saxòfon soprano"
         },
-        "classifier_hotkey" : "a"
+        "classifier_hotkey" : ""
     },
     "trompa" : {
         "translations" : {
@@ -117,7 +117,7 @@
             "en_US" : "Horn",
             "ca_VA" : "Trompa"
         },
-        "classifier_hotkey" : "t"
+        "classifier_hotkey" : "h"
     },
     "fliscorno" : {
         "translations" : {
@@ -125,7 +125,7 @@
             "en_US" : "Flugelhorn",
             "ca_VA" : "Fliscorn"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "fl"
     },
     "trompeta" : {
         "translations" : {
@@ -137,11 +137,11 @@
     },
     "trombon" : {
         "translations" : {
-            "es_ES" : "Saxofón",
-            "en_US" : "Saxophone",
-            "ca_VA" : "Saxòfon"
+            "es_ES" : "Trombón",
+            "en_US" : "Trombone",
+            "ca_VA" : "Trombó"
         },
-        "classifier_hotkey" : "s"
+        "classifier_hotkey" : "t"
     },
     "trombon_bajo" : {
         "translations" : {
@@ -149,7 +149,7 @@
             "en_US" : "Bass trombone",
             "ca_VA" : "Trombó baix"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "tb"
     },
     "bombardino" : {
         "translations" : {
@@ -157,7 +157,7 @@
             "en_US" : "Euphonium",
             "ca_VA" : "Bombardino"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "b"
     },
     "tuba" : {
         "translations" : {
@@ -173,7 +173,7 @@
             "en_US" : "Cymbals",
             "ca_VA" : "Plats"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "p"
     },
     "bombo" : {
         "translations" : {
@@ -181,7 +181,7 @@
             "en_US" : "Bass drum",
             "ca_VA" : "Bombo"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "bo"
     },
     "caja" : {
         "translations" : {
@@ -189,7 +189,7 @@
             "en_US" : "Snare drum",
             "ca_VA" : "Caixa"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "ca"
     },
     "timbales" : {
         "translations" : {

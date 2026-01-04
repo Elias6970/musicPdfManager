@@ -93,6 +93,28 @@ class InstrumentsNamesManager:
             print("Error: The JSON file is malformed.")
             return []
         
+    @staticmethod
+    def get_instruments() -> list[str]:
+        """
+        Returns a list with all the instrument standard names.
+        Throws FileNotFoundError if the instruments file does not exist,
+        and JSONDecodeError if the file is malformed.
+        
+        """
+        try:
+            with open(INSTRUMENTS_PATH(), 'r', encoding='utf-8') as file:
+                instruments = json.load(file)
+
+                return [i for i in instruments]
+            
+        except FileNotFoundError:
+            print(f"Error: The file {INSTRUMENTS_PATH()} does not exist.")
+            return []
+        except json.JSONDecodeError:
+            print("Error: The JSON file is malformed.")
+            return []
+        
+
 
     @staticmethod
     def get_instruments_and_shortcuts_as_str() -> str:

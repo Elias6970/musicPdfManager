@@ -25,7 +25,8 @@ class PresetsPrinter(Printer):
         self.ignore_preset_copies = False #If the export should ignore the copies of the presets
         self.add_piece_number = False #If the exported pdfs should have page numbers for each piece
         self.add_cover_page = False #If the exported pdfs should have a cover page
-        #
+        self.add_index = False #If the exported pdfs should have an index page
+
         self._solution:dict[str,dict[str,ResolvedPresetInstrument]] = {}
 
     def set_sorted_export(self,t:bool) -> None:
@@ -41,7 +42,11 @@ class PresetsPrinter(Printer):
     def set_add_cover_page(self,t:bool) -> None:
         """Set if the exported pdfs should have a cover page."""
         self.add_cover_page = t
-        
+    
+    def set_add_index(self,t:bool) -> None:
+        """Set if the exported pdfs should have an index page."""
+        self.add_index = t
+
     #Return the printeablePreset id to remove it from a list
     def add(self,copies:int,preset:Preset,dir:Dir) -> int:
         p = PrinteablePreset(copies)
@@ -119,11 +124,14 @@ class PresetsPrinter(Printer):
             pass
 
         piece_num = 1
-
+        if self.add_index:
+            index = self._create_index([NameManager.get_name(m) for m in exporting_order], title="Índice de pasodobles")
         #Export the pieces in each pdf sorted by name
         for i in self._solution.keys():
             merge_pdf = pypdf.PdfWriter()
-            merge_pdf.append(self._create_index([NameManager.get_name(m) for m in exporting_order], title="Índice de pasodobles"))
+
+            if self.add_index:
+                merge_pdf.append(index)
 
             for j in exporting_order:
                 for _ in range(self._solution[i][j].copies):
@@ -137,7 +145,8 @@ class PresetsPrinter(Printer):
                     merge_pdf.append(pdf)
 
             merge_pdf.write(os.path.join(exporting_folder,i)+".pdf")
-            merge_pdf.close()         
+            merge_pdf.close()   
+            piece_num = 1      
 
     
     def _add_page_number_to_pdf(self, input_pdf:str, page_number:str|int) -> str:
@@ -210,7 +219,7 @@ class PresetsPrinter(Printer):
     def _create_index(self, 
                       elements:list[str], 
                       title:str = "Índice", 
-                      subtitle=datetime.datetime.now().strftime("%d-%m-%Y"),
+                      subtitle=f"AM Virgen del Remedio {datetime.datetime.now().strftime("%d-%m-%Y")}",
                       output_path:str = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex()),
                       max_columns:int = 3,
                       min_font_size:int = 9,

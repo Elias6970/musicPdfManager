@@ -18,6 +18,7 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
 
         self.classifier = Classifier(pieces_list,update_parted_flag_db_function)
 
+        self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowMaximizeButtonHint)
         self.setWindowTitle(self.tr("Score classifier")) #traducir 
         self.init_ui()
 
@@ -78,6 +79,8 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
         btn_prev.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus) 
         btn_next = QtWidgets.QPushButton(self.tr("Continue")) #traducir
         btn_next.clicked.connect(self.continue_btn)
+        btn_next.setAutoDefault(False)
+        btn_next.setDefault(False)
         btn_close = QtWidgets.QPushButton(self.tr("Close")) #traducir
         btn_close.clicked.connect(self.close)
         btn_close.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
