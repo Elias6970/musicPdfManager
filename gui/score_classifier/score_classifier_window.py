@@ -228,6 +228,23 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
     
     def closeEvent(self, a0):
         self.close()
+
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+        """Focus the input box when typing anywhere in the dialog."""
+        modifiers = event.modifiers()
+        text = event.text()
+
+        if (not self.line_edit.hasFocus()
+            and text
+            and not text.isspace()
+            and not (modifiers & (QtCore.Qt.KeyboardModifier.ControlModifier
+                                   | QtCore.Qt.KeyboardModifier.AltModifier
+                                   | QtCore.Qt.KeyboardModifier.MetaModifier))):
+            self.line_edit.setFocus()
+            self.line_edit.insert(text)
+            return
+
+        super().keyPressEvent(event)
     
     #For testing
     """def state(self):

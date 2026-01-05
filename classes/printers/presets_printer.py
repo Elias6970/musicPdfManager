@@ -114,7 +114,7 @@ class PresetsPrinter(Printer):
         #Get the exporting order by the order added
         exporting_order:list[str] = [str(i.dir.name) for i in self.items]
         if self.sorted_export:
-            exporting_order.sort()
+            exporting_order.sort(key=lambda x: NameManager.get_name(x))
 
         #Create folder in the path selected
         exporting_folder = os.path.join(path,PresetsPrinter.EXPORTING_FOLDER_NAME)
