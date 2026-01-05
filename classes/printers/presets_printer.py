@@ -165,18 +165,40 @@ class PresetsPrinter(Printer):
         orig_width = first_page.mediabox.width
         orig_height = first_page.mediabox.height
 
+        # Respect the rotation flag but flatten it into the content so the new PDF has no /Rotate entry.
+        rotation = getattr(first_page, "rotation", 0) or first_page.get("/Rotate", 0)
+        rotation = rotation % 360
+        angle = (-rotation) % 360  # Transformations rotate counterclockwise
+
+        if angle in (90, 270):
+            target_width, target_height = orig_height, orig_width
+        else:
+            target_width, target_height = orig_width, orig_height
+
+        transform = pypdf.Transformation()
+        if angle == 90:
+            transform = transform.rotate(angle).translate(orig_height, 0)
+        elif angle == 180:
+            transform = transform.rotate(angle).translate(orig_width, orig_height)
+        elif angle == 270:
+            transform = transform.rotate(angle).translate(0, orig_width)
+
+        flattened_page = pypdf.PageObject.create_blank_page(width=target_width, height=target_height)
+        flattened_page.merge_transformed_page(first_page, transform)
+
         # Create the ReportLab frame page
-        frame_pdf = pypdf.PdfReader(self._create_frame_page(orig_width, orig_height, str(page_number))).pages[0]
+        frame_pdf = pypdf.PdfReader(self._create_frame_page(target_width, target_height, str(page_number))).pages[0]
 
-        scale_w = (orig_width - margin) / orig_width  # Scale factor to fit within the white frame
-        sacale_h = (orig_height - margin) / orig_height  # Scale factor to fit within the white frame
-        first_page.scale_by(min(scale_w, sacale_h))  # Scale the first page content
+        scale_w = (target_width - margin) / target_width  # Scale factor to fit within the white frame
+        scale_h = (target_height - margin) / target_height  # Scale factor to fit within the white frame
+        scale_factor = min(scale_w, scale_h)
+        flattened_page.scale_by(scale_factor)
 
-        # Calculate offset to center within white frame
-        y_offset = frame_pdf.mediabox.height - first_page.mediabox.height
+        # Center the scaled page within the frame
+        y_offset = frame_pdf.mediabox.height - flattened_page.mediabox.height
 
         # Merge shrunk content onto frame
-        frame_pdf.merge_translated_page(first_page, tx=0, ty=y_offset)
+        frame_pdf.merge_translated_page(flattened_page, tx=0, ty=y_offset)
 
         writer.add_page(frame_pdf)
 

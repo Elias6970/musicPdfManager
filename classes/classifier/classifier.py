@@ -1,5 +1,5 @@
 import os,tempfile
-from classes.error import EmptyInitialInputException, FirstPageException, NoMorePiecesToClassifyException
+from classes.error import EmptyInitialInputException, FirstPageException, NoMorePiecesToClassifyException, PdfNotFoundException
 from classes.utils.name_manager import NameManager
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
@@ -74,10 +74,15 @@ class Classifier:
     #Jump to the next piece
     def next_piece(self):
         self.last_rotation = 0
-        self.actual_piece += 1
-        self.pdf_controller = PdfController(self.pieces_to_classify[self.actual_piece])
-        self.actual_piece_name = os.path.basename(self.pieces_to_classify[self.actual_piece].path)
-
+        while True:
+            try:
+                self.actual_piece += 1
+                self.pdf_controller = PdfController(self.pieces_to_classify[self.actual_piece])
+                self.actual_piece_name = os.path.basename(self.pieces_to_classify[self.actual_piece].path)
+                break
+            except PdfNotFoundException:
+                print("Unable to find pdfs in piece:",self.pieces_to_classify[self.actual_piece].path)
+        
     #Manage the functionality to go to the previous page
     def previous_page_manager(self):
         if self.pdf_controller.actual_pdf_number == 0 and self.pdf_controller.get_actual_pdf().actual_pdf_page == 0:
