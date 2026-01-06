@@ -1,5 +1,4 @@
 import os,re
-from unidecode import unidecode
 from classes.utils.name_manager import NameManager
 from classes.files_management.dir import Dir
 from classes.db_manage import Db_archive

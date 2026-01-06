@@ -1,4 +1,3 @@
-from unidecode import unidecode
 from classes.utils.name_manager import NameManager
 from classes.error import PieceNotFoundException
 from classes.utils.name_manager import NameManager

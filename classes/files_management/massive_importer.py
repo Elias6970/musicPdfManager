@@ -170,9 +170,10 @@ class MassiveImporter:
                         dir_name = std_name
                 else:
                     dir_name = dir_path.name
-                
+
+                dir_name = ArchiveFileManager.parse_name_to_file_manager(dir_name)                
                 ArchiveFileManager.make_dir(dir_name)
-                self.logger.info("Dir created in the archive")
+                self.logger.info(f"Dir {dir_name} created in the archive")
                 are_imported = ArchiveFileManager.copy_files_in_archive(dir_name,files_to_import)
 
                 if are_imported:

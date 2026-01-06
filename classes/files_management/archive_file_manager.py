@@ -1,6 +1,7 @@
 import os,shutil,hashlib
 from classes.files_management.file import File
 from classes.constants.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH
+import unicodedata
 
 #This class make all the interactions with the files on the archive path
 class ArchiveFileManager:
@@ -19,8 +20,21 @@ class ArchiveFileManager:
     #> ^
     #| ^
     @staticmethod
-    def parse_name_to_file_manager(parsed_name:str) -> str:
-        return parsed_name.replace("\\","^").replace("/","^").replace(":","_").replace("*","+").replace("?","¿").replace('"',"'").replace("<","^").replace(">","^").replace("|","^")
+    def parse_name_to_file_manager(parsed_name: str) -> str:
+        normalized = unicodedata.normalize("NFD", parsed_name)
+        no_accents = normalized.encode("ascii", "ignore").decode("ascii")
+        uppercased = no_accents.upper()
+        return (
+            uppercased.replace("\\", "^")
+            .replace("/", "^")
+            .replace(":", "_")
+            .replace("*", "+")
+            .replace("?", "¿")
+            .replace('"', "'")
+            .replace("<", "^")
+            .replace(">", "^")
+            .replace("|", "^")
+        )
     
     @staticmethod
     def copy_files_in_archive(piece_path:str,files:list) -> bool:
@@ -153,4 +167,14 @@ class ArchiveFileManager:
         """
         return ArchiveFileManager.md5_hash(path1) == ArchiveFileManager.md5_hash(path2)
         
-
+    @staticmethod
+    def sanitize_archive_folder_names():
+        """
+        Rename archive folders replacing forbidden characters using parse_name_to_file_manager.
+        """
+        for folder in os.listdir(RELATIVE_ARCHIVE_PATH()):
+            parsed_name = ArchiveFileManager.parse_name_to_file_manager(folder)
+            if folder != parsed_name:
+                os.rename(os.path.join(RELATIVE_ARCHIVE_PATH(), folder),
+                          os.path.join(RELATIVE_ARCHIVE_PATH(), parsed_name))
+                print(f"Renamed folder {folder} to {parsed_name} in archive.")
