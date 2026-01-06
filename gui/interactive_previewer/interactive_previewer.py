@@ -88,8 +88,8 @@ class InteractivePreviewer(QGraphicsView):
 
                 # Calculate the angle change
                 delta_x = scene_pos.x() - self.rotating_offset.x()
-                delta_y = scene_pos.y() - self.rotating_offset.y()
-                self.angle = self.initial_rotation_angle + math.degrees(-delta_x/40)
+                #delta_y = scene_pos.y() - self.rotating_offset.y()
+                self.angle = self.initial_rotation_angle + math.degrees(-delta_x/240) # Adjust divisor for sensitivity
 
                 self.rectangle.setTransformOriginPoint(self.start_pos.x() + self.rectangle.rect().width()/2,self.start_pos.y() + self.rectangle.rect().height()/2)
                 self.rectangle.setRotation(self.angle)
