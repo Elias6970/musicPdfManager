@@ -5,22 +5,27 @@ import unicodedata
 
 #This class make all the interactions with the files on the archive path
 class ArchiveFileManager:
-    
-    #Returns the name of the folder in the directory archive
-    #Parsed_name: is the parsed name(cod-NAME) but
-    #replaces the forbidden simbols
-    #forbidden (space) its replaces:
-    #\ ^
-    #/ ^
-    #: _
-    #* +
-    #? ¿
-    #" '
-    #< ^
-    #> ^
-    #| ^
+
     @staticmethod
     def parse_name_to_file_manager(parsed_name: str) -> str:
+        """
+        Normalize and sanitize a file name string for safe use in the file manager.
+
+        This function removes diacritical marks from the given name, converts it to
+        uppercase, and replaces characters that are typically invalid in file names
+        with safe alternatives:
+        - `\`, `/`, `<`, `>`, and `|` are replaced with `^`
+        - `:` is replaced with `_`
+        - `*` is replaced with `+`
+        - `?` is replaced with `¿`
+        - `"` is replaced with `'`
+
+        Args:
+            parsed_name (str): The original file name to normalize and sanitize.
+
+        Returns:
+            str: The sanitized, uppercase file name suitable for the file manager.
+        """
         normalized = unicodedata.normalize("NFD", parsed_name)
         no_accents = normalized.encode("ascii", "ignore").decode("ascii")
         uppercased = no_accents.upper()
