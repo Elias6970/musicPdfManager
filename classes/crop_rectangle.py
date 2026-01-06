@@ -86,16 +86,16 @@ class CropRectangle:
         
         # Save or use the new pixmap
         rgb_image = cv2.cvtColor(warped_img, cv2.COLOR_BGR2RGB)
-
+        encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), 75]
         #Encode the matlike img into png to be able to create the pixmap
-        success, encoded_image = cv2.imencode('.png', rgb_image)
+        success, encoded_image = cv2.imencode('.jpg', rgb_image,encode_params)
         if not success:
             raise ValueError("Image encoding failed.")
 
         # Create a Pixmap from the RGB image.
-        pix = fitz.Pixmap(encoded_image.tobytes())
+        #pix = fitz.Pixmap()
 
-        return pix
+        return (encoded_image.tobytes(),max_width,max_height)
 
     #Crop a pdf with the selected rectangle and add it to a new a4 white pdf.
     #Your rectangle is scalled to fit the new pdf but keeping the aspect ratio.
@@ -117,15 +117,15 @@ class CropRectangle:
         try:
             page = file[0]
             render_matrix = fitz.Matrix(zoom, zoom)
-            original_pixmap = page.get_pixmap(matrix=render_matrix)
+            original_pixmap = page.get_pixmap(matrix=render_matrix, alpha=False)
         finally:
             file.close()
 
-        warped_pixmap:fitz.Pixmap = self.extract_and_warp_rect(original_pixmap, scale=zoom)
+        jpg_data, img_width, img_height = self.extract_and_warp_rect(original_pixmap, scale=zoom)
         #warped_pixmap.save("prueba.png")
         # Get original image size
-        img_width = warped_pixmap.width
-        img_height = warped_pixmap.height
+        #img_width = warped_pixmap.width
+        #img_height = warped_pixmap.height
 
         # Scale while maintaining aspect ratio
         scale_factor = min(a4_width / img_width, a4_height / img_height)
@@ -142,7 +142,7 @@ class CropRectangle:
 
         # Insert the Pixmap directly (no saving needed)
         page.insert_image(fitz.Rect(x_offset, y_offset, x_offset + new_width, y_offset + new_height),
-                            pixmap=warped_pixmap)
+                            stream=jpg_data)
 
         # Save PDF
         pdf.save(output_path)

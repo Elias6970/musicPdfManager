@@ -13,7 +13,7 @@ class File:
 
     @staticmethod
     def is_pdf(path:str):
-        extension = os.path.splitext(path) #Extract the extension
-        if ".pdf" == extension[1]:
+        extension = os.path.splitext(path)[1].lower() #Extract the extension
+        if ".pdf" == extension:
             return True
         return False
