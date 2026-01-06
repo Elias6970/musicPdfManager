@@ -21,7 +21,7 @@
             "en_US" : "English_horn",
             "ca_VA" : "Corn anglès"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "ci"
     },
     "flauta" : {
         "translations" : {
@@ -69,7 +69,7 @@
             "en_US" : "Bass clarinet",
             "ca_VA" : "Clarinet baix"
         },
-        "classifier_hotkey" : "j"
+        "classifier_hotkey" : "cb"
     },
     "fagot" : {
         "translations" : {
@@ -77,7 +77,7 @@
             "en_US" : "Basson",
             "ca_VA" : "Fagot"
         },
-        "classifier_hotkey" : "a"
+        "classifier_hotkey" : "fa"
     },
     "saxofon_alto" : {
         "translations" : {
@@ -93,7 +93,7 @@
             "en_US" : "Tenor saxophone",
             "ca_VA" : "Saxòfon tenor"
         },
-        "classifier_hotkey" : "x"
+        "classifier_hotkey" : "st"
     },
     "saxofon_baritono" : {
         "translations" : {
@@ -109,7 +109,7 @@
             "en_US" : "Soprano saxophone",
             "ca_VA" : "Saxòfon soprano"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "ss"
     },
     "trompa" : {
         "translations" : {
@@ -197,7 +197,7 @@
             "en_US" : "Timpani",
             "ca_VA" : "Timbals"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "ti"
     },
     "gong" : {
         "translations" : {
@@ -213,7 +213,7 @@
             "en_US" : "Percussion",
             "ca_VA" : "Percussió"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "pr"
     },
     "marimba" : {
         "translations" : {
@@ -221,7 +221,7 @@
             "en_US" : "Marimba",
             "ca_VA" : "Marimba"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "ma"
     },
     "xilofono" : {
         "translations" : {
@@ -229,7 +229,7 @@
             "en_US" : "Xylophone",
             "ca_VA" : "Xilòfon"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "x"
     },
     "lira" : {
         "translations" : {
@@ -237,7 +237,7 @@
             "en_US" : "Glockenspiel",
             "ca_VA" : "Lira"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "li"
     },
     "vibrafono" : {
         "translations" : {
@@ -253,7 +253,7 @@
             "en_US" : "Dulzaina",
             "ca_VA" : "Dolçaina"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "du"
     },
     "guitarra" : {
         "translations" : {
@@ -261,7 +261,7 @@
             "en_US" : "Guitar",
             "ca_VA" : "Guitarra"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "gi"
     },
     "chello" : {
         "translations" : {
@@ -269,7 +269,7 @@
             "en_US" : "Cello",
             "ca_VA" : "Violoncel"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "ch"
     },
     "contrabajo" : {
         "translations" : {
@@ -277,6 +277,6 @@
             "en_US" : "Double bass",
             "ca_VA" : "Contrabaix"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "db"
     }
 }
