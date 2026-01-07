@@ -2,13 +2,14 @@ import os,shutil,hashlib
 from classes.files_management.file import File
 from classes.constants.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH
 import unicodedata
+from pathlib import Path
 
 #This class make all the interactions with the files on the archive path
 class ArchiveFileManager:
 
     @staticmethod
     def parse_name_to_file_manager(parsed_name: str) -> str:
-        """
+        r"""
         Normalize and sanitize a file name string for safe use in the file manager.
 
         This function removes diacritical marks from the given name, converts it to
@@ -183,3 +184,17 @@ class ArchiveFileManager:
                 os.rename(os.path.join(RELATIVE_ARCHIVE_PATH(), folder),
                           os.path.join(RELATIVE_ARCHIVE_PATH(), parsed_name))
                 print(f"Renamed folder {folder} to {parsed_name} in archive.")
+
+    @staticmethod
+    def move_uppercase_pdfs_to_scores():
+        """
+        Iterate over the archive and move files ending with .PDF from Extras to Scores.
+        """
+        base_path = Path(RELATIVE_ARCHIVE_PATH())
+        for pdf_file in base_path.rglob("*.PDF"):
+            if pdf_file.parent.name != DIR_EXTRAS:
+                continue
+            destination = pdf_file.parent.parent / DIR_SCORES / pdf_file.with_suffix(".pdf").name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(pdf_file), str(destination))
+            print(f"Moved {pdf_file} to {destination}.")
