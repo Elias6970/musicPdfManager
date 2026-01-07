@@ -146,6 +146,7 @@ class CropRectangle:
 
         # Save PDF
         pdf.save(output_path)
+        pdf.close()
         return output_path
     
 
