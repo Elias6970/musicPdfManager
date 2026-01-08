@@ -1,6 +1,6 @@
 import os,shutil,hashlib
 from classes.files_management.file import File
-from classes.constants.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH
+from classes.constants.constants import DIR_SCORES,DIR_EXTRAS,RELATIVE_ARCHIVE_PATH, HYPHEN
 import unicodedata
 from pathlib import Path
 
@@ -30,6 +30,10 @@ class ArchiveFileManager:
         normalized = unicodedata.normalize("NFD", parsed_name)
         no_accents = normalized.encode("ascii", "ignore").decode("ascii")
         uppercased = no_accents.upper()
+        if "-" in uppercased:
+            number, rest = uppercased.split("-", 1)
+            uppercased = f"{number}{HYPHEN}{rest.lstrip()}"
+
         return (
             uppercased.replace("\\", "^")
             .replace("/", "^")
