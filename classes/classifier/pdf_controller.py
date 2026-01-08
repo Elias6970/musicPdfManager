@@ -4,6 +4,7 @@ from classes.error import PdfNotFoundException
 from classes.files_management.dir import Dir
 from classes.constants.constants import DIR_SCORES
 from classes.classifier.exportable_pdf import ExportablePdf
+from concurrent.futures import ProcessPoolExecutor
 
 #Object that controlls the pdfs ONLY IN ONE PIECE DIR
 #   actual_pdf_number: index of the pdf in the dir(dir/scores)
@@ -58,9 +59,13 @@ class PdfController():
     def export(self):
         backup_dir = self.move_originals()
         try:
-            for i in self.pdfs:
-                i.export()
+            with ProcessPoolExecutor() as executor:
+                futures = [executor.submit(pdf.export) for pdf in self.pdfs]
+                for f in futures:
+                    f.result()
+            #for i in self.pdfs:
+            #    i.export()
         except Exception as e:
-            print("Exception:", e," ",type(e))
+            print("Exception:", e, " ", type(e))
             self.move_from_backup_to_partituras(backup_dir)
         
