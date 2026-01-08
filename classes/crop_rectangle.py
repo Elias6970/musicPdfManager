@@ -58,7 +58,10 @@ class CropRectangle:
 
         # Convert fitz.Pixmap to NumPy array (RGBA or grayscale)
         img = np.frombuffer(pixmap.samples, dtype=np.uint8).reshape(pixmap.h, pixmap.w, pixmap.n)
-
+        if pixmap.n == 4:
+            # Convert RGBA to BGR
+            img = cv2.cvtColor(img, cv2.COLOR_RGBA2BGR)
+            
         # Ensure points are float32
         points = self.get_rectangle_corners() * scale
         rect = np.array(points, dtype="float32")
