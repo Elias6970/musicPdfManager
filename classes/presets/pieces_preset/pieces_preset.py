@@ -26,7 +26,22 @@ class PiecesPreset:
             return True
         except Exception:
             return False
+    
+    def change_all_instruments_presets(self, preset_name: str) -> bool:
+        """
+        Update the instruments preset for every piece
+        
+        Args:
+            preset_name (str): The new preset identifier to apply to all pieces.
 
+        Returns:
+            bool: True if the preset assignments were updated successfully; False otherwise.
+        """
+        try:
+            self.pieces = [(piece_std_name, preset_name, copies) for piece_std_name, _, copies in self.pieces]
+            return True
+        except Exception:
+            return False
 
     def dump(self) -> dict:
         """Dump the preset to a dict"""

@@ -1,3 +1,5 @@
+from concurrent.futures import ProcessPoolExecutor
+from operator import index
 from classes.utils.name_manager import NameManager
 from classes.printers.printer import Printer
 from classes.printers.printeable_preset import PrinteablePreset
@@ -123,40 +125,77 @@ class PresetsPrinter(Printer):
         except FileExistsError:
             pass
 
-        piece_num = 1
+        index = None
         if self.add_index:
             index = self._create_index([NameManager.get_name(m) for m in exporting_order], title="Índice de pasodobles")
         #Export the pieces in each pdf sorted by name
-        for i in self._solution.keys():
+        tasks = []
+        with ProcessPoolExecutor() as executor:
+            for i in self._solution.keys():
+                future = executor.submit(self._process_instrument_pdf,
+                                            self.add_index,
+                                            self.add_cover_page,
+                                            self.add_piece_number,
+                                            index,
+                                            exporting_order,
+                                            self._solution,
+                                            i,
+                                            exporting_folder)
+                tasks.append(future)
+
+            for task in tasks:
+                try:
+                    task.result()
+                except Exception as e:
+                    print(f"Error exporting instrument PDF: {e}")
+             
+     
+
+    def _process_instrument_pdf(self,
+                                add_index:bool,
+                                add_cover_page:bool,
+                                add_page_numbers:bool,
+                                index_path:str,
+                                exporting_order:list[str],
+                                solution:dict[str,dict[str,ResolvedPresetInstrument]],
+                                instrument:str,
+                                exporting_folder:str) -> None:
+            
+            piece_num = 1 
             merge_pdf = pypdf.PdfWriter()
 
-            if self.add_index:
-                merge_pdf.append(index)
+            if add_index:
+                merge_pdf.append(index_path)
 
             for j in exporting_order:
-                for _ in range(self._solution[i][j].copies):
-                    pdf = self._solution[i][j].resolution
+                for _ in range(solution[instrument][j].copies):
+                    pdf = solution[instrument][j].resolution
                     if pdf == None:
                         continue
 
-                    if self.add_piece_number:
+                    if add_page_numbers:
                         pdf = self._add_page_number_to_pdf(pdf, piece_num)
                         piece_num += 1
                     merge_pdf.append(pdf)
 
-            merge_pdf.write(os.path.join(exporting_folder,i)+".pdf")
+            merge_pdf.write(os.path.join(exporting_folder,instrument)+".pdf")
             merge_pdf.close()   
-            piece_num = 1      
+            
 
-    
-    def _add_page_number_to_pdf(self, input_pdf:str, page_number:str|int) -> str:
+    def _add_page_number_to_pdf(self, input_pdf:str, page_number:str|int) -> pypdf.PdfReader:
         """
-        Add a page number in the bottom-right to the first page of the pdf.
+        Add a page number to the first page of a PDF, respecting rotation and scaling to fit within a margin.
+        The first page is rendered onto a new frame page that includes the page number,
+        and the remaining pages are appended unchanged. The original rotation is flattened
+        into the content so the resulting PDF has no `/Rotate` entry.
+        Args:
+            input_pdf (str): Path to the source PDF file.
+            page_number (str | int): Page number text to place on the first page.
+        Returns:
+            pypdf.PdfReader: An in-memory PDF reader containing the modified document.
+        """
 
-        returns the path to the new pdf with the page number added (temporally file).
-        """
         margin = 15  # Margin for the white frame
-
 
         reader = pypdf.PdfReader(input_pdf)
         writer = pypdf.PdfWriter()
@@ -166,8 +205,7 @@ class PresetsPrinter(Printer):
         orig_height = first_page.mediabox.height
 
         # Respect the rotation flag but flatten it into the content so the new PDF has no /Rotate entry.
-        rotation = getattr(first_page, "rotation", 0) or first_page.get("/Rotate", 0)
-        rotation = rotation % 360
+        rotation = getattr(first_page, "rotation", 0) or first_page.get("/Rotate", 0) % 360
         angle = (-rotation) % 360  # Transformations rotate counterclockwise
 
         if angle in (90, 270):
@@ -175,43 +213,41 @@ class PresetsPrinter(Printer):
         else:
             target_width, target_height = orig_width, orig_height
 
-        transform = pypdf.Transformation()
-        if angle == 90:
-            transform = transform.rotate(angle).translate(orig_height, 0)
-        elif angle == 180:
-            transform = transform.rotate(angle).translate(orig_width, orig_height)
-        elif angle == 270:
-            transform = transform.rotate(angle).translate(0, orig_width)
-
-        flattened_page = pypdf.PageObject.create_blank_page(width=target_width, height=target_height)
-        flattened_page.merge_transformed_page(first_page, transform)
-
         # Create the ReportLab frame page
         frame_pdf = pypdf.PdfReader(self._create_frame_page(target_width, target_height, str(page_number))).pages[0]
 
         scale_w = (target_width - margin) / target_width  # Scale factor to fit within the white frame
         scale_h = (target_height - margin) / target_height  # Scale factor to fit within the white frame
         scale_factor = min(scale_w, scale_h)
-        flattened_page.scale_by(scale_factor)
+        #flattened_page.scale_by(scale_factor)
 
         # Center the scaled page within the frame
-        y_offset = frame_pdf.mediabox.height - flattened_page.mediabox.height
+        final_scaled_height = target_height * scale_factor
+        y_offset = frame_pdf.mediabox.height - final_scaled_height
+
+
+
+        transform = pypdf.Transformation().rotate(angle)
+        if angle == 90:
+            transform = transform.translate(orig_height, 0)
+        elif angle == 180:
+            transform = transform.translate(orig_width, orig_height)
+        elif angle == 270:
+            transform = transform.translate(0, orig_width)
+
+        transform = transform.scale(scale_factor).translate(0, y_offset)
 
         # Merge shrunk content onto frame
-        frame_pdf.merge_translated_page(flattened_page, tx=0, ty=y_offset)
+        frame_pdf.merge_transformed_page(first_page, transform)
 
         writer.add_page(frame_pdf)
+        writer.append(reader, pages=list(range(1, len(reader.pages))))
 
-        # Add remaining pages unchanged
-        for page in reader.pages[1:]:
-            writer.add_page(page)
+        buffer = io.BytesIO()
+        writer.write(buffer)
+        buffer.seek(0)
+        return pypdf.PdfReader(buffer)
 
-        output_pdf = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex())
-        #output_pdf = input_pdf.replace(".pdf", f"_modified.pdf")
-        with open(output_pdf, "wb") as f:
-            writer.write(f)
-        
-        return output_pdf
 
     def _create_frame_page(self, width, height, number_text="1"):
         """Create a ReportLab canvas with a white background and a page number in the bottom-right corner."""

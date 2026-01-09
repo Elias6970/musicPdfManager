@@ -498,9 +498,9 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         print("preset_name",preset_name)
         print(self.sender())
         [print(i) for i in self.piece_preset_manager.presets]
-        dir_error_msg:str = self.tr("This pieces are not found:\n")
+        dir_error_msg:str = self.tr("The pieces are not found:\n")
         dir_error:bool = False
-        preset_error_msg:str = self.tr("This presets are not found:\n")
+        preset_error_msg:str = self.tr("The instrument presets are not found:\n")
         preset_error:bool = False
 
         if self.piece_preset_manager.exist(preset_name):
@@ -514,12 +514,20 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                     ShowError.show_tooltip_error(self.tr(f"Preset {piece_preset.preset_name} not found in the list"),5000,self.presets_combo_box)
                     self.presets_combo_box.setCurrentIndex(-1)
                 
+                from gui.pop_up_windows.dropdown_window import DropdownWindow
+
+                instrument_preset_name = ""
                 #Set the elements in the printer (piece + instrument preset)
                 for i in piece_preset.pieces:
                     dir = Validate.check_if_exist_dir(i[0],self.archive.pieces.get_parsed_names())
                     if not isinstance(dir, Dir_Error):
                         
-                        instrument_preset = self.preset_manager.get_preset(i[1])
+                        #Ask for the instrument preset for the import
+                        if instrument_preset_name == "":
+                            window = DropdownWindow(self.preset_manager.get_names(),i[1],self)
+                            instrument_preset_name = window.selected_option
+                            instrument_preset = self.preset_manager.get_preset(instrument_preset_name)
+                        
                         if instrument_preset != None:
                             self.add_score(dir, instrument_preset, int(i[2]))
                         else:
