@@ -1,5 +1,6 @@
 import os
 from classes.files_management.dir import Dir,Dir_Error
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 class Validate():
     @staticmethod
@@ -20,5 +21,6 @@ class Validate():
         """
         for i in list_of_pieces:
             if src_txt == i:
-                return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i),i)
+                name = ArchiveFileManager.parse_name_to_file_manager(i)
+                return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),name),name)
         return Dir_Error()

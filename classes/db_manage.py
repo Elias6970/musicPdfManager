@@ -221,6 +221,28 @@ class Db_archive(Db):
     def close_db(self):
         self.cur.close()
 
+    def correct_names(self):
+        """
+        Clean up leading and trailing whitespace in the `name` column for all rows in the current table.
+        For each record, the method strips whitespace, updates the name and `last_modification` timestamp if it changed,
+        commits the changes, and returns True on success or False if an exception is encountered.
+        """
+        try:
+            rows = self.cur.execute(f"SELECT cod,name FROM {self.table_name}").fetchall()
+            for cod, name in rows:
+                if name is None:
+                    continue
+                fixed = str(name).strip()
+                if fixed != name:
+                    self.cur.execute(
+                        f"UPDATE {self.table_name} SET name=?,last_modification=CURRENT_TIMESTAMP WHERE cod=?",
+                        (fixed, cod),
+                    )
+            self.con.commit()
+            return True
+        except Exception as e:
+            print(f"{type(e)}:{e}")
+            return False
 
 
 #---Presets:
