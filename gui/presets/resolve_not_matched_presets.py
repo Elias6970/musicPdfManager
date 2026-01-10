@@ -53,7 +53,6 @@ class ResolveNotMatchedPresets(QtWidgets.QDialog):
                     self.resolved[-1].resolution = os.path.join(j.dir.path,DIR_SCORES,score) + ".pdf"
                     continue
                     
-        print(self.resolved)
         self.hide()
 
 

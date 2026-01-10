@@ -261,7 +261,6 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
 
                 self.instruments_combo_box.setEnabled(True)
                 self.instruments_combo_box.addItems(scores)
-                self.instruments_combo_box.addItem("PEcuario")
             
             #if the piece is not in the digital archive
             except FileNotFoundError:
@@ -298,7 +297,9 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                     ShowError.show_tooltip_error(self.tr("Preset not found"),5000,self.presets_combo_box)
                     self.presets_combo_box.setCurrentIndex(-1)
                     return False
-            
+                
+                self.piece_search_bar.clear() #Only clear the bar and not the label because maybe the user want to insert another time the sameone
+                self.piece_search_bar.setFocus()
                 return self.add_score(dir, preset, copies)
             
         except AttributeError:

@@ -214,7 +214,7 @@ class PresetsPrinter(Printer):
             target_width, target_height = orig_width, orig_height
 
         # Create the ReportLab frame page
-        frame_pdf = pypdf.PdfReader(self._create_frame_page(target_width, target_height, str(page_number))).pages[0]
+        base_pdf = pypdf.PdfReader(self._create_white_background_page(target_width, target_height)).pages[0]
 
         scale_w = (target_width - margin) / target_width  # Scale factor to fit within the white frame
         scale_h = (target_height - margin) / target_height  # Scale factor to fit within the white frame
@@ -223,7 +223,7 @@ class PresetsPrinter(Printer):
 
         # Center the scaled page within the frame
         final_scaled_height = target_height * scale_factor
-        y_offset = frame_pdf.mediabox.height - final_scaled_height
+        y_offset = base_pdf.mediabox.height - final_scaled_height
 
 
 
@@ -238,9 +238,12 @@ class PresetsPrinter(Printer):
         transform = transform.scale(scale_factor).translate(0, y_offset)
 
         # Merge shrunk content onto frame
-        frame_pdf.merge_transformed_page(first_page, transform)
+        base_pdf.merge_transformed_page(first_page, transform)
 
-        writer.add_page(frame_pdf)
+        number_overlay = pypdf.PdfReader(self._create_number_overlay(target_width, target_height, str(page_number))).pages[0]
+        base_pdf.merge_page(number_overlay)
+
+        writer.add_page(base_pdf)
         writer.append(reader, pages=list(range(1, len(reader.pages))))
 
         buffer = io.BytesIO()
@@ -249,30 +252,54 @@ class PresetsPrinter(Printer):
         return pypdf.PdfReader(buffer)
 
 
-    def _create_frame_page(self, width, height, number_text="1"):
-        """Create a ReportLab canvas with a white background and a page number in the bottom-right corner."""
+    def _create_white_background_page(self, width: float, height: float) -> io.BytesIO:
+        """
+        Create a ReportLab canvas with a white background.
+        Args:
+            width (float): Page width in points.
+            height (float): Page height in points.
 
+        Returns:
+            io.BytesIO: Buffer containing the generated white background PDF.
+        """
         buffer = io.BytesIO()
         c = canvas.Canvas(buffer, pagesize=(width, height))
 
-        # Optional: draw white background (usually default is white anyway)
+        # Draw white background (usually default is white anyway)
         c.setFillColorRGB(1, 1, 1) # White color
         c.rect(0, 0, width, height, fill=1, stroke=0)
+        c.save()
+        buffer.seek(0)
+        return buffer
 
-        # Draw page number in bottom-right corner
-        c.setFont("Helvetica-Bold", 13)
-        c.setFillColorRGB(0, 0, 0)
 
-        # Adjust the position based on the number of digits
+    def _create_number_overlay(self, width: float, height: float, number_text: str = "1") -> io.BytesIO:
+        """
+        Create a transparent PDF overlay with a page number at the bottom-right corner.
+        Args:
+            width (float): The width of the PDF page in points.
+            height (float): The height of the PDF page in points.
+            number_text (str, optional): The page number text to display. Defaults to "1".
+        Returns:
+            io.BytesIO: A buffer containing the generated PDF overlay.
+        """
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=(width, height))
+        
+        # No background rect here, so it remains transparent!
+        font_size = 25
+        c.setFont("Helvetica-Bold", font_size)
+        c.setFillColorRGB(0, 0, 0) # Black text
+
         if int(number_text) < 10:
-            c.drawRightString(width - 11, 7, number_text)
+            c.drawRightString(width - 11, 7, str(number_text))
         else:
-            c.drawRightString(width - 7, 7, number_text)
+            c.drawRightString(width - 7, 7, str(number_text))
 
         c.save()
         buffer.seek(0)
         return buffer
-    
+        
 
     def _create_index(self, 
                       elements:list[str], 
