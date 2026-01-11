@@ -12,7 +12,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.units import mm
-
+from reportlab.pdfbase.pdfmetrics import stringWidth
 import pypdf,os,io, tempfile, math, datetime
 
 
@@ -300,7 +300,32 @@ class PresetsPrinter(Printer):
         buffer.seek(0)
         return buffer
         
-
+    def _fit_text_in_width(self, text:str, font_name:str, font_size:int, max_width:float) -> str:
+        """Fit text within a specified width by truncating and adding ellipsis if necessary.
+        Args:
+            text (str): The text to fit.
+            font_name (str): The font name to use.
+            font_size (int): The font size to use.
+            max_width (float): The maximum width in points.
+        Returns:
+            str: The fitted text, possibly truncated with ellipsis.
+        """
+        text_width = stringWidth(text, font_name, font_size)
+        if text_width <= max_width:
+            return text
+        else:
+            ellipsis_width = stringWidth("...", font_name, font_size)
+            available_width = max_width - ellipsis_width
+            fitted_text = ""
+            for char in text:
+                char_width = stringWidth(char, font_name, font_size)
+                if stringWidth(fitted_text + char, font_name, font_size) <= available_width:
+                    fitted_text += char
+                else:
+                    break
+            return fitted_text + "..."
+        
+        
     def _create_index(self, 
                       elements:list[str], 
                       title:str = "Índice", 
@@ -377,7 +402,9 @@ class PresetsPrinter(Printer):
                         row = idx % rows_per_column
                         x = left_margin + col * column_width
                         y = page_height - bottom_margin - row * line_height - title_space
-                        c.drawString(x, y, str(str(idx+1) + "- " + texto))
+                        text = str(str(idx+1) + "- " + texto)
+                        fitted_text = self._fit_text_in_width(text, font_name, font_size, column_width - 5) # 5 points padding
+                        c.drawString(x, y, fitted_text)
 
                     c.save()
                     print(f"Índice creado con tamaño de fuente: {font_size} y columnas: {num_columns}")
