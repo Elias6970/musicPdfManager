@@ -1,5 +1,7 @@
 import os,re
 from classes.utils.name_manager import NameManager
+from classes.error import IncorrectCodOrNameError, CodAlreadyExistsError
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.files_management.dir import Dir
 from classes.db_manage import Db_archive
 from classes.constants.constants import DB_NAME,HYPHEN,IGNORE_FILES,RELATIVE_ARCHIVE_PATH
@@ -12,7 +14,76 @@ class Archive:
         self.archive_path = archive_path
         self.pieces = Pieces_list()
         self.update_pieces()
+
+    def add_piece(self,cod, name, files:list[str],author:str, type:str, handwritten:bool, digitalized:bool, parted:bool):
+        """
+        Add a new musical piece to the archive by creating its directory, copying associated files,
+        and inserting its metadata into the database.
+        Args:
+            cod (str): Unique identifier for the piece.
+            name (str): Name of the piece.
+            files (list[str]): List of file paths to associate with the piece.
+            author (str): Name of the author or composer.
+            type (str): Type or category of the piece.
+            handwritten (bool): True if the piece is handwritten.
+            digitalized (bool): True if the piece has been digitalized.
+            parted (bool): True if the piece is parted.
+        Returns:
+            bool: True if the piece was successfully added to the archive and database; False otherwise.
+        """
+
+        parsed_name = NameManager.get_std_name(cod,name)
+
+        #Create the dir in the archive
+        ArchiveFileManager.make_dir(parsed_name)
+
+        if files != []:
+            #Copy the files to the archive
+            are_moved = ArchiveFileManager.copy_files_in_archive(parsed_name,files)
+        else:
+            are_moved = True
+
+        if are_moved:
+            try:
+                is_inserted = self.db.insert(cod=int(cod),
+                                            name=name,
+                                            author=author,
+                                            type=type,
+                                            handwritten=int(handwritten),
+                                            parted=int(parted),
+                                            digitalized=int(digitalized))
+            except (CodAlreadyExistsError,IncorrectCodOrNameError) as e:
+                return False
+            
+            if is_inserted:
+                self.pieces.add(int(cod),name,parsed_name,digitalized)
+                self.update_pieces() #Update the list of pieces with the db
+                
+                return True
+            
+        return False
+
+    def delete_piece(self,cod:int,std_name:str=""):
+        """
+        Remove a music piece from the manager by its code, deleting it from the internal list,
+        the database, and attempting to remove the associated file.
+        Args:
+            cod (int): The unique identifier of the piece to delete.
+        Raises:
+            ValueError: If the code is not present in the internal collection.
+        """
         
+        self.pieces.remove(int(cod))
+        self.db.delete_score(int(cod)) #Delete from db
+
+        try:
+            if std_name == "":
+                std_name = NameManager.get_std_name(cod,self.db.get_with_equals("cod",str(cod),"cod,name")[0][1])
+            std_path = ArchiveFileManager.parse_name_to_file_manager(std_name)
+            ArchiveFileManager.delete_piece(std_path)
+        except FileNotFoundError:
+            pass
+
 
     #Update the list of pieces with the db
     def update_pieces(self):

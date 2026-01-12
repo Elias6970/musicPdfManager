@@ -120,17 +120,15 @@ class ArchiveFileManager:
     @staticmethod
     def make_dir(name):
         """Create a dir for a piece in the archive path"""
-        print("archive_path",RELATIVE_ARCHIVE_PATH())
-        print(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_SCORES))
         try:
-            os.makedirs(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_SCORES)) #Create partituras
+            os.makedirs(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_SCORES),exist_ok=True) #Create partituras
         except Exception as e:
             print(e, type(e))
 
         try:
-            os.makedirs(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_EXTRAS)) #Create extras
-        except:
-            pass
+            os.makedirs(os.path.join(RELATIVE_ARCHIVE_PATH(),name,DIR_EXTRAS),exist_ok=True) #Create extras
+        except Exception as e:
+            print(e, type(e))
     
     #delete a piece. Recive the stadard name-> num-name ej: 1-HOLA
     @staticmethod

@@ -19,20 +19,13 @@ class Delete_piece_window(AbstractSerchBarAndTwoButtonsWindow):
     #Delete the selected score
     def delete_piece(self):
         if self.validate_selection(self.search_bar.text()):
-            cod = NameManager.get_cod(self.piece_lbl.text())
             #Ask to be sure that the user want to delete this score
             alert = QtWidgets.QMessageBox.question(self,self.tr("Warning"),self.tr("Are you sure that you want to delete \n{}".format(self.piece_lbl.text())),QtWidgets.QMessageBox.StandardButton.Yes,QtWidgets.QMessageBox.StandardButton.No) #traducir
 
             if alert == QtWidgets.QMessageBox.StandardButton.Yes:
                 try:
-                    self.archive.db.delete_score(int(cod)) #Delete from db
-                    self.archive.pieces.remove(int(cod))
-
-                    try:
-                        ArchiveFileManager.delete_piece(self.piece_lbl.text())
-                    except FileNotFoundError:
-                        pass
-
+                    cod = NameManager.get_cod(self.piece_lbl.text())
+                    self.archive.delete_piece(cod,self.piece_lbl.text())
                     
                     alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Icon.NoIcon,"",self.tr("{} has been correctly deleted".format(self.piece_lbl.text())),QtWidgets.QMessageBox.StandardButton.Ok,self) #traducir
                     self.search_bar.clear() #Clear the text

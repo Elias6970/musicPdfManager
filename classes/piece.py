@@ -5,7 +5,7 @@ from classes.utils.name_manager import NameManager
 #Class that represents a piece
 #raise PathNotFoundException if the path doesn't exits unless is None
 class Piece:
-    def __init__(self,cod:int,name:str,parsed_name=None,digitalized:bool=False):
+    def __init__(self,cod:int,name:str,parsed_name:str|None=None,digitalized:bool=False):
         self.cod = cod
         self.name = name
         self.digitalized:bool = digitalized
@@ -95,5 +95,31 @@ class Pieces_list:
                 i.cod = new_cod
                 i.name = new_name
                 i.parsed_name = i.update_parsed_name()
+                return True
+        return False
+    
+    def exists_cod(self,cod:int) -> bool:
+        """
+        Check if a piece with the given code exists.
+
+        :param cod int: The code to look for.
+        :return bool: True if a piece with the specified code is found, False otherwise.
+        """
+
+        for i in self.pieces:
+            if i.cod == cod:
+                return True
+        return False
+
+    def exists_parsed(self,parsed_name:str) -> bool:
+        """
+        Check if a piece with the given parsed name exists in the collection.
+        
+        :param parsed_name str: The parsed identifier to search for.
+        :return bool: True if a piece with the specified parsed name is found, else False.
+        """
+        
+        for i in self.pieces:
+            if i.parsed_name == parsed_name:
                 return True
         return False

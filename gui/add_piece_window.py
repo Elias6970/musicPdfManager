@@ -39,7 +39,6 @@ class Add_piece_window(AbstractFieldsWindow):
         cod = self.line_cod.text()
         name = self.line_name.text()
         parsed_name = NameManager.get_std_name(cod,name)
-        classified = False
 
         if self.verifications(cod,name):
 
@@ -51,14 +50,18 @@ class Add_piece_window(AbstractFieldsWindow):
                 file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
     
                 if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-                    ArchiveFileManager.make_dir(parsed_name)
-                    are_moved = ArchiveFileManager.copy_files_in_archive(parsed_name,file_dialog.selectedFiles())
+                    is_added = self.archive.add_piece(cod=cod,
+                                                      name=name,
+                                                      files=file_dialog.selectedFiles(),
+                                                      author=self.line_author.text(),
+                                                      type=self.line_type.text(),
+                                                      handwritten=self.checkboxes_dict[HANDWRITTEN].isChecked(),
+                                                      digitalized=True,
+                                                      parted=False)
 
-                    if are_moved:
-                        if not self.checkboxes_dict[DONT_CLASSIFY_NOW].isChecked():
+                    if is_added and not self.checkboxes_dict[DONT_CLASSIFY_NOW].isChecked():
                             try:
                                 ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),parsed_name))],self.archive.db.update_parted)
-                                classified = True                        
                             except Exception:
                                 pass
                     else:
@@ -67,21 +70,18 @@ class Add_piece_window(AbstractFieldsWindow):
                 else:
                     YesNoWindow(self.tr("There has been an error selecting the files"),True,self)
                     return
+            else:
+                is_added = self.archive.add_piece(cod=cod,
+                                                  name=name,
+                                                  files=[],
+                                                  author=self.line_author.text(),
+                                                  type=self.line_type.text(),
+                                                  handwritten=self.checkboxes_dict[HANDWRITTEN].isChecked(),
+                                                  digitalized=False,
+                                                  parted=False)
 
-            try:
-                is_inserted = self.archive.db.insert(int(cod),
-                                                    name,
-                                                    self.line_author.text(),
-                                                    self.line_type.text(),
-                                                    handwritten=int(self.checkboxes_dict[HANDWRITTEN].isChecked()),
-                                                    parted=0,
-                                                    digitalized=1)
-            except (CodAlreadyExistsError,IncorrectCodOrNameError) as e:
-                Error_window.print_error(e)
 
-            if is_inserted:
-                self.archive.pieces.add(int(cod),name,parsed_name,classified)
-
+            if is_added:
                 YesNoWindow(self.tr("{} has been correctly imported".format(parsed_name)),True,self)
                 self.reset_fields()
 
