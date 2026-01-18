@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtCore, QtGui
-from gui.list_items.instrument_and_number_item import InstrumentAndNumberItem
+from gui.elements.list_items.instrument_and_number_item import InstrumentAndNumberItem
 
 class InfiniteComboBoxesItem(QtWidgets.QFrame):
 

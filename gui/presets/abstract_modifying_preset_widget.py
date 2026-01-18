@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QLineEdit, QHBoxLayout
-from gui.status_console import StatusConsole
+from gui.elements.status_console import StatusConsole
 from gui.error_window import ShowError
-from gui.list_items.infinite_comboboxes_item import InfiniteComboBoxesItem
+from gui.elements.list_items.infinite_comboboxes_item import InfiniteComboBoxesItem
 from classes.presets.preset_manager import PresetManager
 from classes.presets.preset import Preset
 import re

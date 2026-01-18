@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget
-from gui.status_console import StatusConsole
-from gui.list_items.status_conosle_item_with_two_buttons import StatusConsleItemWithTwoButtons
+from gui.elements.status_console import StatusConsole
+from gui.elements.list_items.status_conosle_item_with_two_buttons import StatusConsleItemWithTwoButtons
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.presets.add_preset_widget import AddPresetWidget
 from gui.presets.modify_preset_widget import ModifyPresetWidget

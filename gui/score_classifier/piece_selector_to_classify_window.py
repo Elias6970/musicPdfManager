@@ -4,10 +4,10 @@ from  classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import StopClassifyingException, PdfNotFoundException
-from gui.status_console import StatusConsole
-from gui.score_search_bar import ScoreSearchBar
+from gui.elements.status_console import StatusConsole
+from gui.elements.score_search_bar import ScoreSearchBar
 from gui.pop_up_windows.yes_no_window import YesNoWindow
-from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
+from gui.elements.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
 from gui.error_window import Error_window
 from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
 import os

@@ -15,10 +15,10 @@ from gui.error_window import Error_window, ShowError
 from gui.pop_up_windows.type_of_export_window import TypeOfExportWindow, TypeOfExport
 from gui.presets.resolve_not_matched_presets import ResolveNotMatchedPresets
 from gui.pop_up_windows.yes_no_window import YesNoWindow
-from gui.status_console import StatusConsole
-from gui.score_search_bar import ScoreSearchBar
-from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
-from gui.previewer import Preview
+from gui.elements.status_console import StatusConsole
+from gui.elements.score_search_bar import ScoreSearchBar
+from gui.elements.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
+from gui.elements.previewer import Preview
 import os
 
 class MultipleSelectionWindow(QtWidgets.QWidget):

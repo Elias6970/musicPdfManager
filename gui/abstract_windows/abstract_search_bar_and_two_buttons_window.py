@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtCore
-from gui.score_search_bar import ScoreSearchBar
+from gui.elements.score_search_bar import ScoreSearchBar
 from classes.files_management.archive import Archive
 
 #Abstract window that have: (Is a false abstract window but it used like that)

@@ -8,10 +8,10 @@ from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from classes.constants.constants import DIR_SCORES
 from gui.error_window import Error_window
-from gui.status_console import StatusConsole
-from gui.score_search_bar import ScoreSearchBar
-from gui.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
-from gui.previewer import Preview
+from gui.elements.status_console import StatusConsole
+from gui.elements.score_search_bar import ScoreSearchBar
+from gui.elements.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
+from gui.elements.previewer import Preview
 
 import os
 
