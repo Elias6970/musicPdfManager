@@ -4,7 +4,7 @@ from classes.config import Configuration
 from classes.files_management.archive import Archive
 from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.printers.dossier import Dossier
-from gui.error_window import Error_window
+from gui.pop_up_windows.error_window import Error_window
 from gui.selectors.individual_selection_window import IndividualSelectionWindow
 from gui.selectors.multiple_selection_window import MultipleSelectionWindow
 from gui.piece_windows.add_piece_window import Add_piece_window
@@ -12,8 +12,8 @@ from gui.piece_windows.delete_piece_window import Delete_piece_window
 from gui.piece_windows.modify_piece_window import Modify_piece_window
 from gui.piece_windows.add_scores_to_existing_piece_window import Add_scores_to_existing_piece_window
 from gui.score_classifier.piece_selector_to_classify_window import PieceSelectorToClassifyWindow
-from gui.about_us_window import About_us_window
-from gui.preferences_window import Preferences_window
+from gui.pop_up_windows.about_us_window import About_us_window
+from gui.config.preferences_window import Preferences_window
 from gui.presets.presets_window import PresetsWindow
 from tools.delete_junk_files import delete_junk_files
 import sys, os

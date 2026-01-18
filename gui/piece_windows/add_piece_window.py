@@ -5,7 +5,7 @@ from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.pieces_management.add_piece_controller import AddPieceController   
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH,HANDWRITTEN,DONT_ADD_SCORES,DONT_CLASSIFY_NOW
-from gui.error_window import Error_window
+from gui.pop_up_windows.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.score_classifier.score_classifier_window import ScoreClassifierWindow

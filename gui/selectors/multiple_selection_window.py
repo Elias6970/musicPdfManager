@@ -11,7 +11,7 @@ from classes.preview_controller import Preview_controller
 from classes.presets.preset_manager import PresetManager
 from classes.presets.pieces_preset.pieces_preset_manager import PiecesPresetManager
 from classes.presets.pieces_preset.pieces_preset import PiecesPreset
-from gui.error_window import Error_window, ShowError
+from gui.pop_up_windows.error_window import Error_window, ShowError
 from gui.pop_up_windows.type_of_export_window import TypeOfExportWindow, TypeOfExport
 from gui.presets.resolve_not_matched_presets import ResolveNotMatchedPresets
 from gui.pop_up_windows.yes_no_window import YesNoWindow

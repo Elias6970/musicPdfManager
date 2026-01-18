@@ -2,7 +2,7 @@ from PyQt6 import QtWidgets
 from classes.files_management.archive import Archive
 from classes.pieces_management.delete_piece_controller import DeletePieceController
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
-from gui.error_window import Error_window
+from gui.pop_up_windows.error_window import Error_window
 from classes.constants.constants import *
 
 #Creates a window that can delete scores with search bar and 2 buttons

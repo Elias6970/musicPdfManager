@@ -7,7 +7,7 @@ from classes.printers.default_printer import DefaultPrinter
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from classes.constants.constants import DIR_SCORES
-from gui.error_window import Error_window
+from gui.pop_up_windows.error_window import Error_window
 from gui.elements.status_console import StatusConsole
 from gui.elements.score_search_bar import ScoreSearchBar
 from gui.elements.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts

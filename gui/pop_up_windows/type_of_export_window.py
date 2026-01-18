@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtCore
-from gui.error_window import ShowError
+from gui.pop_up_windows.error_window import ShowError
 import enum
 
 class TypeOfExport(enum.Enum):

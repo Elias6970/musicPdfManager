@@ -2,7 +2,7 @@ import sys
 from PyQt6 import QtWidgets
 from classes.config import Configuration
 from gui.pop_up_windows.yes_no_window import YesNoWindow
-from gui.error_window import Error_window
+from gui.pop_up_windows.error_window import Error_window
 
 #Window to set the paths of the archive and the cover to export the list of pieces
 class Preferences_window(QtWidgets.QDialog):
