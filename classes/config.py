@@ -6,6 +6,7 @@ PLAIN_TEXT_CONFIG_PATH = os.path.join(DATA_FOLDER,"config.yml")
 DEFAULT_PRESETS_PATH = os.path.join(DATA_FOLDER,"presets.json")
 DEFAULT_PIECES_PRESETS_PATH = os.path.join(DATA_FOLDER,"pieces_presets.json")
 DEFAULT_INSTRUMENTS_PATH = os.path.join(DATA_FOLDER,"instruments.json")
+DEFAULT_DB_PATH = os.path.join(DATA_FOLDER,"archivo.db")
 
 #Languages
 LAN_ESP = "Espanol"
@@ -18,6 +19,7 @@ CONFIG_ATTRIBUTE_PRESETS = "PRESETS_PATH"
 CONFIG_ATTRIBUTE_PIECES_PRESETS = "PIECES_PRESETS_PATH"
 CONFIG_ATTRIBUTE_LANGUAGE = "LANGUAGE"
 CONFIG_ATTRIBUTE_INSTRUMENTS = "INSTRUMENTS"
+CONFIG_ATTRIBUTE_DB_PATH = "DB_PATH"
 
 #Idea of static class to get the configuration of the application
 class Configuration():
@@ -110,6 +112,17 @@ class Configuration():
     def get_logs_path() -> str:
         return os.path.join(DATA_FOLDER,"logs")
     
+    @staticmethod
+    def get_db_path() -> str:
+        """
+        Get the name of the database file.
+        If it doesn't exist, it returns the default path.
+        """
+        db_path = Configuration.get_attribute(CONFIG_ATTRIBUTE_DB_PATH)
+        if db_path == "":
+            return DEFAULT_DB_PATH
+        return db_path
+
     #If the language is not supported return an empty string
     @staticmethod
     def name_to_cod_language(name:str) -> str:
@@ -121,7 +134,7 @@ class Configuration():
             return "ca_VA"
         else:
             return ""
-    
+        
 
     #Lenguage has to be in es_ES format
     @staticmethod

@@ -1,12 +1,12 @@
 import sqlite3,xlrd,openpyxl
-from classes.constants.constants import DB_PATH
+from classes.constants.constants import DB_PATH, DB_PIECES_TABLE
 from classes.error import IncorrectCodOrNameError, CodAlreadyExistsError
 
 #Abstraction of a class that represets a db
 class Db:
     def __init__(self,table_name) -> None:
         self.table_name = table_name
-        self.db_path = DB_PATH
+        self.db_path = DB_PATH()
         
         self.open_db()
         self.create_tables()

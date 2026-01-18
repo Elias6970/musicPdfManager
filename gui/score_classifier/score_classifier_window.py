@@ -1,11 +1,12 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
 from  classes.files_management.dir import Dir
-from classes.constants.constants import ROTATE_L_IMG_PATH,ROTATE_R_IMG_PATH,INSTRUCTIONS_SCORE_CLASSIFIER
+from classes.constants.constants import INSTRUCTIONS_SCORE_CLASSIFIER
 from classes.error import EmptyInitialInputException,FirstPageException,NoMorePiecesToClassifyException
 from classes.classifier.text_analizer import TextAnalizer
 from classes.classifier.classifier import Classifier
-from gui.interactive_previewer.interactive_preview_conversor import InterctivePreviewConversor
 from classes.instruments_names_manager import InstrumentsNamesManager
+from gui.config.constants import ROTATE_L_IMG_PATH, ROTATE_R_IMG_PATH
+from gui.interactive_previewer.interactive_preview_conversor import InterctivePreviewConversor
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.pop_up_windows.error_window import Error_window
 from gui.interactive_previewer.interactive_previewer import InteractivePreviewer

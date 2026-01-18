@@ -3,7 +3,7 @@ from classes.utils.name_manager import NameManager
 from classes.files_management.file import File
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.db_manage import Db_archive
-from classes.constants.constants import DIR_SCORES,DIR_EXTRAS, DB_NAME
+from classes.constants.constants import DB_PIECES_TABLE
 
 class Dir(File):
     def __init__(self, path,name=None):
@@ -53,7 +53,7 @@ class Dir(File):
     def export_all_names(self,path):
         file_dirs = open("archivo_names.txt","w")
         file_db = open("db_names.txt","w")
-        db_con = Db_archive(DB_NAME)
+        db_con = Db_archive(DB_PIECES_TABLE)
 
         names = os.listdir(path)
 

@@ -2,7 +2,7 @@ import os,sys
 from classes.config import Configuration
 
 #Version
-VERSION = "0.5.4"
+VERSION = "0.5.5"
 APP_NAME = "Music pdf manager"
 APP_AUTHOR = "Elías Iborra Pérez"
 GITHUB = "https://github.com/Elias6970/musicPdfManager"
@@ -22,31 +22,16 @@ def INSTRUMENTS_PATH():
     return Configuration.get_instruments_path()
 def LOGS_PATH():
     return Configuration.get_logs_path()
+def DB_PATH():
+    return Configuration.get_db_path()
 
-DB_FILE_NAME = "archivo.db"
-DB_NAME = "AMVR_archive"
+DB_PIECES_TABLE = "pieces"
 DIR_SCORES = "partituras"
 DIR_EXTRAS = "extras"
 IGNORE_FILES  = [".DS_Store"]
 HYPHEN = "-" 
 MAX_COPIES = 20 #Max copies of the combo box next to the add button in select mode 
 
-#Path to the .db file
-DB_PATH = os.path.join('data',DB_FILE_NAME)
-
-#The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
-#Every time you execute the application a temp folder is created
-if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    IMAGES_PATH = os.path.join(sys._MEIPASS,'data','img') #type: ignore
-else:
-    IMAGES_PATH = os.path.join('data','img')
-    
-ICON_PATH = os.path.join(IMAGES_PATH,'icon.ico')
-EDIT_IMG_PATH = os.path.join(IMAGES_PATH,'edit.png')
-REFRESH_IMG_PATH = os.path.join(IMAGES_PATH,'refresh.png')
-ROTATE_R_IMG_PATH = os.path.join(IMAGES_PATH,'rotate_left.png')
-ROTATE_L_IMG_PATH = os.path.join(IMAGES_PATH,'rotate_right.png')
-TRASH_IMG_PATH = os.path.join(IMAGES_PATH,'trash.png')
 
 #Database parameters
 COD = "cod"

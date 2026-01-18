@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QDialog, QWidget, QVBoxLayout, QPushButton, QStackedWidget
 from gui.elements.status_console import StatusConsole
-from gui.elements.list_items.status_conosle_item_with_two_buttons import StatusConsleItemWithTwoButtons
+from gui.elements.list_items.status_console_item_with_two_buttons import StatusConsoleItemWithTwoButtons
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.presets.add_preset_widget import AddPresetWidget
 from gui.presets.modify_preset_widget import ModifyPresetWidget
@@ -11,7 +11,7 @@ class PresetsWindow(QDialog):
         super().__init__(parent)
         self.preset_manager = PresetManager()
         self.preset_manager.load()
-        self.items:list[StatusConsleItemWithTwoButtons] = []
+        self.items:list[StatusConsoleItemWithTwoButtons] = []
 
         self.setWindowTitle(self.tr("Presets"))
 
@@ -72,7 +72,7 @@ class PresetsWindow(QDialog):
 
     def add_preset_item_to_console(self,name:str,tool_tip:str):
         """Add a preset item to the list in the display view"""
-        item = StatusConsleItemWithTwoButtons(name,tool_tip,self.show_modify_preset_view,self.delete_preset)
+        item = StatusConsoleItemWithTwoButtons(name,tool_tip,self.show_modify_preset_view,self.delete_preset)
         self.status_console.add_item(item)
         self.items.append(item)
 

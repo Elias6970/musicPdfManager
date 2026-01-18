@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants.constants import MAX_COPIES,REFRESH_IMG_PATH
+from classes.constants.constants import MAX_COPIES
 from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate
@@ -7,10 +7,11 @@ from classes.printers.default_printer import DefaultPrinter
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
 from classes.constants.constants import DIR_SCORES
+from gui.config.constants import REFRESH_IMG_PATH
 from gui.pop_up_windows.error_window import Error_window
 from gui.elements.status_console import StatusConsole
 from gui.elements.score_search_bar import ScoreSearchBar
-from gui.elements.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
+from gui.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 from gui.elements.previewer import Preview
 
 import os
@@ -231,7 +232,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
             self.printer.add(path,copies)
 
             #Update the labels of the down scores
-            self.scroll.add_item(StatusConsleItemWithTwoTexts(self.printer.actual_piece.name,
+            self.scroll.add_item(StatusConsoleItemWithTwoTexts(self.printer.actual_piece.name,
                                                   self.part_combo_box.currentText(),
                                                   int(self.num_copies.currentText()),
                                                   self.printer.items[-1].id,

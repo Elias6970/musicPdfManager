@@ -1,11 +1,11 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
-from classes.constants.constants import TRASH_IMG_PATH
+from gui.config.constants import TRASH_IMG_PATH
 
 #Item in the status console
 # item_id: id to delete the item from a list
 # remove_widget: function to remove the widget from the layout
 # remove_from_list: function to remove the item from the list. (Used for the logic list to print)
-class StatusConsleItemWithTwoTexts(QtWidgets.QFrame):
+class StatusConsoleItemWithTwoTexts(QtWidgets.QFrame):
     def __init__(self, piece_name:str, instrument:str, copies:str|int, item_id:int|str, remove_widget, remove_from_list,parent=None) -> None:
         super().__init__(parent)
 

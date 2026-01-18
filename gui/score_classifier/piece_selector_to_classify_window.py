@@ -7,7 +7,7 @@ from classes.error import StopClassifyingException, PdfNotFoundException
 from gui.elements.status_console import StatusConsole
 from gui.elements.score_search_bar import ScoreSearchBar
 from gui.pop_up_windows.yes_no_window import YesNoWindow
-from gui.elements.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
+from gui.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 from gui.pop_up_windows.error_window import Error_window
 from gui.score_classifier.score_classifier_window import ScoreClassifierWindow
 import os
@@ -67,7 +67,7 @@ class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
     def btn_add(self):
         if self.validate_selection(self.search_bar.text()):
             self.pieces_to_classify.append(self.search_bar.text())
-            self.status_area.add_item(StatusConsleItemWithTwoTexts("",
+            self.status_area.add_item(StatusConsoleItemWithTwoTexts("",
                                      self.search_bar.text(),
                                      "",
                                      self.search_bar.text(),

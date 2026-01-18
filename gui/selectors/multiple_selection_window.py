@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants.constants import MAX_COPIES,REFRESH_IMG_PATH
+from classes.constants.constants import MAX_COPIES
 from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir
 from classes.files_management.dir import Dir_Error
@@ -11,13 +11,14 @@ from classes.preview_controller import Preview_controller
 from classes.presets.preset_manager import PresetManager
 from classes.presets.pieces_preset.pieces_preset_manager import PiecesPresetManager
 from classes.presets.pieces_preset.pieces_preset import PiecesPreset
+from gui.config.constants import REFRESH_IMG_PATH
 from gui.pop_up_windows.error_window import Error_window, ShowError
 from gui.pop_up_windows.type_of_export_window import TypeOfExportWindow, TypeOfExport
 from gui.presets.resolve_not_matched_presets import ResolveNotMatchedPresets
 from gui.pop_up_windows.yes_no_window import YesNoWindow
 from gui.elements.status_console import StatusConsole
 from gui.elements.score_search_bar import ScoreSearchBar
-from gui.elements.list_items.status_console_item_two_texts import StatusConsleItemWithTwoTexts
+from gui.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 from gui.elements.previewer import Preview
 import os
 
@@ -318,7 +319,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         
 
         #Update the labels of the down scores
-        self.scroll.add_item(StatusConsleItemWithTwoTexts(dir.name,
+        self.scroll.add_item(StatusConsoleItemWithTwoTexts(dir.name,
                                                 preset.name,
                                                 copies,
                                                 scrolleable_item_id,

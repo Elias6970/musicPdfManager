@@ -1,9 +1,10 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from classes.constants.constants import DB_NAME, RELATIVE_ARCHIVE_PATH, ICON_PATH, VERSION
+from classes.constants.constants import DB_PIECES_TABLE, RELATIVE_ARCHIVE_PATH, VERSION
 from classes.config import Configuration
 from classes.files_management.archive import Archive
 from classes.config import PLAIN_TEXT_CONFIG_PATH
 from classes.printers.dossier import Dossier
+from gui.config.constants import ICON_PATH
 from gui.pop_up_windows.error_window import Error_window
 from gui.selectors.individual_selection_window import IndividualSelectionWindow
 from gui.selectors.multiple_selection_window import MultipleSelectionWindow
@@ -29,7 +30,7 @@ class Main_window(QtWidgets.QMainWindow):
             Preferences_window(True,self)
 
         #Init the Archive 
-        self.archive = Archive(DB_NAME,RELATIVE_ARCHIVE_PATH())
+        self.archive = Archive(DB_PIECES_TABLE,RELATIVE_ARCHIVE_PATH())
         
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()

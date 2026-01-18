@@ -7,7 +7,7 @@ from classes.utils.name_manager import NameManager
 #########ALL FILES NEED TO BE IN THE ASSETS FOLDER###########
 
 IMPORT_FOLDER = "imports"
-DB_NAME = ":memory:"
+DB_PIECES_TABLE = ":memory:"
 TABLE_NAME = "prueba"
 
 root = os.path.dirname(os.path.abspath(__file__))
@@ -28,11 +28,9 @@ def clean_where_to_import():
 
 @pytest.fixture()
 def db_conn():
-    con = sqlite3.connect(DB_NAME)
+    con = sqlite3.connect(DB_PIECES_TABLE)
     yield con
     con.close()
-    #os.remove(DB_NAME)
-
 
 @pytest.mark.parametrize(
          "to_import, where_to_import, expected_pieces",
@@ -190,7 +188,7 @@ def test_simple_import_using_archive_names(db_conn:sqlite3.Connection,to_import:
     monkey_patch = pytest.MonkeyPatch()
     #monkey_patch.setattr(classes.constants.constants, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)  
     monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
-    monkey_patch.setattr(classes.db_manage,"DB_PATH", DB_NAME)
+    monkey_patch.setattr(classes.db_manage,"DB_PATH", lambda: DB_PIECES_TABLE)
     monkey_patch.setattr(classes.db_manage.Db_archive,"open_db", open_db_with_fixture)
     
     db = classes.db_manage.Db_archive(TABLE_NAME)

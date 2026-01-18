@@ -1,12 +1,12 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
-from classes.constants.constants import EDIT_IMG_PATH, TRASH_IMG_PATH
+from gui.config.constants import EDIT_IMG_PATH, TRASH_IMG_PATH
 
 #Item in a list with two buttons and one lbl
 #   name: name of the item. It's the identifier. Need to be unique
 #   tool_tip: tooltip for the item
 #   edit_func: function that is called when you press edit button. Recive the preset_name as parameter
 #   delete_func: function that is called when you press delete button. Recive the preset_name as parameter
-class StatusConsleItemWithTwoButtons(QtWidgets.QFrame):
+class StatusConsoleItemWithTwoButtons(QtWidgets.QFrame):
     def __init__(self, name:str, tool_tip:str, edit_func, delete_func,parent=None) -> None:
         super().__init__(parent)
 

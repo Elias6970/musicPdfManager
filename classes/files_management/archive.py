@@ -2,9 +2,8 @@ import os,re
 from classes.utils.name_manager import NameManager
 from classes.error import IncorrectCodOrNameError, CodAlreadyExistsError
 from classes.files_management.archive_file_manager import ArchiveFileManager
-from classes.files_management.dir import Dir
 from classes.db_manage import Db_archive
-from classes.constants.constants import DB_NAME,HYPHEN,IGNORE_FILES,RELATIVE_ARCHIVE_PATH
+from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 from classes.piece import Pieces_list
 
 #The connection with the db is started when the obj is created with the super.
@@ -117,6 +116,6 @@ class Archive:
         for i in names:
             if "DS_Store" not in i:
                 cod = NameManager.get_cod(i)
-                self.db.cur.execute("UPDATE {} SET digitalized = 1 WHERE cod = {};".format(DB_NAME,str(cod)))
+                self.db.cur.execute("UPDATE {} SET digitalized = 1 WHERE cod = {};".format(self.db.table_name,str(cod)))
                         
         self.db.con.commit()
