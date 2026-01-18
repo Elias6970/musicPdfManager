@@ -69,7 +69,8 @@ class Dir(File):
         file_dirs.close()
         file_db.close()
 
-    
+    def __str__(self):
+        return f"Dir: {self.name} Path: {self.path}"
 
 #Class for returning errors
 class Dir_Error(Dir):

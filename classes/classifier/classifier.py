@@ -82,7 +82,9 @@ class Classifier:
                 break
             except PdfNotFoundException:
                 print("Unable to find pdfs in piece:",self.pieces_to_classify[self.actual_piece].path)
-        
+            except IndexError:
+                raise NoMorePiecesToClassifyException()
+            
     #Manage the functionality to go to the previous page
     def previous_page_manager(self):
         if self.pdf_controller.actual_pdf_number == 0 and self.pdf_controller.get_actual_pdf().actual_pdf_page == 0:

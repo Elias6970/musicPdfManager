@@ -15,7 +15,7 @@ class Archive:
         self.pieces = Pieces_list()
         self.update_pieces()
 
-    def add_piece(self,cod, name, files:list[str],author:str, type:str, handwritten:bool, digitalized:bool, parted:bool):
+    def add_piece(self,cod:int|str, name:str, author:str, type:str,  files:list[str], handwritten:bool, digitalized:bool, parted:bool):
         """
         Add a new musical piece to the archive by creating its directory, copying associated files,
         and inserting its metadata into the database.
@@ -62,6 +62,18 @@ class Archive:
                 return True
             
         return False
+
+    def add_files_to_piece(self,parsed_name:str,files:list[str]) -> bool:
+        """
+        Add files to an existing piece in the archive.
+        Args:
+            parsed_name (str): Standardized name of the piece to which files will be added.
+            files (list[str]): List of file paths or file objects to add to the piece.
+        Returns:
+            bool: True if files are added successfully; False otherwise.
+        """
+        are_moved = ArchiveFileManager.copy_files_in_archive(parsed_name,files)
+        return are_moved
 
     def delete_piece(self,cod:int,std_name:str=""):
         """

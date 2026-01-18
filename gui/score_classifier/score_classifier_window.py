@@ -23,7 +23,12 @@ class ScoreClassifierWindow(QtWidgets.QDialog):
         self.init_ui()
 
         #Open the fiirst page
-        self.opener(self.classifier.first_page())
+        try:
+            self.opener(self.classifier.first_page())
+        except NoMorePiecesToClassifyException:
+            self.close()
+            return
+        
         self.piece_name_lbl.setText(self.classifier.actual_piece_name)
 
         self.exec()

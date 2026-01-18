@@ -1,7 +1,7 @@
 from PyQt6 import  QtWidgets
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
-from classes.files_management.archive_file_manager import ArchiveFileManager
+from classes.pieces_management.add_piece_controller import AddPieceController
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import PdfNotFoundException,StopClassifyingException
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
@@ -15,7 +15,8 @@ class Add_scores_to_existing_piece_window(AbstractSerchBarAndTwoButtonsWindow):
     def __init__(self,archive:Archive,parent=None):
         super(Add_scores_to_existing_piece_window,self).__init__(archive,self.add_score,parent)
         self.archive = archive
-        
+        self.controller = AddPieceController(self.archive)
+
         self.setWindowTitle(self.tr("Add scores to existing piece"))
         self.func_btn.setText(self.tr("Add"))
         
@@ -32,9 +33,14 @@ class Add_scores_to_existing_piece_window(AbstractSerchBarAndTwoButtonsWindow):
 
 
         if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-            if self.validate_selection(self.search_bar.text()) and ArchiveFileManager.copy_files_in_archive(self.search_bar.text(),file_dialog.selectedFiles()):
+            is_correct_std_name = self.validate_selection(self.search_bar.text())
+            files_are_added = self.controller.add_files_to_piece(self.search_bar.text(),file_dialog.selectedFiles())
+            if is_correct_std_name and files_are_added:
                 try: 
-                    ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.db.update_parted)
+                    #You reclassify the whole piece (this is why commented)
+                    #ScoreClassifierWindow([Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),self.search_bar.text()))],self.archive.db.update_parted)
+                    #TODO: Reclassify only the new files added
+                    pass
                 except StopClassifyingException:
                     pass
                 except PdfNotFoundException: 

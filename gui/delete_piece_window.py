@@ -1,7 +1,6 @@
 from PyQt6 import QtWidgets
-from classes.utils.name_manager import NameManager
 from classes.files_management.archive import Archive
-from classes.files_management.archive_file_manager import ArchiveFileManager
+from classes.pieces_management.delete_piece_controller import DeletePieceController
 from gui.abstract_windows.abstract_search_bar_and_two_buttons_window import AbstractSerchBarAndTwoButtonsWindow
 from gui.error_window import Error_window
 from classes.constants.constants import *
@@ -10,6 +9,8 @@ from classes.constants.constants import *
 class Delete_piece_window(AbstractSerchBarAndTwoButtonsWindow):
     def __init__(self,archive:Archive,parent=None):
         super(Delete_piece_window,self).__init__(archive,self.delete_piece,parent) #traducir
+
+        self.controller = DeletePieceController(self.archive)
 
         self.setWindowTitle(self.tr("Delete piece"))
         self.func_btn.setText(self.tr("Delete"))
@@ -24,8 +25,7 @@ class Delete_piece_window(AbstractSerchBarAndTwoButtonsWindow):
 
             if alert == QtWidgets.QMessageBox.StandardButton.Yes:
                 try:
-                    cod = NameManager.get_cod(self.piece_lbl.text())
-                    self.archive.delete_piece(cod,self.piece_lbl.text())
+                    self.controller.delete_piece(self.piece_lbl.text())
                     
                     alert = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Icon.NoIcon,"",self.tr("{} has been correctly deleted".format(self.piece_lbl.text())),QtWidgets.QMessageBox.StandardButton.Ok,self) #traducir
                     self.search_bar.clear() #Clear the text

@@ -3,9 +3,8 @@ from PyQt6 import QtWidgets
 from classes.utils.name_manager import NameManager
 from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
-from classes.files_management.archive_file_manager import ArchiveFileManager
+from classes.pieces_management.add_piece_controller import AddPieceController   
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH,HANDWRITTEN,DONT_ADD_SCORES,DONT_CLASSIFY_NOW
-from classes.error import IncorrectCodOrNameError, CodAlreadyExistsError
 from gui.error_window import Error_window
 from gui.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from gui.pop_up_windows.yes_no_window import YesNoWindow
@@ -23,6 +22,8 @@ import os
 class Add_piece_window(AbstractFieldsWindow):
     def __init__(self, archive: Archive, parent=None):
         super().__init__(archive, self.tr("Add new piece"), self.tr("Add"), [HANDWRITTEN,DONT_ADD_SCORES,DONT_CLASSIFY_NOW],self.add_score, parent=parent)
+
+        self.controller = AddPieceController(self.archive)
 
         self.line_cod.setText(str(self.archive.db.get_next_cod()))#cambiar
 
@@ -50,11 +51,11 @@ class Add_piece_window(AbstractFieldsWindow):
                 file_dialog.setAcceptMode(QtWidgets.QFileDialog.AcceptMode.AcceptOpen)  # Set the dialog to save mode
     
                 if file_dialog.exec() == QtWidgets.QFileDialog.DialogCode.Accepted:
-                    is_added = self.archive.add_piece(cod=cod,
+                    is_added = self.controller.add_piece(cod=cod,
                                                       name=name,
-                                                      files=file_dialog.selectedFiles(),
                                                       author=self.line_author.text(),
                                                       type=self.line_type.text(),
+                                                      files=file_dialog.selectedFiles(),
                                                       handwritten=self.checkboxes_dict[HANDWRITTEN].isChecked(),
                                                       digitalized=True,
                                                       parted=False)
@@ -71,11 +72,11 @@ class Add_piece_window(AbstractFieldsWindow):
                     YesNoWindow(self.tr("There has been an error selecting the files"),True,self)
                     return
             else:
-                is_added = self.archive.add_piece(cod=cod,
+                is_added = self.controller.add_piece(cod=cod,
                                                   name=name,
-                                                  files=[],
                                                   author=self.line_author.text(),
                                                   type=self.line_type.text(),
+                                                  files=[],
                                                   handwritten=self.checkboxes_dict[HANDWRITTEN].isChecked(),
                                                   digitalized=False,
                                                   parted=False)
