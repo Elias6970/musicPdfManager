@@ -1,8 +1,19 @@
-import zipfile,os, rarfile
+import zipfile,os, rarfile, sys
 from pathlib import Path
 from classes.loggers.default_logger import DefaultLogger
 
-rarfile.UNRAR_TOOL = r"C:\\Program Files\\unrar\\UnRAR.exe"
+def get_unrar_path():
+    # If the app is frozen (packaged by PyInstaller)
+    if getattr(sys, 'frozen', False):
+        # The temporary folder where PyInstaller extracts files
+        base_path = sys._MEIPASS
+    else:
+        # Normal python execution
+        base_path = os.path.dirname( r"C:\\Program Files\\unrar\\UnRAR.exe")
+    
+    return os.path.join(base_path, "UnRAR.exe")
+
+rarfile.UNRAR_TOOL = get_unrar_path()
 
 class FileDecompressor:
     logger:DefaultLogger

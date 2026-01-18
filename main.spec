@@ -1,10 +1,10 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+from PyInstaller.utils.hooks import collect_all
 
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[],
+    binaries=[('C:\\Program Files\\unrar\\UnRAR.exe','.')],
     datas=[
         ('data\\img\\edit.png','data\\img'),
         ('data\\img\\icon.ico','data\\img'),
@@ -36,7 +36,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,
@@ -45,5 +45,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=['data/img/icon.ico']
+    icon='data/img/icon.ico'
 )

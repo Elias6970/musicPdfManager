@@ -139,11 +139,13 @@ class Configuration():
     #Lenguage has to be in es_ES format
     @staticmethod
     def save_config(archive_path:str,presets_path:str,dossier_cover:str,language:str):
+        db = Configuration.get_db_path()
         with open(PLAIN_TEXT_CONFIG_PATH,'w') as file:
             file.write(CONFIG_ATTRIBUTE_ARCHIVE_PATH+"="+archive_path+"\n")
             file.write(CONFIG_ATTRIBUTE_DOSSIER_COVER+"="+dossier_cover+"\n")
             file.write(CONFIG_ATTRIBUTE_LANGUAGE+"="+language+"\n")
             file.write(CONFIG_ATTRIBUTE_PRESETS+"="+presets_path+"\n")
+            file.write(CONFIG_ATTRIBUTE_DB_PATH+"="+db+"\n")
 
                        
 

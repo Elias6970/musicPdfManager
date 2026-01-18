@@ -333,7 +333,7 @@ class PresetsPrinter(Printer):
                       output_path:str = os.path.join(tempfile.gettempdir(), os.urandom(24,).hex()),
                       max_columns:int = 3,
                       min_font_size:int = 9,
-                      initial_font_size:int = 20,
+                      initial_font_size:int = 18,
                       font_name:str = "Helvetica",
                       title_font_name:str = "Helvetica-Bold",
                       subtitle_font_name:str = "Helvetica-Oblique",
