@@ -28,7 +28,7 @@ class PresetsPrinter(Printer):
         self.add_piece_number = False #If the exported pdfs should have page numbers for each piece
         self.add_cover_page = False #If the exported pdfs should have a cover page
         self.add_index = False #If the exported pdfs should have an index page
-
+        self.add_blank_page_after_index = False #If the exported pdfs should have a blank page after the index
         self._solution:dict[str,dict[str,ResolvedPresetInstrument]] = {}
 
     def set_sorted_export(self,t:bool) -> None:
@@ -48,6 +48,10 @@ class PresetsPrinter(Printer):
     def set_add_index(self,t:bool) -> None:
         """Set if the exported pdfs should have an index page."""
         self.add_index = t
+
+    def set_add_blank_page_after_index(self,t:bool) -> None:
+        """Set if the exported pdfs should have a blank page after the index."""
+        self.add_blank_page_after_index = t
 
     #Return the printeablePreset id to remove it from a list
     def add(self,copies:int,preset:Preset,dir:Dir) -> int:
@@ -134,6 +138,7 @@ class PresetsPrinter(Printer):
             for i in self._solution.keys():
                 future = executor.submit(self._process_instrument_pdf,
                                             self.add_index,
+                                            self.add_blank_page_after_index,
                                             self.add_cover_page,
                                             self.add_piece_number,
                                             index,
@@ -153,6 +158,7 @@ class PresetsPrinter(Printer):
 
     def _process_instrument_pdf(self,
                                 add_index:bool,
+                                add_blank_page_after_index:bool,
                                 add_cover_page:bool,
                                 add_page_numbers:bool,
                                 index_path:str,
@@ -166,6 +172,9 @@ class PresetsPrinter(Printer):
 
             if add_index:
                 merge_pdf.append(index_path)
+            
+                if add_blank_page_after_index:
+                    merge_pdf.add_blank_page(width=A4[1], height=A4[0]) #Landscape blank page
 
             for j in exporting_order:
                 for _ in range(solution[instrument][j].copies):

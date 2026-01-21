@@ -24,6 +24,7 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         self.add_piece_numbers:bool = False
         self.add_cover_page:bool = False
         self.add_index:bool = False
+        self.add_blank_page_after_index:bool = False
 
         self.setWindowModality(QtCore.Qt.WindowModality.WindowModal)
         self.setWindowTitle(self.tr("Exporting configuration"))
@@ -54,10 +55,17 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         _export_types_group.buttonClicked.connect(self.manage_btns_enableability)
 
         self._add_index_cb = QtWidgets.QCheckBox()
+        self._add_index_cb.stateChanged.connect(self.manage_blank_page_after_index_enableability)
         self._add_index_cb.setText(self.tr("Add index to each pdf."))
         self._add_index_cb.setToolTip(self.tr("Add an index page at the beginning of each pdf with the list of pieces included."))
         self._add_index_cb.setEnabled(False)
         self._add_index_cb.setStyleSheet("padding-left: 25px;")
+
+        self._add_blank_page_after_index_cb = QtWidgets.QCheckBox()
+        self._add_blank_page_after_index_cb.setText(self.tr("Add blank page after index."))
+        self._add_blank_page_after_index_cb.setToolTip(self.tr("Add a blank page after the index page in each pdf."))
+        self._add_blank_page_after_index_cb.setEnabled(False)
+        self._add_blank_page_after_index_cb.setStyleSheet("padding-left: 50px;")
 
         self._sort_alphabetically_cb = QtWidgets.QCheckBox()
         self._sort_alphabetically_cb.setText(self.tr("Sort the pdfs alphabetically."))
@@ -97,6 +105,7 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         _container_layout.addWidget(self._by_pieces_rb)
         _container_layout.addWidget(self._by_instruments_rb)
         _container_layout.addWidget(self._add_index_cb)
+        _container_layout.addWidget(self._add_blank_page_after_index_cb)
         _container_layout.addWidget(self._sort_alphabetically_cb)
         _container_layout.addWidget(self._add_piece_numbers_cb)
         _container_layout.addWidget(self._add_cover_page_cb)
@@ -116,6 +125,7 @@ class TypeOfExportWindow(QtWidgets.QDialog):
             self._add_piece_numbers_cb.setEnabled(True)
             self._add_cover_page_cb.setEnabled(True)
             self._add_index_cb.setEnabled(True)
+            #self._add_blank_page_after_index_cb.setEnabled(True)
         else:
             self._sort_alphabetically_cb.setEnabled(False)
             self._sort_alphabetically_cb.setChecked(False)
@@ -125,7 +135,15 @@ class TypeOfExportWindow(QtWidgets.QDialog):
             self._add_cover_page_cb.setChecked(False)
             self._add_index_cb.setEnabled(False)
             self._add_index_cb.setChecked(False)
+            #self._add_blank_page_after_index_cb.setEnabled(False)
+            #self._add_blank_page_after_index_cb.setChecked(False)
 
+    def manage_blank_page_after_index_enableability(self):
+        if self._add_index_cb.isChecked():
+            self._add_blank_page_after_index_cb.setEnabled(True)
+        else:
+            self._add_blank_page_after_index_cb.setEnabled(False)
+            self._add_blank_page_after_index_cb.setChecked(False)
     
     #Save the options in variables
     def confirm(self):
@@ -139,6 +157,7 @@ class TypeOfExportWindow(QtWidgets.QDialog):
             self.add_piece_numbers = self._add_piece_numbers_cb.isChecked()
             self.add_cover_page = self._add_cover_page_cb.isChecked()
             self.add_index = self._add_index_cb.isChecked()
+            self.add_blank_page_after_index = self._add_blank_page_after_index_cb.isChecked()
         else:
             ShowError.show_tooltip_error(self.tr("You need to select the type of export"),5000,self._btn_confirm)
             return #You need to select an option

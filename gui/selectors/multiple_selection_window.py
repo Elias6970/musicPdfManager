@@ -353,6 +353,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                     self.printer.set_add_piece_numbers(window.add_piece_numbers)
                     self.printer.set_add_cover_page(window.add_cover_page)
                     self.printer.set_add_index(window.add_index)
+                    self.printer.set_add_blank_page_after_index(window.add_blank_page_after_index)
 
                     #Make the preporcess and solve the errros
                     errors = self.printer.preprocess_export()
