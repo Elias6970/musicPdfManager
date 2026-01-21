@@ -370,6 +370,8 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
 
                     #Export and save
                     pdf_path = self.dialog_window_select_exporting_path()
+                    if not pdf_path:
+                        return
                     self.printer.export_by_instruments(pdf_path)
 
                     YesNoWindow(self.tr("Pdfs exported successfully"),True,self)

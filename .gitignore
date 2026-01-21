@@ -19,6 +19,7 @@ dist
 *.db
 presets.json
 pieces_presets.json
+!instruments_order.txt
 .pytest_cache
 data/logs/
 tests/**/data

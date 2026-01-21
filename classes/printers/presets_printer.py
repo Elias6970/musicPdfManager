@@ -108,6 +108,20 @@ class PresetsPrinter(Printer):
 
         return errors
 
+    def create_export_folder(self,path:str) -> str:
+        """Create the exporting folder in the given path and return its path"""
+        exporting_folder = os.path.join(path,PresetsPrinter.EXPORTING_FOLDER_NAME)
+        try:
+            os.mkdir(exporting_folder)
+        except FileExistsError:
+            pass
+
+        return exporting_folder
+
+    def export_by_pieces(self,path:str) -> None:
+        exporting_folder = self.create_export_folder(path)
+
+        
 
     def export_by_instruments(self,path:str) -> None:
         """
@@ -117,17 +131,12 @@ class PresetsPrinter(Printer):
             path (str): The path where the pdfs will be exported
         """
 
+        exporting_folder = self.create_export_folder(path)
+
         #Get the exporting order by the order added
         exporting_order:list[str] = [str(i.dir.name) for i in self.items]
         if self.sorted_export:
             exporting_order.sort(key=lambda x: NameManager.get_name(x))
-
-        #Create folder in the path selected
-        exporting_folder = os.path.join(path,PresetsPrinter.EXPORTING_FOLDER_NAME)
-        try:
-            os.mkdir(exporting_folder)
-        except FileExistsError:
-            pass
 
         index = None
         if self.add_index:

@@ -25,6 +25,10 @@ class ResolveNotMatchedPresets(QtWidgets.QDialog):
 
         self.setLayout(_layout)
 
+        if len(unresolved) == 0:
+            self.hide()
+            return
+        
         #Genereate 
         for i in unresolved:
             if i.dir != None and i.state == PresetResolverStates.NOT_RESOLVED:
@@ -34,7 +38,6 @@ class ResolveNotMatchedPresets(QtWidgets.QDialog):
                 self.status_console.add_item(item)
                 self.items.append(item)
         
-
 
         self.exec()
 
