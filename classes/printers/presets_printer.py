@@ -1,6 +1,7 @@
 from concurrent.futures import ProcessPoolExecutor
 from operator import index
 from classes.utils.name_manager import NameManager
+from classes.custom_order.instrument_sorter import InstrumentSorter
 from classes.printers.printer import Printer
 from classes.printers.printeable_preset import PrinteablePreset
 from classes.presets.preset import Preset
@@ -118,10 +119,60 @@ class PresetsPrinter(Printer):
 
         return exporting_folder
 
+    
+    def _process_piece_pdf(self,piece:str, instruments_order:list[str], exporting_folder:str) -> None:
+        """
+        Create a single PDF per piece by merging instrument PDFs in the given order.
+        For each instrument in `instruments_order`, appends the resolved PDF for the
+        specified `piece` as many times as its `copies` value indicates, skipping
+        missing resolutions. The merged document is written to
+        `exporting_folder/<piece>.pdf`.
+        Args:
+            piece (str): Name/identifier of the piece to export.
+            instruments_order (list[str]): Ordered list of instrument names to merge.
+            exporting_folder (str): Destination directory for the exported PDF.
+        Returns:
+            None
+        """
+        
+        merge_pdf = pypdf.PdfWriter()
+
+        for instrument in instruments_order:
+            for _ in range(self._solution[instrument][piece].copies):
+                pdf = self._solution[instrument][piece].resolution
+                if pdf == None:
+                    continue
+                merge_pdf.append(pdf)
+            
+        merge_pdf.write(os.path.join(exporting_folder,piece)+".pdf")
+        merge_pdf.close()          
+
     def export_by_pieces(self,path:str) -> None:
+        """
+        Generate all the pdf to print splitted by pieces
+        """
         exporting_folder = self.create_export_folder(path)
 
-        
+        pieces = list(self._solution[list(self._solution.keys())[0]].keys())
+
+        instruments_order = InstrumentSorter.sort_instruments(list(self._solution.keys()))
+
+        tasks = []
+        with ProcessPoolExecutor() as executor:
+            for piece in pieces:
+                future = executor.submit(self._process_piece_pdf,
+                                         piece,
+                                         instruments_order,
+                                         exporting_folder)
+                tasks.append(future)
+            
+            for task in tasks:
+                try:
+                    task.result()
+                except Exception as e:
+                    print(f"Error exporting instrument PDF: {e}")      
+               
+            
 
     def export_by_instruments(self,path:str) -> None:
         """

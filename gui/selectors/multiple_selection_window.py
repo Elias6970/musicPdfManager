@@ -345,8 +345,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 window = TypeOfExportWindow(self)
                 if window.type_of_export == TypeOfExport.ALL_IN_ONE:
                     YesNoWindow("Not implemented yet",True,self)
-                elif window.type_of_export == TypeOfExport.BY_PIECES:
-                    YesNoWindow("Not implemented yet",True,self)
+                    return
                 elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
                     self.printer.set_sorted_export(window.sort_alphabetically)
                     self.printer.set_ignore_presets_copies(window.ignore_preset_copies)
@@ -355,26 +354,32 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                     self.printer.set_add_index(window.add_index)
                     self.printer.set_add_blank_page_after_index(window.add_blank_page_after_index)
 
-                    #Make the preporcess and solve the errros
-                    errors = self.printer.preprocess_export()
-                    r = ResolveNotMatchedPresets(errors,self)
+                #Make the preporcess and solve the errros
+                errors = self.printer.preprocess_export()
+                r = ResolveNotMatchedPresets(errors,self)
 
-                    if len(r.resolved) < len(errors):
-                        return #Not all scores selected
-                    if len(r.resolved) > len(errors):
-                        raise MoreScoresThanPresetsException(self.tr("Something went wrong during the selection of the presets"))
-                    
-                    #Add resolution to the solution
-                    for i in r.resolved:
-                        self.printer.add_to_solution(i)
+                if len(r.resolved) < len(errors):
+                    return #Not all scores selected
+                if len(r.resolved) > len(errors):
+                    raise MoreScoresThanPresetsException(self.tr("Something went wrong during the selection of the presets"))
+                
+                #Add resolution to the solution
+                for i in r.resolved:
+                    self.printer.add_to_solution(i)
 
-                    #Export and save
-                    pdf_path = self.dialog_window_select_exporting_path()
-                    if not pdf_path:
-                        return
+                #Export and save
+                pdf_path = self.dialog_window_select_exporting_path()
+                if not pdf_path:
+                    return
+                
+                if window.type_of_export == TypeOfExport.ALL_IN_ONE:
+                    pass
+                elif window.type_of_export == TypeOfExport.BY_PIECES:
+                    self.printer.export_by_pieces(pdf_path)
+                elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
                     self.printer.export_by_instruments(pdf_path)
 
-                    YesNoWindow(self.tr("Pdfs exported successfully"),True,self)
+                YesNoWindow(self.tr("Pdfs exported successfully"),True,self)
             
             else:
                 error = self.tr("*You need to add some piece")
