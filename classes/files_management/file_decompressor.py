@@ -1,17 +1,49 @@
-import zipfile,os, rarfile, sys
+import zipfile,os, rarfile, sys, shutil
 from pathlib import Path
 from classes.loggers.default_logger import DefaultLogger
 
-def get_unrar_path():
-    # If the app is frozen (packaged by PyInstaller)
-    if getattr(sys, 'frozen', False):
-        # The temporary folder where PyInstaller extracts files
-        base_path = sys._MEIPASS
-    else:
-        # Normal python execution
-        base_path = os.path.dirname( r"C:\\Program Files\\unrar\\UnRAR.exe")
-    
-    return os.path.join(base_path, "UnRAR.exe")
+def get_unrar_path() -> str | None:
+    """
+    Locates the UnRAR executable.
+    Returns the absolute path as a string, or None if not found.
+    """
+    # 1. Priority: Check Environment Variable (User Override)
+    # If the user explicitly set this, trust them and return it.
+    env_path = os.environ.get("UNRAR_PATH")
+    if env_path and os.path.exists(env_path):
+        return env_path
+
+    exe_name = "UnRAR.exe" if sys.platform.startswith("win") else "unrar"
+
+    # 2. Priority: PyInstaller / Frozen Bundle
+    # If wrapped in an exe, check the temporary extraction folder.
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        bundle_path = os.path.join(sys._MEIPASS, exe_name)
+        if os.path.exists(bundle_path):
+            return bundle_path
+
+    # 3. Priority: System PATH (The standard way)
+    # This works for Linux/macOS and correctly configured Windows.
+    path_from_shutil = shutil.which(exe_name)
+    if path_from_shutil:
+        return path_from_shutil
+
+    # 4. Priority: Common Windows Installation Paths (Fallback)
+    if sys.platform.startswith("win"):
+        # Check standard 64-bit and 32-bit WinRAR folders
+        common_paths = [
+            os.path.join(os.environ.get("ProgramFiles", r"C:\\Program Files"), "WinRAR", exe_name),
+            os.path.join(os.environ.get("ProgramFiles(x86)", r"C:\\Program Files (x86)"), "WinRAR", exe_name),
+            # Keep your original guess just in case
+            r"C:\\Program Files\\Unrar\\UnRAR.exe", 
+        ]
+        
+        for candidate in common_paths:
+            if os.path.exists(candidate):
+                return candidate
+
+    # 5. Not found
+    return None
 
 rarfile.UNRAR_TOOL = get_unrar_path()
 
