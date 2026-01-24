@@ -343,10 +343,8 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
             if self.printer.items:
                 #Ask for the type of creation. By instruments or by pieces
                 window = TypeOfExportWindow(self)
-                if window.type_of_export == TypeOfExport.ALL_IN_ONE:
-                    YesNoWindow("Not implemented yet",True,self)
-                    return
-                elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
+
+                if window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
                     self.printer.set_sorted_export(window.sort_alphabetically)
                     self.printer.set_ignore_presets_copies(window.ignore_preset_copies)
                     self.printer.set_add_piece_numbers(window.add_piece_numbers)
@@ -373,7 +371,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                     return
                 
                 if window.type_of_export == TypeOfExport.ALL_IN_ONE:
-                    pass
+                    self.printer.export_all_in_one(pdf_path)
                 elif window.type_of_export == TypeOfExport.BY_PIECES:
                     self.printer.export_by_pieces(pdf_path)
                 elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
@@ -505,9 +503,6 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
     def load_pieces_preset(self, preset_name:str):
         """Load a pieces preset by the name in the mulple selection window"""
         self.refresh()
-        print("preset_name",preset_name)
-        print(self.sender())
-        [print(i) for i in self.piece_preset_manager.presets]
         dir_error_msg:str = self.tr("The pieces are not found:\n")
         dir_error:bool = False
         preset_error_msg:str = self.tr("The instrument presets are not found:\n")

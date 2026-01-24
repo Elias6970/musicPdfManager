@@ -8,7 +8,7 @@ class InstrumentSorter:
     NON_MATCH_INDEX = float('inf')
 
     ORDER_LIST = load_instruments_order()
-    print(ORDER_LIST)
+
     # We pre-calculate the lowercase versions of the order list.
     # This prevents us from running .lower() on the order list N times per file.
     # We store: (original_index, lowercase_word, length_of_word)

@@ -1,5 +1,7 @@
 from concurrent.futures import ProcessPoolExecutor
 from operator import index
+from pathlib import Path
+import shutil
 from classes.utils.name_manager import NameManager
 from classes.custom_order.instrument_sorter import InstrumentSorter
 from classes.printers.printer import Printer
@@ -119,8 +121,7 @@ class PresetsPrinter(Printer):
 
         return exporting_folder
 
-    
-    def _process_piece_pdf(self,piece:str, instruments_order:list[str], exporting_folder:str) -> None:
+    def _process_piece_pdf(self,piece:str, instruments_order:list[str], exporting_folder:str) -> str:
         """
         Create a single PDF per piece by merging instrument PDFs in the given order.
         For each instrument in `instruments_order`, appends the resolved PDF for the
@@ -132,7 +133,7 @@ class PresetsPrinter(Printer):
             instruments_order (list[str]): Ordered list of instrument names to merge.
             exporting_folder (str): Destination directory for the exported PDF.
         Returns:
-            None
+            str: Path to the generated PDF file.
         """
         
         merge_pdf = pypdf.PdfWriter()
@@ -143,9 +144,49 @@ class PresetsPrinter(Printer):
                 if pdf == None:
                     continue
                 merge_pdf.append(pdf)
+        
+        output_file = Path(exporting_folder) / f"{piece}.pdf"
+        merge_pdf.write(str(output_file))
+        merge_pdf.close()   
+
+        return str(output_file)    
+
+    def export_all_in_one(self,path:str) -> None:
+        """
+        Generate one single pdf with all the pieces and instruments to printed
+        """
+        exporting_folder = self.create_export_folder(path)
+        exporting_temp_folder = Path(tempfile.gettempdir()) / os.urandom(24).hex()
+        exporting_temp_folder.mkdir(parents=True, exist_ok=True)
+
+        pieces = list(self._solution[list(self._solution.keys())[0]].keys())
+
+        instruments_order = InstrumentSorter.sort_instruments(list(self._solution.keys()))
+
+        tasks = []
+        with ProcessPoolExecutor() as executor:
+            for piece in pieces:
+                future = executor.submit(self._process_piece_pdf,
+                                         piece,
+                                         instruments_order,
+                                         exporting_temp_folder)
+                tasks.append(future)
             
-        merge_pdf.write(os.path.join(exporting_folder,piece)+".pdf")
-        merge_pdf.close()          
+            merge_pdf = pypdf.PdfWriter()
+            for task in tasks:
+                try:
+                    if isinstance(task.result(), str):
+                        merge_pdf.append(task.result())
+                        print(f"Added piece PDF: {task.result()}")
+                except Exception as e:
+                    print(f"Error exporting instrument PDF: {e}")  
+            
+            merge_pdf.write(os.path.join(exporting_folder,"all_in_one.pdf"))
+            merge_pdf.close()
+
+        #Delete the temp folder
+        shutil.rmtree(exporting_temp_folder)
+         
 
     def export_by_pieces(self,path:str) -> None:
         """
