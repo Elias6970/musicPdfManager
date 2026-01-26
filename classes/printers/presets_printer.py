@@ -385,7 +385,7 @@ class PresetsPrinter(Printer):
 
     def _create_number_overlay(self, width: float, height: float, number_text: str = "1") -> io.BytesIO:
         """
-        Create a transparent PDF overlay with a page number at the bottom-right corner.
+        Create a transparent PDF overlay with a page number at the bottom-right and top-right corners.
         Args:
             width (float): The width of the PDF page in points.
             height (float): The height of the PDF page in points.
@@ -403,8 +403,11 @@ class PresetsPrinter(Printer):
 
         if int(number_text) < 10:
             c.drawRightString(width - 11, 7, str(number_text))
+            c.drawRightString(width - 11, height - font_size -7, str(number_text))
         else:
             c.drawRightString(width - 7, 7, str(number_text))
+            c.drawRightString(width - 7, height - font_size -7, str(number_text))
+
 
         c.save()
         buffer.seek(0)
