@@ -1,5 +1,6 @@
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.files_management.file_decompressor import FileDecompressor
+from classes.files_management.excel_controller import ExcelController
 from classes.db_manage import Db_archive
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 from classes.loggers.massive_importer_logger import MassiveImporterLogger
@@ -14,6 +15,7 @@ class MassiveImporter:
         self.logger = MassiveImporterLogger()
         self.fd = FileDecompressor(MassiveImporterLogger())
         self.db = db
+        self.excel_controller = ExcelController()
 
     
     def __manage_a_file(self,file:Path,temp_dir:Path) -> list[str]:
@@ -79,7 +81,7 @@ class MassiveImporter:
         return unique_pieces
     
     
-    def __generate_report(self,imported:list[str],not_imported:list[str]) -> str:
+    def _generate_report(self,imported:list[str],not_imported:list[str]) -> str:
         """
         Generate a string with imported and not imported pieces
         """
@@ -161,8 +163,10 @@ class MassiveImporter:
                 if use_db_name:
                     self.logger.info("Using db name...")
                     cod = NameManager.get_cod(dir_path.name)
-                    name = self.db.get_with_equals("cod",cod,"cod,name")
-                    std_name = NameManager.get_std_name(cod,name[0][1]) if name else None
+                    name = self.db.get_with_equals("cod", cod, "name")
+                    print(name)
+                    std_name = ArchiveFileManager.parse_name_to_file_manager(NameManager.get_std_name(cod, name[0][0])) if name else None
+                    print(std_name)
                     if std_name == None:
                         self.logger.error("use_db_name flag enabled but cod is not in the db for %s. Using this name",dir_path.name)
                         dir_name = dir_path.name
@@ -189,14 +193,14 @@ class MassiveImporter:
                 shutil.rmtree(temp_dir)
 
 
-                imported.append(dir_path.name)
+                imported.append(dir_name)
 
             except Exception as e:
                 self.logger.error(f"Error importing piece {dir_path.name}. {type(e)}:{e}")
                 not_imported.append(dir_path.name)
 
 
-        print(self.__generate_report(imported,not_imported))
+        print(self._generate_report(imported,not_imported))
         return (imported,not_imported)
 
 
@@ -235,7 +239,39 @@ class MassiveImporter:
         return (imported_pieces,not_imported_pieces,imported_in_db)
 
 
+    def import_with_data(self, pieces_to_import:str, excel_data_path:str, overwrite:bool=False, ignore_first_row:bool=True) -> tuple[list[str],list[str],list[str]]:
+        """
+        It imports the pieces into the archive and db using an excel file to get the data.
+        The piece name is taken from the excel file. To match the folder and the excell it uses the cod.
+        
+        :param pieces_to_import: absolut path to the folder where pieces to import are. 
+            At this folder, each folder inside is consider as a piece. The name of the folders need to be in a standard way (cod-name).
+            All the folders inside a piece are ignored and only the files are imported. Also junk files like .DS_Store aren't imported
+        :type pieces_to_import: str
+        :param excel_data_path: Path to the excel file with the data. Can be xlsx or xlsm.
+        :type excel_data_path: str
+        :param overwrite: overwrite the pieces that already exist in the archive (NOT IMPLEMENTED)
+        :type overwrite: bool
+        :param ignore_first_row: Ignore the first row of the excel file (usually the header)
+        :type ignore_first_row: bool
+        :return: Return a tuple with three list.
+          the first is the imported pieces with the imported name,
+          the second the not imported pieces due to errors and 
+          the third the pieces imported in the db.
+        :rtype:  tuple[list[str],list[str],list[str]]
+        """
 
+        db_tuples = self.excel_controller.read_excel(excel_data_path, ignore_first_row)
+        self.db.massive_insert(db_tuples)
+        
+        imported_pieces,not_imported_pieces = self.import_only__into_archive(pieces_to_import, overwrite, use_db_name=True)
 
+        imported_in_db = [NameManager.get_std_name(t[0],t[1]) for t in db_tuples]
+        imported_in_db_ids = [t[0] for t in db_tuples]
+        self.db.update_digitalized_bulk(imported_in_db_ids)
+        
+        return (imported_pieces,not_imported_pieces,imported_in_db)
+
+        
 
 

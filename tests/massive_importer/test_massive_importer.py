@@ -4,6 +4,7 @@ from classes.files_management.massive_importer import MassiveImporter
 import classes.files_management.archive_file_manager
 import classes.db_manage
 from classes.utils.name_manager import NameManager
+from classes.files_management.archive_file_manager import ArchiveFileManager
 #########ALL FILES NEED TO BE IN THE ASSETS FOLDER###########
 
 IMPORT_FOLDER = "imports"
@@ -246,3 +247,121 @@ def test_simple_import_using_archive_names(db_conn:sqlite3.Connection,to_import:
         getted =  db_conn.execute(f"SELECT cod,name FROM {TABLE_NAME} WHERE cod={NameManager.get_cod(i)} LIMIT 1").fetchone()
         assert i == NameManager.get_std_name(getted[0],getted[1])
 
+
+#The expected_pieces dict key is the expected the name given by ArchiveFileManager.parse_name_to_file_manager
+@pytest.mark.parametrize(
+            "to_import, where_to_import, excel_data, expected_pieces",
+        [
+            ("test_1", IMPORT_FOLDER,
+                [(1, "Title From Excel", "Comp", "Arr", "Inst")],
+                {
+                "1-TITLE FROM EXCEL": {
+                    "expected_scores": ["blank.pdf", "5_blank_pages.pdf"],
+                    "expected_extras": []
+                }
+            }),
+            ("test_2", IMPORT_FOLDER,
+                [(1, "Uno Title", "C", "A", "I"), (2, "Dos Title", "C", "A", "I")],
+                {
+                "1-UNO TITLE": {
+                    "expected_scores": ["blank.pdf", "5_blank_pages.pdf"],
+                    "expected_extras": []
+                },
+                "2-DOS TITLE": {
+                    "expected_scores": ["blank.pdf"],
+                    "expected_extras": ["test.txt"]
+                }
+            }),
+            ("test_5", IMPORT_FOLDER,
+                [(5, "Cinco From Excel", "C", "A", "I"), (6, "Seis From Excel", "C", "A", "I")],
+                {
+                "5-CINCO FROM EXCEL": {
+                    "expected_scores": ["blank.pdf", "empty.pdf", "5_blank_pages.pdf"],
+                    "expected_extras": []
+                }
+            }),
+
+            # Case where directory name matches COD but has different name, expecting DB name to prevail
+            ("test_6", IMPORT_FOLDER,
+                [(6, "Correct Title From DB", "C", "A", "I")],
+                {
+                "6-CORRECT TITLE FROM DB": {
+                    "expected_scores": ["blank.pdf", "empty.pdf", "5_blank_pages.pdf"],
+                    "expected_extras": []
+                }
+            })
+        ]
+)
+def test_import_with_data(db_conn: sqlite3.Connection, to_import: list[str], where_to_import: str, excel_data: list, expected_pieces: dict[str, dict[str, list[str]]]):
+    def open_db_with_fixture(self):
+        self.con = db_conn
+        self.cur = self.con.cursor()
+
+    monkey_patch = pytest.MonkeyPatch()
+    monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
+    monkey_patch.setattr(classes.db_manage, "DB_PATH", lambda: DB_PIECES_TABLE)
+    monkey_patch.setattr(classes.db_manage.Db_archive, "open_db", open_db_with_fixture)
+
+    # Mock ExcelController to return our test data without reading a real file
+    class MockExcelController:
+        def read_excel(self, path, ignore_first_row):
+            return excel_data
+
+    db = classes.db_manage.Db_archive(TABLE_NAME)
+    mi = MassiveImporter(db)
+    mi.excel_controller = MockExcelController()
+
+    # The path "dummy.xlsx" doesn't matter because we mocked the reader
+    imported_pieces, not_imported_pieces, imported_in_db = mi.import_with_data(to_import, "dummy.xlsx", overwrite=False, ignore_first_row=True)
+
+    assert len(not_imported_pieces) == 0
+
+    # Validate that generated keys match expected piece names (which should come from Excel/DB logic)
+    assert len(imported_pieces) == len(expected_pieces)
+    assert len(imported_in_db) == len(excel_data) # All excel rows should be in DB
+
+    imported_pieces.sort()
+    expected_pieces_list = list(expected_pieces.keys())
+    expected_pieces_list.sort()
+
+    for imported, expected in zip(imported_pieces, expected_pieces_list):
+        assert imported == ArchiveFileManager.parse_name_to_file_manager(expected)
+        # Also verify it exists in DB with that name
+        cod = NameManager.get_cod(imported)
+        db_row = db_conn.execute(f"SELECT cod, name FROM {TABLE_NAME} WHERE cod=?", (cod,)).fetchone()
+        assert db_row is not None
+        assert NameManager.get_std_name(db_row[0], db_row[1]) == imported
+
+    # Compare files inside folders
+    for i in imported_pieces:
+        try:
+            piece = expected_pieces[i]
+            expected_scores = piece["expected_scores"]
+            expected_extras = piece["expected_extras"]
+
+            # Compare the scores
+            scores_path = Path(os.path.join(where_to_import, i, "partituras"))
+            if scores_path.exists():
+                score_files = [f.name for f in scores_path.iterdir() if f.is_file()]
+            else:
+                score_files = []
+            
+            score_files.sort()
+            expected_scores.sort()
+
+            assert score_files == expected_scores
+
+            # Compare the extras
+            extras_path = Path(os.path.join(where_to_import, i, "extras"))
+            if extras_path.exists():
+                extras_files = [f.name for f in extras_path.iterdir() if f.is_file()]
+            else:
+                extras_files = []
+
+            extras_files.sort()
+            expected_extras.sort()
+
+            assert extras_files == expected_extras
+
+        except KeyError:
+            pytest.fail(f"The piece {i} wasn't expected to be imported")

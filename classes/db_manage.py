@@ -1,4 +1,4 @@
-import sqlite3,xlrd,openpyxl
+import sqlite3
 from classes.constants.constants import DB_PATH, DB_PIECES_TABLE
 from classes.error import IncorrectCodOrNameError, CodAlreadyExistsError
 
@@ -48,7 +48,7 @@ class Db_archive(Db):
 
 
     #Insert a score in the db
-    def insert(self,cod:int, name:str, author:str="", type="",handwritten=0,parted=0,digitalized=0) -> bool:
+    def insert(self,cod:int, name:str, author:str="", type="",handwritten=0,parted=0,digitalized=0, commit=True) -> bool:
         """
         Insert a piece into the db. It can raise IncorrectCodOrNameError and CodAlreadyExistsError exceptions
         """
@@ -57,7 +57,8 @@ class Db_archive(Db):
             if int(cod) > 0 and name is not None and len(name.strip()) > 0:
 
                 self.cur.execute("INSERT INTO {} (cod, name, author, type, created_date, last_modification, digitalized, handwritten, parted) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, ?, ?, ?)".format(self.table_name), (str(cod), str(name), str(author), str(type),digitalized,handwritten,parted))
-                self.con.commit()
+                if commit:
+                    self.con.commit()
                 return True
             
             else:
@@ -72,47 +73,29 @@ class Db_archive(Db):
             print(f"Exception inserting: {e}")
 
         return False
+    
+    def massive_insert(self, pieces:list[tuple[int,str,str,str]]) -> int:
+        """
+        Insert multiple pieces into the db. It returns the number of pieces inserted correctly.
+        Each piece is a tuple with (cod:int, name:str, author:str, type:str). 
+        Handwritten, parted and digitalized are set to 0 by default.
 
-    #Insert into the db from excel xlsx 
-    #Imports the first four columns of the excel and must be cod,name,author,type. IN THIS ORDER
-    def insert_from_xlsx(self,file):
-        i = 0
-
-        excel = openpyxl.load_workbook(file)
-        sheet = excel.active
-        for row in sheet.iter_rows(): # type: ignore    
-            if i == 0: #Jump the firsts iteration
-                i+=1
-                continue 
-
-            row_values = list(cell.value for cell in row)
-
-            #Don't analize the empty rows 
-            if row_values[0] == None:
-                continue
+        :param pieces: List of pieces to insert.
+        :type pieces: list[tuple[int,str,str,str]]
+        :return: Number of pieces inserted correctly.
+        :rtype: int
+        """
+        inserted = 0
+        for piece in pieces:
             try:
-                
-                self.insert(int(str(row_values[0])),str(row_values[1]),str(row_values[2]),row_values[3])
-            except Exception as e:
-                print(f"Error inserting: {str(row_values)}")
-            
-            i+=1         
+                if self.insert(piece[0],piece[1],piece[2],piece[3], 0, 0, 0, commit=False):
+                    inserted += 1
+            except (IncorrectCodOrNameError, CodAlreadyExistsError):
+                print("Skipping piece due to error:", piece)
+        
+        self.con.commit()
 
-
-    #Insert into the db from excel xls
-    #Imports the first four columns of the excel and must be cod,name,author,type. IN THIS ORDER
-    def insert_from_xls(self,file):
-        excel = xlrd.open_workbook(file)
-        sheet = excel.sheet_by_index(0)
-
-        for i in range(1,sheet.nrows):
-            row = sheet.row_values(i)
-            try:
-                self.insert(int(row[0]),str(row[1]),row[2],row[3])
-            except Exception as e:
-                print(f"Error inserting {str(row)}")
-
-        self.cur.close()
+        return inserted
 
 
     def delete_score(self,cod):
@@ -199,6 +182,17 @@ class Db_archive(Db):
         self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,parted=? WHERE cod=?".format(self.table_name),(int(parted),str(cod)))
         self.con.commit()
         return True
+
+    def update_digitalized(self,cod:str|int,digitalized:bool=True,commit:bool=True):
+        self.cur.execute("UPDATE {} SET last_modification=CURRENT_TIMESTAMP,digitalized=? WHERE cod=?".format(self.table_name),(int(digitalized),str(cod)))
+        if commit:
+            self.con.commit()
+        return True
+    
+    def update_digitalized_bulk(self,cods:list[int],digitalized:bool=True):
+        for cod in cods:
+            self.update_digitalized(cod,digitalized,commit=False)
+        self.con.commit()
 
     #Check if a piece is parted
     def is_parted(self,cod) -> bool:
