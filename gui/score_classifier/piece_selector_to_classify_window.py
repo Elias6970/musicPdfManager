@@ -65,14 +65,15 @@ class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
         self.pieces_to_classify.remove(piece)
 
     def btn_add(self):
-        if self.validate_selection(self.search_bar.text()):
-            self.pieces_to_classify.append(self.search_bar.text())
+        text = self.search_bar.text()
+        if self.validate_selection(text) and text not in self.pieces_to_classify:
+            self.pieces_to_classify.append(text)
             self.status_area.add_item(StatusConsoleItemWithTwoTexts("",
-                                     self.search_bar.text(),
-                                     "",
-                                     self.search_bar.text(),
-                                     self.status_area.remove_item,
-                                     self.remove_piece))
+                                    text,
+                                    "",
+                                    text,
+                                    self.status_area.remove_item,
+                                    self.remove_piece))
 
             self.search_bar.clear()
 
