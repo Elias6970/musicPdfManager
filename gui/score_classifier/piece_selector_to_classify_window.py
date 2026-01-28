@@ -1,6 +1,7 @@
 from PyQt6 import QtWidgets
 from classes.utils.name_manager import NameManager
-from  classes.files_management.dir import Dir
+from classes.files_management.archive_file_manager import ArchiveFileManager
+from classes.files_management.dir import Dir
 from classes.files_management.archive import Archive
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 from classes.error import StopClassifyingException, PdfNotFoundException
@@ -77,7 +78,10 @@ class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
 
             self.search_bar.clear()
 
-
+    def _get_dir(self,piece_name:str) -> Dir:
+        folder_name = ArchiveFileManager.parse_name_to_file_manager(piece_name)
+        return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),folder_name))
+    
     #Button that opens the classify window.
     #   This function checks if the pieces have the parted flag = 1 in the db
     def btn_classify(self):
@@ -87,13 +91,13 @@ class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
             if self.archive.db.is_parted(str(NameManager.get_cod(i))):
                 error_classified.append(i)
             else:
-                to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
+                to_classify.append(self._get_dir(i))
         
         if not error_classified == "":
             for i in error_classified:
                 answer = YesNoWindow(i + self.tr(" is already splited,\n")+self.tr("do you want to redo it? "),False,self) #traducir
                 if answer.btn_confirm_pressed == True:
-                    to_classify.append(Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),i)))
+                    to_classify.append(self._get_dir(i))
 
         if len(to_classify) > 0:
             try:

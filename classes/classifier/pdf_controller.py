@@ -56,6 +56,11 @@ class PdfController():
 
         shutil.rmtree(backup_folder_path)
 
+    def clean_scores(self):
+        scores = os.path.join(self.dir_path,DIR_SCORES)
+        shutil.rmtree(scores)
+        os.mkdir(scores)
+
     def export(self):
         backup_dir = self.move_originals()
         try:
@@ -67,5 +72,6 @@ class PdfController():
             #    i.export()
         except Exception as e:
             print("Exception:", e, " ", type(e))
+            self.clean_scores()
             self.move_from_backup_to_partituras(backup_dir)
         

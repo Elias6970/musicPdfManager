@@ -33,6 +33,10 @@ class ExportablePdf(File):
     def add_pdf_page(self,temp_file_path:str,new_name:str,crop_rectangle:CropRectangle) -> None:  
         self.list_of_new_files.append((temp_file_path,new_name,crop_rectangle))
     
+    def set_last_page(self) -> None:
+        """Set the actual page to the last one of the pdf"""
+        self.actual_pdf_page = self.num_pages - 1
+        
     #Remove the latest page from the list
     def remove_latest_page(self) -> None:
         self.list_of_new_files.pop()

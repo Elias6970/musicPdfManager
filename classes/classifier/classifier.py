@@ -90,12 +90,14 @@ class Classifier:
         if self.pdf_controller.actual_pdf_number == 0 and self.pdf_controller.get_actual_pdf().actual_pdf_page == 0:
             raise FirstPageException()
         
-        elif self.pdf_controller.get_actual_pdf().actual_pdf_page == 0:
+        if self.pdf_controller.get_actual_pdf().actual_pdf_page == 0:
             self.pdf_controller.actual_pdf_number -= 1
+            self.pdf_controller.get_actual_pdf().set_last_page()
         else:
             self.pdf_controller.get_actual_pdf().actual_pdf_page -= 1
         
         self.pdf_controller.get_actual_pdf().remove_latest_page()
+
 
         return self.next_page(False)
 
