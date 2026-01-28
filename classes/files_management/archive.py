@@ -32,13 +32,14 @@ class Archive:
         """
 
         parsed_name = NameManager.get_std_name(cod,name)
+        folder_name = ArchiveFileManager.parse_name_to_file_manager(parsed_name)
 
         #Create the dir in the archive
-        ArchiveFileManager.make_dir(parsed_name)
+        ArchiveFileManager.make_dir(folder_name)
 
         if files != []:
             #Copy the files to the archive
-            are_moved = ArchiveFileManager.copy_files_in_archive(parsed_name,files)
+            are_moved = ArchiveFileManager.copy_files_in_archive(folder_name,files)
         else:
             are_moved = True
 
@@ -71,7 +72,8 @@ class Archive:
         Returns:
             bool: True if files are added successfully; False otherwise.
         """
-        are_moved = ArchiveFileManager.copy_files_in_archive(parsed_name,files)
+        folder_name = ArchiveFileManager.parse_name_to_file_manager(parsed_name)
+        are_moved = ArchiveFileManager.copy_files_in_archive(folder_name,files)
         return are_moved
 
     def delete_piece(self,cod:int,std_name:str=""):
@@ -90,8 +92,8 @@ class Archive:
         try:
             if std_name == "":
                 std_name = NameManager.get_std_name(cod,self.db.get_with_equals("cod",str(cod),"cod,name")[0][1])
-            std_path = ArchiveFileManager.parse_name_to_file_manager(std_name)
-            ArchiveFileManager.delete_piece(std_path)
+            folder_name = ArchiveFileManager.parse_name_to_file_manager(std_name)
+            ArchiveFileManager.delete_piece(folder_name)
         except FileNotFoundError:
             pass
 

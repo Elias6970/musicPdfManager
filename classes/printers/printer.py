@@ -5,11 +5,11 @@ from classes.files_management.dir import Dir
 #The methods need to be implemented in the child classes
 class Printer:
     def __init__(self) -> None:
-        self.actual_piece:Dir
+        self.actual_piece_dir:Dir
         self.items:list[PrinteableElement] = []
     
     def set_actual_piece(self,new_piece:Dir):
-        self.actual_piece = new_piece
+        self.actual_piece_dir = new_piece
 
     def add(self,item:PrinteableElement):
         self.items.append(item)

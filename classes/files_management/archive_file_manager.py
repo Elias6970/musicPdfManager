@@ -13,13 +13,8 @@ class ArchiveFileManager:
         Normalize and sanitize a file name string for safe use in the file manager.
 
         This function removes diacritical marks from the given name, converts it to
-        uppercase, and replaces characters that are typically invalid in file names
-        with safe alternatives:
-        - `\`, `/`, `<`, `>`, and `|` are replaced with `^`
-        - `:` is replaced with `_`
-        - `*` is replaced with `+`
-        - `?` is replaced with `¿`
-        - `"` is replaced with `'`
+        uppercase, and remove characters that are typically invalid in file names:
+        There are removed this chars: `\`, `/`, `<`, `>`, `|`, `:`, `*`, `?`, `"` 
 
         Args:
             parsed_name (str): The original file name to normalize and sanitize.
@@ -35,15 +30,15 @@ class ArchiveFileManager:
             uppercased = f"{number}{HYPHEN}{rest.lstrip()}"
 
         return (
-            uppercased.replace("\\", "^")
-            .replace("/", "^")
-            .replace(":", "_")
-            .replace("*", "+")
-            .replace("?", "¿")
-            .replace('"', "'")
-            .replace("<", "^")
-            .replace(">", "^")
-            .replace("|", "^")
+            uppercased.replace("\\", "")
+            .replace("/", "")
+            .replace(":", "")
+            .replace("*", "")
+            .replace("?", "")
+            .replace('"', "")
+            .replace("<", "")
+            .replace(">", "")
+            .replace("|", "")
         )
     
     @staticmethod
@@ -200,3 +195,11 @@ class ArchiveFileManager:
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(str(pdf_file), str(destination))
             print(f"Moved {pdf_file} to {destination}.")
+    
+
+    @staticmethod
+    def path_exists(path:str) -> bool:
+        """
+        Check if a path exists in the system
+        """
+        return os.path.exists(path)

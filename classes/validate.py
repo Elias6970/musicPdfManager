@@ -3,6 +3,7 @@ from classes.files_management.dir import Dir,Dir_Error
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.constants.constants import RELATIVE_ARCHIVE_PATH
 class Validate():
+    #UNUSED
     @staticmethod
     def validate_selection(src_txt:str,list_of_texts:list[str]) -> bool:
         for i in list_of_texts:
@@ -14,13 +15,14 @@ class Validate():
 
 
     @staticmethod
-    def check_if_exist_dir(src_txt:str,list_of_pieces:list[str]) -> Dir:
+    def check_if_piece_in_list(src_txt:str,list_of_pieces:list[str]) -> Dir:
         """"Check if the src_txt is in the list_of_pieces.
         If it is, return a Dir object with the path and name.
         If it is not, return a Dir_Error object.
+        Return the Dir object even if the folder doesn't
         """
         for i in list_of_pieces:
             if src_txt == i:
-                name = ArchiveFileManager.parse_name_to_file_manager(i)
-                return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),name),name)
+                folder_name = ArchiveFileManager.parse_name_to_file_manager(i)
+                return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),folder_name),folder_name)
         return Dir_Error()

@@ -1,6 +1,7 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
 from classes.constants.constants import MAX_COPIES
 from classes.files_management.archive import Archive
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.files_management.dir import Dir
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate
@@ -247,21 +248,21 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 self.instruments_combo_box.removeItem(0)
 
         #set instruments
-        piece = Validate.check_if_exist_dir(text,self.archive.pieces.get_parsed_names())
-        if not isinstance(piece,Dir_Error):
+        piece_dir = Validate.check_if_piece_in_list(text,self.archive.pieces.get_parsed_names())
+        if not isinstance(piece_dir,Dir_Error):
             try:
-                piece.path = os.path.join(self.archive.archive_path,piece.name)
-                scores = piece.get_scores()
-                #Raise the error if the scores dir is empty
-                if not scores:
-                    raise NoScoresException()
-                
-                #For the printer
-                self.piece_lbl.setText(piece.name)
-                self.printer.actual_piece = piece
+                if piece_dir.search_and_set_path():
+                    scores = piece_dir.get_scores()
+                    #Raise the error if the scores dir is empty
+                    if not scores:
+                        raise NoScoresException()
+                    
+                    #For the printer
+                    self.piece_lbl.setText(piece_dir.name)
+                    self.printer.actual_piece_dir = piece_dir
 
-                self.instruments_combo_box.setEnabled(True)
-                self.instruments_combo_box.addItems(scores)
+                    self.instruments_combo_box.setEnabled(True)
+                    self.instruments_combo_box.addItems(scores)
             
             #if the piece is not in the digital archive
             except FileNotFoundError:
@@ -286,19 +287,19 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         """
 
         try:
-            dir = self.printer.actual_piece
-            preset_name = self.presets_combo_box.currentText()
-            copies = int(self.num_copies.currentText())
+            dir = self.printer.actual_piece_dir
 
-            validation = Validate.validate_selection(dir.name,self.archive.pieces.get_parsed_names())
-            if validation:
-
+            if ArchiveFileManager.path_exists(dir.path):
+                preset_name = self.presets_combo_box.currentText()
                 preset = self.preset_manager.get_preset(preset_name)
+                            
                 if preset == None:
                     ShowError.show_tooltip_error(self.tr("Preset not found"),5000,self.presets_combo_box)
                     self.presets_combo_box.setCurrentIndex(-1)
                     return False
                 
+                copies = int(self.num_copies.currentText())
+
                 self.piece_search_bar.clear() #Only clear the bar and not the label because maybe the user want to insert another time the sameone
                 self.piece_search_bar.setFocus()
                 return self.add_score(dir, preset, copies)
@@ -455,7 +456,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
     #Manage the preview controller
     def update_preview(self,piece_parsed_name:str,instrument:str) -> None:
         #Check if a piece and instrument is selected
-        piece = Validate.check_if_exist_dir(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
+        piece = Validate.check_if_piece_in_list(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
                 if not piece.get_scores():
@@ -467,9 +468,9 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                         self.preview_controller.update_path()
                         self.check_mv_btns_enableability() # Update the buttons states
                     else:
-                        self.preview_controller = Preview_controller(piece_parsed_name,instrument)
+                        self.preview_controller = Preview_controller(piece.name,instrument)
                 except Exception:
-                    self.preview_controller = Preview_controller(piece_parsed_name,instrument)
+                    self.preview_controller = Preview_controller(piece.name,instrument)
 
                 self.change_preview_img()
             except NoScoresException:
@@ -524,7 +525,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 instrument_preset_name = ""
                 #Set the elements in the printer (piece + instrument preset)
                 for i in piece_preset.pieces:
-                    dir = Validate.check_if_exist_dir(i[0],self.archive.pieces.get_parsed_names())
+                    dir = Validate.check_if_piece_in_list(i[0],self.archive.pieces.get_parsed_names())
                     if not isinstance(dir, Dir_Error):
                         
                         #Ask for the instrument preset for the import

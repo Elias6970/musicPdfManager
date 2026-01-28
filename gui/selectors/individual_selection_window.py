@@ -3,6 +3,7 @@ from classes.constants.constants import MAX_COPIES
 from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
 from classes.validate import Validate
+from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.printers.default_printer import DefaultPrinter
 from classes.error import NoScoresException
 from classes.preview_controller import Preview_controller
@@ -191,12 +192,10 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
                 self.part_combo_box.removeItem(0)
 
         #set instruments
-        piece = Validate.check_if_exist_dir(text,self.archive.pieces.get_parsed_names())
+        piece = Validate.check_if_piece_in_list(text,self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
                 if piece.search_and_set_path():
-                    print(piece.path)
-                    print(piece.get_scores())
                     scores = piece.get_scores()
                     #Raise the error if the scores dir is empty
                     if not scores:
@@ -205,7 +204,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
                     self.part_combo_box.setEnabled(True)
                     self.part_combo_box.addItems(piece.get_scores())
                     self.piece_lbl.setText(piece.name)
-                    self.printer.actual_piece = piece
+                    self.printer.actual_piece_dir = piece
             
             #if the piece is not in the digital archive
             except FileNotFoundError:
@@ -219,25 +218,21 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
 
     #Add the score to the list of added scores an update it in the labels list
     def add_score(self):
-        #Is throw if actual piece doesn't exist
-        try:
-            validation = Validate.validate_selection(self.printer.actual_piece.name,self.archive.pieces.get_parsed_names())
-        except AttributeError:
-            return
-        
-        if self.part_combo_box.isEnabled() and validation:
+        if self.part_combo_box.isEnabled():
+            path = os.path.join(self.printer.actual_piece_dir.path,DIR_SCORES,self.part_combo_box.currentText())
 
-            path=os.path.join(self.printer.actual_piece.path,DIR_SCORES,self.part_combo_box.currentText())
-            copies=int(self.num_copies.currentText())
-            self.printer.add(path,copies)
+            if ArchiveFileManager.path_exists(path):
 
-            #Update the labels of the down scores
-            self.scroll.add_item(StatusConsoleItemWithTwoTexts(self.printer.actual_piece.name,
-                                                  self.part_combo_box.currentText(),
-                                                  int(self.num_copies.currentText()),
-                                                  self.printer.items[-1].id,
-                                                  self.scroll.remove_item,
-                                                  self.printer.remove))
+                copies=int(self.num_copies.currentText())
+                self.printer.add(path,copies)
+
+                #Update the labels of the down scores
+                self.scroll.add_item(StatusConsoleItemWithTwoTexts(self.printer.actual_piece_dir.name,
+                                                    self.part_combo_box.currentText(),
+                                                    int(self.num_copies.currentText()),
+                                                    self.printer.items[-1].id,
+                                                    self.scroll.remove_item,
+                                                    self.printer.remove))
     
 
     #Display a window to select a location to save a pdf
@@ -325,7 +320,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
     #Manage the preview controller
     def update_preview(self,piece_parsed_name:str,instrument:str) -> None:
         #Check if a piece and instrument is selected
-        piece = Validate.check_if_exist_dir(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
+        piece = Validate.check_if_piece_in_list(self.piece_search_bar.text(),self.archive.pieces.get_parsed_names())
         if not isinstance(piece,Dir_Error):
             try:
                 if not piece.get_scores():
@@ -335,9 +330,9 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
                         self.preview_controller.instrument = instrument
                         self.preview_controller.update_path()
                     else:
-                        self.preview_controller = Preview_controller(piece_parsed_name,instrument)
+                        self.preview_controller = Preview_controller(piece.name,instrument)
                 except Exception:
-                    self.preview_controller = Preview_controller(piece_parsed_name,instrument)
+                    self.preview_controller = Preview_controller(piece.name,instrument)
 
                 self.change_preview_img()
             except NoScoresException:
