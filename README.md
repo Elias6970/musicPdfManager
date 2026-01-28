@@ -49,41 +49,35 @@ The archive has folders with the `cod` and the `name` separated with a hyppen `-
 +  partituras: has the pdfs with their correct name made with [the classifier tool](#herramienta-clasificador-de-partituras).
 + extras: has the other data that is not a pdf. Now it is not possible to see the extra files with this application. You need to go to the folder and see it manually.
 
-# Herramienta clasificador de partituras
+# Tool for score classifying
 
-####  Introducción
-En el clasificador de partituras tendrás que seleccionar las partituras que quieres clasificar. Una vez seleccionadas irá apareciendo cada página de cada pdf de esa partitura para ponerle nombre.
+####  Introduction
+In the score classifier you need to select the pieces that you want to classify. After selecting them, they are going to appear page by page to label each one.
 
-#### Instrucciones
-+ **Nombre:**
-    + <u>Una letra:</u> se pondrá la letra entre parentesis si el instrumento aparece en el cuadro de arriba.
-    + <u>Nombre Completo:</u> si el instrumento no aparece en el cuadro.
-    <br />
-    + Si la partitura pertenece a la obra anterior puedes dejar el recuadro en blanco. El programa le pondrá el nombre de la partitura anterior automáticamente.
-    <br />
-    + Ejemplo:(Introducción de una secuencia de partituras)
-    `1. Entrada:'c' --> salida: 'clarinete'`
-    `2. Entrada:'timbales' --> salida: 'timbales'`
-    `3. Entrada: '' --> salida: 'timbales'` porque al no introducir nada se presupone que es parte de la partitura anterior.
+#### How to use it
++ **Instrument:**
+    + <u>Diminutive:</u> Character/s that represent the instrument. You can see each one in the left shortcuts panel.
+    + <u>Complete name:</u> If the instrument is not in the shortcuts panel you can write the complete name instead.
+    + <u>*Empty*:<u> If you leave it empty the program takes the  instrument from the previous page.
+
+    + Example (Sequence of inputs):
+    `1. Input:'c' --> Output: 'clarinete'`
+    `2. Input:'triangle' --> Output: 'triangle'`
+    `3. Input: '' --> Output: 'triangle'`
 <br />
 
-+ **Numero:**
-    + Se introduce el número de la partitura (primero, segundo, tercero, etc).
-    + Puede no introducirse el número pero si hay mas de un papel de un mismo instrumento se debe hacer.
-    + Ejemplo:(Introducción de una secuencia de partituras)
-    `1. Entrada:'c3' --> salida: 'clarinete 3'`
-    `2. Entrada:'dulzaina 1' --> salida: 'dulzaina 1'`
-    `3. Entrada: '' --> salida: 'dulzaina 1'` 
-    
++ **Number:**
+    + Insert the number of that instrument (first, second, third, etc.)
+    + You can leave it empty if there is only one score for that instrument (maybe for oboe. There is not oboe 1 and oboe 2).
+    + Example:(Sequence of inputs):
+    `1. Input:'c3' --> Output: 'clarinete 3'`
+    `2. Input:'dulzaina 1' --> Output: 'dulzaina 1'`
+    `3. Input: 'f' --> Output: 'flauta'`  
 <br />
 
-#### **Excepción:** 
-+ El clarinete principal no tiene número su nombre es **cp**.
-    + Ejemplo:
-    `Entrada: 'cp' --> salida: 'clariente principal'`
 
-#### **Lógica aplicación**
-+ La aplicación no efectua los cambios hasta que no se acabe de clasificar una obra entera.
+#### **Aplication logic**
++ The changes to the original scores (pdfs) are applied when you finish classifying a piece. If you select more than one piece to classify, the changes are going to be applied after finishing each one.
 
 # **Features**
 1. You can reclasify a piece
@@ -92,19 +86,10 @@ En el clasificador de partituras tendrás que seleccionar las partituras que qui
 4. All translated except classifying instructions
 
 # TODO
-`50% Refactor the project with Pieces not an array of strings`
-
-`Add the option to make prefabs for selecting scores like x1 0boe,x2 flute,x4 clarinet, etc. And its name is wood wind`
-
-`Translate classifying instructions`
-
-`Maybe we can add a window that shows all the instruments selected  when you finish a piece in classify window`
+`Auto time set in db_manage with CURRENT_TIMESTAMP is set to gtm=0 and it need to be set to the local computer time`
 
 `Implement a tool for getting logs to detect future errors`
 
-`Import db from xlsx and xls`
-
-`Auto time set in db_manage with CURRENT_TIMESTAMP is set to gtm=0 and it need to be set to the local computer time`
-
+`Translate classifying instructions`
 
 
