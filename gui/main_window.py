@@ -16,6 +16,7 @@ from gui.score_classifier.piece_selector_to_classify_window import PieceSelector
 from gui.pop_up_windows.about_us_window import About_us_window
 from gui.config.preferences_window import Preferences_window
 from gui.presets.presets_window import PresetsWindow
+from gui.pop_up_windows.yes_no_window import YesNoWindow
 from tools.delete_junk_files import delete_junk_files
 import sys, os
 
@@ -94,7 +95,7 @@ class Main_window(QtWidgets.QMainWindow):
         clasify_scores_opt.triggered.connect(self.clasify_scores)
 
         delete_junk_files_opt = QtGui.QAction(self.tr("Delete junk files"),self)
-        delete_junk_files_opt.triggered.connect(lambda: delete_junk_files(RELATIVE_ARCHIVE_PATH()))
+        delete_junk_files_opt.triggered.connect(lambda: (delete_junk_files(RELATIVE_ARCHIVE_PATH()),YesNoWindow(self.tr("Junk files deleted"),True,self))) #traducir
 
         about_opt = QtGui.QAction(self.tr("About"),self) #traducir
         about_opt.triggered.connect(self.about_opt_menu)

@@ -1,5 +1,6 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
 from classes.constants.constants import MAX_COPIES
+from classes.custom_order.instrument_sorter import InstrumentSorter
 from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.files_management.dir import Dir
@@ -260,9 +261,10 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                     #For the printer
                     self.piece_lbl.setText(piece_dir.name)
                     self.printer.actual_piece_dir = piece_dir
-
+                    
+                    sorted_scores = InstrumentSorter.sort_instruments(scores)
                     self.instruments_combo_box.setEnabled(True)
-                    self.instruments_combo_box.addItems(scores)
+                    self.instruments_combo_box.addItems(sorted_scores)
             
             #if the piece is not in the digital archive
             except FileNotFoundError:

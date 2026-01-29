@@ -7,6 +7,6 @@ def delete_junk_files(path):
                 if file == '.DS_Store' or '._.DS_Store' in file:
                     os.remove(os.path.join(root, file))
                     print(f'Archive .DS_Store eliminado en: {root}')
-                if file.startswith("._"):
+                elif file.startswith("._") or file.startswith(".Spotlight"):
                     os.remove(os.path.join(root, file))
                     print(f"Archive with ._: {file}")

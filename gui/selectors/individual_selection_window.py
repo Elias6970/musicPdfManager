@@ -2,6 +2,7 @@ from PyQt6 import QtWidgets,QtGui,QtCore
 from classes.constants.constants import MAX_COPIES
 from classes.files_management.archive import Archive
 from classes.files_management.dir import Dir_Error
+from classes.custom_order.instrument_sorter import InstrumentSorter
 from classes.validate import Validate
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.printers.default_printer import DefaultPrinter
@@ -200,9 +201,9 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
                     #Raise the error if the scores dir is empty
                     if not scores:
                         raise NoScoresException()
-                    
+                    sorted_scores = InstrumentSorter.sort_instruments(scores)
                     self.part_combo_box.setEnabled(True)
-                    self.part_combo_box.addItems(piece.get_scores())
+                    self.part_combo_box.addItems(sorted_scores)
                     self.piece_lbl.setText(piece.name)
                     self.printer.actual_piece_dir = piece
             

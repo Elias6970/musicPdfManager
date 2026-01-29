@@ -33,7 +33,11 @@ class MassiveImporter:
         files_to_import:list[str] = []
         if file.is_file():
             self.logger.info("Importing file %s",file)
-
+            
+            if file.name in [".DS_Store"] or file.name.startswith("._") or file.name.startswith(".Spotlight"):
+                self.logger.info("Ignoring junk file %s",file)
+                return files_to_import
+            
             if not file.suffix.lower() in [".rar", ".zip", ".tar.gz", ".tar", ".7z"]:
                 files_to_import.append(file.absolute())
                 return files_to_import
