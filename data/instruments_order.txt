@@ -1,6 +1,6 @@
 oboe
 corno_ingles
-flutin
+flautin
 flauta
 requinto
 clarinete_principal
@@ -19,6 +19,7 @@ trombon_bajo
 bombardino
 tuba
 violonchello
+chello
 contrabajo
 caja
 platos
