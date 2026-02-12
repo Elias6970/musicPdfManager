@@ -144,7 +144,6 @@ class PresetsPrinter(Printer):
         #pieces = list(self._solution[list(self._solution.keys())[0]].keys())
         pieces:list[str] = [str(i.dir.name) for i in self.items]
         if self.sorted_export:
-            print("Dentro")
             pieces.sort(key=lambda x: NameManager.get_name(x))
 
         instruments_order = InstrumentSorter.sort_instruments(list(self._solution.keys()))
@@ -180,7 +179,7 @@ class PresetsPrinter(Printer):
         """
         exporting_folder = self.create_export_folder(path)
 
-        pieces = list(self._solution[list(self._solution.keys())[0]].keys())
+        pieces = [str(i.dir.name) for i in self.items]
 
         instruments_order = InstrumentSorter.sort_instruments(list(self._solution.keys()))
 

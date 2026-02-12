@@ -22,6 +22,10 @@ class StatusConsole(QtWidgets.QScrollArea):
     def add_item(self,item:QtWidgets.QFrame) -> None:
         self.status_console_layout.addWidget(item)
         self.items.append(item)
+
+        if self.verticalScrollBar().value() == self.verticalScrollBar().maximum():
+            item.show()
+            QtCore.QTimer.singleShot(0, lambda: self.verticalScrollBar().setValue(self.verticalScrollBar().maximum()))
     
     def remove_item(self,item:QtWidgets.QFrame) -> None:
         self.status_console_layout.removeWidget(item)

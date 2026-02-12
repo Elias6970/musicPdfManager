@@ -2,8 +2,8 @@ import os,sys
 from classes.config import Configuration
 
 #Version
-VERSION = "0.5.5"
-APP_NAME = "Music pdf manager"
+VERSION = "0.5.52"
+APP_NAME = "Music Pdf Manager"
 APP_AUTHOR = "Elías Iborra Pérez"
 GITHUB = "https://github.com/Elias6970/musicPdfManager"
 
