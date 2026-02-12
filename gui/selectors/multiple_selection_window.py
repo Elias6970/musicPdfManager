@@ -347,8 +347,11 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
             if self.printer.items:
                 #Ask for the type of creation. By instruments or by pieces
                 window = TypeOfExportWindow(self)
-
-                if window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
+                if window.type_of_export == TypeOfExport.CANCELLED:
+                    return
+                elif window.type_of_export == TypeOfExport.ALL_IN_ONE:
+                    self.printer.sorted_export = window.sort_alphabetically
+                elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
                     self.printer.sorted_export = window.sort_alphabetically
                     self.printer.ignore_preset_copies = window.ignore_preset_copies
                     self.printer.add_piece_number = window.add_piece_numbers

@@ -25,14 +25,16 @@ class PresetsPrinter(Printer):
 
     def __init__(self) -> None:
         super().__init__()
-        self.items:list[PrinteablePreset] = []
-        self.sorted_export = False #If the export should be sorted by name of the piece 
-        self.ignore_preset_copies = False #If the export should ignore the copies of the presets
-        self.add_piece_number = False #If the exported pdfs should have page numbers for each piece
-        self.add_cover_page = False #If the exported pdfs should have a cover page
-        self.add_index = False #If the exported pdfs should have an index page
-        self.add_blank_page_after_index = False #If the exported pdfs should have a blank page after the index
-        self._solution:dict[str,dict[str,ResolvedPresetInstrument]] = {}
+        self.items:list[PrinteablePreset] = [] #List of PrinteablePreset objects to print, each one has a preset and a dir
+        self._solution:dict[str,dict[str,ResolvedPresetInstrument]] = {} #Dictionary with the resolved pieces to export organized by instrument and piece name. It is generated in the preprocess_export method and used in the export methods
+
+        self.sorted_export = False # Whether to sort the exported pieces alphabetically by name
+        self.ignore_preset_copies = False # Whether to export single copies ignoring the preset configuration
+        self.add_piece_number = False # Whether to add a sequential number overlay to each piece in the PDF
+        self.add_cover_page = False # Whether to include a cover page at the beginning of the export
+        self.add_index = False # Whether to generate and include an index of pieces
+        self.add_blank_page_after_index = False # Whether to insert a blank page after the index (useful for double-sided printing)
+        self.merge_pdfs = False # Whether to merge all exported content into unified PDF files for pieces and instruments
 
 
     #Return the printeablePreset id to remove it from a list
@@ -118,11 +120,12 @@ class PresetsPrinter(Printer):
         merge_pdf = pypdf.PdfWriter()
 
         for instrument in instruments_order:
-            for _ in range(self._solution[instrument][piece].copies):
-                pdf = self._solution[instrument][piece].resolution
-                if pdf == None:
-                    continue
-                merge_pdf.append(pdf)
+            if instrument in self._solution and piece in self._solution[instrument]: #Check if the piece has a score for this instrument
+                for _ in range(self._solution[instrument][piece].copies):
+                    pdf = self._solution[instrument][piece].resolution
+                    if pdf == None:
+                        continue
+                    merge_pdf.append(pdf)
         
         output_file = Path(exporting_folder) / f"{piece}.pdf"
         merge_pdf.write(str(output_file))
@@ -138,7 +141,11 @@ class PresetsPrinter(Printer):
         exporting_temp_folder = Path(tempfile.gettempdir()) / os.urandom(24).hex()
         exporting_temp_folder.mkdir(parents=True, exist_ok=True)
 
-        pieces = list(self._solution[list(self._solution.keys())[0]].keys())
+        #pieces = list(self._solution[list(self._solution.keys())[0]].keys())
+        pieces:list[str] = [str(i.dir.name) for i in self.items]
+        if self.sorted_export:
+            print("Dentro")
+            pieces.sort(key=lambda x: NameManager.get_name(x))
 
         instruments_order = InstrumentSorter.sort_instruments(list(self._solution.keys()))
 
@@ -156,7 +163,7 @@ class PresetsPrinter(Printer):
                 try:
                     if isinstance(task.result(), str):
                         merge_pdf.append(task.result())
-                        print(f"Added piece PDF: {task.result()}")
+                        #print(f"Added piece PDF: {task.result()}")
                 except Exception as e:
                     print(f"Error exporting instrument PDF: {e}")  
             

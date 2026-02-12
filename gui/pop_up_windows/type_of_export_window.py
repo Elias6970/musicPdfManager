@@ -67,11 +67,17 @@ class TypeOfExportWindow(QtWidgets.QDialog):
         self._add_blank_page_after_index_cb.setEnabled(False)
         self._add_blank_page_after_index_cb.setStyleSheet("padding-left: 50px;")
 
-        self._sort_alphabetically_cb = QtWidgets.QCheckBox()
-        self._sort_alphabetically_cb.setText(self.tr("Sort the pdfs alphabetically."))
-        self._sort_alphabetically_cb.setToolTip(self.tr("Sort the pieces in each pdf alphabetically.\nOnly when exporting by instrument."))
-        self._sort_alphabetically_cb.setEnabled(False)
-        self._sort_alphabetically_cb.setStyleSheet("padding-left: 25px;")
+        self._sort_alphabetically_all_in_one_cb = QtWidgets.QCheckBox()
+        self._sort_alphabetically_all_in_one_cb.setText(self.tr("Sort the pdfs alphabetically."))
+        self._sort_alphabetically_all_in_one_cb.setToolTip(self.tr("Sort the pieces in each pdf alphabetically.\nOnly when exporting by instrument."))
+        self._sort_alphabetically_all_in_one_cb.setEnabled(False)
+        self._sort_alphabetically_all_in_one_cb.setStyleSheet("padding-left: 25px;")
+            
+        self._sort_alphabetically_by_instrument_cb = QtWidgets.QCheckBox()
+        self._sort_alphabetically_by_instrument_cb.setText(self.tr("Sort the pdfs alphabetically."))
+        self._sort_alphabetically_by_instrument_cb.setToolTip(self.tr("Sort the pieces in each pdf alphabetically.\nOnly when exporting by instrument."))
+        self._sort_alphabetically_by_instrument_cb.setEnabled(False)
+        self._sort_alphabetically_by_instrument_cb.setStyleSheet("padding-left: 25px;")
         
         self._add_piece_numbers_cb = QtWidgets.QCheckBox()
         self._add_piece_numbers_cb.setText(self.tr("Add number to each piece."))
@@ -102,11 +108,12 @@ class TypeOfExportWindow(QtWidgets.QDialog):
 
         _container_layout.addWidget(_warning_lbl)
         _container_layout.addWidget(self._all_in_one_rb)
+        _container_layout.addWidget(self._sort_alphabetically_all_in_one_cb)
         _container_layout.addWidget(self._by_pieces_rb)
         _container_layout.addWidget(self._by_instruments_rb)
         _container_layout.addWidget(self._add_index_cb)
         _container_layout.addWidget(self._add_blank_page_after_index_cb)
-        _container_layout.addWidget(self._sort_alphabetically_cb)
+        _container_layout.addWidget(self._sort_alphabetically_by_instrument_cb)
         _container_layout.addWidget(self._add_piece_numbers_cb)
         _container_layout.addWidget(self._add_cover_page_cb)
         _container_layout.addWidget(_h_line)
@@ -121,22 +128,27 @@ class TypeOfExportWindow(QtWidgets.QDialog):
     #Control the activation of the buttons
     def manage_btns_enableability(self):
         if self._by_instruments_rb.isChecked():
-            self._sort_alphabetically_cb.setEnabled(True)
+            self._sort_alphabetically_by_instrument_cb.setEnabled(True)
             self._add_piece_numbers_cb.setEnabled(True)
             self._add_cover_page_cb.setEnabled(True)
             self._add_index_cb.setEnabled(True)
-            #self._add_blank_page_after_index_cb.setEnabled(True)
-        else:
-            self._sort_alphabetically_cb.setEnabled(False)
-            self._sort_alphabetically_cb.setChecked(False)
+        else :
+            self._sort_alphabetically_by_instrument_cb.setEnabled(False)
+            self._sort_alphabetically_by_instrument_cb.setChecked(False)
             self._add_piece_numbers_cb.setEnabled(False)
             self._add_piece_numbers_cb.setChecked(False)
             self._add_cover_page_cb.setEnabled(False)
             self._add_cover_page_cb.setChecked(False)
             self._add_index_cb.setEnabled(False)
             self._add_index_cb.setChecked(False)
-            #self._add_blank_page_after_index_cb.setEnabled(False)
-            #self._add_blank_page_after_index_cb.setChecked(False)
+
+
+        if self._all_in_one_rb.isChecked():
+            self._sort_alphabetically_all_in_one_cb.setEnabled(True)
+        else:
+            self._sort_alphabetically_all_in_one_cb.setEnabled(False)
+            self._sort_alphabetically_all_in_one_cb.setChecked(False)
+
 
     def manage_blank_page_after_index_enableability(self):
         if self._add_index_cb.isChecked():
@@ -149,11 +161,12 @@ class TypeOfExportWindow(QtWidgets.QDialog):
     def confirm(self):
         if self._all_in_one_rb.isChecked():
             self.type_of_export = TypeOfExport.ALL_IN_ONE
+            self.sort_alphabetically = self._sort_alphabetically_all_in_one_cb.isChecked()
         elif self._by_pieces_rb.isChecked():
             self.type_of_export = TypeOfExport.BY_PIECES
         elif self._by_instruments_rb.isChecked():
             self.type_of_export = TypeOfExport.BY_INSTRUMENTS
-            self.sort_alphabetically = self._sort_alphabetically_cb.isChecked()
+            self.sort_alphabetically = self._sort_alphabetically_by_instrument_cb.isChecked()
             self.add_piece_numbers = self._add_piece_numbers_cb.isChecked()
             self.add_cover_page = self._add_cover_page_cb.isChecked()
             self.add_index = self._add_index_cb.isChecked()
