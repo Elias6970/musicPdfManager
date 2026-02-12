@@ -34,27 +34,6 @@ class PresetsPrinter(Printer):
         self.add_blank_page_after_index = False #If the exported pdfs should have a blank page after the index
         self._solution:dict[str,dict[str,ResolvedPresetInstrument]] = {}
 
-    def set_sorted_export(self,t:bool) -> None:
-        self.sorted_export = t
-
-    def set_ignore_presets_copies(self,t:bool) -> None:
-        self.ignore_preset_copies = t
-
-    def set_add_piece_numbers(self,t:bool) -> None:
-        """Set if the exported pdfs should have page numbers for each piece."""
-        self.add_piece_number = t
-    
-    def set_add_cover_page(self,t:bool) -> None:
-        """Set if the exported pdfs should have a cover page."""
-        self.add_cover_page = t
-    
-    def set_add_index(self,t:bool) -> None:
-        """Set if the exported pdfs should have an index page."""
-        self.add_index = t
-
-    def set_add_blank_page_after_index(self,t:bool) -> None:
-        """Set if the exported pdfs should have a blank page after the index."""
-        self.add_blank_page_after_index = t
 
     #Return the printeablePreset id to remove it from a list
     def add(self,copies:int,preset:Preset,dir:Dir) -> int:
@@ -226,7 +205,7 @@ class PresetsPrinter(Printer):
         exporting_folder = self.create_export_folder(path)
 
         #Get the exporting order by the order added
-        exporting_order:list[str] = [str(i.dir.name) for i in self.items]
+        exporting_order:list[str] = [str(i.dir.name) for i in self.items]    
         if self.sorted_export:
             exporting_order.sort(key=lambda x: NameManager.get_name(x))
 
@@ -278,15 +257,18 @@ class PresetsPrinter(Printer):
                     merge_pdf.add_blank_page(width=A4[1], height=A4[0]) #Landscape blank page
 
             for j in exporting_order:
-                for _ in range(solution[instrument][j].copies):
-                    pdf = solution[instrument][j].resolution
-                    if pdf == None:
-                        continue
+                if j in solution[instrument]: #Check if the piece has a score for this instrument
+                    for _ in range(solution[instrument][j].copies):
+                        pdf = solution[instrument][j].resolution
+                        if pdf == None:
+                            continue
 
-                    if add_page_numbers:
-                        pdf = self._add_page_number_to_pdf(pdf, piece_num)
-                        piece_num += 1
-                    merge_pdf.append(pdf)
+                        if add_page_numbers:
+                            pdf = self._add_page_number_to_pdf(pdf, piece_num)
+                
+                        merge_pdf.append(pdf)
+                
+                piece_num += 1 #Increment piece number even if the piece is not included for this instrument, to keep the numbering consistent across instruments (and the index)
 
             merge_pdf.write(os.path.join(exporting_folder,instrument)+".pdf")
             merge_pdf.close()   

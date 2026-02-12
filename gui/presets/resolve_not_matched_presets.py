@@ -10,6 +10,8 @@ import os
 class ResolveNotMatchedPresets(QtWidgets.QDialog):
     def __init__(self,unresolved:list[ResolvedPresetInstrument],parent=None) -> None:
         super(ResolveNotMatchedPresets,self).__init__(parent)
+        self.IGNORE_OPTION = self.tr("IGNORE")
+
         self.setWindowTitle(self.tr("Solve not autosolved scores"))
         self.status_console = StatusConsole()
         self.items:list[StatusConsoleItemWithTwoTextsAndOneField] = []
@@ -32,9 +34,12 @@ class ResolveNotMatchedPresets(QtWidgets.QDialog):
         #Genereate 
         for i in unresolved:
             if i.dir != None and i.state == PresetResolverStates.NOT_RESOLVED:
+                options = i.dir.get_score_names_without_extension()
+                options.insert(0,self.IGNORE_OPTION)
                 item = StatusConsoleItemWithTwoTextsAndOneField(i.piece,
                                                                i.instrument,
-                                                               i.dir.get_score_names_without_extension())
+                                                               options)
+                item.score_selected.setCurrentIndex(0) #Set to ignore by default
                 self.status_console.add_item(item)
                 self.items.append(item)
         
@@ -52,6 +57,8 @@ class ResolveNotMatchedPresets(QtWidgets.QDialog):
 
             for j in self.unresolved:
                 if j.piece == piece and j.instrument == inst:
+                    if score == self.IGNORE_OPTION:
+                        j.state = PresetResolverStates.IGNORED
                     self.resolved.append(j)
                     self.resolved[-1].resolution = os.path.join(j.dir.path,DIR_SCORES,score) + ".pdf"
                     continue

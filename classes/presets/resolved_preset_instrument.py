@@ -21,3 +21,6 @@ class ResolvedPresetInstrument:
         
         return super().__eq__(value)
     
+    def __str__(self):
+        return f"ResolvedPresetInstrument(state={self.state}, copies={self.copies}, piece='{self.piece}', instrument='{self.instrument}', resolution='{self.resolution}')"
+    

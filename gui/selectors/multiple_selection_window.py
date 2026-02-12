@@ -5,6 +5,7 @@ from classes.files_management.archive import Archive
 from classes.files_management.archive_file_manager import ArchiveFileManager
 from classes.files_management.dir import Dir
 from classes.files_management.dir import Dir_Error
+from classes.presets.preset_resolver_states import PresetResolverStates
 from classes.validate import Validate
 from classes.printers.presets_printer import PresetsPrinter
 from classes.presets.preset import Preset
@@ -348,17 +349,17 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 window = TypeOfExportWindow(self)
 
                 if window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
-                    self.printer.set_sorted_export(window.sort_alphabetically)
-                    self.printer.set_ignore_presets_copies(window.ignore_preset_copies)
-                    self.printer.set_add_piece_numbers(window.add_piece_numbers)
-                    self.printer.set_add_cover_page(window.add_cover_page)
-                    self.printer.set_add_index(window.add_index)
-                    self.printer.set_add_blank_page_after_index(window.add_blank_page_after_index)
+                    self.printer.sorted_export = window.sort_alphabetically
+                    self.printer.ignore_preset_copies = window.ignore_preset_copies
+                    self.printer.add_piece_number = window.add_piece_numbers
+                    self.printer.add_cover_page = window.add_cover_page
+                    self.printer.add_index = window.add_index
+                    self.printer.add_blank_page_after_index = window.add_blank_page_after_index
 
                 #Make the preporcess and solve the errros
                 errors = self.printer.preprocess_export()
                 r = ResolveNotMatchedPresets(errors,self)
-
+                
                 if len(r.resolved) < len(errors):
                     return #Not all scores selected
                 if len(r.resolved) > len(errors):
@@ -366,6 +367,10 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
                 
                 #Add resolution to the solution
                 for i in r.resolved:
+                    print(i)
+                    if i.state == PresetResolverStates.IGNORED:
+                        continue
+                    print(f"Exist {i.resolution} for piece {i.piece} and instrument {i.instrument}")
                     self.printer.add_to_solution(i)
 
                 #Export and save
