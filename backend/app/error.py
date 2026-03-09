@@ -43,3 +43,6 @@ class EmailAlreadyRegisteredError(Exception):
 
 class InvalidCredentialsError(Exception):
     pass
+
+class InvalidUserDataError(Exception):
+    pass
