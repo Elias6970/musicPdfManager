@@ -244,9 +244,9 @@ class Main_window(QtWidgets.QMainWindow):
         translator = QtCore.QTranslator(self)
 
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            path = os.path.join(sys._MEIPASS,"translate",language,"compiled",language+".qm") #type:ignore
+            path = os.path.join(sys._MEIPASS,"frontend_pyqt","translate",language,"compiled",language+".qm") #type:ignore
         else:
-            path = os.path.join("translate",language,"compiled",language+".qm")
+            path = os.path.join("frontend_pyqt","translate",language,"compiled",language+".qm")
 
         translator.load(path)
 
