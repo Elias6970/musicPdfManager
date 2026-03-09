@@ -1,6 +1,6 @@
 import pytest,os, tempfile, hashlib
-from classes.files_management.file_decompressor import FileDecompressor
-from classes.loggers.massive_importer_logger import MassiveImporterLogger
+from backend.app.files_management.file_decompressor import FileDecompressor
+from backend.app.loggers.massive_importer_logger import MassiveImporterLogger
 
 #########ALL FILES NEED TO BE IN THE ASSETS FOLDER###########
 

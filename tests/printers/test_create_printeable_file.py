@@ -1,5 +1,5 @@
-from classes.printers.printeable_file import PrinteableFile
-from classes.printers.default_printer import DefaultPrinter
+from backend.app.printers.printeable_file import PrinteableFile
+from backend.app.printers.default_printer import DefaultPrinter
 import pytest
 
 def test_create_printeable_files():

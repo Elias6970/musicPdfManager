@@ -1,10 +1,10 @@
 import pytest,os, tempfile, hashlib,shutil, sqlite3
 from pathlib import Path
-from classes.files_management.massive_importer import MassiveImporter
-import classes.files_management.archive_file_manager
-import classes.db_manage
-from classes.utils.name_manager import NameManager
-from classes.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.files_management.massive_importer import MassiveImporter
+import backend.app.files_management.archive_file_manager
+import backend.app.db_manage
+from backend.app.utils.name_manager import NameManager
+from backend.app.files_management.archive_file_manager import ArchiveFileManager
 #########ALL FILES NEED TO BE IN THE ASSETS FOLDER###########
 
 IMPORT_FOLDER = "imports"
@@ -88,7 +88,7 @@ def db_conn():
 def test_import_only_into_archive(to_import:list[str],where_to_import:str,expected_pieces:dict[str,dict[str,list[str]]]):
 
     monkey_patch = pytest.MonkeyPatch()
-    monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
+    monkey_patch.setattr(backend.app.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
     
     mi = MassiveImporter(None)
     imported = mi.import_only__into_archive(to_import,False,False)[0]
@@ -187,12 +187,12 @@ def test_simple_import_using_archive_names(db_conn:sqlite3.Connection,to_import:
         self.cur = self.con.cursor()
 
     monkey_patch = pytest.MonkeyPatch()
-    #monkey_patch.setattr(classes.constants.constants, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)  
-    monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
-    monkey_patch.setattr(classes.db_manage,"DB_PATH", lambda: DB_PIECES_TABLE)
-    monkey_patch.setattr(classes.db_manage.Db_archive,"open_db", open_db_with_fixture)
+    #monkey_patch.setattr(backend.app.constants.constants, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)  
+    monkey_patch.setattr(backend.app.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
+    monkey_patch.setattr(backend.app.db_manage,"DB_PATH", lambda: DB_PIECES_TABLE)
+    monkey_patch.setattr(backend.app.db_manage.Db_archive,"open_db", open_db_with_fixture)
     
-    db = classes.db_manage.Db_archive(TABLE_NAME)
+    db = backend.app.db_manage.Db_archive(TABLE_NAME)
     mi = MassiveImporter(db)
 
     imported,not_imported,imported_db = mi.simple_import(to_import,False,False)
@@ -298,16 +298,16 @@ def test_import_with_data(db_conn: sqlite3.Connection, to_import: list[str], whe
         self.cur = self.con.cursor()
 
     monkey_patch = pytest.MonkeyPatch()
-    monkey_patch.setattr(classes.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
-    monkey_patch.setattr(classes.db_manage, "DB_PATH", lambda: DB_PIECES_TABLE)
-    monkey_patch.setattr(classes.db_manage.Db_archive, "open_db", open_db_with_fixture)
+    monkey_patch.setattr(backend.app.files_management.archive_file_manager, "RELATIVE_ARCHIVE_PATH", lambda: where_to_import)
+    monkey_patch.setattr(backend.app.db_manage, "DB_PATH", lambda: DB_PIECES_TABLE)
+    monkey_patch.setattr(backend.app.db_manage.Db_archive, "open_db", open_db_with_fixture)
 
     # Mock ExcelController to return our test data without reading a real file
     class MockExcelController:
         def read_excel(self, path, ignore_first_row):
             return excel_data
 
-    db = classes.db_manage.Db_archive(TABLE_NAME)
+    db = backend.app.db_manage.Db_archive(TABLE_NAME)
     mi = MassiveImporter(db)
     mi.excel_controller = MockExcelController()
 

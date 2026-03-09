@@ -1,6 +1,6 @@
 import pytest
-from classes.presets.preset import  Preset
-from classes.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
+from backend.app.presets.preset import  Preset
+from backend.app.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 
 def instruments_of_a_preset():
     return {

@@ -1,8 +1,8 @@
-from classes.presets.preset import Preset
-from classes.printers.presets_printer import PresetsPrinter
-from classes.presets.resolved_preset_instrument import ResolvedPresetInstrument
-from classes.presets.preset_resolver_states import PresetResolverStates
-from classes.files_management.dir import Dir
+from backend.app.presets.preset import Preset
+from backend.app.printers.presets_printer import PresetsPrinter
+from backend.app.presets.resolved_preset_instrument import ResolvedPresetInstrument
+from backend.app.presets.preset_resolver_states import PresetResolverStates
+from backend.app.files_management.dir import Dir
 import pytest,os
 
 

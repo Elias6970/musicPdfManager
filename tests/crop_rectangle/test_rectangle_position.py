@@ -1,5 +1,5 @@
-from classes.crop_rectangle import CropRectangle
-from gui.interactive_previewer.movable_rectangle import MovableRectangle
+from backend.app.crop_rectangle import CropRectangle
+from frontend_pyqt.interactive_previewer.movable_rectangle import MovableRectangle
 from PyQt6.QtCore import QRectF, QSize
 import pytest, fitz
 import numpy as np

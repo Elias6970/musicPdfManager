@@ -5,8 +5,8 @@ from matplotlib import pyplot as plt
 from pdf2image import pdf2image
 from thefuzz import fuzz
 
-from classes.files_manage import File
-from classes.constants import OPTIONS_OF_INSTRUMENTS_ESP
+from backend.app.files_management.file import File
+from backend.app.constants import OPTIONS_OF_INSTRUMENTS_ESP
 
 class Pdf(File):
     def __init__(self, path):

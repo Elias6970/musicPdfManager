@@ -2,7 +2,7 @@ import subprocess,sys,os
 
 def generate_translation():
     all_files = []
-    for root, dirs, files in os.walk(os.path.join(".","gui")):
+    for root, dirs, files in os.walk(os.path.join(".","frontend_pyqt")):
         for file in files:
             if file.endswith(".py"):
                 all_files.append(os.path.abspath(os.path.join(root, file)))

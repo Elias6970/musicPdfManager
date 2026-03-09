@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from classes.files_management.excel_controller import ExcelController
+from backend.app.files_management.excel_controller import ExcelController
 
 @pytest.fixture
 def excel_controller():
@@ -8,7 +8,7 @@ def excel_controller():
 
 class TestExcelController:
     
-    @patch('classes.files_management.excel_controller.xlrd.open_workbook')
+    @patch('backend.app.files_management.excel_controller.xlrd.open_workbook')
     def test_read_xls(self, mock_open_workbook, excel_controller):
         # Setup mock for .xls
         mock_sheet = MagicMock()
@@ -29,7 +29,7 @@ class TestExcelController:
         assert result[1] == (2, 'Title 2', 'Author 2', 'Genre 2')
         mock_open_workbook.assert_called_once_with('test_files/test.xls')
 
-    @patch('classes.files_management.excel_controller.openpyxl.load_workbook')
+    @patch('backend.app.files_management.excel_controller.openpyxl.load_workbook')
     def test_read_xlsx(self, mock_load_workbook, excel_controller):
         # Setup mock for .xlsx behavior
         mock_sheet = MagicMock()
@@ -79,7 +79,7 @@ class TestExcelController:
         ),
     ])
     def test_read_excel_parametrized_xlsx(self, file_name, ignore_first, row_data, expected_result, excel_controller):
-        with patch('classes.files_management.excel_controller.openpyxl.load_workbook') as mock_load_wb:
+        with patch('backend.app.files_management.excel_controller.openpyxl.load_workbook') as mock_load_wb:
             mock_sheet = MagicMock()
             
             # Helper to create mock cells
@@ -106,7 +106,7 @@ class TestExcelController:
         result = excel_controller.read_excel("test.txt")
         assert result == []
 
-    @patch('classes.files_management.excel_controller.xlrd.open_workbook')
+    @patch('backend.app.files_management.excel_controller.xlrd.open_workbook')
     def test_read_xls_logging_error(self, mock_open_workbook, excel_controller):
         # Simulate bad data in the second row causing a ValueError or similar
         mock_sheet = MagicMock()

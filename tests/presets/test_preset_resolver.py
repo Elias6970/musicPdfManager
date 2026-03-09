@@ -1,6 +1,6 @@
-from classes.presets.preset_resolver import PresetResolver, PresetResolverStates
-from classes.presets.preset import Preset
-from classes.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
+from backend.app.presets.preset_resolver import PresetResolver, PresetResolverStates
+from backend.app.presets.preset import Preset
+from backend.app.constants.constants import PRESETS_COPIES,PRESETS_OTHER_OPTIONS
 import pytest
 
 
