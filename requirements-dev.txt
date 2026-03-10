@@ -1,0 +1,4 @@
+-r backend/requirements.txt
+-r frontend_pyqt/requirements.txt
+pyinstaller==6.3.0
+pytest==8.3.5

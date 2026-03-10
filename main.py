@@ -1,9 +1,9 @@
 import sys
-import gui.main_window as gui
+import frontend_pyqt.main_window as frontend_pyqt
 
 def main():
-    app = gui.QtWidgets.QApplication(sys.argv)
-    w = gui.Main_window()
+    app = frontend_pyqt.QtWidgets.QApplication(sys.argv)
+    w = frontend_pyqt.Main_window()
     w.show()
     w.center_on_screen()
     sys.exit(app.exec())
