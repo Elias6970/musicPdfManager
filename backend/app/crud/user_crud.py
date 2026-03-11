@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
 from backend.app.models.user import User, UserCreate
-from backend.app.utils.auth import get_password_hash
+from backend.app.security.auth import get_password_hash
 
 def create_user(session: Session, user_create: UserCreate) -> User:
     db_obj = User.model_validate(
