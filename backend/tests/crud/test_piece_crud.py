@@ -4,12 +4,14 @@ from backend.app.crud.piece_crud import create_piece, update_piece, get_piece, d
 from backend.app.models.piece import Piece, PieceCreate
 from backend.app.models.author import Author
 from backend.app.models.type import Type
-
-sqlite_file_name = "sqlite:///:memory:"
+from backend.app.models.archive import Archive
+from backend.app.models.user_archive_link import UserArchiveLink  # Required for Archive relationship registry
+from backend.app.models.user import User  # Required for UserArchiveLink relationship registry
+from backend.app.models.role import Role  # Required for User relationship registry
 
 @pytest.fixture(name="session")
 def session_fixture():
-    engine = create_engine(sqlite_file_name)
+    engine = create_engine("sqlite:///:memory:")
     # Create tables in the in-memory database
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
@@ -18,7 +20,9 @@ def session_fixture():
         author2 = Author(name="Author 2")
         type1 = Type(name="Type 1")
         type2 = Type(name="Type 2")
-        session.add_all([author1, author2, type1, type2])
+        archive1 = Archive(name="Archive 1")
+        archive2 = Archive(name="Archive 2")
+        session.add_all([author1, author2, type1, type2, archive1, archive2])
         session.commit()
         yield session
 
@@ -30,7 +34,8 @@ def test_create_piece_normal(session: Session):
         parted=True,
         digitalized=True,
         author_id=1,
-        type_id=1
+        type_id=1,
+        archive_id=1
     )
     piece = create_piece(session, piece_in)
     
@@ -42,6 +47,7 @@ def test_create_piece_normal(session: Session):
     assert piece.digitalized is True
     assert piece.author_id == 1
     assert piece.type_id == 1
+    assert piece.archive_id == 1
 
 def test_create_piece_extreme(session: Session):
     # Extreme: very large cod, very long name, combinations of bools
@@ -53,7 +59,8 @@ def test_create_piece_extreme(session: Session):
         parted=False,
         digitalized=True,
         author_id=1,
-        type_id=1
+        type_id=1,
+        archive_id=2
     )
     piece = create_piece(session, piece_in)
     
@@ -65,13 +72,14 @@ def test_create_piece_extreme(session: Session):
     assert piece.digitalized is True
     assert piece.author_id == 1
     assert piece.type_id == 1
+    assert piece.archive_id == 2
 
 
 def test_update_piece_every_field(session: Session):
     # Initial piece
     piece_in = PieceCreate(
         cod=10, name="Original", handwrited=False, parted=False,
-        digitalized=False, author_id=1, type_id=1
+        digitalized=False, author_id=1, type_id=1, archive_id=1
     )
     piece = create_piece(session, piece_in)
     piece_id = piece.id
@@ -84,7 +92,8 @@ def test_update_piece_every_field(session: Session):
         parted=True,
         digitalized=True,
         author_id=2, # Changing foreign keys
-        type_id=2
+        type_id=2,
+        archive_id=2
     )
     updated_piece = update_piece(session, piece_id, update_data)
     
@@ -97,11 +106,12 @@ def test_update_piece_every_field(session: Session):
     assert updated_piece.digitalized is True
     assert updated_piece.author_id == 2
     assert updated_piece.type_id == 2
+    assert updated_piece.archive_id == 2
 
 
 def test_update_piece_non_existent(session: Session):
     update_data = PieceCreate(
-        cod=1, name="Ghost", handwrited=False, parted=False, digitalized=False, author_id=1, type_id=1
+        cod=1, name="Ghost", handwrited=False, parted=False, digitalized=False, author_id=1, type_id=1, archive_id=1
     )
     result = update_piece(session, 9999, update_data)
     assert result is None
@@ -109,7 +119,7 @@ def test_update_piece_non_existent(session: Session):
 
 def test_get_piece_existing_and_non_existent(session: Session):
     piece_in = PieceCreate(
-        cod=1, name="Find me", handwrited=True, parted=True, digitalized=True, author_id=1, type_id=1
+        cod=1, name="Find me", handwrited=True, parted=True, digitalized=True, author_id=1, type_id=1, archive_id=1
     )
     piece = create_piece(session, piece_in)
     
@@ -117,6 +127,7 @@ def test_get_piece_existing_and_non_existent(session: Session):
     found = get_piece(session, piece.id)
     assert found is not None
     assert found.name == "Find me"
+    assert found.archive_id == 1
     
     # Non-existent
     not_found = get_piece(session, 9999)
@@ -125,7 +136,7 @@ def test_get_piece_existing_and_non_existent(session: Session):
 
 def test_delete_piece(session: Session):
     piece_in = PieceCreate(
-        cod=404, name="To Delete", handwrited=True, parted=True, digitalized=True, author_id=1, type_id=1
+        cod=404, name="To Delete", handwrited=True, parted=True, digitalized=True, author_id=1, type_id=1, archive_id=1
     )
     piece = create_piece(session, piece_in)
     piece_id = piece.id
