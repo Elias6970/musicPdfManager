@@ -17,6 +17,7 @@ class ArchivePublic(ArchiveBase):
 
 class Archive(ArchiveBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    path: Optional[str] = Field(default=None)
     
     pieces: List["Piece"] = Relationship(back_populates="archive")
     user_links: List["UserArchiveLink"] = Relationship(back_populates="archive")
