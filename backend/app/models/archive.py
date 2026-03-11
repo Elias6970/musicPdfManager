@@ -16,7 +16,6 @@ class ArchivePublic(ArchiveBase):
     id: int
 
 class Archive(ArchiveBase, table=True):
-    __tablename__ = "archives"
     id: Optional[int] = Field(default=None, primary_key=True)
     
     pieces: List["Piece"] = Relationship(back_populates="archive")
