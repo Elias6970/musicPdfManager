@@ -12,7 +12,12 @@ class PieceBase(SQLModel):
     handwrited: bool
     parted: bool
     digitalized: bool
-
+    
+    @property
+    def std_name(self) -> str:
+        """Dynamically concatenated cod and name."""
+        return f"{self.cod}-{self.name}"
+    
 class PieceCreate(PieceBase):
     author_id: int
     type_id: int
@@ -30,9 +35,4 @@ class Piece(PieceBase, table=True):
     author: Optional["Author"] = Relationship(back_populates="pieces")
     type: Optional["Type"] = Relationship(back_populates="pieces")
     archive: Optional["Archive"] = Relationship(back_populates="pieces")
-    
-    @property
-    def std_name(self) -> str:
-        """Dynamically concatenated cod and name."""
-        return f"{self.cod}-{self.name}"
 
