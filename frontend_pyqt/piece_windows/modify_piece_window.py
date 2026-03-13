@@ -1,7 +1,6 @@
 from PyQt6 import QtWidgets
 from backend.app.utils.name_manager import NameManager
 from backend.app.files_management.archive import Archive
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.error import AvoidModificationException
 from frontend_pyqt.abstract_windows.abstract_fields_window import AbstractFieldsWindow
 from frontend_pyqt.elements.score_search_bar import ScoreSearchBar
@@ -55,7 +54,7 @@ class Modify_piece_window(QtWidgets.QDialog):
         
 
             if insertion:
-                ArchiveFileManager.change_piece_dir_name(self.old_piece.parsed_name,NameManager.get_std_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text()))
+                self.archive.file_manager.change_piece_dir_name(self.old_piece.parsed_name,NameManager.get_std_name(int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text()))
                 self.archive.pieces.update_cod_and_name(self.old_piece.cod,int(self.abstract_fields.line_cod.text()),self.abstract_fields.line_name.text())
                 
 
