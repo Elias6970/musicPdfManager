@@ -1,6 +1,5 @@
 from PyQt6 import QtWidgets
 from backend.app.utils.name_manager import NameManager
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.files_management.dir import Dir
 from backend.app.files_management.archive import Archive
 from backend.app.constants.constants import RELATIVE_ARCHIVE_PATH
@@ -79,7 +78,7 @@ class PieceSelectorToClassifyWindow(QtWidgets.QDialog):
             self.search_bar.clear()
 
     def _get_dir(self,piece_name:str) -> Dir:
-        folder_name = ArchiveFileManager.parse_name_to_file_manager(piece_name)
+        folder_name = self.archive.file_manager.parse_name_to_file_manager(piece_name)
         return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),folder_name))
     
     #Button that opens the classify window.

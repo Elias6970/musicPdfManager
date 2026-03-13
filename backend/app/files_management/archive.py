@@ -13,6 +13,7 @@ class Archive:
         self.archive_path = archive_path
         self.pieces = Pieces_list()
         self.update_pieces()
+        self.file_manager = ArchiveFileManager(archive_path)
 
     def add_piece(self,cod:int|str, name:str, author:str, type:str,  files:list[str], handwritten:bool, digitalized:bool, parted:bool):
         """
@@ -32,14 +33,14 @@ class Archive:
         """
 
         parsed_name = NameManager.get_std_name(cod,name)
-        folder_name = ArchiveFileManager.parse_name_to_file_manager(parsed_name)
+        folder_name = self.file_manager.parse_name_to_file_manager(parsed_name)
 
         #Create the dir in the archive
-        ArchiveFileManager.make_dir(folder_name)
+        self.file_manager.make_dir(folder_name)
 
         if files != []:
             #Copy the files to the archive
-            are_moved = ArchiveFileManager.copy_files_in_archive(folder_name,files)
+            are_moved = self.file_manager.copy_files_in_archive(folder_name,files)
         else:
             are_moved = True
 
@@ -72,8 +73,8 @@ class Archive:
         Returns:
             bool: True if files are added successfully; False otherwise.
         """
-        folder_name = ArchiveFileManager.parse_name_to_file_manager(parsed_name)
-        are_moved = ArchiveFileManager.copy_files_in_archive(folder_name,files)
+        folder_name = self.file_manager.parse_name_to_file_manager(parsed_name)
+        are_moved = self.file_manager.copy_files_in_archive(folder_name,files)
         return are_moved
 
     def delete_piece(self,cod:int,std_name:str=""):
@@ -92,8 +93,8 @@ class Archive:
         try:
             if std_name == "":
                 std_name = NameManager.get_std_name(cod,self.db.get_with_equals("cod",str(cod),"cod,name")[0][1])
-            folder_name = ArchiveFileManager.parse_name_to_file_manager(std_name)
-            ArchiveFileManager.delete_piece(folder_name)
+            folder_name = self.file_manager.parse_name_to_file_manager(std_name)
+            self.file_manager.delete_piece(folder_name)
         except FileNotFoundError:
             pass
 

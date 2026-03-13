@@ -4,7 +4,6 @@ from backend.app.files_management.archive import Archive
 from backend.app.files_management.dir import Dir_Error
 from backend.app.custom_order.instrument_sorter import InstrumentSorter
 from backend.app.validate import Validate
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.printers.default_printer import DefaultPrinter
 from backend.app.error import NoScoresException
 from backend.app.preview_controller import Preview_controller
@@ -222,7 +221,7 @@ class IndividualSelectionWindow(QtWidgets.QWidget):
         if self.part_combo_box.isEnabled():
             path = os.path.join(self.printer.actual_piece_dir.path,DIR_SCORES,self.part_combo_box.currentText())
 
-            if ArchiveFileManager.path_exists(path):
+            if self.archive.file_manager.path_exists(path):
 
                 copies=int(self.num_copies.currentText())
                 self.printer.add(path,copies)

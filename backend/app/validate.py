@@ -21,8 +21,9 @@ class Validate():
         If it is not, return a Dir_Error object.
         Return the Dir object even if the folder doesn't
         """
+        manager = ArchiveFileManager(RELATIVE_ARCHIVE_PATH())
         for i in list_of_pieces:
             if src_txt == i:
-                folder_name = ArchiveFileManager.parse_name_to_file_manager(i)
+                folder_name = manager.parse_name_to_file_manager(i)
                 return Dir(os.path.join(RELATIVE_ARCHIVE_PATH(),folder_name),folder_name)
         return Dir_Error()
