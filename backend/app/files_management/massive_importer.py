@@ -16,7 +16,7 @@ class MassiveImporter:
         self.fd = FileDecompressor(MassiveImporterLogger())
         self.db = db
         self.excel_controller = ExcelController()
-
+        self._file_manager = ArchiveFileManager(RELATIVE_ARCHIVE_PATH())
     
     def __manage_a_file(self,file:Path,temp_dir:Path) -> list[str]:
         """
@@ -78,7 +78,7 @@ class MassiveImporter:
         seen_hashes = set()
         unique_pieces = []
         for i in pieces_list:
-            file_hash = ArchiveFileManager.md5_hash(i)
+            file_hash = self._file_manager.md5_hash(i)
             if file_hash not in seen_hashes:
                 seen_hashes.add(file_hash)
                 unique_pieces.append(i)
@@ -169,7 +169,7 @@ class MassiveImporter:
                     cod = NameManager.get_cod(dir_path.name)
                     name = self.db.get_with_equals("cod", cod, "name")
                     print(name)
-                    std_name = ArchiveFileManager.parse_name_to_file_manager(NameManager.get_std_name(cod, name[0][0])) if name else None
+                    std_name = self._file_manager.parse_name_to_file_manager(NameManager.get_std_name(cod, name[0][0])) if name else None
                     print(std_name)
                     if std_name == None:
                         self.logger.error("use_db_name flag enabled but cod is not in the db for %s. Using this name",dir_path.name)
@@ -179,16 +179,16 @@ class MassiveImporter:
                 else:
                     dir_name = dir_path.name
 
-                dir_name = ArchiveFileManager.parse_name_to_file_manager(dir_name)                
-                ArchiveFileManager.make_dir(dir_name)
+                dir_name = self._file_manager.parse_name_to_file_manager(dir_name)                
+                self._file_manager.make_dir(dir_name)
                 self.logger.info(f"Dir {dir_name} created in the archive")
-                are_imported = ArchiveFileManager.copy_files_in_archive(dir_name,files_to_import)
+                are_imported = self._file_manager.copy_files_in_archive(dir_name,files_to_import)
 
                 if are_imported:
                     self.logger.info("Files coppied correctly")
                 else:
                     self.logger.error(f"Error copying the files for piece {dir_name}. Skipping this import.")
-                    ArchiveFileManager.delete_piece(dir_name)
+                    self._file_manager.delete_piece(dir_name)
                     not_imported.append(dir_path.name)
 
 

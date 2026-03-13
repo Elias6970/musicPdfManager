@@ -3,7 +3,7 @@ from backend.app.utils.name_manager import NameManager
 from backend.app.files_management.file import File
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.db_manage import Db_archive
-from backend.app.constants.constants import DB_PIECES_TABLE
+from backend.app.constants.constants import DB_PIECES_TABLE, RELATIVE_ARCHIVE_PATH
 
 class Dir(File):
     def __init__(self, path,name=None):
@@ -12,6 +12,8 @@ class Dir(File):
             self.name = os.path.basename(path)
         else:
             self.name = name
+        
+        self.file_manager = ArchiveFileManager(RELATIVE_ARCHIVE_PATH())
 
     def search_and_set_path(self) -> bool:
         """
@@ -19,7 +21,7 @@ class Dir(File):
         If the path exists, set the path to the dir and return True
         If the path does not exist, return False
         """
-        path = ArchiveFileManager.get_piece_path(NameManager.get_cod(self.name))
+        path = self.file_manager.get_piece_path(NameManager.get_cod(self.name))
         if path != "":
             self.set_path(path)
             return True
@@ -27,11 +29,11 @@ class Dir(File):
 
     def get_scores(self):
         """Return the scores names with the extension (always .pdf)"""
-        return ArchiveFileManager.get_scores(self.path)
+        return self.file_manager.get_scores(self.path)
     
     def get_extras(self):
         """Return the extras names with the extensions"""
-        return ArchiveFileManager.get_extras(self.path)
+        return self.file_manager.get_extras(self.path)
     
     
     def get_score_names_without_extension(self):
@@ -41,7 +43,7 @@ class Dir(File):
 
     def change_name(self,new_name:str) -> bool:
         """Change the name of the dir"""
-        path = ArchiveFileManager.move_files(self.path,new_name)
+        path = self.file_manager.move_files(self.path,new_name)
         
         if path == "":
             return False

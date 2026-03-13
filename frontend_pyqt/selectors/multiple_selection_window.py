@@ -2,7 +2,6 @@ from PyQt6 import QtWidgets,QtGui,QtCore
 from backend.app.constants.constants import MAX_COPIES
 from backend.app.custom_order.instrument_sorter import InstrumentSorter
 from backend.app.files_management.archive import Archive
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.files_management.dir import Dir
 from backend.app.files_management.dir import Dir_Error
 from backend.app.presets.preset_resolver_states import PresetResolverStates
@@ -292,7 +291,7 @@ class MultipleSelectionWindow(QtWidgets.QWidget):
         try:
             dir = self.printer.actual_piece_dir
 
-            if ArchiveFileManager.path_exists(dir.path):
+            if self.archive.file_manager.path_exists(dir.path):
                 preset_name = self.presets_combo_box.currentText()
                 preset = self.preset_manager.get_preset(preset_name)
                             

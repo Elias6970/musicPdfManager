@@ -10,8 +10,9 @@ os.chdir(os.path.join(root,"assets"))
 def hash_file(path):
     h = hashlib.sha256()  # create a SHA-256 hash object
     with open(path, 'rb') as f:  # open file in binary mode
-        for chunk in iter(lambda: f.read(4096), b''):  # read 4KB at a time
-            h.update(chunk)  # feed chunk into hash
+        # Replace \r\n with \n to avoid CRLF mismatch on Windows checkouts
+        content = f.read().replace(b'\r\n', b'\n')
+        h.update(content)
     return h.hexdigest()  # get the hash as a hex string
 
 
