@@ -4,8 +4,13 @@ from backend.app.loggers.massive_importer_logger import MassiveImporterLogger
 
 #########ALL FILES NEED TO BE IN THE ASSETS FOLDER###########
 
-root = os.path.dirname(os.path.abspath(__file__))
-os.chdir(os.path.join(root,"assets"))
+@pytest.fixture(autouse=True)
+def change_to_assets_dir():
+    root = os.path.dirname(os.path.abspath(__file__))
+    original_cwd = os.getcwd()
+    os.chdir(os.path.join(root, "assets"))
+    yield
+    os.chdir(original_cwd)
 
 def hash_file(path):
     h = hashlib.sha256()  # create a SHA-256 hash object
