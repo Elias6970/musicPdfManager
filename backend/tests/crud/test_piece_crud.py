@@ -1,6 +1,6 @@
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
-from backend.app.crud.piece_crud import create_piece, update_piece, get_piece, delete_piece
+from backend.app.crud.piece_crud import create_piece, update_piece, get_piece, delete_piece, increment_piece_version
 from backend.app.models.piece import Piece, PieceCreate
 from backend.app.models.author import Author
 from backend.app.models.type import Type
@@ -48,6 +48,10 @@ def test_create_piece_normal(session: Session):
     assert piece.author_id == 1
     assert piece.type_id == 1
     assert piece.archive_id == 1
+    
+    assert piece.version == 1
+    assert piece.created_at is not None
+    assert piece.updated_at is not None
 
 def test_create_piece_extreme(session: Session):
     # Extreme: very large cod, very long name, combinations of bools
@@ -107,6 +111,8 @@ def test_update_piece_every_field(session: Session):
     assert updated_piece.author_id == 2
     assert updated_piece.type_id == 2
     assert updated_piece.archive_id == 2
+    
+    assert updated_piece.version == 2
 
 
 def test_update_piece_non_existent(session: Session):
@@ -151,3 +157,20 @@ def test_delete_piece(session: Session):
     # Delete non-existent
     deleted_again = delete_piece(session, piece_id)
     assert deleted_again is False
+
+def test_increment_piece_version(session: Session):
+    piece_in = PieceCreate(
+        cod=777, name="Version Test", handwrited=False, parted=False, digitalized=False, author_id=1, type_id=1, archive_id=1
+    )
+    piece = create_piece(session, piece_in)
+    
+    assert piece.version == 1
+    
+    updated_piece = increment_piece_version(session, piece.id)
+    
+    assert updated_piece is not None
+    assert updated_piece.version == 2
+    
+    # Check that a non-existent piece returns None
+    result = increment_piece_version(session, 9999)
+    assert result is None

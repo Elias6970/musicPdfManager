@@ -1,5 +1,7 @@
 from typing import Optional, TYPE_CHECKING
+from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, DateTime, func
 
 if TYPE_CHECKING:
     from backend.app.models.author import Author
@@ -28,6 +30,16 @@ class PiecePublic(PieceBase):
 
 class Piece(PieceBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
+    created_at: Optional[datetime] = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), server_default=func.now())
+    )
+    updated_at: Optional[datetime] = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    )
+    version: Optional[int] = Field(default=1)
+    
     author_id: Optional[int] = Field(default=None, foreign_key="author.id")
     type_id: Optional[int] = Field(default=None, foreign_key="type.id")
     archive_id: Optional[int] = Field(default=None, foreign_key="archive.id")
