@@ -10,3 +10,4 @@ opencv-python==4.11.0.86
 sqlmodel==0.0.37
 PyJWT==2.11.0
 pwdlib[argon2]==0.3.0
+fastapi[standard]==0.135.1
