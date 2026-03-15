@@ -46,3 +46,6 @@ class InvalidCredentialsError(Exception):
 
 class InvalidUserDataError(Exception):
     pass
+
+class InsufficientPermissionsError(Exception):
+    pass

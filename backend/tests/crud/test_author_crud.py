@@ -9,12 +9,6 @@ from backend.app.crud.author_crud import (
     delete_author
 )
 
-# Dummy Piece model to satisfy the SQLAlchemy mapper for Author.pieces 
-# since the real Piece model doesn't exist yet.
-class Piece(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    author_id: Optional[int] = Field(default=None, foreign_key="author.id")
-    author: Optional[Author] = Relationship(back_populates="pieces")
 
 @pytest.fixture
 def session():

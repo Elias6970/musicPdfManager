@@ -16,6 +16,20 @@ def update_piece(session: Session, piece_id: int, piece_in: PieceCreate) -> Opti
     piece_data = piece_in.model_dump(exclude_unset=True)
     for key, value in piece_data.items():
         setattr(db_piece, key, value)
+        
+    # Increment version manually on update
+    db_piece.version = (db_piece.version or 0) + 1
+        
+    session.add(db_piece)
+    session.commit()
+    session.refresh(db_piece)
+    return db_piece
+
+def increment_piece_version(session: Session, piece_id: int) -> Optional[Piece]:
+    db_piece = session.get(Piece, piece_id)
+    if not db_piece:
+        return None
+    db_piece.version = (db_piece.version or 0) + 1
     session.add(db_piece)
     session.commit()
     session.refresh(db_piece)

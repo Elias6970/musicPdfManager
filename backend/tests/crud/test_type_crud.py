@@ -9,13 +9,6 @@ from backend.app.crud.type_crud import (
     delete_type
 )
 
-# Dummy Piece model to satisfy the SQLAlchemy mapper for Type.pieces
-# since the real Piece model doesn't exist yet.
-class Piece(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    type_id: Optional[int] = Field(default=None, foreign_key="type.id")
-    type: Optional[Type] = Relationship(back_populates="pieces")
-
 @pytest.fixture
 def session():
     engine = create_engine("sqlite:///:memory:")

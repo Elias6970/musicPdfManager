@@ -2,7 +2,7 @@ from sqlmodel import Session
 from backend.app.crud import user_crud
 from backend.app.models.user import UserCreate, UserPublic
 from backend.app.models.token import Token
-from backend.app.utils.auth import verify_password, create_access_token
+from backend.app.security.auth import verify_password, create_access_token
 from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
 
 def register_user(session: Session, user_create: UserCreate) -> UserPublic:
