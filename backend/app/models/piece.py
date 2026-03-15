@@ -21,8 +21,8 @@ class PieceBase(SQLModel):
         return f"{self.cod}-{self.name}"
     
 class PieceCreate(PieceBase):
-    author_id: int
-    type_id: int
+    author_id: Optional[int] = None
+    type_id: Optional[int] = None
     archive_id: int
 
 class PiecePublic(PieceBase):
