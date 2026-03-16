@@ -29,9 +29,9 @@ class ServerSettings(BaseModel):
 
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
-    base_presets_instruments_path: str = "presets/instruments"
-    base_presets_pieces_path: str = "presets/pieces"
-    base_dossier_cover_path: str = "dossier_covers"
+    base_presets_instruments_path: str = "data/presets/instruments"
+    base_presets_pieces_path: str = "data/presets/pieces"
+    base_dossier_cover_path: str = "data/dossier_covers"
 
 class ServerSettingsRepository:
     """Load/save/validate ServerSettings from a versioned JSON file."""
