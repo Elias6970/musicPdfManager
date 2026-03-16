@@ -2,10 +2,7 @@
 from datetime import datetime, timedelta, timezone
 from pwdlib import PasswordHash
 import jwt
-
-SECRET_KEY = "3a137d4e057a4b42718b1a723411587186aca4d8a4e54a42bc1c38765cc707ee" 
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+import backend.app.settings as settings
 
 pwd_context = PasswordHash.recommended()
 
@@ -20,8 +17,10 @@ def create_access_token(subject: str | int, expires_delta: timedelta | None = No
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.get_server_settings().access_token_expire_minutes)
     
     to_encode = {"exp": expire, "sub": str(subject)}
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(payload=to_encode, 
+                             key=settings.get_server_settings().jwt_secret_key, 
+                             algorithm=settings.get_server_settings().jwt_algorithm)
     return encoded_jwt
