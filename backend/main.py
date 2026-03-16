@@ -1,4 +1,8 @@
 from fastapi import FastAPI
+import app.settings as settings
+from api.dependencies.permissions import RequireArchiveRoleFastAPI, RequireRoleFastAPI
+
+require_admin = RequireRoleFastAPI(allowed_roles=["admin"])
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -14,6 +18,11 @@ def create_app() -> FastAPI:
     def health_check():
         return {"status": "ok"}
 
+    @app.get("/is_authenticated")
+    def is_authenticated(iss=require_admin):
+        return {"authenticated": True}
+
     return app
 
+settings.get_server_settings()
 app = create_app()

@@ -24,3 +24,15 @@ def create_access_token(subject: str | int, expires_delta: timedelta | None = No
                              key=settings.get_server_settings().jwt_secret_key, 
                              algorithm=settings.get_server_settings().jwt_algorithm)
     return encoded_jwt
+
+def decode_access_token(token: str) -> str | None:
+    """Decodes a JWT access token and returns the payload if valid."""
+    try:
+        decoded_jwt = jwt.decode(
+            token, 
+            key=settings.get_server_settings().jwt_secret_key, 
+            algorithms=[settings.get_server_settings().jwt_algorithm]
+        )
+        return decoded_jwt["sub"] if "sub" in decoded_jwt else None
+    except jwt.InvalidTokenError:
+        return None

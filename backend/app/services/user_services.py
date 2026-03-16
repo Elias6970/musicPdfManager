@@ -7,7 +7,8 @@ from backend.app.models.user_config import UserConfigCreate
 from backend.app.models.token import Token
 from backend.app.security.auth import verify_password, create_access_token
 from backend.app.settings import get_server_settings
-from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
+from backend.app.error import EmailAlreadyRegisteredError, InsufficientPermissionsError, InvalidCredentialsError, InvalidUserDataError
+
 
 def register_user(session: Session, user_create: UserCreate) -> User:
     if "@" not in user_create.email:
@@ -72,5 +73,16 @@ def get_user_dossier_cover_path(session: Session, user_id: int) -> str:
 
     settings = get_server_settings()
     return os.path.join(settings.base_dossier_cover_path, user_config.dossier_cover_path)
+
+
+def check_user_role(session: Session, user_id: int, allowed_roles: list[str]) -> User:
+    user = user_crud.get_user_by_id(session, user_id=user_id)
+    if not user:
+        raise InvalidUserDataError("User not found")
+    
+    if user.role is None or user.role.name not in allowed_roles:
+        raise InsufficientPermissionsError("User does not have the required role")
+    
+    return user
 
 
