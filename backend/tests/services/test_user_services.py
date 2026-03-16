@@ -1,8 +1,15 @@
+import os
 import pytest
 from unittest.mock import MagicMock, patch
 from sqlmodel import Session
 
-from backend.app.services.user_services import login_user, register_user
+from backend.app.services.user_services import (
+    login_user,
+    register_user,
+    get_user_presets_instruments_path,
+    get_user_presets_pieces_path,
+    get_user_dossier_cover_path,
+)
 from backend.app.models.token import Token
 from backend.app.models.user import UserCreate
 from backend.app.error import InvalidCredentialsError, EmailAlreadyRegisteredError, InvalidUserDataError
@@ -129,4 +136,73 @@ def test_register_user_empty_name(mock_session):
         register_user(session=mock_session, user_create=user_in)
         
     assert str(exc_info.value) == "Name can't be empty"
+
+
+@pytest.mark.parametrize(
+    "service_fn,base_attr,user_attr",
+    [
+        (
+            get_user_presets_instruments_path,
+            "base_presets_instruments_path",
+            "presets_instruments_path",
+        ),
+        (
+            get_user_presets_pieces_path,
+            "base_presets_pieces_path",
+            "presets_pieces_path",
+        ),
+        (
+            get_user_dossier_cover_path,
+            "base_dossier_cover_path",
+            "dossier_cover_path",
+        ),
+    ],
+)
+def test_get_user_paths_success(service_fn, base_attr, user_attr, mock_session):
+    user_id = 7
+    user_relative_path = "user/custom/path"
+    base_path = "base/root"
+
+    mock_user_config = MagicMock()
+    setattr(mock_user_config, user_attr, user_relative_path)
+
+    mock_settings = MagicMock()
+    setattr(mock_settings, base_attr, base_path)
+
+    with patch(
+        "backend.app.services.user_services.user_config_crud.get_user_config_by_user_id"
+    ) as mock_get_user_config, patch(
+        "backend.app.services.user_services.get_server_settings"
+    ) as mock_get_settings:
+        mock_get_user_config.return_value = mock_user_config
+        mock_get_settings.return_value = mock_settings
+
+        result = service_fn(session=mock_session, user_id=user_id)
+
+        assert result == os.path.join(base_path, user_relative_path)
+        mock_get_user_config.assert_called_once_with(mock_session, user_id=user_id)
+        mock_get_settings.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    "service_fn",
+    [
+        get_user_presets_instruments_path,
+        get_user_presets_pieces_path,
+        get_user_dossier_cover_path,
+    ],
+)
+def test_get_user_paths_user_config_not_found_raises(service_fn, mock_session):
+    user_id = 99
+
+    with patch(
+        "backend.app.services.user_services.user_config_crud.get_user_config_by_user_id"
+    ) as mock_get_user_config:
+        mock_get_user_config.return_value = None
+
+        with pytest.raises(InvalidUserDataError) as exc_info:
+            service_fn(session=mock_session, user_id=user_id)
+
+        assert str(exc_info.value) == "User config not found"
+        mock_get_user_config.assert_called_once_with(mock_session, user_id=user_id)
 
