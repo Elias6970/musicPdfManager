@@ -12,6 +12,7 @@ from backend.app.services.user_services import (
 )
 from backend.app.models.token import Token
 from backend.app.models.user import UserCreate
+from backend.app.models.user_config import UserConfigCreate
 from backend.app.error import InvalidCredentialsError, EmailAlreadyRegisteredError, InvalidUserDataError
 
 @pytest.fixture
@@ -85,12 +86,22 @@ def test_login_user_wrong_password(mock_get_user, mock_verify, mock_session):
 
 @patch("backend.app.services.user_services.user_crud.get_user_by_email")
 @patch("backend.app.services.user_services.user_crud.create_user")
-def test_register_user_success(mock_create_user, mock_get_user, mock_session):
+@patch("backend.app.services.user_services.user_config_crud.create_user_config")
+@patch("backend.app.services.user_services.uuid4")
+def test_register_user_success(
+    mock_uuid4,
+    mock_create_user_config,
+    mock_create_user,
+    mock_get_user,
+    mock_session,
+):
     # Arrange
     user_in = UserCreate(name="Test", email="new@example.com", password="password")
     mock_get_user.return_value = None  # user doesn't exist yet
+    mock_uuid4.side_effect = ["inst-uuid", "pieces-uuid", "cover-uuid"]
     
     mock_created_user = MagicMock()
+    mock_created_user.id = 42
     mock_create_user.return_value = mock_created_user
 
     # Act
@@ -100,6 +111,17 @@ def test_register_user_success(mock_create_user, mock_get_user, mock_session):
     assert result == mock_created_user
     mock_get_user.assert_called_once_with(mock_session, email="new@example.com")
     mock_create_user.assert_called_once_with(mock_session, user_in)
+    mock_create_user_config.assert_called_once()
+
+    create_args, _ = mock_create_user_config.call_args
+    assert create_args[0] == mock_session
+    assert create_args[1] == UserConfigCreate(
+        language="en_US",
+        presets_instruments_path="inst-uuid.json",
+        presets_pieces_path="pieces-uuid.json",
+        dossier_cover_path="cover-uuid.json",
+        user_id=42,
+    )
 
 @patch("backend.app.services.user_services.user_crud.get_user_by_email")
 def test_register_user_already_exists(mock_get_user, mock_session):

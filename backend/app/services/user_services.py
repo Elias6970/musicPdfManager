@@ -1,13 +1,15 @@
 import os
+from uuid import uuid4
 from sqlmodel import Session
 from backend.app.crud import user_crud, user_config_crud
-from backend.app.models.user import UserCreate, UserPublic
+from backend.app.models.user import UserCreate, User
+from backend.app.models.user_config import UserConfigCreate
 from backend.app.models.token import Token
 from backend.app.security.auth import verify_password, create_access_token
 from backend.app.settings import get_server_settings
 from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
 
-def register_user(session: Session, user_create: UserCreate) -> UserPublic:
+def register_user(session: Session, user_create: UserCreate) -> User:
     if "@" not in user_create.email:
         raise InvalidUserDataError("Invalid email format")
     
@@ -21,6 +23,16 @@ def register_user(session: Session, user_create: UserCreate) -> UserPublic:
     
     # Create the user
     user = user_crud.create_user(session, user_create)
+    user_config_crud.create_user_config(
+        session,
+        UserConfigCreate(
+            language="en_US",
+            presets_instruments_path=f"{uuid4()}.json",
+            presets_pieces_path=f"{uuid4()}.json",
+            dossier_cover_path=f"{uuid4()}.json",
+            user_id=user.id,
+        ),
+    )
     return user
 
 def login_user(session: Session, email: str, password: str) -> Token:
