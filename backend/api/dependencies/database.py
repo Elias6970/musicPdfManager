@@ -1,7 +1,7 @@
 
 
 from sqlmodel import Session, create_engine
-import app.settings as settings
+import backend.app.settings as settings
 
 from collections.abc import Iterator
 

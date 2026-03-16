@@ -2,9 +2,9 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session
-from app.models.user import User
-from api.dependencies.database import get_session
-from app.security.auth import decode_access_token
+from backend.app.models.user import User
+from backend.api.dependencies.database import get_session
+from backend.app.security.auth import decode_access_token
 # Import your token decoding logic here
 
 

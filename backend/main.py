@@ -1,6 +1,23 @@
-from fastapi import FastAPI
-import app.settings as settings
-from api.dependencies.permissions import RequireArchiveRoleFastAPI, RequireRoleFastAPI
+from contextlib import asynccontextmanager
+
+from fastapi import Depends, FastAPI
+from sqlmodel import SQLModel
+
+# Import the models module to register all SQLModel schemas
+import backend.app.models
+
+import backend.app.settings as settings
+from backend.api.dependencies.permissions import RequireArchiveRoleFastAPI, RequireRoleFastAPI
+from backend.api.dependencies.database import engine
+from backend.api.routes import users
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # This runs when the server starts
+    SQLModel.metadata.create_all(engine)
+    yield
+    # This runs when the server stops
+
 
 require_admin = RequireRoleFastAPI(allowed_roles=["admin"])
 
@@ -8,18 +25,19 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="musicPdfManager API",
         description="FastAPI backend for musicPdfManager",
-        version="1.0.0"
+        version="1.0.0",
+        lifespan=lifespan
     )
 
     # Attach our external routing here
-    #app.include_router(users.router, prefix="/api/v1/users", tags=["users"])
+    app.include_router(users.router, prefix="/api/v1")
 
     @app.get("/health")
     def health_check():
         return {"status": "ok"}
 
     @app.get("/is_authenticated")
-    def is_authenticated(iss=require_admin):
+    def is_authenticated(token: str = Depends(require_admin)):
         return {"authenticated": True}
 
     return app
