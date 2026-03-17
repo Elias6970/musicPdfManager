@@ -1,7 +1,8 @@
 import os
 from uuid import uuid4
-from sqlmodel import Session
+from sqlmodel import Session, select
 from backend.app.crud import user_crud, user_config_crud
+from backend.app.models.role import Role
 from backend.app.models.user import UserCreate, User
 from backend.app.models.user_config import UserConfigCreate
 from backend.app.models.token import Token
@@ -22,6 +23,13 @@ def register_user(session: Session, user_create: UserCreate) -> User:
     if existing_user:
         raise EmailAlreadyRegisteredError("Email already registered")
     
+    # Set the default role
+    if user_create.role_id is None or user_create.role_id == 0:
+        role = session.exec(select(Role).where(Role.name == "user")).first()  # Ensure "user" role exists
+        if not role:
+            raise InvalidUserDataError("Default role 'user' not found in the database")
+        user_create.role_id = role.id
+    
     # Create the user
     user = user_crud.create_user(session, user_create)
     user_config_crud.create_user_config(
@@ -31,7 +39,7 @@ def register_user(session: Session, user_create: UserCreate) -> User:
             presets_instruments_path=f"{uuid4()}.json",
             presets_pieces_path=f"{uuid4()}.json",
             dossier_cover_path=f"{uuid4()}.json",
-            user_id=user.id,
+            user_id=user.id, #type: ignore
         ),
     )
     return user
@@ -44,7 +52,7 @@ def login_user(session: Session, email: str, password: str) -> Token:
     if not verify_password(plain_password=password, hashed_password=user.password_hash):
         raise InvalidCredentialsError("Incorrect password")
     
-    access_token = create_access_token(subject=user.id)
+    access_token = create_access_token(subject=user.id) #type: ignore
     return Token(access_token=access_token, token_type="bearer")
 
 

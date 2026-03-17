@@ -25,7 +25,8 @@ class RequireRoleFastAPI:
         current_user: User = Depends(get_current_user)
     ) -> User:
         try:
-            print("Checking user role for user_id:", current_user.id)
+            if current_user.id is None:
+                raise InvalidUserDataError("User not authenticated")
             return check_user_role(
                 session=session,
                 user_id=current_user.id,
@@ -55,6 +56,8 @@ class RequireArchiveRoleFastAPI:
         current_user: User = Depends(get_current_user)
     ) -> UserArchiveLink:
         try:
+            if current_user.id is None:
+                raise InvalidUserDataError("User not authenticated")
             return check_archive_role(
                 session=session,
                 user_id=current_user.id,
@@ -66,3 +69,6 @@ class RequireArchiveRoleFastAPI:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=str(e)
             )
+
+
+require_admin = RequireRoleFastAPI(allowed_roles=["admin"])

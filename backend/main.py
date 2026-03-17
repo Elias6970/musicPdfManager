@@ -7,19 +7,17 @@ from sqlmodel import SQLModel
 import backend.app.models
 
 import backend.app.settings as settings
-from backend.api.dependencies.permissions import RequireArchiveRoleFastAPI, RequireRoleFastAPI
-from backend.api.dependencies.database import engine
+from backend.api.dependencies.database import engine, insert_default_roles
 from backend.api.routes import users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # This runs when the server starts
     SQLModel.metadata.create_all(engine)
+    insert_default_roles()
     yield
     # This runs when the server stops
 
-
-require_admin = RequireRoleFastAPI(allowed_roles=["admin"])
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -32,14 +30,7 @@ def create_app() -> FastAPI:
     # Attach our external routing here
     app.include_router(users.router, prefix="/api/v1")
 
-    @app.get("/health")
-    def health_check():
-        return {"status": "ok"}
-
-    @app.get("/is_authenticated")
-    def is_authenticated(token: str = Depends(require_admin)):
-        return {"authenticated": True}
-
+    
     return app
 
 settings.get_server_settings()

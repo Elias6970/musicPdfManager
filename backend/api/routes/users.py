@@ -3,7 +3,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 
 from backend.api.dependencies.database import get_session
-from backend.app.models.user import UserCreate, UserPublic
+from backend.api.dependencies.permissions import RequireRoleFastAPI,require_admin
+from backend.app.models.user import User, UserCreate, UserPublic
 from backend.app.models.token import Token
 from backend.app.services.user_services import register_user, login_user
 from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
@@ -11,7 +12,7 @@ from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsErr
 router = APIRouter(prefix="/users", tags=["users"])
 
 @router.post("/register", response_model=UserPublic)
-def register(user_in: UserCreate, session: Session = Depends(get_session)):
+def register(user_in: UserCreate, session: Session = Depends(get_session), creator: User = Depends(require_admin)):
     try:
         user = register_user(session, user_create=user_in)
         return user
