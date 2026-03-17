@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI, APIRouter
 from sqlmodel import SQLModel
 
 # Import the models module to register all SQLModel schemas
@@ -8,7 +8,7 @@ import backend.app.models
 
 import backend.app.settings as settings
 from backend.api.dependencies.database import engine, insert_default_roles
-from backend.api.routes import users
+from backend.api.routes import archive, users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,11 +26,12 @@ def create_app() -> FastAPI:
         version="1.0.0",
         lifespan=lifespan
     )
-
-    # Attach our external routing here
-    app.include_router(users.router, prefix="/api/v1")
-
+    router = APIRouter(prefix="/api/v1")
+    router.include_router(users.router)
+    router.include_router(archive.router)
     
+    
+    app.include_router(router)
     return app
 
 settings.get_server_settings()

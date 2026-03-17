@@ -2,7 +2,6 @@
 paths_all_files.txt
 archive_app
 __pycache__
-__init__.py
 .vscode
 *.xls
 *.xlsx
