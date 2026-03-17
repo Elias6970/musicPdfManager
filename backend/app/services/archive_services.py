@@ -1,5 +1,9 @@
 from typing import List
 from sqlmodel import Session, select
+from backend.app.models.author import Author
+from backend.app.models.type import Type
+from backend.app.crud.author_crud import get_or_create_author
+from backend.app.crud.type_crud import get_or_create_type
 from backend.app.models.user_archive_link import UserArchiveLink, ArchiveRole
 from backend.app.error import FileCouldNotBeReadException, InsufficientPermissionsError
 from backend.app.models.piece import Piece, PieceCreate
@@ -74,7 +78,8 @@ def add_piece_to_archive(
     Add a new piece to an archive with associated files.
     
     This function creates the directory structure, copies files to the archive,
-    and saves the piece metadata to the database.
+    and saves the piece metadata to the database. If author or type names are provided instead of IDs, 
+    it will create or fetch those records as well.
     
     Args:
         session: The database session.
@@ -88,16 +93,23 @@ def add_piece_to_archive(
     Raises:
         FileCouldNotBeReadException: If file operations fail.
     """
+    #Create directory and copy the files
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
-    
-    # Create the directory structure in the archive
     file_manager.make_dir(folder_name)
-
-    # Copy files to the archive
     files_copied = file_manager.copy_files_in_archive(folder_name, files)
     
     if not files_copied:
         raise FileCouldNotBeReadException("Failed to copy files to archive")
+
+    # Handle author and type creation if names are provided instead of IDs
+    if piece.author_id is None and piece.author_name:
+        author = get_or_create_author(session, piece.author_name)
+        piece.author_id = author.id
+
+    if piece.type_id is None and piece.type_name:
+        type_ = get_or_create_type(session, piece.type_name)
+        piece.type_id = type_.id
+
 
     return create_piece(session, piece)
 

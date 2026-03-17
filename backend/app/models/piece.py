@@ -3,6 +3,10 @@ from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, DateTime, func
 
+from backend.app.models.archive import ArchivePublic
+from backend.app.models.author import AuthorPublic
+from backend.app.models.type import TypePublic
+
 if TYPE_CHECKING:
     from backend.app.models.author import Author
     from backend.app.models.type import Type
@@ -21,12 +25,19 @@ class PieceBase(SQLModel):
         return f"{self.cod}-{self.name}"
     
 class PieceCreate(PieceBase):
-    author_id: Optional[int] = None
-    type_id: Optional[int] = None
+    #For the crud operations author_id and type_id are needed.
     archive_id: int
+    author_id: Optional[int] = None
+    author_name: Optional[str] = None  # Allow passing author name instead of ID
+    type_id: Optional[int] = None
+    type_name: Optional[str] = None  # Allow passing type name instead of ID
+
 
 class PiecePublic(PieceBase):
     id: int
+    author: Optional["AuthorPublic"] = None
+    type: Optional["TypePublic"] = None
+    archive: Optional["ArchivePublic"] = None
 
 class Piece(PieceBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
