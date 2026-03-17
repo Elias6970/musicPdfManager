@@ -31,9 +31,13 @@ def session_fixture(engine):
     with Session(engine) as session:
         # Create base dependencies
         archive = Archive(name="Central Archive")
-        user = User(name="testuser", email="test@test.com", password_hash="pw")
+        role_user = Role(name="user")
+        role_admin = Role(name="admin")
         
-        session.add_all([archive, user])
+        user = User(name="testuser", email="test@test.com", password_hash="pw", role=role_user)
+        admin_user = User(name="adminuser", email="admin@test.com", password_hash="pw", role=role_admin)
+        
+        session.add_all([archive, role_user, role_admin, user, admin_user])
         session.commit()
         
         # Link user to archive as OWNER
@@ -61,6 +65,12 @@ def test_check_archive_role_failure(session: Session):
 
     with pytest.raises(InsufficientPermissionsError):
         check_archive_role(session, user_id=99, archive_id=1, allowed_roles=[ArchiveRole.OWNER])
+
+def test_check_archive_role_admin_success(session: Session):
+    # adminuser ID is 2, has no UserArchiveLink, but is an admin
+    link = check_archive_role(session, user_id=2, archive_id=1, allowed_roles=[ArchiveRole.VIEWER])
+    assert link is not None
+    assert link.role == ArchiveRole.OWNER
 
 def test_get_all_piece_std_names(session: Session):
     p1 = Piece(cod=1, name="Piece 1", archive_id=1, digitalized=False, handwrited=False, parted=False)

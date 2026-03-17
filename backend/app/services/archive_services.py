@@ -4,6 +4,7 @@ from backend.app.models.author import Author
 from backend.app.models.type import Type
 from backend.app.crud.author_crud import get_or_create_author
 from backend.app.crud.type_crud import get_or_create_type
+from backend.app.models.user import User
 from backend.app.models.user_archive_link import UserArchiveLink, ArchiveRole
 from backend.app.error import FileCouldNotBeReadException, InsufficientPermissionsError
 from backend.app.models.piece import Piece, PieceCreate
@@ -19,11 +20,7 @@ def check_archive_role(
 ) -> UserArchiveLink:
     """
     Core business logic to verify if a user has sufficient permissions for an archive.
-    
-    This function is completely isolated from FastAPI. You can use it in your services
-    or anywhere else in your backend. If the user doesn't have an allowed role,
-    it raises a custom `InsufficientPermissionsError` which can be handled by
-    your API endpoint or an exception handler.
+    Admin users can access all archives regardless of their specific role.
 
     Args:
         session: The database session.
@@ -37,6 +34,13 @@ def check_archive_role(
     Raises:
         InsufficientPermissionsError: If the user is lacking access or the required role.
     """
+
+    #Check if the user is admin
+    user = session.get(User, user_id)
+    if user and user.role and user.role.name == "admin":
+        return UserArchiveLink(user_id=user_id, archive_id=archive_id, role=ArchiveRole.OWNER)
+
+    #Check archive roles
     statement = select(UserArchiveLink).where(
         UserArchiveLink.user_id == user_id,
         UserArchiveLink.archive_id == archive_id
@@ -56,7 +60,9 @@ def get_all_piece_std_names(session: Session, archive_id: int) -> List[str]:
     """
     Retrieve a list of std_name for all pieces belonging to a specific archive.
     """
+    print("AWUUUUUU",type(archive_id))
     statement = select(Piece).where(Piece.archive_id == archive_id)
+    print("HOLAAA")
     return [piece.std_name for piece in session.exec(statement).all()]
 
 
@@ -64,7 +70,7 @@ def get_all_digitalized_piece_std_names(session: Session, archive_id: int) -> Li
     """
     Retrieve a list of std_name for all pieces digitalized belonging to a specific archive.
     """    
-    statement = select(Piece).where(Piece.archive_id == archive_id, Piece.digitalized.is_(True))
+    statement = select(Piece).where(Piece.archive_id == archive_id, Piece.digitalized == True)
     return [piece.std_name for piece in session.exec(statement).all()]
 
 

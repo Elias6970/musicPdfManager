@@ -14,13 +14,37 @@ from backend.app.services.archive_services import (
     add_piece_to_archive as _add_piece_to_archive,
     add_files_to_existing_piece as _add_files_to_existing_piece,
     delete_piece_from_archive as _delete_piece_from_archive,
+    get_all_piece_std_names as _get_all_piece_std_names,
+    get_all_digitalized_piece_std_names as _get_all_digitalized_piece_std_names
 )
 
-router = APIRouter(prefix="/pieces", tags=["pieces"])
+router = APIRouter(prefix="/archives/{archive_id}/pieces", tags=["pieces"])
 
+@router.get("/std", response_model=List[str])
+def get_all_piece_std_names(
+    archive_id: int, 
+    session: Session = Depends(get_session), 
+    _ = Depends(require_archive_viewer)
+):
+    """Retrieve a list of std_name for all pieces in the archive."""
+    return _get_all_piece_std_names(session, archive_id)
+
+@router.get("/std/digitalized", response_model=List[str])
+def get_all_digitalized_piece_std_names(
+    archive_id: int, 
+    session: Session = Depends(get_session), 
+    _ = Depends(require_archive_viewer)
+):
+    """Retrieve a list of std_name for all digitalized pieces in the archive."""
+    return _get_all_digitalized_piece_std_names(session, archive_id)
 
 @router.get("/{piece_id}", response_model=PiecePublic)
-def get_piece(piece_id: int, session: Session = Depends(get_session), _ = Depends(require_archive_viewer)):
+def get_piece(
+    archive_id: int, 
+    piece_id: int, 
+    session: Session = Depends(get_session), 
+    _ = Depends(require_archive_viewer)
+):
     """Retrieve a piece by ID."""
     piece = _get_piece(session, piece_id)
     if not piece:
@@ -30,8 +54,7 @@ def get_piece(piece_id: int, session: Session = Depends(get_session), _ = Depend
         )
     return piece
 
-
-@router.post("/archive/{archive_id}", response_model=PiecePublic, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=PiecePublic, status_code=status.HTTP_201_CREATED)
 def add_piece_to_archive(
     archive_id: int,
     piece: PieceCreate,
@@ -53,10 +76,10 @@ def add_piece_to_archive(
         )
 
 
-@router.post("/{piece_id}/archive/{archive_id}/files", response_model=PiecePublic)
+@router.post("/{piece_id}/files", response_model=PiecePublic)
 def add_files_to_existing_piece(
-    piece_id: int,
     archive_id: int,
+    piece_id: int,
     files: List[str],
     session: Session = Depends(get_session),
     file_manager: ArchiveFileManager = Depends(get_archive_file_manager),
@@ -75,10 +98,10 @@ def add_files_to_existing_piece(
         )
 
 
-@router.delete("/{piece_id}/archive/{archive_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{piece_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_piece_from_archive(
-    piece_id: int,
     archive_id: int,
+    piece_id: int,
     session: Session = Depends(get_session),
     file_manager: ArchiveFileManager = Depends(get_archive_file_manager),
     _ = Depends(require_archive_editor)
