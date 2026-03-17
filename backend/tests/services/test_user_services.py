@@ -160,6 +160,53 @@ def test_register_user_empty_name(mock_session):
     assert str(exc_info.value) == "Name can't be empty"
 
 
+@patch("backend.app.services.user_services.user_crud.get_user_by_email")
+def test_register_user_default_role_not_found(mock_get_user, mock_session):
+    # Arrange
+    user_in = UserCreate(name="Test", email="test@example.com", password="password", role_id=0)
+    mock_get_user.return_value = None  # User doesn't exist
+    
+    mock_exec = MagicMock()
+    mock_exec.first.return_value = None  # Role not found
+    mock_session.exec.return_value = mock_exec
+
+    # Act & Assert
+    with pytest.raises(InvalidUserDataError) as exc_info:
+        register_user(session=mock_session, user_create=user_in)
+
+    assert str(exc_info.value) == "Default role 'user' not found in the database"
+
+
+@patch("backend.app.services.user_services.user_crud.get_user_by_email")
+@patch("backend.app.services.user_services.user_crud.create_user")
+@patch("backend.app.services.user_services.user_config_crud.create_user_config")
+@patch("backend.app.services.user_services.uuid4")
+def test_register_user_default_role_assigned(
+    mock_uuid4, mock_create_user_config, mock_create_user, mock_get_user, mock_session
+):
+    # Arrange
+    user_in = UserCreate(name="Test", email="test@example.com", password="password", role_id=None)
+    mock_get_user.return_value = None  # User doesn't exist
+    
+    # Mocking the database role query
+    mock_role = MagicMock()
+    mock_role.id = 5
+    mock_exec = MagicMock()
+    mock_exec.first.return_value = mock_role
+    mock_session.exec.return_value = mock_exec
+
+    mock_created_user = MagicMock()
+    mock_created_user.id = 1
+    mock_create_user.return_value = mock_created_user
+
+    # Act
+    register_user(session=mock_session, user_create=user_in)
+
+    # Assert
+    assert user_in.role_id == 5
+    mock_create_user.assert_called_once_with(mock_session, user_in)
+
+
 @pytest.mark.parametrize(
     "service_fn,base_attr,user_attr",
     [
