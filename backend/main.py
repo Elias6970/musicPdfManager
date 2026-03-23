@@ -8,7 +8,7 @@ import backend.app.models
 
 import backend.app.settings as settings
 from backend.api.dependencies.database import engine, insert_default_roles
-from backend.api.routes import archives, pieces, users
+from backend.api.routes import archives, pieces, users, uploads
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     router.include_router(users.router)
     router.include_router(archives.router)
     router.include_router(pieces.router)
+    router.include_router(uploads.router)
 
     app.include_router(router)
     return app
