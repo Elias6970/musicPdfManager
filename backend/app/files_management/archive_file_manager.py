@@ -9,8 +9,8 @@ class ArchiveFileManager:
     def __init__(self, archive_path:str):
         self.archive_path = archive_path
         
-    
-    def parse_name_to_file_manager(self,parsed_name: str) -> str:
+    @staticmethod
+    def parse_name_to_file_manager(parsed_name: str) -> str:
         r"""
         Normalize and sanitize a file name string for safe use in the file manager.
 

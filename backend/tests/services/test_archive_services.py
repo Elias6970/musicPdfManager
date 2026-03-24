@@ -1,5 +1,6 @@
 import pytest
-from unittest.mock import MagicMock
+import os
+from unittest.mock import MagicMock, patch
 from sqlmodel import Session, SQLModel, create_engine
 
 from backend.app.models.piece import Piece, PieceCreate
@@ -13,6 +14,7 @@ from backend.app.error import FileCouldNotBeReadException, InsufficientPermissio
 
 from backend.app.services.archive_services import (
     check_archive_role,
+    get_archive_path,
     get_all_piece_std_names,
     get_all_digitalized_piece_std_names,
     add_piece_to_archive,
@@ -182,3 +184,41 @@ def test_add_files_to_existing_piece_copy_fail(session: Session, file_manager: M
     with pytest.raises(FileCouldNotBeReadException):
         assert p1.id is not None
         add_files_to_existing_piece(session, p1.id, ["test.pdf"], file_manager)
+
+
+@patch("backend.app.services.archive_services.get_server_settings")
+def test_get_archive_path_success(mock_get_settings, session: Session):
+    # Setup mock settings
+    mock_settings = MagicMock()
+    mock_settings.archive_root = "/mock/root"
+    mock_get_settings.return_value = mock_settings
+    
+    # Setup database with an archive that has a valid path
+    archive = Archive(name="Path Test Archive", path="test_folder")
+    session.add(archive)
+    session.commit()
+    
+    # Execute
+    assert archive.id is not None
+    result_path = get_archive_path(session, archive.id)
+    
+    # Assert
+    assert result_path == os.path.join("/mock/root", "test_folder")
+
+
+def test_get_archive_path_not_found(session: Session):
+    # Execute & Assert
+    with pytest.raises(ValueError, match="Archive with id 999 not found"):
+        get_archive_path(session, 999)
+
+
+def test_get_archive_path_no_valid_path(session: Session):
+    # Setup database with an archive lacking a path
+    archive = Archive(name="No Path Archive", path=None)
+    session.add(archive)
+    session.commit()
+    
+    # Execute & Assert
+    with pytest.raises(ValueError, match=f"Archive with id {archive.id} does not have a valid path"):
+        assert archive.id is not None
+        get_archive_path(session, archive.id)
