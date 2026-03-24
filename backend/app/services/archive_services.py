@@ -1,5 +1,7 @@
+import os
 from typing import List
 from sqlmodel import Session, select
+from backend.app.models.archive import Archive
 from backend.app.models.author import Author
 from backend.app.models.type import Type
 from backend.app.crud.author_crud import get_or_create_author
@@ -10,6 +12,7 @@ from backend.app.error import FileCouldNotBeReadException, InsufficientPermissio
 from backend.app.models.piece import Piece, PieceCreate
 from backend.app.crud.piece_crud import create_piece, get_piece, delete_piece
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.settings import get_server_settings
 
 
 def check_archive_role(
@@ -55,14 +58,29 @@ def check_archive_role(
     
     return link
 
+def get_archive_path(session: Session, archive_id: int) -> str:
+    """
+    Retrieve the file system path for a given archive ID.
+
+    Args:
+        session: The database session.
+        archive_id: The ID of the archive.
+    Returns:
+        str: The file system path of the archive.
+    """
+    archive = session.exec(select(Archive).where(Archive.id == archive_id)).first()
+    if not archive:
+        raise ValueError(f"Archive with id {archive_id} not found")
+    if not archive.path:
+        raise ValueError(f"Archive with id {archive_id} does not have a valid path")
+    
+    return os.path.join(get_server_settings().archive_root, archive.path)
 
 def get_all_piece_std_names(session: Session, archive_id: int) -> List[str]:
     """
     Retrieve a list of std_name for all pieces belonging to a specific archive.
     """
-    print("AWUUUUUU",type(archive_id))
     statement = select(Piece).where(Piece.archive_id == archive_id)
-    print("HOLAAA")
     return [piece.std_name for piece in session.exec(statement).all()]
 
 
@@ -99,11 +117,16 @@ def add_piece_to_archive(
     Raises:
         FileCouldNotBeReadException: If file operations fail.
     """
+
     #Create directory and copy the files
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
     file_manager.make_dir(folder_name)
-    files_copied = file_manager.copy_files_in_archive(folder_name, files)
     
+    settings = get_server_settings()
+    temp_folder = settings.temp_upload_folder
+    temp_files = [os.path.join(temp_folder, f) for f in files]
+    
+    files_copied = file_manager.copy_files_in_archive(folder_name, temp_files)
     if not files_copied:
         raise FileCouldNotBeReadException("Failed to copy files to archive")
 
@@ -148,7 +171,11 @@ def add_files_to_existing_piece(
         
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
     
-    files_copied = file_manager.copy_files_in_archive(folder_name, files)
+    settings = get_server_settings()
+    temp_folder = settings.temp_upload_folder
+    temp_files = [os.path.join(temp_folder, f) for f in files]
+    
+    files_copied = file_manager.copy_files_in_archive(folder_name, temp_files)
     if not files_copied:
         raise FileCouldNotBeReadException("Failed to copy additional files to archive")
         

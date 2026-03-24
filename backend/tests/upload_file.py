@@ -10,7 +10,7 @@ from urllib.parse import quote
 
 url = 'http://127.0.0.1:8000/api/v1/uploads/staging'
 filename = "D:\\22\\programacion\\archivo\\ArchivoDigital\\4-APOSTOL POETA\\partituras\\Apostol poeta Marcha Cristiana Doçaina.pdf"
-filename = "C:\\Users\\Elias6970\\Desktop\\Video Monteverdi.mp4"
+#filename = "C:\\Users\\Elias6970\\Desktop\\Video Monteverdi.mp4"
 headers = {'filename': quote(filename), 'content-length': str(os.path.getsize(filename))}
 start = time.time()
 
