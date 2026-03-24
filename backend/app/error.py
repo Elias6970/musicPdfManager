@@ -49,3 +49,6 @@ class InvalidUserDataError(Exception):
 
 class InsufficientPermissionsError(Exception):
     pass
+
+class FileTooLargeException(Exception):
+    pass

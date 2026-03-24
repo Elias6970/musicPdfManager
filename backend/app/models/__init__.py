@@ -7,6 +7,7 @@ from .type import Type
 from .user import User
 from .user_archive_link import UserArchiveLink
 from .user_config import UserConfig
+from .upload import UploadStagingResponse
 
 __all__ = [
     "Archive",
@@ -17,5 +18,6 @@ __all__ = [
     "Type",
     "User",
     "UserArchiveLink",
-    "UserConfig"
+    "UserConfig",
+    "UploadStagingResponse",
 ]

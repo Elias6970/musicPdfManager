@@ -71,4 +71,11 @@ class RequireArchiveRoleFastAPI:
             )
 
 
+# --- Global User Role Dependencies ---
 require_admin = RequireRoleFastAPI(allowed_roles=["admin"])
+require_user = RequireRoleFastAPI(allowed_roles=["admin", "user"])
+
+# --- Archive-Specific Role Dependencies ---
+require_archive_owner = RequireArchiveRoleFastAPI(allowed_roles=[ArchiveRole.OWNER])
+require_archive_editor = RequireArchiveRoleFastAPI(allowed_roles=[ArchiveRole.OWNER, ArchiveRole.EDITOR])
+require_archive_viewer = RequireArchiveRoleFastAPI(allowed_roles=[ArchiveRole.OWNER, ArchiveRole.EDITOR, ArchiveRole.VIEWER])
