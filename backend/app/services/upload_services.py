@@ -1,3 +1,4 @@
+import asyncio
 import os
 import uuid
 import time
@@ -62,3 +63,31 @@ async def process_upload_stream(request: Request) -> UploadStagingResponse:
             except OSError:
                 pass
         raise e
+
+async def cleanup_temp_uploads_routine():
+    """Background routine that periodically deletes expired temporary files."""
+    while True:
+        settings = get_server_settings()
+
+        try:
+            temp_folder = settings.temp_upload_folder
+            max_age_seconds = settings.max_temp_file_age_minutes * 60
+            
+            if os.path.exists(temp_folder):
+                current_time = time.time()
+                for filename in os.listdir(temp_folder):
+                    filepath = os.path.join(temp_folder, filename)
+                    
+                    if os.path.isfile(filepath):
+                        file_mtime = os.path.getmtime(filepath)
+                        
+                        if (current_time - file_mtime) > max_age_seconds:
+                            try:
+                                os.remove(filepath)
+                            except OSError:
+                                pass
+                                
+        except Exception:
+            pass
+            
+        await asyncio.sleep(settings.cleanup_uploads_interval_minutes * 60)

@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-
 from fastapi import FastAPI, APIRouter
 from sqlmodel import SQLModel
 
@@ -9,14 +8,21 @@ import backend.app.models
 import backend.app.settings as settings
 from backend.api.dependencies.database import engine, insert_default_roles
 from backend.api.routes import archives, pieces, users, uploads
+from backend.app.services.upload_services import cleanup_temp_uploads_routine
+import asyncio
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # This runs when the server starts
     SQLModel.metadata.create_all(engine)
     insert_default_roles()
+    
+    # Start the background task for cleaning up temporary uploads
+    cleanup_task = asyncio.create_task(cleanup_temp_uploads_routine())
+    
     yield
     # This runs when the server stops
+    cleanup_task.cancel()
 
 
 def create_app() -> FastAPI:
@@ -35,5 +41,5 @@ def create_app() -> FastAPI:
     app.include_router(router)
     return app
 
-settings.get_server_settings()
+settings.save_server_settings(settings.get_server_settings()) # Ensure settings file exists with defaults
 app = create_app()

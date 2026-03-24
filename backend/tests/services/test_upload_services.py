@@ -88,3 +88,50 @@ async def test_process_upload_stream_exceeds_during_stream(mock_settings, tmp_pa
     # Verify file was cleaned up
     filepath = os.path.join(tmp_path, "1234-5678")
     assert not os.path.exists(filepath)
+
+@pytest.mark.asyncio
+async def test_cleanup_temp_uploads_routine_deletes_expired(mock_settings, tmp_path):
+    from backend.app.services.upload_services import cleanup_temp_uploads_routine
+    import time
+    
+    mock_settings.temp_upload_folder = str(tmp_path)
+    mock_settings.max_temp_file_age_minutes = 2
+    mock_settings.cleanup_uploads_interval_minutes = 15
+
+    # Create two files
+    old_file = tmp_path / "old.pdf"
+    new_file = tmp_path / "new.pdf"
+    
+    old_file.write_text("old text")
+    new_file.write_text("new text")
+    
+    # Set modify time to 3 minutes ago
+    old_time = time.time() - (3 * 60)
+    os.utime(str(old_file), (old_time, old_time))
+    
+    class StopLoop(Exception):
+        pass
+
+    with patch("asyncio.sleep", side_effect=StopLoop):
+        with pytest.raises(StopLoop):
+            await cleanup_temp_uploads_routine()
+            
+    assert not os.path.exists(str(old_file))
+    assert os.path.exists(str(new_file))
+
+
+@pytest.mark.asyncio
+async def test_cleanup_temp_uploads_routine_ignores_missing_folder(mock_settings):
+    from backend.app.services.upload_services import cleanup_temp_uploads_routine
+    
+    mock_settings.temp_upload_folder = "/path/that/does/not/exist"
+    mock_settings.max_temp_file_age_minutes = 2
+    mock_settings.cleanup_uploads_interval_minutes = 15
+
+    class StopLoop(Exception):
+        pass
+
+    with patch("asyncio.sleep", side_effect=StopLoop):
+        with pytest.raises(StopLoop):
+            # Should silently fail and reach the sleep statement
+            await cleanup_temp_uploads_routine()

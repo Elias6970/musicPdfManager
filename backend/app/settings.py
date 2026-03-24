@@ -26,6 +26,7 @@ class ServerSettings(BaseModel):
     temp_upload_folder: str = "data/temp_uploads"
     max_upload_size_mb: int = Field(default=100, ge=1)
     max_temp_file_age_minutes: int = Field(default=120, ge=1)
+    cleanup_uploads_interval_minutes: int = Field(default=30, ge=1)
 
     jwt_secret_key: str = "change-this-secret-key"
     jwt_algorithm: str = "HS256"
