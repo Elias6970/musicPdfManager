@@ -43,23 +43,47 @@ class ArchiveFileManager:
             .replace("|", "")
         )
     
+    @staticmethod
+    def extract_original_filename(file_path: str) -> str:
+        """Extracts the original filename from a temporarily uploaded file, removing the UUID prefix if it exists."""
+        return os.path.basename(file_path).split("_", 1)[-1]
+        
+    @staticmethod
+    def format_temp_filename(file_uuid: str, filename: str) -> str:
+        """Formats a filename with a UUID prefix for temporary storage."""
+        return f"{file_uuid}_{os.path.basename(filename)}"
+    
     
     def copy_files_in_archive(self,piece_path:str,files:list) -> bool:
         """
         Copy the files to the internal archive deppending if they are scores or extras
+        and remove the temporally prefix of the name of the files.
+        If an error is produced, nothing is copied and it returns false.
             :param piece_path: name of the piece in the internal archive (without the relative archive path, only the name)
             :param files: list of strs with the absolute path of each file
         """
+        copied_files = []
         try:
             for i in files:
-                if File.is_pdf(i):
-                    shutil.copy(i,os.path.join(self.archive_path,piece_path,DIR_SCORES,os.path.basename(i)))
-                else:
-                    shutil.copy(i,os.path.join(self.archive_path,piece_path,DIR_EXTRAS,os.path.basename(i)))
+                folder = DIR_SCORES if File.is_pdf(i) else DIR_EXTRAS    
+                filename = self.extract_original_filename(i)
+                path = os.path.join(self.archive_path,piece_path,folder,filename)
+                shutil.copy(i,path)
+                copied_files.append(i)
+
             return True
         
         except Exception as e:
             print(f"{type(e)}:{e}")
+            for f in copied_files:
+                try:
+                    os.remove(os.path.join(self.archive_path,piece_path,DIR_SCORES,os.path.basename(f)))
+                except Exception as e:
+                    print(f"Error removing copied file {f} from Scores: {type(e)}:{e}")
+                try:
+                    os.remove(os.path.join(self.archive_path,piece_path,DIR_EXTRAS,os.path.basename(f)))
+                except Exception as e:
+                    print(f"Error removing copied file {f} from Extras: {type(e)}:{e}")
         
         return False
     

@@ -4,6 +4,7 @@ from backend.app.models.printers.jobs.simple_print_job import SimplePrintJob
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.services.archive_services import get_archive_path
 from backend.app.settings import get_server_settings
+from backend.app.constants.constants import DIR_SCORES
 import os, fitz
 
 def process_simple_print_job(session: Session, job: SimplePrintJob) -> bytes:
@@ -24,8 +25,9 @@ def process_simple_print_job(session: Session, job: SimplePrintJob) -> bytes:
     
     for file_element in job.files:
         archive_folder = get_archive_path(session, file_element.archive_id)
-        piece_folder = ArchiveFileManager.parse_name_to_file_manager(file_element.file_name)
-        file_path = os.path.join(archive_folder, piece_folder, file_element.file_name)
+        piece_folder = ArchiveFileManager.parse_name_to_file_manager(file_element.piece_std_name)
+        file_name = ArchiveFileManager.extract_original_filename(file_element.file_name)
+        file_path = os.path.join(archive_folder, piece_folder, DIR_SCORES,file_name)
         
         if os.path.exists(file_path):
             with fitz.open(file_path) as doc:

@@ -9,8 +9,21 @@ from fastapi import Request
 from backend.app.settings import get_server_settings
 from backend.app.error import FileTooLargeException
 from backend.app.models.upload import UploadStagingResponse
+from backend.app.files_management.archive_file_manager import ArchiveFileManager
 
 async def process_upload_stream(request: Request) -> UploadStagingResponse:
+    """
+    Processes an incoming file upload stream and saves it to a temporary staging folder.
+    
+    The file is saved on disk with a unique name combining a newly generated UUID and the 
+    original filename separated by an underscore (e.g., '123e4567-e89b-12d3_myscore.pdf'). 
+    This prevents name collisions and unauthorized access while keeping the original name 
+    recoverable.
+    
+    Returns:
+        UploadStagingResponse: Contains the generated `file_id` (the combined UUID_filename) 
+        and the `original_filename`.
+    """
     settings = get_server_settings()
     
     # Pre-validation check for declared size
@@ -24,8 +37,7 @@ async def process_upload_stream(request: Request) -> UploadStagingResponse:
     filename = unquote(filename)
     
     file_uuid = str(uuid.uuid4())
-    _, ext = os.path.splitext(filename)
-    temp_filename = f"{file_uuid}{ext}"
+    temp_filename = ArchiveFileManager.format_temp_filename(file_uuid, filename)
     
     os.makedirs(settings.temp_upload_folder, exist_ok=True)
     filepath = os.path.join(settings.temp_upload_folder, temp_filename)

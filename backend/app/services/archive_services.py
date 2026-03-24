@@ -117,11 +117,16 @@ def add_piece_to_archive(
     Raises:
         FileCouldNotBeReadException: If file operations fail.
     """
+
     #Create directory and copy the files
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
     file_manager.make_dir(folder_name)
-    files_copied = file_manager.copy_files_in_archive(folder_name, files)
     
+    settings = get_server_settings()
+    temp_folder = settings.temp_upload_folder
+    temp_files = [os.path.join(temp_folder, f) for f in files]
+    
+    files_copied = file_manager.copy_files_in_archive(folder_name, temp_files)
     if not files_copied:
         raise FileCouldNotBeReadException("Failed to copy files to archive")
 
@@ -166,7 +171,11 @@ def add_files_to_existing_piece(
         
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
     
-    files_copied = file_manager.copy_files_in_archive(folder_name, files)
+    settings = get_server_settings()
+    temp_folder = settings.temp_upload_folder
+    temp_files = [os.path.join(temp_folder, f) for f in files]
+    
+    files_copied = file_manager.copy_files_in_archive(folder_name, temp_files)
     if not files_copied:
         raise FileCouldNotBeReadException("Failed to copy additional files to archive")
         

@@ -43,6 +43,22 @@ def test_copy_files_in_archive(mock_is_pdf, manager, tmp_path):
     assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_SCORES, "test.pdf"))
     assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_EXTRAS, "test.txt"))
 
+@patch('backend.app.files_management.archive_file_manager.File.is_pdf')
+def test_copy_files_in_archive_removes_uuid_prefix(mock_is_pdf, manager, tmp_path):
+    mock_is_pdf.side_effect = lambda path: str(path).endswith('.pdf')
+    piece_path = "1-TEST"
+    manager.make_dir(piece_path)
+    
+    score_file = tmp_path / "624af065-2681-464c-907e-a951304aff9e_my_score.pdf"
+    extra_file = tmp_path / "someuuid123_my_extra_file.txt"
+    score_file.write_text("pdf content")
+    extra_file.write_text("txt content")
+    
+    result = manager.copy_files_in_archive(piece_path, [str(score_file), str(extra_file)])
+    assert result is True
+    assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_SCORES, "my_score.pdf"))
+    assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_EXTRAS, "my_extra_file.txt"))
+
 def test_move_files(manager, tmp_path):
     src = tmp_path / "source.txt"
     src.write_text("content")
@@ -135,3 +151,13 @@ def test_path_exists(manager, tmp_path):
     f.write_text("")
     assert manager.path_exists(str(f)) is True
     assert manager.path_exists(str(tmp_path / "missing.txt")) is False
+
+def test_extract_original_filename():
+    assert ArchiveFileManager.extract_original_filename("123e4567-e89b_myscore.pdf") == "myscore.pdf"
+    assert ArchiveFileManager.extract_original_filename("/temp/folder/123e4567-e89b_myscore.pdf") == "myscore.pdf"
+    assert ArchiveFileManager.extract_original_filename("123e4567-e89b_my_original_score_file.pdf") == "my_original_score_file.pdf"
+    assert ArchiveFileManager.extract_original_filename("myscore.pdf") == "myscore.pdf"
+
+def test_format_temp_filename():
+    assert ArchiveFileManager.format_temp_filename("123e4567-e89b", "myscore.pdf") == "123e4567-e89b_myscore.pdf"
+    assert ArchiveFileManager.format_temp_filename("123e4567-e89b", "/user/local/downloads/myscore.pdf") == "123e4567-e89b_myscore.pdf"
