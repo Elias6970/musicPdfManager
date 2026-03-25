@@ -6,6 +6,7 @@ from backend.app.models.presets.instruments_preset import InstrumentsPreset, Ins
 from backend.app.crud.instruments_preset_crud import (
     save_instruments_preset,
     get_instruments_preset,
+    get_all_instruments_presets,
     delete_instruments_preset
 )
 
@@ -71,6 +72,27 @@ def test_get_instruments_preset_not_exists(test_json_path):
     # Retrieve a preset that doesn't exist
     retrieved_preset = get_instruments_preset(test_json_path, "nonexistent")
     assert retrieved_preset is None
+
+def test_get_all_instruments_presets_exists(test_json_path, sample_preset):
+    # Save a preset
+    save_instruments_preset(test_json_path, sample_preset)
+    
+    # Save another preset
+    another_preset = InstrumentsPreset(name="preset_2", instruments={})
+    save_instruments_preset(test_json_path, another_preset)
+    
+    # Retrieve all 
+    all_presets = get_all_instruments_presets(test_json_path)
+    
+    assert len(all_presets) == 2
+    names = [p.name for p in all_presets]
+    assert "test_preset" in names
+    assert "preset_2" in names
+
+def test_get_all_instruments_presets_not_exists(test_json_path):
+    # Retrieve without creating the file
+    all_presets = get_all_instruments_presets(test_json_path)
+    assert all_presets == []
 
 def test_delete_instruments_preset_exists(test_json_path, sample_preset):
     # First save the preset

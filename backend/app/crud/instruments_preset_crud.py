@@ -39,6 +39,19 @@ def get_instruments_preset(path: str, preset_name: str) -> Optional[InstrumentsP
 
     return InstrumentsPreset(name=preset_name, instruments=data[preset_name])
 
+def get_all_instruments_presets(path: str) -> list[InstrumentsPreset]:
+    """Get all presets in the file. Returns an empty list if file doesn't exist or is empty."""
+    if not os.path.exists(path):
+        return []
+        
+    with open(path, 'r', encoding='utf-8') as file:
+        try:
+            data = json.load(file)
+        except json.JSONDecodeError:
+            return []
+            
+    return [InstrumentsPreset(name=name, instruments=instrs) for name, instrs in data.items()]
+
 def delete_instruments_preset(path: str, preset_name: str) -> bool:
     """Delete a preset by name. Returns True if successfully deleted, False otherwise."""
     if not os.path.exists(path):
