@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Depends, Request, HTTPException, status
 
 from backend.app.services.upload_services import process_upload_stream
 from backend.app.error import FileTooLargeException
 from backend.app.models.upload import UploadStagingResponse
+from backend.api.dependencies.permissions import require_user
 
 router = APIRouter(prefix="/uploads", tags=["uploads"])
 
 @router.post("/staging", response_model=UploadStagingResponse, status_code=status.HTTP_201_CREATED)
-async def upload_file_to_staging(request: Request):
+async def upload_file_to_staging(request: Request, _ = Depends(require_user)):
     """
     Upload a file stream to a temporary staging area before linking to a piece.
     The file name must be passed in the 'filename' HTTP Header.
