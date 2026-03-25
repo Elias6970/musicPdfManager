@@ -52,3 +52,12 @@ class InsufficientPermissionsError(Exception):
 
 class FileTooLargeException(Exception):
     pass
+
+class UserConfigNotFoundError(Exception):
+    pass
+
+class PresetNotFoundError(Exception):
+    pass
+
+class PresetAlreadyExistsError(Exception):
+    pass
