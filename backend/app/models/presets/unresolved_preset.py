@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from sqlmodel import SQLModel
 
-class UnresolvedPresetResponse(BaseModel):
+class UnresolvedPresetResponse(SQLModel):
     """
     Response model for an unresolved preset when an instrument is missing.
     """
