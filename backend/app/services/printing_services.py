@@ -1,15 +1,22 @@
 from sqlmodel import Session
 
+from backend.app.error import UnresolvedInstrumentsException
 from backend.app.models.presets.instruments_preset import InstrumentsPreset
 from backend.app.models.presets.resolution_preset import SolvedInstrument, SolvedPreset, UnresolvedInstrumentResponse
-from backend.app.models.printers.jobs.preset_print_job import PresetPrintJob
+from backend.app.models.printers.jobs.preset_print_job import ExportStrategyType, PresetPrintJob
 from backend.app.models.printers.jobs.simple_print_job import SimplePrintJob
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.services.archive_services import get_archive_path
+from backend.app.services.export_strategies.all_in_one import AllInOneExporter
+from backend.app.services.export_strategies.base_strategy import PresetExportStrategy
+from backend.app.services.export_strategies.by_element import ByElementExporter
+from backend.app.services.export_strategies.splitted import SplittedExporter
 from backend.app.services.instruments_preset_service import get_preset
 from backend.app.services.pieces_services import get_scores
 from backend.app.settings import get_server_settings
 from backend.app.constants.constants import DIR_SCORES
+from backend.app.utils.name_manager import NameManager
+from backend.app.custom_order.instrument_sorter import InstrumentSorter
 import os, fitz
 
 def process_simple_print_job(session: Session, job: SimplePrintJob) -> bytes:
@@ -98,10 +105,13 @@ def _preprocess_preset_print_jon(session: Session,
     unresolved:list[UnresolvedInstrumentResponse] = []
     file_manager = ArchiveFileManager(get_archive_path(session, job.archive_id))
     
+    #Always sort the instruments in the same order to ensure consistency in the output
+    sorted_instruments = InstrumentSorter.sort_instruments(list(preset.instruments.keys()))
+    
     for piece in job.pieces:        
         scores = get_scores(piece.std_name, file_manager, extension=False)
 
-        for instrument in preset.instruments:
+        for instrument in sorted_instruments:
             solved_file = None
             #Direct assign
             if instrument in scores:
@@ -139,16 +149,25 @@ def process_preset_print_job(session: Session, job: PresetPrintJob) -> bytes:
         bytes: The merged PDF file as a bytes object.
         
     Raises:
-        FileNotFoundError: If any of the files in the preset print job are not found on the disk.
+        UnresolvedInstrumentsException: If any of the instruments in the preset print job are unresolved.
     """
     preset = get_preset(session, job.user_id, job.preset_name)
 
     #Sort the pieces list
     if job.config.sorted_export:
-         job.pieces.sort(key=lambda x: x.std_name) #TODO: Change because std_name is num-name
+         job.pieces.sort(key=lambda x: NameManager.get_name(x.std_name).lower())
          
-    #Check all the paths
-    solved, unresolved = _preprocess_preset_print_jon(session, job, preset, by_instruments=False)
+    #Check all the files to found the unresolved instruments of the preset
+    solved, unresolved = _preprocess_preset_print_jon(session, job, preset, by_instruments=job.config.group_by_instrument)
     
-    if unresolved != []:
-        
+    if unresolved:
+        raise UnresolvedInstrumentsException(unresolved)
+    
+    export_strategies:dict[str, PresetExportStrategy] = {
+        ExportStrategyType.ALL_IN_ONE: AllInOneExporter(),
+        ExportStrategyType.SPLITTED: SplittedExporter(),
+        ExportStrategyType.BY_ELEMENT: ByElementExporter()
+    }
+    strategy = export_strategies[job.config.export_strategy] #Raise error if not found, but it should be always found because of the Enum
+
+    return strategy.export(session, solved, job.config)
