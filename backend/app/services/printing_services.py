@@ -72,7 +72,7 @@ def process_preset_print_job(session: Session, job: PresetPrintJob) -> bytes:
          job.pieces.sort(key=lambda x: NameManager.get_name(x.std_name).lower())
          
     #Check all the files to found the unresolved instruments of the preset
-    solved, unresolved = _preprocess_preset_print_job(session, job, preset, by_instruments=job.config.group_by_instrument)
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     
     if unresolved:
         raise UnresolvedInstrumentsException(unresolved)

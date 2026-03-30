@@ -41,19 +41,19 @@ def _add_to_solution(solvedPreset: SolvedPreset, archive_id: int, piece_std_name
 
 def _preprocess_preset_print_job(session: Session, 
                                  job: PresetPrintJob, 
-                                 preset: InstrumentsPreset,
-                                 by_instruments: bool) -> tuple[SolvedPreset, list[UnresolvedInstrumentResponse]]:
+                                 preset: InstrumentsPreset) -> tuple[SolvedPreset, list[UnresolvedInstrumentResponse]]:
     """
-    Preprocesses a PresetPrintJob by expanding the pieces according to the specified preset, taking into account the number of copies and other options for each instrument.
-
+    Preprocesses a PresetPrintJob by expanding the pieces according to the specified preset, 
+    taking into account the number of copies and other options for each instrument.
+    The solvedPreset contains the mapping of pieces and instruments. 
+    If group_by_instrument is True, the first level of the solution is organized by instruments, otherwise it is organized by pieces.
     Args:
         session (Session): The database session.
         job (PresetPrintJob): The original print job containing the pieces to be printed.
         preset (InstrumentsPreset): The preset containing the configuration for each instrument.
-        by_instruments (bool): Flag indicating how the solution should be organized. If True, the solution will be organized by instruments; if False, it will be organized by pieces.
 
     Returns:
-        list[UnresolvedInstrumentResponse] | None: A list of unresolved instrument responses or None if no unresolved instruments are found.
+        tuple[SolvedPreset, list[UnresolvedInstrumentResponse]]: A tuple containing the solved preset with all the instruments that were successfully matched to files, and a list of unresolved instruments that could not be matched.
     """
     solved: SolvedPreset = SolvedPreset()
     unresolved:list[UnresolvedInstrumentResponse] = []
@@ -82,7 +82,8 @@ def _preprocess_preset_print_job(session: Session,
                 solved_file = job.solved_fails.get(piece.std_name, {}).get(instrument) #Return None if not found
 
             if solved_file:
-                _add_to_solution(solved, job.archive_id, piece.std_name, instrument, solved_file, preset.instruments[instrument].copies, by_instruments)
+                copies = 1 if job.config.ignore_preset_copies else preset.instruments[instrument].copies
+                _add_to_solution(solved, job.archive_id, piece.std_name, instrument, solved_file, copies, job.config.group_by_instrument)
             else: #Not found
                 unresolved.append(UnresolvedInstrumentResponse(archive_id=job.archive_id, 
                                                                 piece_std_name=piece.std_name, 

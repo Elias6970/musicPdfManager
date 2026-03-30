@@ -23,6 +23,9 @@ def _create_mock_job_and_preset():
     job.archive_id = 1
     job.pieces = [MagicMock(std_name="01-TEST")]
     job.solved_fails = {}
+    job.config = MagicMock()
+    job.config.group_by_instrument = True
+    job.config.ignore_preset_copies = False
     
     preset = MagicMock()
     instrument_config = MagicMock()
@@ -36,7 +39,7 @@ def test_preprocess_direct_match(base_mocks):
     session, job, preset = _create_mock_job_and_preset()
     base_mocks.return_value = ["Violin I", "Cello"]
     
-    solved, unresolved = _preprocess_preset_print_job(session, job, preset, by_instruments=True)
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     
     assert len(unresolved) == 0
     assert "Violin I" in solved.solution
@@ -48,7 +51,7 @@ def test_preprocess_other_options_match(base_mocks):
     preset.instruments["Violin I"].other_options = ["Vln 1", "Vn 1"]
     base_mocks.return_value = ["Vn 1", "Cello"]  # Exact "Violin I" is missing, but "Vn 1" is there
     
-    solved, unresolved = _preprocess_preset_print_job(session, job, preset, by_instruments=True)
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     
     assert len(unresolved) == 0
     assert "Violin I" in solved.solution
@@ -59,7 +62,7 @@ def test_preprocess_solved_fails_match(base_mocks):
     base_mocks.return_value = []  # No files found on disk normally
     job.solved_fails = {"01-TEST": {"Violin I": "custom_override.pdf"}}
     
-    solved, unresolved = _preprocess_preset_print_job(session, job, preset, by_instruments=True)
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     
     assert len(unresolved) == 0
     assert "Violin I" in solved.solution
@@ -69,7 +72,7 @@ def test_preprocess_unresolved(base_mocks):
     session, job, preset = _create_mock_job_and_preset()
     base_mocks.return_value = ["Viola"]  # Completely unrelated files available
     
-    solved, unresolved = _preprocess_preset_print_job(session, job, preset, by_instruments=True)
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     
     assert len(solved.solution) == 0
     assert len(unresolved) == 1
@@ -83,11 +86,23 @@ def test_preprocess_unresolved(base_mocks):
 
 def test_preprocess_by_piece(base_mocks):
     session, job, preset = _create_mock_job_and_preset()
+    job.config.group_by_instrument = False
     base_mocks.return_value = ["Violin I", "Cello"]
     
-    solved, unresolved = _preprocess_preset_print_job(session, job, preset, by_instruments=False)
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     
     assert len(unresolved) == 0
     assert "01-TEST" in solved.solution
     assert "Violin I" in solved.solution["01-TEST"]
     assert solved.solution["01-TEST"]["Violin I"].file == "Violin I.pdf"
+
+def test_preprocess_ignore_copies(base_mocks):
+    session, job, preset = _create_mock_job_and_preset()
+    job.config.ignore_preset_copies = True
+    preset.instruments["Violin I"].copies = 5
+    base_mocks.return_value = ["Violin I", "Cello"]
+    
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
+    
+    assert len(unresolved) == 0
+    assert solved.solution["Violin I"]["01-TEST"].copies == 1
