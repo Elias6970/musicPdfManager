@@ -56,6 +56,7 @@ def _add_to_solution(solvedPreset: SolvedPreset, archive_id: int, piece_std_name
         piece_std_name (str): The standardized name of the piece.
         instrument (str): The instrument name.
         file_name (str): The original file name of the instrument part.
+        copies (int): The number of copies to print for this instrument.
         by_instrument (bool): If True, organize solution by instruments; if False, organize by pieces.
     """
     if by_instrument:
@@ -95,9 +96,9 @@ def _preprocess_preset_print_jon(session: Session,
     """
     solved: SolvedPreset = SolvedPreset()
     unresolved:list[UnresolvedInstrumentResponse] = []
+    file_manager = ArchiveFileManager(get_archive_path(session, job.archive_id))
     
     for piece in job.pieces:        
-        file_manager = ArchiveFileManager(get_archive_path(session, job.archive_id))
         scores = get_scores(piece.std_name, file_manager, extension=False)
 
         for instrument in preset.instruments:
@@ -141,6 +142,11 @@ def process_preset_print_job(session: Session, job: PresetPrintJob) -> bytes:
         FileNotFoundError: If any of the files in the preset print job are not found on the disk.
     """
     preset = get_preset(session, job.user_id, job.preset_name)
+
+    #Sort the pieces list
+    if job.config.sorted_export:
+         job.pieces.sort(key=lambda x: x.std_name) #TODO: Change because std_name is num-name
+         
     #Check all the paths
     solved, unresolved = _preprocess_preset_print_jon(session, job, preset, by_instruments=False)
     
