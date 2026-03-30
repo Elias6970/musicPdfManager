@@ -17,13 +17,25 @@ class PresetPrintJob(BaseModel):
     Attributes:
         preset_name (str): Name identifier for this print preset.
         user_id (int): ID of the user who owns this preset.
-        pieces (list[PrinteablePiece]): List of pieces to be printed.
+        archive_id (int): ID of the archive containing the pieces to be printed.
+        pieces (list[PrinteablePiece]): List of pieces to be printed (All the pieces belong to same archive_id).
         config (PresetPrintJobConfig): Print configuration settings for this job.
         solved_fails (dict[str, dict[str, str]]): Mapping of piece names to instrument resolution mappings,
             where missing instruments are mapped to their replacement instruments. Defaults to empty dict.
+            Example:
+            {
+                "piece_1": {
+                    "oboe_1": "oboe_2",
+                    "clarinet": "clarinet_1"
+                },
+                "piece_2": {
+                    "oboe_1": "oboe_2"
+                }
+            }
     """
     preset_name: str
     user_id: int
+    archive_id: int
     pieces: list[PrinteablePiece]
     config: PresetPrintJobConfig
     solved_fails: dict[str, dict[str, str]] = {}

@@ -120,22 +120,24 @@ class ArchiveFileManager:
         
     
     
-    def get_scores(self,piece_path:str) -> list[str]:
+    def get_scores(self,piece_std_name:str) -> list[str]:
         """
         Get the path of the piece without the Scores dir extension  
         and return the list of scores inside it
         """
-        return self._get_file_names(os.path.join(piece_path,DIR_SCORES))
+        piece_name = self.parse_name_to_file_manager(piece_std_name)
+        return self._get_file_names(os.path.join(self.archive_path,piece_name,DIR_SCORES))
 
 
     #If the piece doesn't exist or doesn't have any exta it returns an empty list
     
-    def get_extras(self,piece_path:str) -> list[str]:
+    def get_extras(self,piece_std_name:str) -> list[str]:
         """
         Get the path of the piece without the Extras dir extension
         and return the list of extras inside it
         """
-        return self._get_file_names(os.path.join(piece_path,DIR_EXTRAS))
+        piece_name = self.parse_name_to_file_manager(piece_std_name)
+        return self._get_file_names(os.path.join(self.archive_path,piece_name,DIR_EXTRAS))
 
 
     

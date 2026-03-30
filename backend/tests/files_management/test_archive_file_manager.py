@@ -87,8 +87,8 @@ def test_get_scores_and_extras(manager):
     Path(score_path).write_text("")
     Path(extra_path).write_text("")
     
-    assert "score.pdf" in manager.get_scores(os.path.join(manager.archive_path, piece))
-    assert "extra.txt" in manager.get_extras(os.path.join(manager.archive_path, piece))
+    assert "score.pdf" in manager.get_scores(os.path.join(piece))
+    assert "extra.txt" in manager.get_extras(os.path.join(piece))
 
 def test_make_dir(manager):
     manager.make_dir("new_piece")

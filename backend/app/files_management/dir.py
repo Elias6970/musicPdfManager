@@ -29,11 +29,11 @@ class Dir(File):
 
     def get_scores(self):
         """Return the scores names with the extension (always .pdf)"""
-        return self.file_manager.get_scores(self.path)
+        return self.file_manager.get_scores(os.path.basename(self.path))
     
     def get_extras(self):
         """Return the extras names with the extensions"""
-        return self.file_manager.get_extras(self.path)
+        return self.file_manager.get_extras(os.path.basename(self.path))
     
     
     def get_score_names_without_extension(self):
