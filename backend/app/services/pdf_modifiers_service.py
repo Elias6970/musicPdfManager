@@ -13,6 +13,7 @@ def _get_string_width(text: str, fontname: str, fontsize: int) -> float:
     return fitz.get_text_length(text, fontname=fontname, fontsize=fontsize)
 
 def _fit_text_in_width(text: str, fontname: str, fontsize: int, max_width: float) -> str:
+    """Truncates text with ellipsis if it exceeds the max width."""
     text_width = _get_string_width(text, fontname, fontsize)
     if text_width <= max_width:
         return text
@@ -26,7 +27,7 @@ def _fit_text_in_width(text: str, fontname: str, fontsize: int, max_width: float
             break
     return fitted_text + "..."
 
-def create_index_pymupdf(elements: list[str], title: str = "Índice", subtitle: str = "") -> fitz.Document:
+def create_index(elements: list[str], title: str = "Índice", subtitle: str = "") -> fitz.Document:
     """Creates a A4 landscape index PDF document mirroring presets_printer behavior using PyMuPDF."""
     doc = fitz.Document()
     page_width, page_height = A4_H_PT, A4_W_PT  # Landscape A4
@@ -34,9 +35,9 @@ def create_index_pymupdf(elements: list[str], title: str = "Índice", subtitle: 
     if not subtitle:
         subtitle = f"AM Virgen del Remedio {datetime.datetime.now().strftime('%d-%m-%Y')}"
 
-    title_font_name = "Helvetica-Bold"
-    subtitle_font_name = "Helvetica-Oblique"
-    font_name = "Helvetica"
+    title_font_name = "hebo"
+    subtitle_font_name = "heit"
+    font_name = "helv"
     
     title_font_size = 40
     subtitle_font_size = 10
@@ -112,6 +113,9 @@ def add_piece_number(doc: fitz.Document, page_number: int | str):
     if len(doc) == 0:
         return
     
+    font_size = 30
+    font_name = "cobo"
+
     orig_page = doc[0]
     rect = orig_page.rect
     orig_width, orig_height = rect.width, rect.height
@@ -139,28 +143,29 @@ def add_piece_number(doc: fitz.Document, page_number: int | str):
     new_page.show_pdf_page(dest_rect, temp_doc, 0)
 
     # Put numbers right aligned
-    font_size = 25
     num_str = str(page_number)
     is_single = int(num_str) < 10 if num_str.isdigit() else len(num_str) == 1
     
     offset = 11 if is_single else 7
     target_x = orig_width - offset
     
-    num_width = _get_string_width(num_str, "Helvetica-Bold", font_size)
+    num_width = _get_string_width(num_str, font_name, font_size)
     start_x = target_x - num_width
     
     bottom_y = orig_height - 7
     top_y = 32 # equivalent to height - 25 - 7 in reportlab translated to top align baseline
+
+    # hebo font is bugged and it doesn't generate the name correctly
+    new_page.insert_text((start_x, top_y), num_str, fontsize=font_size, fontname=font_name)
+    new_page.insert_text((start_x, bottom_y), num_str, fontsize=font_size, fontname=font_name)
     
-    new_page.insert_text((start_x, top_y), num_str, fontsize=font_size, fontname="Helvetica-Bold")
-    new_page.insert_text((start_x, bottom_y), num_str, fontsize=font_size, fontname="Helvetica-Bold")
 
 def create_cover_page(title: str) -> fitz.Document:
     """Creates a basic landscape cover page."""
     doc = fitz.Document()
     page = doc.new_page(width=A4_H_PT, height=A4_W_PT)
     
-    tw = _get_string_width(title, "Helvetica-Bold", 40)
-    page.insert_text(((A4_H_PT - tw) / 2, A4_W_PT / 2), title, fontsize=40, fontname="Helvetica-Bold")
+    tw = _get_string_width(title, "hebo", 40)
+    page.insert_text(((A4_H_PT - tw) / 2, A4_W_PT / 2), title, fontsize=40, fontname="hebo")
     
     return doc
