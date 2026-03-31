@@ -27,7 +27,7 @@ def _fit_text_in_width(text: str, fontname: str, fontsize: int, max_width: float
     return fitted_text + "..."
 
 def create_index_pymupdf(elements: list[str], title: str = "Índice", subtitle: str = "") -> fitz.Document:
-    """Creates a landscape index PDF document mirroring presets_printer behavior using PyMuPDF."""
+    """Creates a A4 landscape index PDF document mirroring presets_printer behavior using PyMuPDF."""
     doc = fitz.Document()
     page_width, page_height = A4_H_PT, A4_W_PT  # Landscape A4
     
@@ -42,8 +42,8 @@ def create_index_pymupdf(elements: list[str], title: str = "Índice", subtitle: 
     subtitle_font_size = 10
     
     left_margin = 20 * MM2PT
-    bottom_margin = 5 * MM2PT
-    title_space = 40 * MM2PT
+    bottom_margin = 15 * MM2PT
+    title_space = 25 * MM2PT
     
     usable_width = page_width - 2 * left_margin
     usable_height = page_height - 2 * bottom_margin - title_space
