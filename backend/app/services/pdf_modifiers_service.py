@@ -5,10 +5,6 @@ import datetime
 MM2PT = 72 / 25.4
 A4_W_PT, A4_H_PT = 595.276, 841.890
 
-def add_blank_page(pdf_doc: fitz.Document):
-    """Appends a blank landscape A4 page to the document."""
-    pdf_doc.new_page(width=A4_H_PT, height=A4_W_PT)
-
 def _get_string_width(text: str, fontname: str, fontsize: int) -> float:
     return fitz.get_text_length(text, fontname=fontname, fontsize=fontsize)
 
@@ -108,6 +104,30 @@ def create_index(elements: list[str], title: str = "Índice", subtitle: str = ""
         
     return doc
 
+def create_cover_page(title: str) -> fitz.Document:
+    """Creates a basic landscape cover page."""
+    doc = fitz.Document()
+    page = doc.new_page(width=A4_H_PT, height=A4_W_PT)
+    
+    tw = _get_string_width(title, "hebo", 40)
+    page.insert_text(((A4_H_PT - tw) / 2, A4_W_PT / 2), title, fontsize=40, fontname="hebo")
+    
+    return doc
+
+def add_blank_page(pdf_doc: fitz.Document):
+    """Appends a blank landscape A4 page to the document."""
+    pdf_doc.new_page(pno=0,width=A4_H_PT, height=A4_W_PT)
+
+def add_cover_page(pdf_doc: fitz.Document, title: str):
+    """Inserts a cover page at the beginning of the PDF document."""
+    cover_doc = create_cover_page(title)
+    pdf_doc.insert_pdf(cover_doc, from_page=0, to_page=cover_doc.page_count - 1, start_at=0)
+
+def add_index_page(pdf_doc: fitz.Document, elements: list[str], title: str = "Índice", subtitle: str = ""):
+    """Creates an index page and inserts it at the beginning of the PDF document."""
+    index_doc = create_index(elements, title, subtitle)
+    pdf_doc.insert_pdf(index_doc, from_page=0, to_page=index_doc.page_count - 1, start_at=0)
+
 def add_piece_number(doc: fitz.Document, page_number: int | str):
     """Adds a sequentially numbered overlay identically to PresetsPrinter."""
     if len(doc) == 0:
@@ -159,13 +179,3 @@ def add_piece_number(doc: fitz.Document, page_number: int | str):
     new_page.insert_text((start_x, top_y), num_str, fontsize=font_size, fontname=font_name)
     new_page.insert_text((start_x, bottom_y), num_str, fontsize=font_size, fontname=font_name)
     
-
-def create_cover_page(title: str) -> fitz.Document:
-    """Creates a basic landscape cover page."""
-    doc = fitz.Document()
-    page = doc.new_page(width=A4_H_PT, height=A4_W_PT)
-    
-    tw = _get_string_width(title, "hebo", 40)
-    page.insert_text(((A4_H_PT - tw) / 2, A4_W_PT / 2), title, fontsize=40, fontname="hebo")
-    
-    return doc
