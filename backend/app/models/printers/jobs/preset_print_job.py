@@ -9,14 +9,19 @@ class ExportStrategyType(str, Enum):
 
 class PresetPrintJobConfig(BaseModel):
     export_strategy: ExportStrategyType = ExportStrategyType.BY_ELEMENT
-    group_by_instrument: bool = False # If not it is grouped by piece
+    group_by_instrument: bool = False # If not, it is grouped by piece
     
     sorted_export: bool = False
     ignore_preset_copies: bool = False
     add_piece_number: bool = False
+    
     add_cover_page: bool = False
-    add_index: bool = False
+    cover_title: str = "Music Pdf Manager"
 
+    add_index: bool = False
+    index_title: str = "Índice"
+    index_subtitle: str = ""
+    add_blank_page_after_index: bool = False
 
 class PresetPrintJob(BaseModel):
     """

@@ -20,6 +20,9 @@ class ServerSettings(BaseModel):
     port: int = Field(default=8000, ge=1, le=65535) #Unused for now
     api_prefix: str = "/api/v1"
 
+    root_user_email: str = "admin@example.com"
+    root_user_password: str = "admin"
+
     database_url: str = "sqlite:///data/global.db"
     archive_root: str = ""
     

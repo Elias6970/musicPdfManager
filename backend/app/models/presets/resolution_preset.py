@@ -29,12 +29,14 @@ class SolvedPreset(SQLModel):
         "oboe_1": {
             "archive_id": 1,
             "piece_std_name": "piece_1",
-            "file": "oboe_1.pdf"
+            "file": "oboe_1.pdf",
+            "copies": 2
         },
         "clarinet": {
             "archive_id": 1,
             "piece_std_name": "piece_1",
-            "file": "clarinet_1.pdf"
+            "file": "clarinet_1.pdf",
+            "copies": 1
         }
     }
     If it is organized by instruments, the key of the dictionary is the instrument and the value is another dictionary where the key is the piece_std_name and the value is a SolvedInstrument with the information of the selected pdf.
@@ -44,12 +46,14 @@ class SolvedPreset(SQLModel):
         "piece_1": {
             "archive_id": 1,
             "piece_std_name": "piece_1",
-            "file": "oboe_1.pdf"
+            "file": "oboe_1.pdf",
+            "copies": 2
         },
         "piece_2": {
             "archive_id": 1,
             "piece_std_name": "piece_2",
-            "file": "oboe_1.pdf"
+            "file": "oboe_1.pdf",
+            "copies": 1
         }
     }
     """

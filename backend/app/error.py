@@ -1,4 +1,7 @@
 
+from backend.app.models.presets.resolution_preset import UnresolvedInstrumentResponse
+
+
 class PdfNotFoundException(Exception):
     pass
 
@@ -51,7 +54,7 @@ class InsufficientPermissionsError(Exception):
     pass
 
 class UnresolvedInstrumentsException(Exception):
-    def __init__(self, unresolved: list):
+    def __init__(self, unresolved: list["UnresolvedInstrumentResponse"]):
         #List of UnresolvedInstrumentResponse
         self.unresolved = unresolved
         super().__init__(f"{len(unresolved)} unresolved instruments found.")

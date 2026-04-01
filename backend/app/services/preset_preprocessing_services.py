@@ -80,7 +80,9 @@ def _preprocess_preset_print_job(session: Session,
             if not solved_file:
                 #Check if it is in solved_fails
                 solved_file = job.solved_fails.get(piece.std_name, {}).get(instrument) #Return None if not found
-
+                if solved_file:
+                    solved_file = solved_file + ".pdf"
+                    
             if solved_file:
                 copies = 1 if job.config.ignore_preset_copies else preset.instruments[instrument].copies
                 _add_to_solution(solved, job.archive_id, piece.std_name, instrument, solved_file, copies, job.config.group_by_instrument)

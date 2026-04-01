@@ -6,7 +6,7 @@ from sqlmodel import SQLModel
 import backend.app.models
 
 import backend.app.settings as settings
-from backend.api.dependencies.database import engine, insert_default_roles
+from backend.api.dependencies.database import engine, insert_default_roles, insert_root_user
 from backend.api.routes import archives, instruments_presets, pieces, users, uploads, printers
 from backend.app.services.upload_services import cleanup_temp_uploads_routine
 import asyncio
@@ -16,6 +16,7 @@ async def lifespan(app: FastAPI):
     # This runs when the server starts
     SQLModel.metadata.create_all(engine)
     insert_default_roles()
+    insert_root_user()
     
     # Start the background task for cleaning up temporary uploads
     cleanup_task = asyncio.create_task(cleanup_temp_uploads_routine())
