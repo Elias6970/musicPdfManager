@@ -137,6 +137,7 @@ def add_piece_number(doc: fitz.Document, page_number: int | str):
     font_name = "cobo"
 
     orig_page = doc[0]
+    orig_page.remove_rotation() # Ensure page is unrotated before processing
     rect = orig_page.rect
     orig_width, orig_height = rect.width, rect.height
     
