@@ -29,7 +29,21 @@ def _process_element_task(
     archive_paths: dict,
     config: dict
 ) -> tuple[str, bytes, list[str]]:
-    """Worker function to process a single element's PDF and apply decorators."""
+    """Build the PDF for one exported element.
+
+    Parameters:
+        element_name: Final name used for the generated PDF inside the ZIP.
+        inner_items: Mapping of inner item keys to their serialized payloads.
+            Each payload must include ``archive_id``, ``piece_std_name``,
+            ``file``, and optionally ``copies``.
+        archive_paths: Mapping from archive id to its resolved filesystem path.
+        config: Serialized preset print-job options that control decorations
+            such as piece numbers, blank pages, index pages, and cover pages.
+
+    Returns:
+        A tuple containing the element name, the generated PDF bytes, and any
+        warning/error messages collected while processing.
+    """
     doc = fitz.open()
     elements_list = []
     logs = []
