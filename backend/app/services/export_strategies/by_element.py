@@ -82,11 +82,11 @@ def _process_element_task(
             add_blank_page(doc)
 
         if config.get("add_index"):
-            add_index_page(doc, elements=elements_list, title=config.get("index_title"), subtitle=config.get("index_subtitle"))
+            add_index_page(doc, elements=elements_list, title=config.get("index_title", "Index"), subtitle=config.get("index_subtitle", ""))
 
         # Cover page
         if config.get("add_cover_page"):
-            add_cover_page(doc, title=config.get("cover_title"))
+            add_cover_page(doc, title=config.get("cover_title", "Music Pdf Manager"))
         
         pdf_bytes = doc.write()
         doc.close()
