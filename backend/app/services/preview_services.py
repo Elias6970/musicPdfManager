@@ -7,16 +7,17 @@ from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.constants.constants import DIR_SCORES
 from backend.app.services.archive_services import get_archive_path
 
-def generate_preview_bytes(session: Session, request: PreviewRequest) -> bytes:
+def generate_preview_bytes(session: Session, request: PreviewRequest) -> tuple[bytes, int]:
     """
     Generates a PNG image of a specific PDF page in memory using PyMuPDF (fitz)
+    Returns a tuple of (image_bytes, total_pages)
     """
         
     # 2. Reconstruct the absolute path to the instrument PDF
     archive_path = get_archive_path(session, request.archive_id)
     piece_name = ArchiveFileManager.parse_name_to_file_manager(request.piece_std_name)
     
-    pdf_path = os.path.join(archive_path, piece_name, DIR_SCORES, request.instrument)
+    pdf_path = os.path.join(archive_path, piece_name, DIR_SCORES, request.file)
     
     if not os.path.exists(pdf_path):
         raise FileNotFoundError("PDF file not found in the archive")
@@ -35,7 +36,7 @@ def generate_preview_bytes(session: Session, request: PreviewRequest) -> bytes:
         pix = page.get_pixmap(dpi=request.dpi)
         img_bytes = pix.tobytes("png")
         
-        return img_bytes
+        return img_bytes, doc.page_count
     
     except IndexError:
          raise # Re-raise already constructed IndexErrors

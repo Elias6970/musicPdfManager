@@ -17,21 +17,24 @@ def get_pdf_preview(
     """
     Generate and return a PNG preview of a specific PDF page.
     This endpoint utilizes HTTP caching so repeated requests return instantly on the client side.
+    The total number of pages is returned in the 'X-Total-Pages' header.
     """
     try:
-        img_bytes = generate_preview_bytes(session=session, request=request)
+        img_bytes, total_pages = generate_preview_bytes(session=session, request=request)
     except FileNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except IndexError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-    except RuntimeError as e:
+    except (ValueError, RuntimeError) as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
     # Return cacheable HTTP response (Cache duration: 1 Week)
     return Response(
         content=img_bytes,
         media_type="image/png",
-        headers={"Cache-Control": "public, max-age=604800"}
+        headers={
+            "Cache-Control": "public, max-age=604800",
+            "Access-Control-Expose-Headers": "X-Total-Pages",
+            "X-Total-Pages": str(total_pages),
+        }
     )
