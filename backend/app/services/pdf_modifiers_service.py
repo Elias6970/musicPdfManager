@@ -119,7 +119,10 @@ def add_blank_page(pdf_doc: fitz.Document):
     pdf_doc.new_page(pno=0,width=A4_H_PT, height=A4_W_PT)
 
 def add_cover_page(pdf_doc: fitz.Document, title: str):
-    """Inserts a cover page at the beginning of the PDF document."""
+    """
+    ****UNUSED (BAD IMPLEMENTATION)****
+    Inserts a cover page at the beginning of the PDF document.
+    """
     cover_doc = create_cover_page(title)
     pdf_doc.insert_pdf(cover_doc, from_page=0, to_page=cover_doc.page_count - 1, start_at=0)
 
@@ -129,7 +132,12 @@ def add_index_page(pdf_doc: fitz.Document, elements: list[str], title: str = "Í
     pdf_doc.insert_pdf(index_doc, from_page=0, to_page=index_doc.page_count - 1, start_at=0)
 
 def add_piece_number(doc: fitz.Document, page_number: int | str):
-    """Adds a sequentially numbered overlay identically to PresetsPrinter."""
+    """
+    Add the specified number in the top-right and bottom-right corners of the first page of the document.
+    The original page is resized to add a white margin on the bottom and right to fit the numbers without overlapping the content.
+    The final size of the page is the same as the original.
+    """
+
     if len(doc) == 0:
         return
     
