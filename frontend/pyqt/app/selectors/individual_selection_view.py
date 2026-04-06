@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
 from frontend.pyqt.app.config.constants import REFRESH_IMG_PATH
-from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar, ScoreSearchBarIdentifiers
+from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar
 from frontend.pyqt.app.elements.previwer.previewer import Preview
 from frontend.pyqt.app.elements.status_console import StatusConsole
 from frontend.pyqt.app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
@@ -100,7 +100,7 @@ class IndividualSelectionView(QtWidgets.QWidget):
             pass
 
         #Search bar
-        self.piece_search_bar = ScoreSearchBar(ScoreSearchBarIdentifiers.INDIVIDUAL_SELECTOR)
+        self.piece_search_bar = ScoreSearchBar()
         
         #Rest of widgets
         self.only_digitalized_cb = QtWidgets.QCheckBox()
