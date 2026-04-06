@@ -1,14 +1,8 @@
 from PyQt6 import QtWidgets,QtCore
 
-class ScoreSearchBarIdentifiers:
-    INDIVIDUAL_SELECTOR = "individual_selector"
-    MULTIPLE_SELECTOR = "multiple_selector"
-    UPDATE_PIECE = "update_piece"
-    DELETE_PIECE = "delete_piece"
-
 #Search bar + autocompleter that shows the score selected
 class ScoreSearchBar(QtWidgets.QLineEdit):
-    def __init__(self, identifier, parent = None) -> None:
+    def __init__(self, parent = None) -> None:
         super(ScoreSearchBar,self).__init__(parent)
 
         self.setContentsMargins(0,0,0,0)

@@ -1,11 +1,19 @@
 import sys
 from PyQt6.QtWidgets import QApplication
+from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
+from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
 
 def main():
     app = QApplication(sys.argv)
-    # w = frontend_pyqt.Main_window()
-    # w.show()
-    # w.center_on_screen()
+    
+    view = IndividualSelectionView()
+    controller = IndividualSelectionController(view)
+    
+    # Simulate some initial data for testing
+    controller.refresh()
+    
+    view.show()
+
     sys.exit(app.exec())
     
 if __name__ == "__main__":

@@ -21,3 +21,11 @@ class Preview(QLabel):
         pixmap.loadFromData(img_bytes)
         self.setPixmap(pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio,Qt.TransformationMode.SmoothTransformation))
 
+    def show_loading(self):
+        self.clear()
+        self.setText("Loading page...")
+        
+    def show_error(self, error_msg: str):
+        self.clear()
+        self.setText(f"Error loading preview:\n{error_msg}")
+

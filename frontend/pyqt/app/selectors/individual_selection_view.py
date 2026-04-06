@@ -1,13 +1,9 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
 from frontend.pyqt.app.config.constants import REFRESH_IMG_PATH
 from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar, ScoreSearchBarIdentifiers
-from frontend.pyqt.app.elements.previewer import Preview
-
-from frontend_pyqt.pop_up_windows.error_window import Error_window
-from frontend_pyqt.elements.status_console import StatusConsole
-from frontend_pyqt.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
-
-import os
+from frontend.pyqt.app.elements.previwer.previewer import Preview
+from frontend.pyqt.app.elements.status_console import StatusConsole
+from frontend.pyqt.app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 
 class IndividualSelectionView(QtWidgets.QWidget):
     MAX_COPIES = 20
@@ -15,6 +11,7 @@ class IndividualSelectionView(QtWidgets.QWidget):
     add_score_signal = QtCore.pyqtSignal(str,str,int)
     generate_pdf_signal = QtCore.pyqtSignal()
     refresh_requested = QtCore.pyqtSignal()
+    only_digitalized_changed = QtCore.pyqtSignal(bool)
 
     def __init__(self):
         super(IndividualSelectionView,self).__init__()
@@ -51,15 +48,18 @@ class IndividualSelectionView(QtWidgets.QWidget):
         self.num_copies.setFixedWidth(50)
         self.num_copies.addItems([str(i+1) for i in range(self.MAX_COPIES)])
         
-        btn1 = QtWidgets.QPushButton(self.tr("Add"))
-        btn2 = QtWidgets.QPushButton(self.tr("Create Pdf"))
+        self.btn_add_score = QtWidgets.QPushButton(self.tr("Add"))
+        self.btn_create_pdf = QtWidgets.QPushButton(self.tr("Create Pdf"))
 
-        btn1.clicked.connect(self.pre_add_score)
-        btn2.clicked.connect(self.generate_pdf_signal.emit)
+        self.btn_add_score.setEnabled(False)
+        self.btn_create_pdf.setEnabled(False)
+
+        self.btn_add_score.clicked.connect(self.pre_add_score)
+        self.btn_create_pdf.clicked.connect(self.generate_pdf_signal.emit)
 
         layout.addWidget(self.num_copies)
-        layout.addWidget(btn1)
-        layout.addWidget(btn2)
+        layout.addWidget(self.btn_add_score)
+        layout.addWidget(self.btn_create_pdf)
 
         obj.setLayout(layout)
         return obj
@@ -72,9 +72,6 @@ class IndividualSelectionView(QtWidgets.QWidget):
         
         self.btn_mv_back_preview = QtWidgets.QPushButton("<")
         self.btn_mv_forward_preview = QtWidgets.QPushButton(">")
-        
-        self.btn_mv_back_preview.clicked.connect(self.mv_back_preview)
-        self.btn_mv_forward_preview.clicked.connect(self.mv_forward_preview)
 
         hbox.addWidget(self.btn_mv_back_preview)
         hbox.addWidget(self.btn_mv_forward_preview)
@@ -107,7 +104,7 @@ class IndividualSelectionView(QtWidgets.QWidget):
         
         #Rest of widgets
         self.only_digitalized_cb = QtWidgets.QCheckBox()
-        self.only_digitalized_cb.clicked.connect(self.only_digitalized)
+        self.only_digitalized_cb.toggled.connect(self.only_digitalized_changed.emit)
         only_digitalized_lbl = QtWidgets.QLabel(self.tr("Only digitalized")) #traducir
         self.piece_lbl = QtWidgets.QLabel()
         self.part_combo_box = QtWidgets.QComboBox()
@@ -160,10 +157,10 @@ class IndividualSelectionView(QtWidgets.QWidget):
     def create_left_zone(self):
         left = QtWidgets.QWidget()
         left_layout = QtWidgets.QVBoxLayout()
-        self.scroll:StatusConsole = StatusConsole()
+        self.status_console:StatusConsole = StatusConsole()
         
         left_layout.addWidget(self.create_search_bars())
-        left_layout.addWidget(self.scroll)
+        left_layout.addWidget(self.status_console)
         self.setMinimumHeight(550)
         left.setLayout(left_layout)
         left.setFixedWidth(300)
@@ -174,8 +171,11 @@ class IndividualSelectionView(QtWidgets.QWidget):
 #----------------------------APP LOGIC -----------------------------#
 #####################################################################
     def pre_add_score(self):
+        """Pre function to add score. It checks if the combo box is enabled before emitting the signal to add the score."""
         if self.part_combo_box.isEnabled():
-            self.add_score_signal.emit()
+            self.add_score_signal.emit(self.piece_lbl.text(),
+                                       self.part_combo_box.currentText(),
+                                       int(self.num_copies.currentText()))
     
     #Update the autocompleter list of the search bar
     def update_search_bar_autocompleter(self, pieces:list[str]):
@@ -189,6 +189,7 @@ class IndividualSelectionView(QtWidgets.QWidget):
         Set the instruments in the combo box and enable it
         """
         self.part_combo_box.setEnabled(True)
+        self.btn_add_score.setEnabled(True)
         self.part_combo_box.clear()
         self.part_combo_box.addItems(instruments)
         self.part_combo_box.setCurrentIndex(0)
@@ -198,18 +199,25 @@ class IndividualSelectionView(QtWidgets.QWidget):
         Disable instrumets combo box while no scores
         """
         self.part_combo_box.setEnabled(False)
+        self.btn_add_score.setEnabled(False)
         self.part_combo_box.insertItem(0,self.tr("NO SCORES"))
+
+    def clean_instruments_combo_box(self):
+        self.part_combo_box.clear()
+        self.part_combo_box.setEnabled(False)
+        self.btn_add_score.setEnabled(False)
+
 
     def add_item_to_scroll(self, id:str, piece_name:str, instrument:str, copies:int, remove_from_list):
         """
         Add an item to the scroll area with the piece name, instrument and num of copies. 
         It also has a button to remove the item from the scroll and the list of added scores.
         """
-        self.scroll.add_item(StatusConsoleItemWithTwoTexts(piece_name,
+        self.status_console.add_item(StatusConsoleItemWithTwoTexts(piece_name,
                                             instrument,
                                             copies,
                                             id,
-                                            self.scroll.remove_item,
+                                            self.status_console.remove_item,
                                             remove_from_list))
 
     #Display a window to select a location to save a pdf
@@ -228,38 +236,25 @@ class IndividualSelectionView(QtWidgets.QWidget):
 
     #Refresh the list of pieces and delete the info in the printer  
     def refresh(self):
-        self.scroll.clear()
-        self.scroll.update()
+        self.status_console.clear()
+        self.status_console.update()
         self.piece_search_bar.clear()
         self.piece_lbl.clear()
         self.num_copies.setCurrentIndex(0)
+        self.part_combo_box.clear()
+        self.part_combo_box.setEnabled(False)
+        self.btn_add_score.setEnabled(False)
+        self.btn_create_pdf.setEnabled(False)
 
         #Preview
         self.preview.clear()
 
 
-    #Controlls the pieces showed in the search bar
-    def only_digitalized(self):
-        if self.only_digitalized_cb.isChecked():
-            self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_digitalized_parsed_names())
-        else:
-            self.piece_search_bar.update_autocompleter_scores(self.archive.pieces.get_parsed_names())
-
-    
-    def disable_mv_back_preview_btn(self):
-        self.btn_mv_back_preview.setEnabled(False)
-    
-    def enable_mv_back_preview_btn(self):
-        self.btn_mv_back_preview.setEnabled(True)
-    
-    def disable_mv_forward_preview_btn(self):
-        self.btn_mv_forward_preview.setEnabled(False)
-    
-    def enable_mv_forward_preview_btn(self):
-        self.btn_mv_forward_preview.setEnabled(True)
+    def is_only_digitalized(self):
+        return self.only_digitalized_cb.isChecked()
 
     #Change the preview image
-    def change_preview_img(self, bytes_img:bytes=None):
+    def change_preview_img(self, bytes_img:bytes|None=None):
         self.preview.set_image_from_bytes(bytes_img)
 
 

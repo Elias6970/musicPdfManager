@@ -1,23 +1,21 @@
-from PyQt6 import QtCore
+from frontend.pyqt.app.elements.previwer.previewer_controller import PreviewerController
 from PyQt6.QtCore import QObject
-from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBarIdentifiers
-from frontend.pyqt.app.error import PageNotFoundError
 from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
 import frontend.pyqt.app.models.generated_models as generated_models
 from uuid import uuid4
 
 class PrinteableFile(generated_models.PrinteableFile):
-    id:int = None
+    id:str
 
 class IndividualSelectionController(QObject):    
     def __init__(self,view:IndividualSelectionView):
         super().__init__()
         self.view = view
+        self.preview_controller = PreviewerController(self.view.preview)
 
         self.job:generated_models.SimplePrintJob = generated_models.SimplePrintJob(files=[])
-        self.selected_piece:str = None
-        self.selected_instrument:str = None
-        self.selected_page:int = 0
+        self.selected_piece:str|None = None
+        self.selected_instrument:str|None = None
         self.pieces:list[str] = [] #List of pieces std names.
 
         # Connect signals
@@ -27,11 +25,24 @@ class IndividualSelectionController(QObject):
         self.view.piece_search_bar.textChanged.connect(self.set_option_of_instruments)
         self.view.instrument_changed.connect(self.instrument_changed)
         self.view.refresh_requested.connect(self.refresh)
+        self.view.only_digitalized_changed.connect(self.update_pieces_list)
+        
+        # Connect preview controller signals to view buttons
+            
+        self.view.btn_mv_back_preview.clicked.connect(self.preview_controller.previous_page)
+        self.view.btn_mv_forward_preview.clicked.connect(self.preview_controller.next_page)
+        
+        self.preview_controller.enable_previous.connect(self.view.btn_mv_back_preview.setEnabled)
+        self.preview_controller.enable_next.connect(self.view.btn_mv_forward_preview.setEnabled)
 
     def generate_pdf(self):
         """
         Generate the PDF with the added scores.
         """
+        if not self.job.files or len(self.job.files) == 0:
+            print("No scores added to generate PDF.")
+            return
+        
         #Get file path to save
         path = self.view.dialog_window_select_new_pdf()
         if path == "": 
@@ -60,15 +71,19 @@ class IndividualSelectionController(QObject):
             piece_std_name=piece_name,
             file_name=instrument,
             copies=copies)
+        self.job.files.append(piece)
+        print(f"Added score: Piece: {piece_name}, Instrument: {instrument}, Copies: {copies}")
         self.view.add_item_to_scroll(piece.id, piece_name, instrument, copies, self.remove_score)
-
+        self.view.btn_create_pdf.setEnabled(True)
 
     def remove_score(self, id:str):
         """
         Remove the score from the list of added scores.
         The widget it is removed in the StatusConsoleItemWithTwoTexts class.
         """
-        self.job.files = [file for file in self.job.files if file.id != id]
+        self.job.files = [file for file in self.job.files if file.id != id] #type: ignore -> Because always is appended a Modified PrinteableFile with the id, so it is never None.
+        if not self.job.files:
+            self.view.btn_create_pdf.setEnabled(False)
     
     
     def set_option_of_instruments(self,piece_name:str):
@@ -89,6 +104,7 @@ class IndividualSelectionController(QObject):
         else:
             self.selected_piece = None    
             self.view.set_piece_lbl("")
+            self.view.clean_instruments_combo_box()
     
 
     def instrument_changed(self,instrument:str):
@@ -96,49 +112,26 @@ class IndividualSelectionController(QObject):
         Set the selected instrument to add to the PDF.
         """
         self.selected_instrument = instrument
-        self.selected_page = 0
-        self.update_preview()
+        # TODO: Get archive id from the sessionmanager'
+        if self.selected_piece and self.selected_instrument: #To avoid removing the image when the user is typing another piece
+            self.preview_controller.load_document(archive_id=0, piece_std_name=self.selected_piece, file=instrument)
 
+    def get_pieces(self, digitalized:bool=False):
+        """
+        Get the pieces from the API and update the autocompleter of the search bar.
+        """
+        if digitalized:
+            return ["PIEZA DIGITAL 1", "PIEZA DIGITAL 2"]
+        return ["PIEZA 1","PIEZA 2","PIEZA 3", "PIEZA DIGITAL 1", "PIEZA DIGITAL 2"]
 
-    def update_preview(self):
-        img = None #TODO: get the bytes of the image from the api
-        #Can raise page not found
-        self.view.change_preview_img(None) 
-        self.check_mv_btns_enableability()
-
-
-    #Move to the previous preview page 
-    def mv_back_preview(self):
-        try:
-            self.selected_page -= 1
-            self.update_preview()
-        except PageNotFoundError:
-            self.selected_page += 1
-            self.view.disable_mv_back_preview_btn()
-
-
-    #Move to the next preview page
-    def mv_forward_preview(self):
-        try:
-            self.selected_page += 1
-            self.update_preview()
-        except PageNotFoundError:
-            self.selected_page -= 1
-            self.view.disable_mv_forward_preview_btn()
-
-    #Check if move preview buttons must be enabled or disabled
-    def check_mv_btns_enableability(self):
-        if self.preview_controller.is_in_first_page():
-            self.btn_mv_back_preview.setEnabled(False)
-        else:
-            self.btn_mv_back_preview.setEnabled(True)
-        if self.preview_controller.is_in_last_page():
-            self.btn_mv_forward_preview.setEnabled(False)
-        else:
-            self.btn_mv_forward_preview.setEnabled(True)
+    def update_pieces_list(self, only_digitalized: bool):
+        """
+        Updates the internal pieces list and the autocompleter according to the checkbox.
+        """
+        self.pieces = self.get_pieces(digitalized=only_digitalized)
+        self.view.update_search_bar_autocompleter(self.pieces)
 
     def refresh(self):
         self.view.refresh()
-        #TODO: get pieces from api
-        self.pieces = ["PIEZA 1","PIEZA 2","PIEZA 3"]
-        self.view.update_search_bar_autocompleter(self.pieces)
+        # Initial piece load
+        self.update_pieces_list(self.view.is_only_digitalized())
