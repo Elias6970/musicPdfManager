@@ -38,12 +38,12 @@ async def test_process_upload_stream_success(mock_settings, tmp_path):
 
     # Assert
     assert isinstance(result, UploadStagingResponse)
-    assert result.file_id == "1234-5678.pdf"
+    assert result.file_id == "1234-5678_test_file.pdf"
     assert result.original_filename == "test_file.pdf"
     assert result.size_bytes == 12
     
     # Verify file was written
-    filepath = os.path.join(tmp_path, "1234-5678.pdf")
+    filepath = os.path.join(tmp_path, "1234-5678_test_file.pdf")
     assert os.path.exists(filepath)
     with open(filepath, "rb") as f:
         assert f.read() == b"chunk1chunk2"

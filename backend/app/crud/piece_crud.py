@@ -13,7 +13,7 @@ def update_piece(session: Session, piece_id: int, piece_in: PieceCreate) -> Opti
     db_piece = session.get(Piece, piece_id)
     if not db_piece:
         return None
-    piece_data = piece_in.model_dump(exclude_unset=True)
+    piece_data = piece_in.model_dump(exclude_unset=True, exclude_computed_fields=True)
     for key, value in piece_data.items():
         setattr(db_piece, key, value)
         
