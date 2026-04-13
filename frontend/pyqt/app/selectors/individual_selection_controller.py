@@ -1,4 +1,6 @@
+from frontend.pyqt.app.api_client.base_client_factory import get_base_client
 from frontend.pyqt.app.elements.previwer.previewer_controller import PreviewerController
+from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
 from PyQt6.QtCore import QObject
 from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
 import frontend.pyqt.app.models.generated_models as generated_models
@@ -11,7 +13,8 @@ class IndividualSelectionController(QObject):
     def __init__(self,view:IndividualSelectionView):
         super().__init__()
         self.view = view
-        self.preview_controller = PreviewerController(self.view.preview)
+        api_client = PreviewApiClient(get_base_client())
+        self.preview_controller = PreviewerController(self.view.preview, api_client)
 
         self.job:generated_models.SimplePrintJob = generated_models.SimplePrintJob(files=[])
         self.selected_piece:str|None = None
@@ -96,7 +99,7 @@ class IndividualSelectionController(QObject):
             self.view.set_piece_lbl(piece_name)
 
             #TODO:Get the scores from the api.
-            scores = ["OPCION 1","OPCION 2"]
+            scores = ["bombo.pdf","caja.pdf","guion.pdf"]
             if scores:
                 self.view.set_combo_box_instruments(scores)
             else:    
@@ -114,14 +117,14 @@ class IndividualSelectionController(QObject):
         self.selected_instrument = instrument
         # TODO: Get archive id from the sessionmanager'
         if self.selected_piece and self.selected_instrument: #To avoid removing the image when the user is typing another piece
-            self.preview_controller.load_document(archive_id=0, piece_std_name=self.selected_piece, file=instrument)
+            self.preview_controller.load_document(archive_id=1, piece_std_name=self.selected_piece, file=instrument)
 
     def get_pieces(self, digitalized:bool=False):
         """
         Get the pieces from the API and update the autocompleter of the search bar.
         """
         if digitalized:
-            return ["PIEZA DIGITAL 1", "PIEZA DIGITAL 2"]
+            return ["1-A", "2-B"]
         return ["PIEZA 1","PIEZA 2","PIEZA 3", "PIEZA DIGITAL 1", "PIEZA DIGITAL 2"]
 
     def update_pieces_list(self, only_digitalized: bool):
