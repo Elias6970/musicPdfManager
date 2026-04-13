@@ -1,6 +1,8 @@
 from frontend.pyqt.app.api_client.base_client_factory import get_base_client
-from frontend.pyqt.app.elements.previwer.previewer_controller import PreviewerController
 from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
+from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
+from frontend.pyqt.app.config.session_manager import SessionManager
+from frontend.pyqt.app.elements.previwer.previewer_controller import PreviewerController
 from PyQt6.QtCore import QObject
 from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
 import frontend.pyqt.app.models.generated_models as generated_models
@@ -13,13 +15,22 @@ class IndividualSelectionController(QObject):
     def __init__(self,view:IndividualSelectionView):
         super().__init__()
         self.view = view
-        api_client = PreviewApiClient(get_base_client())
-        self.preview_controller = PreviewerController(self.view.preview, api_client)
+        base_client = get_base_client()
+        self.session = SessionManager()
+        
+        self.preview_api = PreviewApiClient(base_client)
+        self.pieces_api = PiecesApiClient(base_client)
+        
+        self.preview_controller = PreviewerController(self.view.preview, self.preview_api)
 
         self.job:generated_models.SimplePrintJob = generated_models.SimplePrintJob(files=[])
         self.selected_piece:str|None = None
         self.selected_instrument:str|None = None
-        self.pieces:list[str] = [] #List of pieces std names.
+        self.pieces:list[generated_models.PiecePublic] = [] #List of pieces public objects.
+
+        # Connect pieces api signals
+        self.pieces_api.pieces_loaded.connect(self._on_pieces_fetched)
+        self.pieces_api.pieces_error.connect(lambda err: print(f"Error fetching pieces: {err}")) #TODO: Show a window
 
         # Connect signals
         self.view.add_score_signal.connect(self.add_score)
@@ -94,7 +105,10 @@ class IndividualSelectionController(QObject):
         Set the options of the instruments combo box according to the piece selected in the search bar.
         If the piece doesn't have scores, it disables the combo box
         """
-        if piece_name != self.selected_piece and piece_name in self.pieces:
+        # Validate string exists by ensuring it's in our cached self.pieces names
+        valid_names = [piece.std_name for piece in self.pieces]
+        
+        if piece_name != self.selected_piece and piece_name in valid_names:
             self.selected_piece = piece_name
             self.view.set_piece_lbl(piece_name)
 
@@ -119,20 +133,35 @@ class IndividualSelectionController(QObject):
         if self.selected_piece and self.selected_instrument: #To avoid removing the image when the user is typing another piece
             self.preview_controller.load_document(archive_id=1, piece_std_name=self.selected_piece, file=instrument)
 
-    def get_pieces(self, digitalized:bool=False):
+    def get_pieces(self):
         """
-        Get the pieces from the API and update the autocompleter of the search bar.
+        Trigger an API request to get the pieces for the current archive.
+        The result is handled via signal _on_pieces_fetched.
         """
-        if digitalized:
-            return ["1-A", "2-B"]
-        return ["PIEZA 1","PIEZA 2","PIEZA 3", "PIEZA DIGITAL 1", "PIEZA DIGITAL 2"]
+        archive_id = self.session.get_archive_id()
+        self.pieces_api.get_pieces(archive_id=archive_id)
+        
+    def _on_pieces_fetched(self, pieces: list[generated_models.PiecePublic]):
+        """
+        Slot called when the piece data finishes loading from API.
+        """
+        self.pieces = pieces
+        
+        # Depending on checkbox, update names in autocompleter
+        only_digitalized = self.view.is_only_digitalized()
+        
+        if only_digitalized:
+            names = [piece.std_name for piece in self.pieces if piece.digitalized]
+        else:
+            names = [piece.std_name for piece in self.pieces]
+
+        self.view.update_search_bar_autocompleter(names)
 
     def update_pieces_list(self, only_digitalized: bool):
         """
-        Updates the internal pieces list and the autocompleter according to the checkbox.
+        Updates the autocompleter using the already fetched pieces array.
         """
-        self.pieces = self.get_pieces(digitalized=only_digitalized)
-        self.view.update_search_bar_autocompleter(self.pieces)
+        self.get_pieces()
 
     def refresh(self):
         self.view.refresh()
