@@ -8,7 +8,10 @@ from backend.api.dependencies.permissions import require_archive_viewer, require
 
 from backend.app.models.piece import PieceCreate, PiecePublic
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
-from backend.app.crud.piece_crud import get_piece as _get_piece
+from backend.app.crud.piece_crud import (
+    get_piece as _get_piece,
+    get_pieces as _get_pieces
+)
 from backend.app.error import FileCouldNotBeReadException
 from backend.app.services.archive_services import (
     add_piece_to_archive as _add_piece_to_archive,
@@ -17,6 +20,7 @@ from backend.app.services.archive_services import (
     get_all_piece_std_names as _get_all_piece_std_names,
     get_all_digitalized_piece_std_names as _get_all_digitalized_piece_std_names
 )
+from backend.app.services.pieces_services import get_scores as _get_piece_scores
 
 router = APIRouter(prefix="/archives/{archive_id}/pieces", tags=["pieces"])
 
@@ -53,6 +57,35 @@ def get_piece(
             detail=f"Piece with ID {piece_id} not found",
         )
     return piece
+
+@router.get("/", response_model=List[PiecePublic])
+def get_pieces(
+    archive_id: int, 
+    session: Session = Depends(get_session), 
+    _ = Depends(require_archive_viewer)
+):
+    """Retrieve a list of pieces in the archive."""
+    return _get_pieces(session, archive_id)
+
+@router.get("/{piece_std_name}/scores", response_model=List[str])
+def get_piece_scores(
+        archive_id: int,
+        piece_std_name: str,
+        file_manager: ArchiveFileManager = Depends(get_archive_file_manager),
+        _ = Depends(require_archive_viewer)
+):
+    """Get the scores of a piece."""
+    try:
+        return _get_piece_scores(piece_std_name, file_manager)
+    except FileCouldNotBeReadException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+        )
+
 
 @router.post("/", response_model=PiecePublic, status_code=status.HTTP_201_CREATED)
 def add_piece_to_archive(

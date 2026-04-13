@@ -1,6 +1,6 @@
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
-from backend.app.crud.piece_crud import create_piece, update_piece, get_piece, delete_piece, increment_piece_version
+from backend.app.crud.piece_crud import create_piece, update_piece, get_piece, get_pieces, delete_piece, increment_piece_version
 from backend.app.models.piece import Piece, PieceCreate
 from backend.app.models.author import Author
 from backend.app.models.type import Type
@@ -174,3 +174,33 @@ def test_increment_piece_version(session: Session):
     # Check that a non-existent piece returns None
     result = increment_piece_version(session, 9999)
     assert result is None
+
+
+def test_get_pieces(session: Session):
+    piece1_in = PieceCreate(
+        cod=1001, name="Archive1 P1", handwrited=False, parted=False, digitalized=False, archive_id=1, author_id=1, type_id=1
+    )
+    piece2_in = PieceCreate(
+        cod=1002, name="Archive1 P2", handwrited=False, parted=False, digitalized=False, archive_id=1, author_id=1, type_id=1
+    )
+    piece3_in = PieceCreate(
+        cod=1003, name="Archive2 P3", handwrited=False, parted=False, digitalized=False, archive_id=2, author_id=1, type_id=1
+    )
+    
+    create_piece(session, piece1_in)
+    create_piece(session, piece2_in)
+    create_piece(session, piece3_in)
+
+    # Fetch pieces for archive 1
+    archive_1_pieces = get_pieces(session, archive_id=1)
+    assert len(archive_1_pieces) == 2
+    assert {p.cod for p in archive_1_pieces} == {1001, 1002}
+    
+    # Fetch pieces for archive 2
+    archive_2_pieces = get_pieces(session, archive_id=2)
+    assert len(archive_2_pieces) == 1
+    assert archive_2_pieces[0].cod == 1003
+    
+    # Fetch pieces for an archive with no pieces
+    empty_archive_pieces = get_pieces(session, archive_id=999)
+    assert len(empty_archive_pieces) == 0
