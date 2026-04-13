@@ -31,6 +31,9 @@ class IndividualSelectionController(QObject):
         # Connect pieces api signals
         self.pieces_api.pieces_loaded.connect(self._on_pieces_fetched)
         self.pieces_api.pieces_error.connect(lambda err: print(f"Error fetching pieces: {err}")) #TODO: Show a window
+        
+        self.pieces_api.piece_scores_loaded.connect(self._on_scores_fetched)
+        self.pieces_api.piece_scores_error.connect(lambda err: print(f"Error fetching scores: {err}"))
 
         # Connect signals
         self.view.add_score_signal.connect(self.add_score)
@@ -112,16 +115,22 @@ class IndividualSelectionController(QObject):
             self.selected_piece = piece_name
             self.view.set_piece_lbl(piece_name)
 
-            #TODO:Get the scores from the api.
-            scores = ["bombo.pdf","caja.pdf","guion.pdf"]
-            if scores:
-                self.view.set_combo_box_instruments(scores)
-            else:    
-                self.view.disable_instruments_combo_box_no_scores()
+            archive_id = self.session.get_archive_id()
+            self.pieces_api.get_piece_scores(archive_id=archive_id, piece_std_name=piece_name)
         else:
             self.selected_piece = None    
             self.view.set_piece_lbl("")
             self.view.clean_instruments_combo_box()
+            
+    def _on_scores_fetched(self, scores: list[str]):
+        """
+        Slot connected to piece_scores_loaded emitted by pieces_api.
+        Updates the combo box or disables it if empty.
+        """
+        if scores:
+            self.view.set_combo_box_instruments(scores)
+        else:    
+            self.view.disable_instruments_combo_box_no_scores()
     
 
     def instrument_changed(self,instrument:str):
