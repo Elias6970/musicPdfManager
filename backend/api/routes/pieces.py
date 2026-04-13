@@ -5,8 +5,8 @@ from sqlmodel import Session
 from backend.api.dependencies.database import get_session
 from backend.api.dependencies.file_manager import get_archive_file_manager
 from backend.api.dependencies.permissions import require_archive_viewer, require_archive_editor
-
 from backend.app.models.piece import PieceCreate, PiecePublic
+from backend.app.custom_order.instrument_sorter import InstrumentSorter
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.crud.piece_crud import (
     get_piece as _get_piece,
@@ -76,7 +76,8 @@ def get_piece_scores(
 ):
     """Get the scores of a piece."""
     try:
-        return _get_piece_scores(piece_std_name, file_manager)
+        scores = _get_piece_scores(piece_std_name, file_manager)
+        return InstrumentSorter.sort_instruments(scores) # Sort the instrument names
     except FileCouldNotBeReadException as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
