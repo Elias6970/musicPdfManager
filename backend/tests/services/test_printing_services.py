@@ -15,11 +15,11 @@ def create_dummy_pdf(path: str):
 
 def test_process_simple_print_job_success(tmp_path, monkeypatch):
     # Mocking dependencies to point to tmp_path
-    monkeypatch.setattr("backend.app.services.printing_service.get_archive_path", lambda s, a_id: str(tmp_path))
+    monkeypatch.setattr("backend.app.services.printing_services.get_archive_path", lambda s, a_id: str(tmp_path))
     monkeypatch.setattr("backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager", lambda name: "piece_folder")
     
     # Create required directory structure
-    piece_dir = os.path.join(tmp_path, "piece_folder")
+    piece_dir = os.path.join(tmp_path, "piece_folder", "partituras")
     os.makedirs(piece_dir, exist_ok=True)
     
     file1_path = os.path.join(piece_dir, "file1.pdf")
@@ -46,7 +46,7 @@ def test_process_simple_print_job_success(tmp_path, monkeypatch):
     result_doc.close()
 
 def test_process_simple_print_job_file_not_found(tmp_path, monkeypatch):
-    monkeypatch.setattr("backend.app.services.printing_service.get_archive_path", lambda s, a_id: str(tmp_path))
+    monkeypatch.setattr("backend.app.services.printing_services.get_archive_path", lambda s, a_id: str(tmp_path))
     monkeypatch.setattr("backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager", lambda name: "piece_folder")
     
     piece_dir = os.path.join(tmp_path, "piece_folder")

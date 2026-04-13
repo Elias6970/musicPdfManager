@@ -60,7 +60,7 @@ def test_preprocess_other_options_match(base_mocks):
 def test_preprocess_solved_fails_match(base_mocks):
     session, job, preset = _create_mock_job_and_preset()
     base_mocks.return_value = []  # No files found on disk normally
-    job.solved_fails = {"01-TEST": {"Violin I": "custom_override.pdf"}}
+    job.solved_fails = {"01-TEST": {"Violin I": "custom_override"}}
     
     solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     

@@ -2,6 +2,7 @@ from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy import Column, DateTime, func
+from pydantic import computed_field
 
 from backend.app.models.archive import ArchivePublic
 from backend.app.models.author import AuthorPublic
@@ -19,6 +20,7 @@ class PieceBase(SQLModel):
     parted: bool
     digitalized: bool
     
+    @computed_field
     @property
     def std_name(self) -> str:
         """Dynamically concatenated cod and name."""
