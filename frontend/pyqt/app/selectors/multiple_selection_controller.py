@@ -32,7 +32,8 @@ class MultipleSelectionController(QObject):
 
         self.preview_controller = PreviewerController(self.view.preview, self.preview_api)
 
-        self.job: PresetPrintJobPublic = PresetPrintJobPublic(preset_name=None, archive_id = None, pieces=[])
+        
+        self.added_pieces: list[PrinteablePieceWithId] = [] #List of pieces added to the PDF with their id to be able to delete them from the list.
         self.pieces: list[PiecePublic] = [] #List of pieces public objects.
         self.selected_piece: str | None = None
         self.presets: list[str] = [] #List of preset names.
@@ -49,6 +50,7 @@ class MultipleSelectionController(QObject):
         self.instruments_presets_api.presets_names_error.connect(lambda err: print(f"Error fetching presets: {err}"))
 
         # Connect view signals
+        self.view.piece_search_bar.textChanged.connect(self.set_option_of_instruments)
         self.view.only_digitalized_changed.connect(self.get_pieces)
         self.view.instrument_changed.connect(self.instrument_changed)
         self.view.add_piece_signal.connect(self.add_piece)
@@ -65,13 +67,15 @@ class MultipleSelectionController(QObject):
         """
         self.instruments_presets_api.get_preset_names()
 
+    def launch_exporting_configuration_window(self):
+        
 
     def add_piece(self, piece_name:str, preset_name:str, copies:int):
         """
         Add a piece to the list of pieces to be printed, with the preset and copies information.
         """
-        piece = PrinteablePieceWithId(std_name = piece_name, id=str(uuid4()), copies=copies)
-        self.job.pieces.append(piece)
+        piece = PrinteablePieceWithId(std_name = piece_name, copies=copies, id=str(uuid4()))
+        self.added_pieces.append(piece)
 
         self.view.add_item_to_status_console(
             piece.id,
@@ -89,8 +93,8 @@ class MultipleSelectionController(QObject):
         Remove the piece from the list of added pieces.
         The widget it is removed in the StatusConsoleItemWithTwoTexts class.
         """
-        self.job.pieces = [piece for piece in self.job.pieces if piece.id != id]
-        if len(self.job.pieces) == 0:
+        self.added_pieces = [piece for piece in self.added_pieces if piece.id != id]
+        if len(self.added_pieces) == 0:
             self.view.btn_create_pdf.setEnabled(False)
             self.view.presets_combo_box.setEnabled(True)
 
@@ -183,10 +187,10 @@ class MultipleSelectionController(QObject):
         """
         Refresh the view to the initial state.
         """
-        self.job = PresetPrintJobPublic(preset_name=None, archive_id = None, pieces=[])
+        self.added_pieces = []
         self.selected_piece = None
         self.selected_instrument = None
-        self.view.refresh()
+        #self.view.refresh()
 
         self.get_pieces()
         self.get_presets()

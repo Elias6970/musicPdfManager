@@ -81,7 +81,11 @@ class MultipleSelectionView(QtWidgets.QWidget):
         self.btn_add_piece = QtWidgets.QPushButton(self.tr("Add")) #traducir
         self.btn_create_pdf = QtWidgets.QPushButton(self.tr("Create Pdf")) #traducir
 
-        self.btn_add_piece.clicked.connect(self.add_piece_signal.emit)
+        self.btn_add_piece.clicked.connect(lambda: self.add_piece_signal.emit(
+            self.piece_search_bar.text(),
+            self.presets_combo_box.currentText(),
+            int(self.num_copies.currentText())
+        ))
         self.btn_create_pdf.clicked.connect(self.create_pdf) #TODO
 
         layout.addWidget(self.num_copies)
@@ -133,7 +137,7 @@ class MultipleSelectionView(QtWidgets.QWidget):
         
         #Refresh button
         self.refresh_button = QtWidgets.QPushButton()
-        self.refresh_button.clicked.connect(self.refresh) #TODO
+        self.refresh_button.clicked.connect(self.refresh_requested.emit)
 
         try:
             self.refresh_button.setIcon(QtGui.QIcon(REFRESH_IMG_PATH))
@@ -267,7 +271,7 @@ class MultipleSelectionView(QtWidgets.QWidget):
         self.presets_combo_box.setEnabled(True)
         self.presets_combo_box.clear()
         self.presets_combo_box.addItems(presets)
-        self.presets_combo_box.setCurrentIndex(0)
+        self.presets_combo_box.setCurrentIndex(-1)
 
     def disable_presets_combo_box_no_presets(self):
         """
