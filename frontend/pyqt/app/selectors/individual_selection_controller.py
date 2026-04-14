@@ -53,7 +53,7 @@ class IndividualSelectionController(QObject):
         self.view.piece_search_bar.textChanged.connect(self.set_option_of_instruments)
         self.view.instrument_changed.connect(self.instrument_changed)
         self.view.refresh_requested.connect(self.refresh)
-        self.view.only_digitalized_changed.connect(self.update_pieces_list)
+        self.view.only_digitalized_changed.connect(self.get_pieces)
         
         # Connect preview controller signals to view buttons
         self.view.btn_mv_back_preview.clicked.connect(self.preview_controller.previous_page)
@@ -187,13 +187,13 @@ class IndividualSelectionController(QObject):
 
         self.view.update_search_bar_autocompleter(names)
 
-    def update_pieces_list(self, only_digitalized: bool):
-        """
-        Updates the autocompleter using the already fetched pieces array.
-        """
-        self.get_pieces()
 
     def refresh(self):
+        self.pieces = []
+        self.job = generated_models.SimplePrintJob(files=[])
+        self.selected_piece = None
+        self.selected_instrument = None
+
+        self.get_pieces()
+
         self.view.refresh()
-        # Initial piece load
-        self.update_pieces_list(self.view.is_only_digitalized())
