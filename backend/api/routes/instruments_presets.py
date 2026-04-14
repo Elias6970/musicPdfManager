@@ -8,6 +8,7 @@ from backend.app.models.presets.instruments_preset import InstrumentsPreset
 from backend.app.services.instruments_preset_service import (
     get_preset,
     get_all_presets,
+    get_all_presets_names,
     add_preset,
     update_preset,
     delete_preset
@@ -27,6 +28,16 @@ def get_all_instrument_presets(
 ):
     try:
         return get_all_presets(session=session, user_id=user.id) # type: ignore
+    except UserConfigNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+@router.get("/names", response_model=list[str])
+def get_all_instrument_preset_names(
+    session: Session = Depends(get_session),
+    user: User = Depends(require_user)
+):
+    try:
+        return get_all_presets_names(session=session, user_id=user.id) # type: ignore
     except UserConfigNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 

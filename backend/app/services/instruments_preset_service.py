@@ -39,6 +39,12 @@ def get_all_presets(session: Session, user_id: int) -> list[InstrumentsPreset]:
     filepath = _get_user_preset_file_path(session, user_id)
     return instruments_preset_crud.get_all_instruments_presets(filepath)
 
+def get_all_presets_names(session: Session, user_id: int) -> list[str]:
+    """Helper to get just the names of all presets for a user, useful for populating dropdowns."""
+    filepath = _get_user_preset_file_path(session, user_id)
+    presets = instruments_preset_crud.get_all_instruments_presets(filepath)
+    return [preset.name for preset in presets]
+
 def add_preset(session: Session, user_id: int, preset: InstrumentsPreset) -> InstrumentsPreset:
     """Add a new instrument preset. Fails if the preset already exists."""
     filepath = _get_user_preset_file_path(session, user_id)
