@@ -35,8 +35,7 @@ def process_simple_print_job(session: Session, job: SimplePrintJob) -> bytes:
     for file_element in job.files:
         archive_folder = get_archive_path(session, file_element.archive_id)
         piece_folder = ArchiveFileManager.parse_name_to_file_manager(file_element.piece_std_name)
-        file_name = ArchiveFileManager.extract_original_filename(file_element.file_name)
-        file_path = os.path.join(archive_folder, piece_folder, DIR_SCORES,file_name)
+        file_path = os.path.join(archive_folder, piece_folder, DIR_SCORES,file_element.file_name)
         
         if os.path.exists(file_path):
             with fitz.open(file_path) as doc:

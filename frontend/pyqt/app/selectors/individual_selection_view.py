@@ -257,4 +257,9 @@ class IndividualSelectionView(QtWidgets.QWidget):
     def change_preview_img(self, bytes_img:bytes|None=None):
         self.preview.set_image_from_bytes(bytes_img)
 
-
+    def show_pdf_saved_message(self,msg:str):
+        msg_box = QtWidgets.QMessageBox(self)
+        msg_box.setWindowTitle(self.tr("PDF Saved"))  #traducir
+        msg_box.setText(msg)
+        msg_box.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msg_box.exec()

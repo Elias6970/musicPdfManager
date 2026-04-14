@@ -1,4 +1,4 @@
-from frontend.pyqt.app.api_client.base_client import BaseApiClient
+from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
 from frontend.pyqt.app.config.session_manager import SessionManager
 
 # We maintain a single global instance of BaseApiClient so that
