@@ -1,6 +1,7 @@
-from frontend.pyqt.app.api_client.base_client_factory import get_base_client
+from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
 from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
+from frontend.pyqt.app.api_client.printers_api_client import PrintersApiClient
 from frontend.pyqt.app.config.session_manager import SessionManager
 from frontend.pyqt.app.elements.previwer.previewer_controller import PreviewerController
 from PyQt6.QtCore import QObject
@@ -9,17 +10,24 @@ import frontend.pyqt.app.models.generated_models as generated_models
 from uuid import uuid4
 
 class PrinteableFile(generated_models.PrinteableFile):
+    """
+    Created to be able to delete the scores from the list of added scores in the PDF generation, 
+    because the PrinteableFile model doesn't have an id, so it is extended to have it and be able to identify it in the list.   
+    The id is generated with uuid4 when a score is added to the list.
+    """
     id:str
 
 class IndividualSelectionController(QObject):    
     def __init__(self,view:IndividualSelectionView):
         super().__init__()
         self.view = view
-        base_client = get_base_client()
         self.session = SessionManager()
-        
+        base_client = get_base_client()
+        base_client.set_token(self.session.get_jwt())
+
         self.preview_api = PreviewApiClient(base_client)
         self.pieces_api = PiecesApiClient(base_client)
+        self.printers_api = PrintersApiClient(base_client)
         
         self.preview_controller = PreviewerController(self.view.preview, self.preview_api)
 
@@ -35,6 +43,9 @@ class IndividualSelectionController(QObject):
         self.pieces_api.piece_scores_loaded.connect(self._on_scores_fetched)
         self.pieces_api.piece_scores_error.connect(lambda err: print(f"Error fetching scores: {err}"))
 
+        self.printers_api.simple_print_success.connect(self._on_pdf_generated)
+        self.printers_api.simple_print_error.connect(lambda err: print(f"Error generating PDF: {err}")) #TODO: Show a window
+        
         # Connect signals
         self.view.add_score_signal.connect(self.add_score)
         self.view.generate_pdf_signal.connect(self.generate_pdf)
@@ -45,7 +56,6 @@ class IndividualSelectionController(QObject):
         self.view.only_digitalized_changed.connect(self.update_pieces_list)
         
         # Connect preview controller signals to view buttons
-            
         self.view.btn_mv_back_preview.clicked.connect(self.preview_controller.previous_page)
         self.view.btn_mv_forward_preview.clicked.connect(self.preview_controller.next_page)
         
@@ -61,8 +71,8 @@ class IndividualSelectionController(QObject):
             return
         
         #Get file path to save
-        path = self.view.dialog_window_select_new_pdf()
-        if path == "": 
+        self.save_path = self.view.dialog_window_select_new_pdf()
+        if self.save_path == "": 
             return 
         
         exportable_list = [generated_models.PrinteableFile(
@@ -70,12 +80,24 @@ class IndividualSelectionController(QObject):
             piece_std_name=file.piece_std_name,
             file_name=file.file_name,
             copies=file.copies
-        ) for file in self.job.files]
+        ) for file in self.job.files] # Convert to PrinteableFile without id for the API
+  
+        print_job = generated_models.SimplePrintJob(files=exportable_list)
+        self.printers_api.generate_simple_print(print_job)
 
-        #TODO: Call the API to generate the PDF with the exportable_list and the options selected in the view.
-        print("Generating PDF with the following scores:")
-        for file in exportable_list:
-            print(f"Piece: {file.piece_std_name}, Instrument: {file.file_name}, Copies: {file.copies}")
+    def _on_pdf_generated(self, pdf_bytes):
+        """
+        Slot called when the simple print PDF generator succeeds.
+        Saves the PDF bytes to the path selected.
+        """
+        if hasattr(self, 'save_path') and self.save_path:
+            try:
+                with open(self.save_path, "wb") as f:
+                    f.write(pdf_bytes.data())
+                print(f"PDF successfully saved to {self.save_path}")
+                self.view.show_pdf_saved_message(f"PDF successfully saved to {self.save_path}")
+            except Exception as e:
+                print(f"Error saving PDF to disk: {e}")
         
 
     def add_score(self, piece_name:str, instrument:str, copies:int):
@@ -84,7 +106,7 @@ class IndividualSelectionController(QObject):
         """
         piece = PrinteableFile(
             id=str(uuid4()),  # Generate a unique ID for each file
-            archive_id=0,  # TODO: Get the archive id from the SessionManager
+            archive_id=self.session.get_archive_id(),
             piece_std_name=piece_name,
             file_name=instrument,
             copies=copies)
@@ -138,9 +160,8 @@ class IndividualSelectionController(QObject):
         Set the selected instrument to add to the PDF.
         """
         self.selected_instrument = instrument
-        # TODO: Get archive id from the sessionmanager'
         if self.selected_piece and self.selected_instrument: #To avoid removing the image when the user is typing another piece
-            self.preview_controller.load_document(archive_id=1, piece_std_name=self.selected_piece, file=instrument)
+            self.preview_controller.load_document(archive_id=self.session.get_archive_id(), piece_std_name=self.selected_piece, file=instrument)
 
     def get_pieces(self):
         """
