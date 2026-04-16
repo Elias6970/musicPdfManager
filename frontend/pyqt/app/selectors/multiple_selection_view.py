@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
+from frontend.pyqt.app.pop_up_windows.type_of_export.type_of_export_controller import TypeOfExportController
 from frontend_pyqt.config.constants import REFRESH_IMG_PATH
 from frontend_pyqt.pop_up_windows.error_window import Error_window, ShowError
-from frontend_pyqt.pop_up_windows.type_of_export_window import TypeOfExportWindow, TypeOfExport
 from frontend_pyqt.presets.resolve_not_matched_presets import ResolveNotMatchedPresets
 from frontend_pyqt.pop_up_windows.yes_no_window import YesNoWindow
 
@@ -9,6 +9,7 @@ from frontend.pyqt.app.elements.status_console import StatusConsole
 from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar
 from frontend.pyqt.app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 from frontend.pyqt.app.elements.previwer.previewer import Preview
+from frontend.pyqt.app.pop_up_windows.type_of_export.type_of_export_view import TypeOfExportView
 
 from backend.app.constants.constants import MAX_COPIES
 from backend.app.custom_order.instrument_sorter import InstrumentSorter
@@ -86,7 +87,7 @@ class MultipleSelectionView(QtWidgets.QWidget):
             self.presets_combo_box.currentText(),
             int(self.num_copies.currentText())
         ))
-        self.btn_create_pdf.clicked.connect(self.create_pdf) #TODO
+        self.btn_create_pdf.clicked.connect(self.generate_pdf_signal.emit)
 
         layout.addWidget(self.num_copies)
         layout.addWidget(self.btn_add_piece)
@@ -292,9 +293,28 @@ class MultipleSelectionView(QtWidgets.QWidget):
                                             self.status_console.remove_item,
                                             remove_from_list))
 
+    #Display a window to select a location to save a pdf
+    def dialog_window_select_exporting_path(self):
+        return QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Select Folder to export"))
 
+  
+    def refresh(self):
+        """
+        Refresh all the view elements to the initial state
+        """
+        self.presets_combo_box.clear()
+        self.piece_search_bar.clear()
+        self.status_console.clear()
+        self.instruments_combo_box.clear()
+        self.num_copies.setCurrentIndex(0)
+        #The preview is cleaned in the preview controller
 
-
+    def show_pdf_saved_message(self,msg:str):
+        msg_box = QtWidgets.QMessageBox(self)
+        msg_box.setWindowTitle(self.tr("Export successful!"))
+        msg_box.setText(msg)
+        msg_box.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
+        msg_box.exec()
 ###########################OLDDDDDDDDDDDDDD@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@J
 
     #Update the autocompleter list of the search bar
@@ -415,91 +435,69 @@ class MultipleSelectionView(QtWidgets.QWidget):
         self.presets_combo_box.setEnabled(False)
         return True
     
-
-    #Display a window to select a location to save a pdf
-    def dialog_window_select_exporting_path(self):
-        return QtWidgets.QFileDialog.getExistingDirectory(self, self.tr("Select Folder to export"))
-
-
     
-    def create_pdf(self):     
-        """Generate the pdf with the selected presets and pieces"""
-        try:
-            if self.printer.items:
-                #Ask for the type of creation. By instruments or by pieces
-                window = TypeOfExportWindow(self)
-                if window.type_of_export == TypeOfExport.CANCELLED:
-                    return
-                elif window.type_of_export == TypeOfExport.ALL_IN_ONE:
-                    self.printer.sorted_export = window.sort_alphabetically
-                elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
-                    self.printer.sorted_export = window.sort_alphabetically
-                    self.printer.ignore_preset_copies = window.ignore_preset_copies
-                    self.printer.add_piece_number = window.add_piece_numbers
-                    self.printer.add_cover_page = window.add_cover_page
-                    self.printer.add_index = window.add_index
-                    self.printer.add_blank_page_after_index = window.add_blank_page_after_index
+    # def create_pdf(self):     
+    #     """Generate the pdf with the selected presets and pieces"""
+    #     try:
+    #         if self.printer.items:
+    #             #Ask for the type of creation. By instruments or by pieces
+    #             window = TypeOfExportWindow(self)
+    #             if window.type_of_export == TypeOfExport.CANCELLED:
+    #                 return
+    #             elif window.type_of_export == TypeOfExport.ALL_IN_ONE:
+    #                 self.printer.sorted_export = window.sort_alphabetically
+    #             elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
+    #                 self.printer.sorted_export = window.sort_alphabetically
+    #                 self.printer.ignore_preset_copies = window.ignore_preset_copies
+    #                 self.printer.add_piece_number = window.add_piece_numbers
+    #                 self.printer.add_cover_page = window.add_cover_page
+    #                 self.printer.add_index = window.add_index
+    #                 self.printer.add_blank_page_after_index = window.add_blank_page_after_index
 
-                #Make the preporcess and solve the errros
-                errors = self.printer.preprocess_export()
-                r = ResolveNotMatchedPresets(errors,self)
+    #             #Make the preporcess and solve the errros
+    #             errors = self.printer.preprocess_export()
+    #             r = ResolveNotMatchedPresets(errors,self)
                 
-                if len(r.resolved) < len(errors):
-                    return #Not all scores selected
-                if len(r.resolved) > len(errors):
-                    raise MoreScoresThanPresetsException(self.tr("Something went wrong during the selection of the presets"))
+    #             if len(r.resolved) < len(errors):
+    #                 return #Not all scores selected
+    #             if len(r.resolved) > len(errors):
+    #                 raise MoreScoresThanPresetsException(self.tr("Something went wrong during the selection of the presets"))
                 
-                #Add resolution to the solution
-                for i in r.resolved:
-                    print(i)
-                    if i.state == PresetResolverStates.IGNORED:
-                        continue
-                    print(f"Exist {i.resolution} for piece {i.piece} and instrument {i.instrument}")
-                    self.printer.add_to_solution(i)
+    #             #Add resolution to the solution
+    #             for i in r.resolved:
+    #                 print(i)
+    #                 if i.state == PresetResolverStates.IGNORED:
+    #                     continue
+    #                 print(f"Exist {i.resolution} for piece {i.piece} and instrument {i.instrument}")
+    #                 self.printer.add_to_solution(i)
 
-                #Export and save
-                pdf_path = self.dialog_window_select_exporting_path()
-                if not pdf_path:
-                    return
+    #             #Export and save
+    #             pdf_path = self.dialog_window_select_exporting_path()
+    #             if not pdf_path:
+    #                 return
                 
-                if window.type_of_export == TypeOfExport.ALL_IN_ONE:
-                    self.printer.export_all_in_one(pdf_path)
-                elif window.type_of_export == TypeOfExport.BY_PIECES:
-                    self.printer.export_by_pieces(pdf_path)
-                elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
-                    self.printer.export_by_instruments(pdf_path)
+    #             if window.type_of_export == TypeOfExport.ALL_IN_ONE:
+    #                 self.printer.export_all_in_one(pdf_path)
+    #             elif window.type_of_export == TypeOfExport.BY_PIECES:
+    #                 self.printer.export_by_pieces(pdf_path)
+    #             elif window.type_of_export == TypeOfExport.BY_INSTRUMENTS:
+    #                 self.printer.export_by_instruments(pdf_path)
 
-                YesNoWindow(self.tr("Pdfs exported successfully"),True,self)
+    #             YesNoWindow(self.tr("Pdfs exported successfully"),True,self)
             
-            else:
-                error = self.tr("*You need to add some piece")
-                ShowError.show_tooltip_error(error,5000,self.btn_create_pdf)
+    #         else:
+    #             error = self.tr("*You need to add some piece")
+    #             ShowError.show_tooltip_error(error,5000,self.btn_create_pdf)
 
                 
         
-        except Exception as e:
-            Error_window.print_error(e)
+    #     except Exception as e:
+    #         Error_window.print_error(e)
 
     
     def refresh_presets_list(self, keep_current_index:bool = False):
         self.preset_manager.load() #Update the presets
         self.set_presets(keep_current_index=keep_current_index)
-
-    #Refresh the list of pieces and delete the info in the printer  
-    def refresh(self):
-        self.scroll.clear()
-        self.scroll.update()
-        self.piece_search_bar.clear()
-        self.piece_lbl.clear()
-        self.num_copies.setCurrentIndex(0)
-        
-        #Printer
-        self.printer = PresetsPrinter()
-        self.archive.update_pieces()
-        #Preview
-        self.preview.clear()
-
-        self.refresh_presets_list()
 
 
     #Controlls the pieces showed in the search bar

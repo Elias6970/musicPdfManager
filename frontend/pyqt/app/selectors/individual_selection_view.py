@@ -246,8 +246,7 @@ class IndividualSelectionView(QtWidgets.QWidget):
         self.btn_add_score.setEnabled(False)
         self.btn_create_pdf.setEnabled(False)
 
-        #Preview
-        self.preview.clear()
+        #Preview is cleared in the preview controller (called by refresh in the controller)
 
 
     def is_only_digitalized(self):

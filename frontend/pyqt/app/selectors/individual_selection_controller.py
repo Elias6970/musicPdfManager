@@ -194,6 +194,7 @@ class IndividualSelectionController(QObject):
         self.selected_piece = None
         self.selected_instrument = None
 
-        self.get_pieces()
-
+        self.preview_controller.clear()
         self.view.refresh()
+
+        self.get_pieces()
