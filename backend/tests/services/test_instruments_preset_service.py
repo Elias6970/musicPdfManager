@@ -8,6 +8,7 @@ from backend.app.services.instruments_preset_service import (
     _get_user_preset_file_path,
     get_preset,
     get_all_presets,
+    get_all_presets_names,
     add_preset,
     update_preset,
     delete_preset
@@ -106,6 +107,27 @@ def test_get_all_presets(mock_get_path, mock_crud_get_all, mock_session, sample_
     assert len(results) == 2
     assert results[0] == sample_preset
     assert results[1].name == "preset_2"
+    mock_get_path.assert_called_once_with(mock_session, 1)
+    mock_crud_get_all.assert_called_once_with("/dummy/presets.json")
+
+# ---------------------------------------------------------
+# Tests for get_all_presets_names
+# ---------------------------------------------------------
+
+@patch("backend.app.services.instruments_preset_service.instruments_preset_crud.get_all_instruments_presets")
+@patch("backend.app.services.instruments_preset_service._get_user_preset_file_path")
+def test_get_all_presets_names(mock_get_path, mock_crud_get_all, mock_session, sample_preset):
+    # Arrange
+    mock_get_path.return_value = "/dummy/presets.json"
+    mock_crud_get_all.return_value = [sample_preset, InstrumentsPreset(name="preset_2", instruments={})]
+
+    # Act
+    results = get_all_presets_names(mock_session, 1)
+
+    # Assert
+    assert len(results) == 2
+    assert results[0] == "test_preset"
+    assert results[1] == "preset_2"
     mock_get_path.assert_called_once_with(mock_session, 1)
     mock_crud_get_all.assert_called_once_with("/dummy/presets.json")
 

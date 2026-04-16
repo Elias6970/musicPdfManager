@@ -31,6 +31,7 @@ class Endpoint(StrEnum):
 
     INSTRUMENT_PRESETS = "/presets/instruments"
     INSTRUMENT_PRESET_BY_NAME = "/presets/instruments/{preset_name}"
+    INSTRUMENT_PRESETS_NAMES = "/presets/instruments/names"
     PIECE_PRESETS = "/presets/pieces"
     PIECE_PRESET_BY_NAME = "/presets/pieces/{preset_name}"
     PIECE_PRESETS_NAMES = "/presets/pieces/names"

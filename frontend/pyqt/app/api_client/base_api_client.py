@@ -53,14 +53,14 @@ class BaseApiClient(QObject):
         payload = QByteArray()
         if data is not None:
             # Handle Pydantic models automatically
-            if hasattr(data, "model_dump"):
-                data_dict = data.model_dump()
-            elif hasattr(data, "dict"):
-                data_dict = data.dict()  # Pydantic v1 fallback
+            if hasattr(data, "model_dump_json"):
+                json_str = data.model_dump_json()
+            elif hasattr(data, "json"):
+                json_str = data.json()  # Pydantic v1 fallback
             else:
-                data_dict = data
-                
-            payload.append(json.dumps(data_dict).encode('utf-8'))
+                json_str = json.dumps(data)
+            
+            payload.append(json_str.encode('utf-8'))
             
         return self.manager.post(request, payload)
 
@@ -69,14 +69,14 @@ class BaseApiClient(QObject):
         request = self._create_request(url)
         payload = QByteArray()
         if data is not None:
-            if hasattr(data, "model_dump"):
-                data_dict = data.model_dump()
-            elif hasattr(data, "dict"):
-                data_dict = data.dict()
+            if hasattr(data, "model_dump_json"):
+                json_str = data.model_dump_json()
+            elif hasattr(data, "json"):
+                json_str = data.json()
             else:
-                data_dict = data
-                
-            payload.append(json.dumps(data_dict).encode('utf-8'))
+                json_str = json.dumps(data)
+            
+            payload.append(json_str.encode('utf-8'))
             
         return self.manager.put(request, payload)
 

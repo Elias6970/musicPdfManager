@@ -110,3 +110,17 @@ class PreviewerController(QObject):
         if self.current_page > 0:
             self.current_page -= 1
             self._fetch_and_display_page(self.current_page)
+    
+    def clear(self, cache:bool=False):
+        """
+        Clear the previewer state. If cache is True, also clear the images in memory cache.
+        """
+        self.current_archive_id = None
+        self.current_piece_std_name = None
+        self.current_file = None
+        self.current_page = 0
+        self.total_pages = 0
+        self.view.clear()
+        
+        if cache:
+            self._cache.clear()

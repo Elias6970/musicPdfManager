@@ -53,3 +53,13 @@ class PresetPrintJob(BaseModel):
     config: PresetPrintJobConfig
     solved_fails: dict[str, dict[str, str]] = {}
 
+class PresetPrintJobPublic(BaseModel):
+    """
+    Public version of PresetPrintJob that excludes user_id.
+    This can be used for sharing the job with the client.
+    """
+    preset_name: str
+    archive_id: int
+    pieces: list[PrinteablePiece]
+    config: PresetPrintJobConfig
+    solved_fails: dict[str, dict[str, str]] = {}

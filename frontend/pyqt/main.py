@@ -1,18 +1,20 @@
 import sys
 from PyQt6.QtWidgets import QApplication
-from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
+from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
+from frontend.pyqt.app.selectors.multiple_selection_view import MultipleSelectionView
 from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
+from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
 
 def main():
     app = QApplication(sys.argv)
     
-    view = IndividualSelectionView()
-    controller = IndividualSelectionController(view)
+    #view = MultipleSelectionView()
+    #controller = MultipleSelectionController(view)
+    #view = IndividualSelectionView()
+    #controller = IndividualSelectionController(view)
+
     
-    # Simulate some initial data for testing
-    controller.refresh()
-    
-    view.show()
+    #view.show()
 
     sys.exit(app.exec())
     
