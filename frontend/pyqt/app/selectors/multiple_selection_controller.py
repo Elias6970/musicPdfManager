@@ -160,6 +160,9 @@ class MultipleSelectionController(QObject):
         Set the selected preset to add to the PDF.
         """
         self.selected_preset = preset_name
+        
+        if self.selected_piece:
+            self.view.btn_add_piece.setEnabled(True)
 
     
     def instrument_changed(self,instrument:str):

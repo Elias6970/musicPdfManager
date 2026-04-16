@@ -27,7 +27,10 @@ class TypeOfExportView(QtWidgets.QDialog):
         self.ignore_preset_copies:bool = False
         self.add_piece_numbers:bool = False
         self.add_cover_page:bool = False
+        self.cover_title:str = ""
         self.add_index:bool = False
+        self.index_title:str = ""
+        self.index_subtitle:str = ""
         self.add_blank_page_after_index:bool = False
                 
         # Group strategy options
@@ -63,13 +66,35 @@ class TypeOfExportView(QtWidgets.QDialog):
         self._ignore_preset_copies_cb.setToolTip(self.tr("Ignore the number of copies for each instrument in the preset and\ngenerate only one copy per instrument in the preset."))
 
         self._add_cover_page_cb = QtWidgets.QCheckBox()
+        self._add_cover_page_cb.stateChanged.connect(self.manage_cover_page_enableability)
         self._add_cover_page_cb.setText(self.tr("Add cover page to each pdf."))
         self._add_cover_page_cb.setToolTip(self.tr("Add a cover page to each pdf with the name of the instrument \nand an optional text for the name"))
         
+        self._cover_title_le = QtWidgets.QLineEdit()
+        self._cover_title_le.setPlaceholderText(self.tr("Cover title"))
+        self._cover_title_le.setEnabled(False)
+        self._cover_title_le.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self._cover_title_le.setCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self._cover_title_le.setStyleSheet("margin-left: 25px;")
+
         self._add_index_cb = QtWidgets.QCheckBox()
-        self._add_index_cb.stateChanged.connect(self.manage_blank_page_after_index_enableability)
+        self._add_index_cb.stateChanged.connect(self.manage_index_enableability)
         self._add_index_cb.setText(self.tr("Add index to each pdf."))
         self._add_index_cb.setToolTip(self.tr("Add an index page at the beginning of each pdf with the list of pieces included."))
+
+        self._index_title_le = QtWidgets.QLineEdit()
+        self._index_title_le.setPlaceholderText(self.tr("Index title"))
+        self._index_title_le.setEnabled(False)
+        self._index_title_le.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self._index_title_le.setCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self._index_title_le.setStyleSheet("margin-left: 25px;")
+
+        self._index_subtitle_le = QtWidgets.QLineEdit()
+        self._index_subtitle_le.setPlaceholderText(self.tr("Index subtitle"))
+        self._index_subtitle_le.setEnabled(False)
+        self._index_subtitle_le.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents, True)
+        self._index_subtitle_le.setCursor(QtCore.Qt.CursorShape.ArrowCursor)
+        self._index_subtitle_le.setStyleSheet("margin-left: 25px;")
 
         self._add_blank_page_after_index_cb = QtWidgets.QCheckBox()
         self._add_blank_page_after_index_cb.setText(self.tr("Add blank page after index."))
@@ -106,7 +131,10 @@ class TypeOfExportView(QtWidgets.QDialog):
         _right_zone_layout.addWidget(self._sort_alphabetically_cb)
         _right_zone_layout.addWidget(self._ignore_preset_copies_cb)
         _right_zone_layout.addWidget(self._add_cover_page_cb)
+        _right_zone_layout.addWidget(self._cover_title_le)
         _right_zone_layout.addWidget(self._add_index_cb)
+        _right_zone_layout.addWidget(self._index_title_le)
+        _right_zone_layout.addWidget(self._index_subtitle_le)
         _right_zone_layout.addWidget(self._add_blank_page_after_index_cb)
         _right_zone_layout.addWidget(self._add_piece_numbers_cb)
 
@@ -120,12 +148,26 @@ class TypeOfExportView(QtWidgets.QDialog):
         self.setLayout(_container_layout)
 
 
-    def manage_blank_page_after_index_enableability(self):
-        if self._add_index_cb.isChecked():
-            self._add_blank_page_after_index_cb.setEnabled(True)
-        else:
-            self._add_blank_page_after_index_cb.setEnabled(False)
+    def manage_cover_page_enableability(self):
+        is_checked = self._add_cover_page_cb.isChecked()
+        self._cover_title_le.setEnabled(is_checked)
+        self._cover_title_le.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents, not is_checked)
+        self._cover_title_le.setCursor(QtCore.Qt.CursorShape.IBeamCursor if is_checked else QtCore.Qt.CursorShape.ArrowCursor)
+
+    def manage_index_enableability(self):
+        is_checked = self._add_index_cb.isChecked()
+        self._add_blank_page_after_index_cb.setEnabled(is_checked)
+        if not is_checked:
             self._add_blank_page_after_index_cb.setChecked(False)
+        self._index_title_le.setEnabled(is_checked)
+        self._index_subtitle_le.setEnabled(is_checked)
+        
+        self._index_title_le.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents, not is_checked)
+        self._index_subtitle_le.setAttribute(QtCore.Qt.WidgetAttribute.WA_TransparentForMouseEvents, not is_checked)
+        
+        cursor = QtCore.Qt.CursorShape.IBeamCursor if is_checked else QtCore.Qt.CursorShape.ArrowCursor
+        self._index_title_le.setCursor(cursor)
+        self._index_subtitle_le.setCursor(cursor)
     
     #Save the options in variables
     def confirm(self):
@@ -152,7 +194,10 @@ class TypeOfExportView(QtWidgets.QDialog):
         self.ignore_preset_copies = self._ignore_preset_copies_cb.isChecked()
         self.sort_alphabetically = self._sort_alphabetically_cb.isChecked()
         self.add_cover_page = self._add_cover_page_cb.isChecked()
+        self.cover_title = self._cover_title_le.text()
         self.add_index = self._add_index_cb.isChecked()
+        self.index_title = self._index_title_le.text()
+        self.index_subtitle = self._index_subtitle_le.text()
         self.add_blank_page_after_index = self._add_blank_page_after_index_cb.isChecked()
         self.add_piece_numbers = self._add_piece_numbers_cb.isChecked()
 
