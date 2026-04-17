@@ -21,7 +21,10 @@ def _create_mock_job_and_preset():
     
     job = MagicMock()
     job.archive_id = 1
-    job.pieces = [MagicMock(std_name="01-TEST")]
+    piece = MagicMock()
+    piece.std_name = "01-TEST"
+    piece.copies = 1
+    job.pieces = [piece]
     job.solved_fails = {}
     job.config = MagicMock()
     job.config.group_by_instrument = True
@@ -98,6 +101,7 @@ def test_preprocess_by_piece(base_mocks):
 
 def test_preprocess_ignore_copies(base_mocks):
     session, job, preset = _create_mock_job_and_preset()
+    job.pieces[0].copies = 2
     job.config.ignore_preset_copies = True
     preset.instruments["Violin I"].copies = 5
     base_mocks.return_value = ["Violin I", "Cello"]
@@ -105,4 +109,18 @@ def test_preprocess_ignore_copies(base_mocks):
     solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     
     assert len(unresolved) == 0
-    assert solved.solution["Violin I"]["01-TEST"].copies == 1
+    # Even if instrument copies are ignored (set to 1), piece copies are still applied
+    assert solved.solution["Violin I"]["01-TEST"].copies == 2
+
+def test_preprocess_applies_piece_copies(base_mocks):
+    session, job, preset = _create_mock_job_and_preset()
+    job.pieces[0].copies = 3
+    preset.instruments["Violin I"].copies = 4
+    base_mocks.return_value = ["Violin I"]
+    
+    solved, unresolved = _preprocess_preset_print_job(session, job, preset)
+    
+    assert len(unresolved) == 0
+    assert "Violin I" in solved.solution
+    # 3 copies of piece * 4 copies of instrument = 12 copies total
+    assert solved.solution["Violin I"]["01-TEST"].copies == 12
