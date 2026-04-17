@@ -2,6 +2,7 @@ import json
 import pytest
 
 from backend.app.models.presets.pieces_preset import PiecesPreset
+from backend.app.models.printers.elements.printeable_piece import PrinteablePiece
 from backend.app.crud.pieces_preset_crud import (
     save_pieces_preset,
     get_pieces_preset,
@@ -17,7 +18,7 @@ def sample_preset() -> PiecesPreset:
         name="Concert Set",
         instruments_preset_name="Standard Orch",
         user_id=1,
-        pieces=["pieceA", "pieceB"]
+        pieces=[PrinteablePiece(std_name="pieceA", copies=1), PrinteablePiece(std_name="pieceB", copies=1)]
     )
 
 
@@ -27,7 +28,7 @@ def sample_preset_2() -> PiecesPreset:
         name="Rehearsal Set",
         instruments_preset_name="Brass Only",
         user_id=1,
-        pieces=["pieceC"]
+        pieces=[PrinteablePiece(std_name="pieceC", copies=1)]
     )
 
 
@@ -39,7 +40,8 @@ def test_save_pieces_preset_creates_file(tmp_path, sample_preset):
     
     data = json.loads(filepath.read_text(encoding="utf-8"))
     assert "Concert Set" in data
-    assert data["Concert Set"]["pieces"] == ["pieceA", "pieceB"]
+    assert data["Concert Set"]["pieces"][0]["std_name"] == "pieceA"
+    assert data["Concert Set"]["pieces"][1]["std_name"] == "pieceB"
     assert data["Concert Set"]["user_id"] == 1
 
 
