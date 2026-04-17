@@ -1,8 +1,9 @@
 from uuid import uuid4
-
-from PyQt6.QtCore import QObject, QByteArray
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import QObject, QByteArray, pyqtSignal
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
+from frontend.pyqt.app.api_client.pieces_presets_api_client import PiecesPresetsApiClient
 from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
 from frontend.pyqt.app.api_client.instruments_presets_api_client import InstrumentsPresetsApiClient
 from frontend.pyqt.app.api_client.printers_api_client import PrintersApiClient
@@ -13,7 +14,7 @@ from frontend.pyqt.app.pop_up_windows.resolve_unmached_presets.resolve_unmatched
 from frontend.pyqt.app.pop_up_windows.type_of_export.type_of_export_controller import TypeOfExportController
 from frontend.pyqt.app.pop_up_windows.type_of_export.type_of_export_view import TypeOfExportView
 from frontend.pyqt.app.selectors.multiple_selection_view import MultipleSelectionView
-from frontend.pyqt.app.models.generated_models import PresetPrintJobPublic, PresetPrintJobConfig, PiecePublic, PrinteablePiece
+from frontend.pyqt.app.models.generated_models import PiecesPresetCreate, PresetPrintJobPublic, PresetPrintJobConfig, PiecePublic, PrinteablePiece, PiecesPreset
 from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
 import zipfile, io, os
 
@@ -26,6 +27,8 @@ class PrinteablePieceWithId(PrinteablePiece):
     id:str
 
 class MultipleSelectionController(QObject):
+    update_pieces_presets_menu_list = pyqtSignal(list)
+
     @property
     def FOLDER_EXPORTING_NAME(self) -> str:
         from datetime import datetime
@@ -41,6 +44,7 @@ class MultipleSelectionController(QObject):
         self.pieces_api = PiecesApiClient(base_client)
         self.preview_api = PreviewApiClient(base_client)
         self.instruments_presets_api = InstrumentsPresetsApiClient(base_client)
+        self.pieces_presets_api = PiecesPresetsApiClient(base_client)
         self.printing_api = PrintersApiClient(base_client)
         
         self.preview_controller = PreviewerController(self.view.preview, self.preview_api)
@@ -56,8 +60,9 @@ class MultipleSelectionController(QObject):
         self.added_pieces: list[PrinteablePieceWithId] = [] #List of pieces added to the PDF with their id to be able to delete them from the list.
         self.pieces: list[PiecePublic] = [] #List of pieces public objects.
         self.selected_piece: str | None = None
-        self.presets: list[str] = [] #List of preset names.
-        self.selected_preset: str | None = None
+        self.instruments_preset: list[str] = [] #List of preset names.
+        self.pieces_presets: list[PiecesPreset] = [] #List of pieces presets objects.
+        self.selected_instruments_preset: str | None = None
         self.solved_fails: dict[str, dict[str, str]] = {}
         self.last_config_export: PresetPrintJobConfig | None = None
 
@@ -68,9 +73,15 @@ class MultipleSelectionController(QObject):
         self.pieces_api.piece_scores_loaded.connect(self._on_scores_fetched)
         self.pieces_api.piece_scores_error.connect(lambda err: print(f"Error fetching scores: {err}")) #TODO: Show a window
 
-        self.instruments_presets_api.presets_names_loaded.connect(self._on_presets_names_loaded)
+        self.instruments_presets_api.presets_names_loaded.connect(self._on_instruments_presets_names_loaded)
         self.instruments_presets_api.presets_names_error.connect(lambda err: print(f"Error fetching presets: {err}"))
         
+        self.pieces_presets_api.presets_loaded.connect(self._on_pieces_presets_fetched)
+        self.pieces_presets_api.presets_error.connect(lambda err: print(f"Error fetching pieces presets: {err}"))
+        self.pieces_presets_api.preset_created.connect(self._on_pieces_preset_saved_success)
+        self.pieces_presets_api.preset_create_error.connect(lambda err: print(f"Error creating preset: {err}"))
+        self.pieces_presets_api.presets_names_loaded.connect(self.update_pieces_presets_menu_list.emit) #To update the pieces presets names in the menu when a new preset is created
+
         self.printing_api.preset_print_success.connect(self._on_exportation_success)
         self.printing_api.preset_print_unresolved.connect(self._on_exportation_unresolved)
 
@@ -80,8 +91,9 @@ class MultipleSelectionController(QObject):
         self.view.instrument_changed.connect(self.instrument_changed)
         self.view.add_piece_signal.connect(self.add_piece)
         self.view.generate_pdf_signal.connect(self.launch_exporting_configuration_window)
-        self.view.preset_changed.connect(self.preset_changed)
+        self.view.instruments_preset_changed.connect(self.instruments_preset_changed)
         self.view.refresh_requested.connect(self.refresh)
+        self.view.save_pieces_preset_signal.connect(self._save_pieces_preset)
 
 
         #Set presets in combo box
@@ -89,7 +101,7 @@ class MultipleSelectionController(QObject):
 
     def export(self, config: PresetPrintJobConfig):
         """Export the PDF with the selected pieces, preset and configuration."""
-        if not self.selected_preset:
+        if not self.selected_instruments_preset:
             ShowError.show_tooltip_error(self.tr("You need to select a preset"),5000,self.view.presets_combo_box)
             return
         
@@ -98,7 +110,7 @@ class MultipleSelectionController(QObject):
             return
 
         preset_print_job = PresetPrintJobPublic(
-            preset_name=self.selected_preset,
+            preset_name=self.selected_instruments_preset,
             archive_id=self.session.get_archive_id(),
             pieces=[PrinteablePiece(std_name=piece.std_name, copies=piece.copies) for piece in self.added_pieces],
             config=config,
@@ -107,16 +119,8 @@ class MultipleSelectionController(QObject):
         self.last_config_export = config
 
         self.printing_api.generate_preset_print(preset_print_job)
-
-    def get_presets(self):
-        """
-        Trigger an API request to get the array of preset names.
-        """
-        self.instruments_presets_api.get_preset_names()
-
-    def launch_exporting_configuration_window(self):
-        self.type_of_export_controller.show()
-
+    
+    
     def add_piece(self, piece_name:str, preset_name:str, copies:int):
         """
         Add a piece to the list of pieces to be printed, with the preset and copies information.
@@ -146,6 +150,28 @@ class MultipleSelectionController(QObject):
             self.view.presets_combo_box.setEnabled(True)
 
 
+    def get_instruments_presets_names(self):
+        """
+        Trigger an API request to get the array of preset instruments names.
+        """
+        self.instruments_presets_api.get_preset_names()
+
+
+    def get_pieces_presets_names(self):
+        """
+        Trigger an API request to get the array of pieces presets names.
+        The result is handled via signal _on_pieces_presets_names_fetched.
+        """
+        self.pieces_presets_api.get_preset_names()
+
+
+    def get_pieces_presets(self):
+        """
+        Trigger an API request to get the array of pieces presets.
+        """
+        self.pieces_presets_api.get_all_presets()
+
+
     def get_pieces(self):
         """
         Trigger an API request to get the pieces for the current archive.
@@ -155,11 +181,15 @@ class MultipleSelectionController(QObject):
         self.pieces_api.get_pieces(archive_id=archive_id)
 
 
-    def preset_changed(self, preset_name:str):
+    def launch_exporting_configuration_window(self):
+        self.type_of_export_controller.show()
+
+
+    def instruments_preset_changed(self, preset_name:str):
         """
         Set the selected preset to add to the PDF.
         """
-        self.selected_preset = preset_name
+        self.selected_instruments_preset = preset_name
         
         if self.selected_piece:
             self.view.btn_add_piece.setEnabled(True)
@@ -222,16 +252,27 @@ class MultipleSelectionController(QObject):
             self.view.disable_instruments_combo_box_no_scores()
     
 
-    def _on_presets_names_loaded(self, presets: list[str]):
+    def _on_instruments_presets_names_loaded(self, presets: list[str]):
         """
         Slot connected to presets_names_loaded emitted by instruments_presets_api.
         Updates the combo box with the presets names or disables it if empty.
         """
-        self.presets = presets
+        self.instruments_preset = presets
         if presets:
             self.view.set_combo_box_presets(presets)
         else:    
             self.view.disable_presets_combo_box_no_presets()
+
+    def _on_pieces_presets_fetched(self, presets: list[dict]):
+        """
+        Slot connected to presets_loaded emitted by pieces_presets_api.
+        It receives the list of pieces and save them in the controller.
+        """
+        try:
+            self.pieces_presets = [PiecesPreset(**preset) for preset in presets]
+        except Exception as e:
+            print(f"Error parsing pieces presets: {e}")
+            self.pieces_presets = []
 
     def _on_exportation_success(self, data:QByteArray):
         """
@@ -257,7 +298,7 @@ class MultipleSelectionController(QObject):
             with open(pdf_path, "wb") as f:
                 f.write(byte_data)
 
-        self.view.show_pdf_saved_message(self.tr(f"Files saved to {self.save_path}"))
+        self.view.show_message(self.tr("Export successful!"), self.tr(f"Files saved to {self.save_path}"))
 
     def _on_exportation_unresolved(self, unresolved: list[dict]):
         """
@@ -293,6 +334,12 @@ class MultipleSelectionController(QObject):
         if self.last_config_export is not None:
             self.export(self.last_config_export) #In theory last_config_export is not None because the user can't see the window to resolve unmatched presets if they haven't tried to export before.
 
+    def _on_pieces_preset_saved_success(self, preset: dict):
+        """
+        Slot connected to preset_created emitted by pieces_presets_api.
+        It receives the saved preset and updates the view.
+        """
+        self.view.show_message(self.tr("Preset saved successfully!"), self.tr(f"Preset saved: {preset['name']}"))
 
     def refresh(self):
         """
@@ -301,12 +348,52 @@ class MultipleSelectionController(QObject):
         self.added_pieces = []
         self.selected_piece = None
         self.selected_instrument = None
-        self.selected_preset = None
-        self.presets = []
+        self.selected_instruments_preset = None
+        self.instruments_preset = []
         self.solved_fails = {}
         
         self.preview_controller.clear()
         self.view.refresh()
 
         self.get_pieces()
-        self.get_presets()
+        self.get_instruments_presets_names()
+        self.get_pieces_presets()
+
+
+    def save_pieces_preset(self):
+        """
+        Trigger the saving of a pieces preset with the current added pieces.
+        """
+        self.view.show_get_piece_preset_name()
+
+    def _save_pieces_preset(self, pieces_preset_name:str):
+        """
+        Trigger an API request to save a pieces preset with the current added pieces and the given name.
+        """
+        if not pieces_preset_name:
+            QtWidgets.QMessageBox.warning(self.view, self.tr("Error"), self.tr("Preset name cannot be empty"))
+            return
+        
+        if len(self.added_pieces) == 0:
+            QtWidgets.QMessageBox.warning(self.view, self.tr("Error"), self.tr("You need to add at least one piece to save a preset"))
+            return
+
+        pieces=[PrinteablePiece(std_name=piece.std_name, copies=piece.copies) for piece in self.added_pieces]
+        preset = PiecesPresetCreate(name = pieces_preset_name, instruments_preset_name=self.selected_instruments_preset, pieces=pieces)
+        self.pieces_presets_api.create_preset(preset)
+    
+    def load_pieces_preset(self, preset_name:str):
+        self.refresh() #To clear the current state before loading the preset
+
+        preset = next((preset for preset in self.pieces_presets if preset.name == preset_name), None)
+        if not preset:
+            QtWidgets.QMessageBox.warning(self.view, self.tr("Error"), self.tr("Preset not found"))
+            return
+        
+        self.selected_instruments_preset = preset.instruments_preset_name
+        self.view.set_instrument_preset_in_combo_box(preset.instruments_preset_name)
+        for piece in preset.pieces:
+            self.add_piece(piece.std_name, preset.instruments_preset_name, piece.copies)
+
+
+        

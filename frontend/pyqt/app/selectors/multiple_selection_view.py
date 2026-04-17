@@ -17,8 +17,8 @@ class MultipleSelectionView(QtWidgets.QWidget):
     generate_pdf_signal = QtCore.pyqtSignal()
     refresh_requested = QtCore.pyqtSignal()
     only_digitalized_changed = QtCore.pyqtSignal(bool)
-    preset_changed = QtCore.pyqtSignal(str)
-
+    instruments_preset_changed = QtCore.pyqtSignal(str)
+    save_pieces_preset_signal = QtCore.pyqtSignal(str)
     def __init__(self):
         super().__init__()
         
@@ -146,7 +146,7 @@ class MultipleSelectionView(QtWidgets.QWidget):
         self.presets_combo_box.setToolTip(self.tr("Select the preset"))
         self.presets_combo_box.setPlaceholderText(" ")
         self.presets_combo_box.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
-        self.presets_combo_box.currentTextChanged.connect(self.preset_changed.emit)
+        self.presets_combo_box.currentTextChanged.connect(self.instruments_preset_changed.emit)
 
         self.hbox_presets = QtWidgets.QHBoxLayout()
         self.hbox_presets.addWidget(presets_lbl)
@@ -242,7 +242,20 @@ class MultipleSelectionView(QtWidgets.QWidget):
         if self.presets_combo_box.currentIndex() != -1:
             self.btn_add_piece.setEnabled(True)
 
-    
+    def set_instrument_preset_in_combo_box(self, preset_name:str):
+        """
+        Set the instrument preset in the combo box and enable it
+        """
+        combobox_id = self.presets_combo_box.findText(preset_name)
+        if combobox_id != -1:
+            self.presets_combo_box.setCurrentIndex(combobox_id)
+            self.presets_combo_box.setEnabled(True)
+        else:
+            ShowError.show_tooltip_error(self.tr(f"Preset {preset_name} not found in the list"),5000,self.presets_combo_box)
+            self.presets_combo_box.setCurrentIndex(-1)
+            self.presets_combo_box.setEnabled(False)
+
+
     def disable_instruments_combo_box_no_scores(self):
         """
         Disable instrumets combo box while no scores
@@ -295,9 +308,9 @@ class MultipleSelectionView(QtWidgets.QWidget):
         self.num_copies.setCurrentIndex(0)
         #The preview is cleaned in the preview controller
 
-    def show_pdf_saved_message(self,msg:str):
+    def show_message(self, title:str, msg:str):
         msg_box = QtWidgets.QMessageBox(self)
-        msg_box.setWindowTitle(self.tr("Export successful!"))
+        msg_box.setWindowTitle(title)
         msg_box.setText(msg)
         msg_box.setStandardButtons(QtWidgets.QMessageBox.StandardButton.Ok)
         msg_box.exec()
@@ -306,79 +319,14 @@ class MultipleSelectionView(QtWidgets.QWidget):
     def update_search_bar_autocompleter(self, pieces:list[str]):
         self.piece_search_bar.update_autocompleter_scores(pieces)
     
+
+    def show_get_piece_preset_name(self):
+        """
+        Show a dialog to get the name of the pieces preset to save, and trigger the save signal.
+        If the user cancels the dialog nothing happens
+        """
+        preset_name, ok =QtWidgets.QInputDialog.getText(self, self.tr("Save pieces preset"), self.tr("Preset name:"))
+        if ok and preset_name:
+            self.save_pieces_preset_signal.emit(preset_name)
+    
 ###########################OLDDDDDDDDDDDDDD@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@J
-    
-
-    def save_pieces_preset(self):
-        """Save the pieces preset with the selected preset and all the pieces with their presets added"""
-
-        if self.printer.items:
-            #Ask for the name of the preset
-            preset_name, ok = QtWidgets.QInputDialog.getText(self, self.tr("Save pieces preset"), self.tr("Preset name:"))
-            if ok and preset_name:
-                pieces_to_add:list[tuple[str,str,str]] = []
-                for i in self.printer.items:
-                    pieces_to_add.append((i.dir.name, i.preset.name, str(i.copies)))
-
-                was_added = self.piece_preset_manager.add_preset_by_elements(preset_name, i.preset.name, pieces_to_add)
-                
-                if not was_added:
-                    Error_window.print_error(message=self.tr("Preset with this name already exists"))
-                else:
-                    self.piece_preset_manager.dump() #Save the presets to the file
-
-    
-    def load_pieces_preset(self, preset_name:str):
-        """Load a pieces preset by the name in the mulple selection window"""
-        self.refresh()
-        dir_error_msg:str = self.tr("The pieces are not found:\n")
-        dir_error:bool = False
-        preset_error_msg:str = self.tr("The instrument presets are not found:\n")
-        preset_error:bool = False
-
-        if self.piece_preset_manager.exist(preset_name):
-            piece_preset = self.piece_preset_manager.get_preset(preset_name)
-            if isinstance(piece_preset, PiecesPreset):
-                #Set the instrument preset in the combo box
-                combobox_id = self.presets_combo_box.findText(piece_preset.preset_name)
-                if combobox_id != -1:
-                    self.presets_combo_box.setCurrentIndex(combobox_id)
-                else:
-                    ShowError.show_tooltip_error(self.tr(f"Preset {piece_preset.preset_name} not found in the list"),5000,self.presets_combo_box)
-                    self.presets_combo_box.setCurrentIndex(-1)
-                
-                from frontend_pyqt.pop_up_windows.dropdown_window import DropdownWindow
-
-                instrument_preset_name = ""
-                #Set the elements in the printer (piece + instrument preset)
-                for i in piece_preset.pieces:
-                    dir = Validate.check_if_piece_in_list(i[0],self.archive.pieces.get_parsed_names())
-                    if not isinstance(dir, Dir_Error):
-                        
-                        #Ask for the instrument preset for the import
-                        if instrument_preset_name == "":
-                            window = DropdownWindow(self.preset_manager.get_names(),i[1],self)
-                            instrument_preset_name = window.selected_option
-                            instrument_preset = self.preset_manager.get_preset(instrument_preset_name)
-                        
-                        if instrument_preset != None:
-                            self.add_score(dir, instrument_preset, int(i[2]))
-                        else:
-                            preset_error_msg += f"{i[1]}\n"
-                            preset_error = True
-                    else:
-                        dir_error_msg += f"{i[0]}\n"
-                        dir_error = True
-        
-        
-        #Show the error message if there are errors
-        error:str = ""
-        if dir_error:
-            error += dir_error_msg
-            if preset_error:
-                error += "\n" + preset_error_msg
-        else:
-            if preset_error:
-                error += preset_error_msg
-        if error != "":
-            Error_window.print_error(message="\n"+error)

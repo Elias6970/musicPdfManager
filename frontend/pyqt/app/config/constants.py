@@ -1,5 +1,7 @@
 import sys,os
 
+CLIENT_VERSION = "0.1.0"
+
 #The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
 #Every time you execute the application a temp folder is created
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
