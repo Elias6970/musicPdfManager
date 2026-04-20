@@ -11,7 +11,7 @@ from backend.app.crud.user_config_crud import (
     update_user_config,
 )
 from backend.app.models.user import User
-from backend.app.models.user_config import UserConfigCreate
+from backend.app.models.user_config import UserConfig
 from backend.app.models import archive as _archive_model  # noqa: F401
 from backend.app.models import author as _author_model  # noqa: F401
 from backend.app.models import piece as _piece_model  # noqa: F401
@@ -53,7 +53,7 @@ def test_create_and_get_user_config(session: Session):
 
     created = create_user_config(
         session,
-        UserConfigCreate(
+        UserConfig(
             language="en",
             presets_instruments_path="data/presets/instruments",
             presets_pieces_path="data/presets/pieces",
@@ -77,7 +77,7 @@ def test_update_user_config_persists_changes(session: Session):
     user = _create_user(session, email="update@example.com")
     created = create_user_config(
         session,
-        UserConfigCreate(
+        UserConfig(
             language="es",
             presets_instruments_path="old_inst",
             presets_pieces_path="old_pieces",
@@ -86,17 +86,12 @@ def test_update_user_config_persists_changes(session: Session):
         ),
     )
 
-    updated = update_user_config(
-        session,
-        created.id,
-        UserConfigCreate(
-            language="en",
-            presets_instruments_path="new_inst",
-            presets_pieces_path="new_pieces",
-            dossier_cover_path="new_cover",
-            user_id=user.id,
-        ),
-    )
+    created.language = "en"
+    created.presets_instruments_path = "new_inst"
+    created.presets_pieces_path = "new_pieces"
+    created.dossier_cover_path = "new_cover"
+
+    updated = update_user_config(session, created)
 
     assert updated is not None
     assert updated.language == "en"
@@ -113,7 +108,7 @@ def test_delete_user_config_removes_row(session: Session):
     user = _create_user(session, email="delete@example.com")
     created = create_user_config(
         session,
-        UserConfigCreate(
+        UserConfig(
             language="en",
             presets_instruments_path="inst",
             presets_pieces_path="pieces",
@@ -133,7 +128,7 @@ def test_create_user_config_requires_existing_user(session: Session):
     with pytest.raises(IntegrityError):
         create_user_config(
             session,
-            UserConfigCreate(
+            UserConfig(
                 language="en",
                 presets_instruments_path="inst",
                 presets_pieces_path="pieces",
