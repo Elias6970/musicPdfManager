@@ -16,7 +16,7 @@ class MainController(QtCore.QObject):
 
         self.individual_selection_controller = IndividualSelectionController(self.view.individual_selection_window)
         self.multiple_selection_controller = MultipleSelectionController(self.view.multiple_selection_window)
-        self.session.set_language("en-US")
+
         self.change_language(self.session.get_language())
 
 
@@ -43,9 +43,9 @@ class MainController(QtCore.QObject):
 
         #TODO: Change this to a function that return the path of the translation file, and also check if it exists, if not, show an error message and exit the program
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            path = os.path.join(sys._MEIPASS,"frontend_pyqt","translate",language,"compiled",language+".qm") #type:ignore
+            path = os.path.join(sys._MEIPASS,"frontend","pyqt","translate",language,"compiled",language+".qm") #type:ignore
         else:
-            path = os.path.join("frontend_pyqt","translate",language,"compiled",language+".qm")
+            path = os.path.join("frontend","pyqt","translate",language,"compiled",language+".qm")
 
         translator.load(path)
 
