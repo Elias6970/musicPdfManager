@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from sqlmodel import Session
 
 from backend.app.crud.user_config_crud import (
@@ -9,7 +9,7 @@ from backend.app.crud.user_config_crud import (
     update_user_config,
     delete_user_config,
 )
-from backend.app.models.user_config import UserConfig, UserConfigCreate
+from backend.app.models.user_config import UserConfig
 
 
 @pytest.fixture
@@ -18,14 +18,7 @@ def mock_session():
 
 
 def test_create_user_config_success(mock_session):
-    user_config_in = UserConfigCreate(
-        language="en",
-        presets_instruments_path="data/presets/instruments",
-        presets_pieces_path="data/presets/pieces",
-        dossier_cover_path="data/covers/default.pdf",
-        user_id=1,
-    )
-    created_obj = UserConfig(
+    user_config_in = UserConfig(
         id=10,
         language="en",
         presets_instruments_path="data/presets/instruments",
@@ -34,14 +27,12 @@ def test_create_user_config_success(mock_session):
         user_id=1,
     )
 
-    with patch("backend.app.crud.user_config_crud.UserConfig.model_validate", return_value=created_obj) as mock_validate:
-        result = create_user_config(mock_session, user_config_in)
+    result = create_user_config(mock_session, user_config_in)
 
-    assert result == created_obj
-    mock_validate.assert_called_once_with(user_config_in)
-    mock_session.add.assert_called_once_with(created_obj)
+    assert result == user_config_in
+    mock_session.add.assert_called_once_with(user_config_in)
     mock_session.commit.assert_called_once()
-    mock_session.refresh.assert_called_once_with(created_obj)
+    mock_session.refresh.assert_called_once_with(user_config_in)
 
 
 def test_get_user_config_success(mock_session):
@@ -94,17 +85,8 @@ def test_get_user_config_by_user_id_not_found(mock_session):
 
 
 def test_update_user_config_success(mock_session):
-    existing = UserConfig(
+    update_in = UserConfig(
         id=3,
-        language="es",
-        presets_instruments_path="old_inst",
-        presets_pieces_path="old_pieces",
-        dossier_cover_path="old_cover",
-        user_id=5,
-    )
-    mock_session.get.return_value = existing
-
-    update_in = UserConfigCreate(
         language="en",
         presets_instruments_path="new_inst",
         presets_pieces_path="new_pieces",
@@ -112,37 +94,12 @@ def test_update_user_config_success(mock_session):
         user_id=5,
     )
 
-    result = update_user_config(mock_session, 3, update_in)
+    result = update_user_config(mock_session, update_in)
 
-    assert result == existing
-    assert existing.language == "en"
-    assert existing.presets_instruments_path == "new_inst"
-    assert existing.presets_pieces_path == "new_pieces"
-    assert existing.dossier_cover_path == "new_cover"
-    assert existing.user_id == 5
-    mock_session.get.assert_called_once_with(UserConfig, 3)
-    mock_session.add.assert_called_once_with(existing)
+    assert result == update_in
+    mock_session.add.assert_called_once_with(update_in)
     mock_session.commit.assert_called_once()
-    mock_session.refresh.assert_called_once_with(existing)
-
-
-def test_update_user_config_not_found(mock_session):
-    mock_session.get.return_value = None
-    update_in = UserConfigCreate(
-        language="en",
-        presets_instruments_path="x",
-        presets_pieces_path="y",
-        dossier_cover_path="z",
-        user_id=1,
-    )
-
-    result = update_user_config(mock_session, 999, update_in)
-
-    assert result is None
-    mock_session.get.assert_called_once_with(UserConfig, 999)
-    mock_session.add.assert_not_called()
-    mock_session.commit.assert_not_called()
-    mock_session.refresh.assert_not_called()
+    mock_session.refresh.assert_called_once_with(update_in)
 
 
 def test_delete_user_config_success(mock_session):

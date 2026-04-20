@@ -1,7 +1,8 @@
 import os
 from uuid import uuid4
 from sqlmodel import Session, select
-from backend.app.crud import user_crud, user_config_crud
+from backend.app.crud import user_crud
+from backend.app.services.user_config_services import create_user_config, get_user_config_by_user_id
 from backend.app.models.role import Role
 from backend.app.models.user import UserCreate, User
 from backend.app.models.user_config import UserConfigCreate
@@ -32,13 +33,10 @@ def register_user(session: Session, user_create: UserCreate) -> User:
     
     # Create the user
     user = user_crud.create_user(session, user_create)
-    user_config_crud.create_user_config(
+    create_user_config(
         session,
         UserConfigCreate(
             language="en_US",
-            presets_instruments_path=f"{uuid4()}.json",
-            presets_pieces_path=f"{uuid4()}.json",
-            dossier_cover_path=f"{uuid4()}.json",
             user_id=user.id, #type: ignore
         ),
     )
@@ -57,7 +55,7 @@ def login_user(session: Session, email: str, password: str) -> Token:
 
 
 def get_user_presets_instruments_path(session: Session, user_id: int) -> str:
-    user_config = user_config_crud.get_user_config_by_user_id(session, user_id=user_id)
+    user_config = get_user_config_by_user_id(session, user_id=user_id)
     if not user_config:
         raise InvalidUserDataError("User config not found")
 
@@ -66,7 +64,7 @@ def get_user_presets_instruments_path(session: Session, user_id: int) -> str:
 
 
 def get_user_presets_pieces_path(session: Session, user_id: int) -> str:
-    user_config = user_config_crud.get_user_config_by_user_id(session, user_id=user_id)
+    user_config = get_user_config_by_user_id(session, user_id=user_id)
     if not user_config:
         raise InvalidUserDataError("User config not found")
 
@@ -75,7 +73,7 @@ def get_user_presets_pieces_path(session: Session, user_id: int) -> str:
 
 
 def get_user_dossier_cover_path(session: Session, user_id: int) -> str:
-    user_config = user_config_crud.get_user_config_by_user_id(session, user_id=user_id)
+    user_config = get_user_config_by_user_id(session, user_id=user_id)
     if not user_config:
         raise InvalidUserDataError("User config not found")
 

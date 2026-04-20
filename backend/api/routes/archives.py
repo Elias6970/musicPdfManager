@@ -7,6 +7,7 @@ from backend.app.models.archive import Archive, ArchiveCreate, ArchivePublic
 from backend.app.models.user import User
 from backend.app.models.user_archive_link import ArchiveRole
 from backend.app.crud import archive_crud
+from backend.app.services.archive_services import get_all_archives_for_user
 
 router = APIRouter(prefix="/archives", tags=["archives"])
 
@@ -30,6 +31,13 @@ def get_archive(
     if not archive:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Archive not found")
     return archive
+
+@router.get("/", response_model=list[ArchivePublic])
+def get_all_archives(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    return get_all_archives_for_user(session, current_user.id) #type: ignore
 
 @router.put("/{archive_id}", response_model=ArchivePublic)
 def update_archive(

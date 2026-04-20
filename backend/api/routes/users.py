@@ -4,9 +4,12 @@ from sqlmodel import Session
 
 from backend.api.dependencies.database import get_session
 from backend.api.dependencies.permissions import RequireRoleFastAPI,require_admin
+from backend.api.dependencies.auth import get_current_user
 from backend.app.models.user import User, UserCreate, UserPublic
+from backend.app.models.user_config import UserConfigPublic
 from backend.app.models.token import Token
 from backend.app.services.user_services import register_user, login_user
+from backend.app.services.user_config_services import get_user_config_by_user_id
 from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -30,3 +33,12 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = D
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
+@router.get("/config", response_model=UserConfigPublic)
+def get_user_config(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+    ) -> UserConfigPublic:
+    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
+    if not user_config:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
+    return UserConfigPublic.model_validate(user_config)

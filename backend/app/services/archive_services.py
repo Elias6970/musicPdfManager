@@ -212,3 +212,15 @@ def delete_piece_from_archive(
     
     # Delete from the database
     return delete_piece(session, piece_id)
+
+
+def get_all_archives_for_user(session: Session, user_id: int) -> List[Archive]:
+    """
+    Retrieve all archives that a user has access to, including those they own, edit, or view.
+    
+    Args:
+        session: The database session.
+        user_id: The ID of the user.
+    """
+    statement = select(Archive).join(UserArchiveLink).where(UserArchiveLink.user_id == user_id)
+    return list(session.exec(statement).all())

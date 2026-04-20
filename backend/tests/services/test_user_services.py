@@ -86,10 +86,8 @@ def test_login_user_wrong_password(mock_get_user, mock_verify, mock_session):
 
 @patch("backend.app.services.user_services.user_crud.get_user_by_email")
 @patch("backend.app.services.user_services.user_crud.create_user")
-@patch("backend.app.services.user_services.user_config_crud.create_user_config")
-@patch("backend.app.services.user_services.uuid4")
+@patch("backend.app.services.user_services.create_user_config")
 def test_register_user_success(
-    mock_uuid4,
     mock_create_user_config,
     mock_create_user,
     mock_get_user,
@@ -98,7 +96,6 @@ def test_register_user_success(
     # Arrange
     user_in = UserCreate(name="Test", email="new@example.com", password="password")
     mock_get_user.return_value = None  # user doesn't exist yet
-    mock_uuid4.side_effect = ["inst-uuid", "pieces-uuid", "cover-uuid"]
     
     mock_created_user = MagicMock()
     mock_created_user.id = 42
@@ -117,9 +114,6 @@ def test_register_user_success(
     assert create_args[0] == mock_session
     assert create_args[1] == UserConfigCreate(
         language="en_US",
-        presets_instruments_path="inst-uuid.json",
-        presets_pieces_path="pieces-uuid.json",
-        dossier_cover_path="cover-uuid.json",
         user_id=42,
     )
 
@@ -179,10 +173,9 @@ def test_register_user_default_role_not_found(mock_get_user, mock_session):
 
 @patch("backend.app.services.user_services.user_crud.get_user_by_email")
 @patch("backend.app.services.user_services.user_crud.create_user")
-@patch("backend.app.services.user_services.user_config_crud.create_user_config")
-@patch("backend.app.services.user_services.uuid4")
+@patch("backend.app.services.user_services.create_user_config")
 def test_register_user_default_role_assigned(
-    mock_uuid4, mock_create_user_config, mock_create_user, mock_get_user, mock_session
+    mock_create_user_config, mock_create_user, mock_get_user, mock_session
 ):
     # Arrange
     user_in = UserCreate(name="Test", email="test@example.com", password="password", role_id=None)
@@ -239,7 +232,7 @@ def test_get_user_paths_success(service_fn, base_attr, user_attr, mock_session):
     setattr(mock_settings, base_attr, base_path)
 
     with patch(
-        "backend.app.services.user_services.user_config_crud.get_user_config_by_user_id"
+        "backend.app.services.user_services.get_user_config_by_user_id"
     ) as mock_get_user_config, patch(
         "backend.app.services.user_services.get_server_settings"
     ) as mock_get_settings:
@@ -265,7 +258,7 @@ def test_get_user_paths_user_config_not_found_raises(service_fn, mock_session):
     user_id = 99
 
     with patch(
-        "backend.app.services.user_services.user_config_crud.get_user_config_by_user_id"
+        "backend.app.services.user_services.get_user_config_by_user_id"
     ) as mock_get_user_config:
         mock_get_user_config.return_value = None
 

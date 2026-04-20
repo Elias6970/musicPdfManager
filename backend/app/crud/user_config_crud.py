@@ -1,13 +1,12 @@
 from sqlmodel import Session, select
-from backend.app.models.user_config import UserConfig, UserConfigCreate
+from backend.app.models.user_config import UserConfig
 
 
-def create_user_config(session: Session, user_config_in: UserConfigCreate) -> UserConfig:
-    db_obj = UserConfig.model_validate(user_config_in)
-    session.add(db_obj)
+def create_user_config(session: Session, user_config_in: UserConfig) -> UserConfig:
+    session.add(user_config_in)
     session.commit()
-    session.refresh(db_obj)
-    return db_obj
+    session.refresh(user_config_in)
+    return user_config_in
 
 
 def get_user_config(session: Session, user_config_id: int) -> UserConfig | None:
@@ -19,17 +18,11 @@ def get_user_config_by_user_id(session: Session, user_id: int) -> UserConfig | N
     return session.exec(statement).first()
 
 
-def update_user_config(session: Session, user_config_id: int, user_config_in: UserConfigCreate) -> UserConfig | None:
-    db_obj = session.get(UserConfig, user_config_id)
-    if not db_obj:
-        return None
-    config_data = user_config_in.model_dump(exclude_unset=True)
-    for key, value in config_data.items():
-        setattr(db_obj, key, value)
-    session.add(db_obj)
+def update_user_config(session: Session, user_config_in: UserConfig) -> UserConfig:
+    session.add(user_config_in)
     session.commit()
-    session.refresh(db_obj)
-    return db_obj
+    session.refresh(user_config_in)
+    return user_config_in
 
 
 def delete_user_config(session: Session, user_config_id: int) -> bool:
@@ -39,3 +32,4 @@ def delete_user_config(session: Session, user_config_id: int) -> bool:
     session.delete(db_obj)
     session.commit()
     return True
+

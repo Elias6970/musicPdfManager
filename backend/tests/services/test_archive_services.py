@@ -14,6 +14,7 @@ from backend.app.error import FileCouldNotBeReadException, InsufficientPermissio
 
 from backend.app.services.archive_services import (
     check_archive_role,
+    get_all_archives_for_user,
     get_archive_path,
     get_all_piece_std_names,
     get_all_digitalized_piece_std_names,
@@ -222,3 +223,40 @@ def test_get_archive_path_no_valid_path(session: Session):
     with pytest.raises(ValueError, match=f"Archive with id {archive.id} does not have a valid path"):
         assert archive.id is not None
         get_archive_path(session, archive.id)
+
+
+def test_get_all_archives_for_user_success(session: Session):
+    # Setup some extra archives
+    archive2 = Archive(name="Second Archive", path="second")
+    archive3 = Archive(name="Third Archive", path="third")
+    session.add_all([archive2, archive3])
+    session.commit()
+    
+    # Link user 1 to archive2 as well
+    link = UserArchiveLink(user_id=1, archive_id=archive2.id, role=ArchiveRole.VIEWER)  #type: ignore
+    session.add(link)
+    session.commit()
+    
+    # Execute
+    archives = get_all_archives_for_user(session, 1)
+    
+    # Assert
+    assert len(archives) == 2
+    archive_ids = [a.id for a in archives]
+    assert 1 in archive_ids
+    assert archive2.id in archive_ids
+    assert archive3.id not in archive_ids
+
+
+def test_get_all_archives_for_user_empty(session: Session):
+    # Create a new user with no linked archives
+    role_user = session.get(Role, 1) # Assumes role 1 is 'user' from fixture
+    new_user = User(name="unlinked", email="unlinked@test.com", password_hash="pw", role=role_user)
+    session.add(new_user)
+    session.commit()
+    
+    # Execute
+    archives = get_all_archives_for_user(session, new_user.id) #type: ignore
+    
+    # Assert
+    assert len(archives) == 0
