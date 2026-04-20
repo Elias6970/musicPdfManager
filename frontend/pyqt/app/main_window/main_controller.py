@@ -21,7 +21,6 @@ class MainController(QtCore.QObject):
 
 
         #Load pieces_presets in the menu list
-        #self.view.update_pieces_presets_menu_list(self.multiple_selection_controller.get_pieces_presets_names()) #They presets are getted from the api when you create the object
         self.multiple_selection_controller.get_pieces_presets_names() #To update the pieces presets names in the menu when a new preset is created
 
         #Connect signals
@@ -57,7 +56,6 @@ class MainController(QtCore.QObject):
     def save_pieces_preset(self):
         """Saves the pieces preset with the given name"""
         self.multiple_selection_controller.save_pieces_preset()
-        #self.view.update_pieces_presets_menu_list(self.multiple_selection_controller.get_pieces_presets_names())
         self.multiple_selection_controller.get_pieces_presets_names() #To update the pieces presets names in the menu when a new preset is created
 
 

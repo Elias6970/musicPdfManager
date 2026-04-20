@@ -66,6 +66,9 @@ class MultipleSelectionController(QObject):
         self.solved_fails: dict[str, dict[str, str]] = {}
         self.last_config_export: PresetPrintJobConfig | None = None
 
+        self._preset_to_load: str | None = None
+        self._pending_preset_loads: set[str] = set()
+
         # Connect pieces api signals
         self.pieces_api.pieces_loaded.connect(self._on_pieces_fetched)
         self.pieces_api.pieces_error.connect(lambda err: print(f"Error fetching pieces: {err}")) #TODO: Show a window
@@ -222,8 +225,45 @@ class MultipleSelectionController(QObject):
             self.selected_piece = None    
             self.view.set_piece_lbl("")
             self.view.clean_instruments_combo_box()
+   
+    
+    def load_pieces_preset(self, preset_name:str):
+        self._preset_to_load = preset_name
+        self._pending_preset_loads = {"pieces", "instruments_presets", "pieces_presets"}
+        self.refresh() #To clear the current state and fetch resources
 
     
+    def _check_pending_preset_load(self, loaded_resource: str):
+        """
+        Check if the loaded resource is one of the pending preset loads, and if so, remove it from the pending list. 
+        If there are no more pending loads, apply the preset load logic.
+        """
+        if not self._preset_to_load or loaded_resource not in self._pending_preset_loads:
+            return
+        
+        self._pending_preset_loads.discard(loaded_resource)
+        
+        if not self._pending_preset_loads:
+            self._apply_preset_load_logic(self._preset_to_load)
+
+
+    def _apply_preset_load_logic(self, preset_name: str):
+        """
+        Apply the load of the preset with the given name, setting the selected preset and adding the pieces to the PDF according to the preset configuration.
+        """
+        preset = next((preset for preset in self.pieces_presets if preset.name == preset_name), None)
+        if not preset:
+            QtWidgets.QMessageBox.warning(self.view, self.tr("Error"), self.tr("Preset not found"))
+            self._preset_to_load = None
+            return
+        
+        self.selected_instruments_preset = preset.instruments_preset_name
+        self.view.set_instrument_preset_in_combo_box(preset.instruments_preset_name)
+        for piece in preset.pieces:
+            self.add_piece(piece.std_name, preset.instruments_preset_name, piece.copies)
+        self._preset_to_load = None
+
+
     def _on_pieces_fetched(self, pieces: list[PiecePublic]):
         """
         Slot called when the piece data finishes loading from API.
@@ -239,6 +279,7 @@ class MultipleSelectionController(QObject):
             names = [piece.std_name for piece in self.pieces]
 
         self.view.update_search_bar_autocompleter(names)
+        self._check_pending_preset_load("pieces")
 
     
     def _on_scores_fetched(self, scores: list[str]):
@@ -262,6 +303,7 @@ class MultipleSelectionController(QObject):
             self.view.set_combo_box_presets(presets)
         else:    
             self.view.disable_presets_combo_box_no_presets()
+        self._check_pending_preset_load("instruments_presets")
 
     def _on_pieces_presets_fetched(self, presets: list[dict]):
         """
@@ -273,6 +315,7 @@ class MultipleSelectionController(QObject):
         except Exception as e:
             print(f"Error parsing pieces presets: {e}")
             self.pieces_presets = []
+        self._check_pending_preset_load("pieces_presets")
 
     def _on_exportation_success(self, data:QByteArray):
         """
@@ -349,7 +392,6 @@ class MultipleSelectionController(QObject):
         self.selected_piece = None
         self.selected_instrument = None
         self.selected_instruments_preset = None
-        self.instruments_preset = []
         self.solved_fails = {}
         
         self.preview_controller.clear()
@@ -382,18 +424,5 @@ class MultipleSelectionController(QObject):
         preset = PiecesPresetCreate(name = pieces_preset_name, instruments_preset_name=self.selected_instruments_preset, pieces=pieces)
         self.pieces_presets_api.create_preset(preset)
     
-    def load_pieces_preset(self, preset_name:str):
-        self.refresh() #To clear the current state before loading the preset
-
-        preset = next((preset for preset in self.pieces_presets if preset.name == preset_name), None)
-        if not preset:
-            QtWidgets.QMessageBox.warning(self.view, self.tr("Error"), self.tr("Preset not found"))
-            return
-        
-        self.selected_instruments_preset = preset.instruments_preset_name
-        self.view.set_instrument_preset_in_combo_box(preset.instruments_preset_name)
-        for piece in preset.pieces:
-            self.add_piece(piece.std_name, preset.instruments_preset_name, piece.copies)
-
 
         
