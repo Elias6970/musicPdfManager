@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from fastapi import FastAPI
 
 from backend.main import app
-from backend.app.models.presets.pieces_preset import PiecesPreset
+from backend.app.models.presets.pieces_preset import PiecesPreset, PiecesPresetCreate
 from backend.app.models.user import User
 from backend.api.dependencies.database import get_session
 from backend.api.dependencies.permissions import require_user
@@ -18,6 +18,14 @@ def sample_preset():
         name="Test Preset",
         instruments_preset_name="Standard Orch",
         user_id=1,
+        pieces=["pieceA", "pieceB"]
+    )
+
+@pytest.fixture
+def sample_preset_create():
+    return PiecesPresetCreate(
+        name="Test Preset",
+        instruments_preset_name="Standard Orch",
         pieces=["pieceA", "pieceB"]
     )
 
@@ -65,22 +73,22 @@ def test_get_pieces_preset_not_found(mock_get_preset):
     assert response.status_code == 404
 
 @patch("backend.api.routes.pieces_presets.add_preset")
-def test_create_pieces_preset(mock_add_preset, sample_preset):
+def test_create_pieces_preset(mock_add_preset, sample_preset, sample_preset_create):
     mock_add_preset.return_value = sample_preset
-    response = client.post("/api/v1/presets/pieces", json=sample_preset.model_dump())
+    response = client.post("/api/v1/presets/pieces", json=sample_preset_create.model_dump())
     assert response.status_code == 201
     assert response.json()["name"] == "Test Preset"
 
 @patch("backend.api.routes.pieces_presets.add_preset")
-def test_create_pieces_preset_conflict(mock_add_preset, sample_preset):
+def test_create_pieces_preset_conflict(mock_add_preset, sample_preset_create):
     mock_add_preset.side_effect = PresetAlreadyExistsError("Already exists")
-    response = client.post("/api/v1/presets/pieces", json=sample_preset.model_dump())
+    response = client.post("/api/v1/presets/pieces", json=sample_preset_create.model_dump())
     assert response.status_code == 409
 
 @patch("backend.api.routes.pieces_presets.update_preset")
-def test_update_pieces_preset(mock_update_preset, sample_preset):
+def test_update_pieces_preset(mock_update_preset, sample_preset, sample_preset_create):
     mock_update_preset.return_value = sample_preset
-    response = client.put("/api/v1/presets/pieces", json=sample_preset.model_dump())
+    response = client.put("/api/v1/presets/pieces", json=sample_preset_create.model_dump())
     assert response.status_code == 200
     assert response.json()["name"] == "Test Preset"
 

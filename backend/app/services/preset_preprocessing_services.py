@@ -84,8 +84,9 @@ def _preprocess_preset_print_job(session: Session,
                     solved_file = solved_file + ".pdf"
                     
             if solved_file:
-                copies = 1 if job.config.ignore_preset_copies else preset.instruments[instrument].copies
-                _add_to_solution(solved, job.archive_id, piece.std_name, instrument, solved_file, copies, job.config.group_by_instrument)
+                instrument_copies = 1 if job.config.ignore_preset_copies else preset.instruments[instrument].copies
+                total_copies = instrument_copies * piece.copies
+                _add_to_solution(solved, job.archive_id, piece.std_name, instrument, solved_file, total_copies, job.config.group_by_instrument)
             else: #Not found
                 unresolved.append(UnresolvedInstrumentResponse(archive_id=job.archive_id, 
                                                                 piece_std_name=piece.std_name, 

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from backend.app.error import UserConfigNotFoundError, PresetNotFoundError, PresetAlreadyExistsError
 from backend.app.models.presets.pieces_preset import PiecesPreset
+from backend.app.models.printers.elements.printeable_piece import PrinteablePiece
 from backend.app.models.user_config import UserConfig
 from backend.app.services.pieces_preset_service import (
     _get_user_preset_file_path,
@@ -33,7 +34,7 @@ def sample_preset():
         name="Test Preset",
         instruments_preset_name="Standard Orch",
         user_id=1,
-        pieces=["pieceA"]
+        pieces=[PrinteablePiece(std_name="pieceA", copies=1)]
     )
 
 
