@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from sqlmodel import Session
 
-from backend.app.services.user_config_service import (
+from backend.app.services.user_config_services import (
     create_user_config,
     get_user_config,
     get_user_config_by_user_id,
@@ -17,7 +17,7 @@ def mock_session():
     return MagicMock(spec=Session)
 
 
-@patch("backend.app.services.user_config_service.user_config_crud")
+@patch("backend.app.services.user_config_services.user_config_crud")
 def test_create_user_config(mock_crud, mock_session):
     user_config_in = UserConfigCreate(
         language="en",
@@ -50,7 +50,7 @@ def test_create_user_config(mock_crud, mock_session):
     assert db_obj_passed.dossier_cover_path.endswith(".json")
 
 
-@patch("backend.app.services.user_config_service.user_config_crud")
+@patch("backend.app.services.user_config_services.user_config_crud")
 def test_get_user_config(mock_crud, mock_session):
     expected_config = UserConfig(
         id=1, language="en", user_id=1, 
@@ -64,7 +64,7 @@ def test_get_user_config(mock_crud, mock_session):
     mock_crud.get_user_config.assert_called_once_with(mock_session, 1)
 
 
-@patch("backend.app.services.user_config_service.user_config_crud")
+@patch("backend.app.services.user_config_services.user_config_crud")
 def test_get_user_config_by_user_id(mock_crud, mock_session):
     expected_config = UserConfig(
         id=2, language="es", user_id=99,
@@ -78,7 +78,7 @@ def test_get_user_config_by_user_id(mock_crud, mock_session):
     mock_crud.get_user_config_by_user_id.assert_called_once_with(mock_session, 99)
 
 
-@patch("backend.app.services.user_config_service.user_config_crud")
+@patch("backend.app.services.user_config_services.user_config_crud")
 def test_update_user_config_success(mock_crud, mock_session):
     existing_db_obj = UserConfig(
         id=1,
@@ -104,7 +104,7 @@ def test_update_user_config_success(mock_crud, mock_session):
     mock_crud.update_user_config.assert_called_once()
 
 
-@patch("backend.app.services.user_config_service.user_config_crud")
+@patch("backend.app.services.user_config_services.user_config_crud")
 def test_update_user_config_not_found(mock_crud, mock_session):
     mock_crud.get_user_config.return_value = None
 
@@ -116,7 +116,7 @@ def test_update_user_config_not_found(mock_crud, mock_session):
     mock_crud.update_user_config.assert_not_called()
 
 
-@patch("backend.app.services.user_config_service.user_config_crud")
+@patch("backend.app.services.user_config_services.user_config_crud")
 def test_delete_user_config(mock_crud, mock_session):
     mock_crud.delete_user_config.return_value = True
 

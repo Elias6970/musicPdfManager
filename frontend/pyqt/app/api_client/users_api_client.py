@@ -1,19 +1,21 @@
 import json
 from PyQt6.QtCore import QObject, pyqtSignal, QByteArray
 from PyQt6.QtNetwork import QNetworkRequest
+from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.config.urls import build_url, Endpoint
+from frontend.pyqt.app.models.generated_models import UserConfigPublic
 
 class UsersApiClient(QObject):
     login_success = pyqtSignal(dict)
     login_error = pyqtSignal(str)
     
-    get_me_success = pyqtSignal(dict)
-    get_me_error = pyqtSignal(str)
+    get_user_config_success = pyqtSignal(UserConfigPublic)
+    get_user_config_error = pyqtSignal(str)
 
-    def __init__(self, parent=None):
+    def __init__(self, base_client:BaseApiClient, parent=None):
         super().__init__(parent)
-        self.base_client = get_base_client()
+        self.base_client = base_client
         # Ensure we connect errors from base client just in case needed
 
     def login(self, email: str, password: str):
@@ -41,15 +43,15 @@ class UsersApiClient(QObject):
             self.login_success.emit(data)
         self._login_reply.deleteLater()
 
-    def get_me(self):
-        url = build_url(Endpoint.USERS_ME)
-        self._get_me_reply = self.base_client.get(url)
-        self._get_me_reply.finished.connect(self._handle_get_me_finished)
+    def get_user_config(self):
+        url = build_url(Endpoint.USERS_CONFIG)
+        self._get_user_config_reply = self.base_client.get(url)
+        self._get_user_config_reply.finished.connect(self._handle_get_user_config_finished)
 
-    def _handle_get_me_finished(self):
-        data = self.base_client.parse_reply(self._get_me_reply)
+    def _handle_get_user_config_finished(self):
+        data = self.base_client.parse_reply(self._get_user_config_reply)
         if data is None:
-            self.get_me_error.emit("Could not fetch user info")
+            self.get_user_config_error.emit("Could not fetch user config")
         else:
-            self.get_me_success.emit(data)
-        self._get_me_reply.deleteLater()
+            self.get_user_config_success.emit(UserConfigPublic.model_validate(data))
+        self._get_user_config_reply.deleteLater()

@@ -1,21 +1,24 @@
 from PyQt6.QtCore import QObject
+from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
 from frontend.pyqt.app.config.session_manager import SessionManager
+from frontend.pyqt.app.models.generated_models import UserConfigPublic
 
 class LoginController(QObject):
     def __init__(self, view: LoginView, parent=None):
         super().__init__(parent)
         self.view = view
-        self.api_client = UsersApiClient(self)
+        base_client = get_base_client()
+        self.api_client = UsersApiClient(base_client, self)
         self.session = SessionManager()
 
         self.view.login_requested.connect(self.handle_login_requested)
         self.api_client.login_success.connect(self.on_login_success)
         self.api_client.login_error.connect(self.on_login_error)
         
-        self.api_client.get_me_success.connect(self.on_get_me_success)
-        self.api_client.get_me_error.connect(self.on_get_me_error)
+        self.api_client.get_user_config_success.connect(self.on_get_user_config_success)
+        self.api_client.get_user_config_error.connect(self.on_get_user_config_error)
 
     def handle_login_requested(self, email, password):
         self.api_client.login(email, password)
@@ -24,18 +27,18 @@ class LoginController(QObject):
         token = data.get("access_token")
         if token:
             self.session.set_jwt(token)
-            # Update base client's token manually so subsequent calls (like get_me) use it
+            # Update base client's token manually to subsequent calls
             self.api_client.base_client.set_token(token)
-            self.api_client.get_me()
+            self.api_client.get_user_config()
         else:
             self.view.show_error("Invalid token received.")
 
     def on_login_error(self, error: str):
         self.view.show_error(error)
 
-    def on_get_me_success(self, data: dict):
-        self.session.set_language(data.get("language", "en_US"))
+    def on_get_user_config_success(self, user_config: UserConfigPublic):
+        self.session.set_language(user_config.language)
         self.view.accept()
 
-    def on_get_me_error(self, error: str):
-        self.view.show_error("Could not fetch user profile.")
+    def on_get_user_config_error(self, error: str):
+        self.view.show_error("Could not fetch user config.")

@@ -21,7 +21,7 @@ class SessionManager:
         self.settings.setValue(JWT_SESSION_KEY, token)
 
     def get_archive_id(self) -> int:
-        return self.settings.value(ARCHIVE_ID_SESSION_KEY, type=int)
+        return self.settings.value(ARCHIVE_ID_SESSION_KEY, type=int, defaultValue=-1)
 
     def set_archive_id(self, archive_id: int):
         self.settings.setValue(ARCHIVE_ID_SESSION_KEY, archive_id)
@@ -36,5 +36,9 @@ class SessionManager:
         jwt = self.get_jwt()
         return bool(jwt and jwt != "dummy_jwt_token_12345")
     
+    def has_archive_id(self) -> bool:
+        archive_id = self.get_archive_id()
+        return archive_id is not None and archive_id != -1
+
     def clear_session(self):
         self.settings.clear()

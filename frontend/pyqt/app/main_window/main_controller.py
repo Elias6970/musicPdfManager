@@ -2,8 +2,11 @@ import os, sys
 
 from PyQt6 import QtCore, QtWidgets, QtGui
 
+from frontend.pyqt.app.api_client.archives_api_client import ArchivesApiClient
+from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.config.session_manager import SessionManager
 from frontend.pyqt.app.main_window.main_view import MainView
+from frontend.pyqt.app.models.generated_models import ArchivePublic
 from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
 from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
 
@@ -17,20 +20,23 @@ class MainController(QtCore.QObject):
         super().__init__()
         self.view = view
         self.session = SessionManager()
-        #self.session.set_jwt("H")
+        base_client = get_base_client()
 
-        self.users_api_client = UsersApiClient(self)
-        self.users_api_client.get_me_success.connect(self._on_auth_success)
-        self.users_api_client.get_me_error.connect(self._show_login)
+        self.change_language(self.session.get_language())
+
+        self.archive_api_client = ArchivesApiClient(base_client, self)
+        self.archive_api_client.get_all_archives_success.connect(self._on_get_all_archives_success)
+        
 
         # Check Auth first
         self._check_auth()
 
+        # Check archive selected, if not, show the archive selection window
+        self._check_archive_selected()
+
+
         self.individual_selection_controller = IndividualSelectionController(self.view.individual_selection_window)
         self.multiple_selection_controller = MultipleSelectionController(self.view.multiple_selection_window)
-
-        self.change_language(self.session.get_language())
-
 
         #Load pieces_presets in the menu list
         self.multiple_selection_controller.get_pieces_presets_names() #To update the pieces presets names in the menu when a new preset is created
@@ -38,6 +44,7 @@ class MainController(QtCore.QObject):
         #Connect signals
         self.multiple_selection_controller.update_pieces_presets_menu_list.connect(self.update_pieces_presets_menu_list)
 
+        self.view.logout.connect(self.logout)
         self.view.show_preferences.connect(self.show_preferences)
         self.view.show_presets.connect(self.show_presets)
         self.view.show_about_us.connect(self.show_about_us)
@@ -47,28 +54,64 @@ class MainController(QtCore.QObject):
         self.view.show_add_scores_to_piece.connect(self.show_add_scores_to_piece)
         self.view.save_pieces_preset.connect(self.save_pieces_preset)
 
+
     def _check_auth(self):
         """Check if the user is authenticated, if not, show the login window"""
-        token = self.session.get_jwt()
-        if not token:
+        if not self.session.is_logged_in():
             self._show_login()
-        else:
-            self.users_api_client.get_me()
+    
 
     def _show_login(self, error: str = ""):
         """Show the login window and handle the authentication process"""
         login_view = LoginView(self.view)
         login_controller = LoginController(login_view)
         # Assuming LoginController sets up token internally and dialog closes with accept()
-        if login_view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
-            self.change_language(self.session.get_language())
-            self.multiple_selection_controller.get_pieces_presets_names()
-        else:
+        if not login_view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             sys.exit(0)
+
 
     def _on_auth_success(self, data: dict):
         # Already authenticated, proceed normally
         pass
+
+
+    def logout(self):
+        """Logout the user and show the login window"""
+        self.session.clear_session()
+        self._show_login()
+    
+
+    def _check_archive_selected(self):
+        """Check if the user has an archive selected, if not, show the archive selection window"""
+        if not self.session.has_archive_id():
+            self.archive_api_client.get_all_archives()
+            print("No archive selected, fetching archives for selection...")
+
+
+    def _on_get_all_archives_success(self, items: list[ArchivePublic]):
+        """Handle the successful retrieval of all archives, show the archive selection window if no archive is selected"""
+        if not items:
+            return #TODO: Show create an archive window to create the first archive
+        
+        # Create a mapping of unique display strings to the actual archive objects.
+        # Adding the ID makes it unique and helps users distinguish between archives with the same name.
+        archive_map = {f"{archive.name} (ID: {archive.id})": archive for archive in items}
+
+        selected_text, ok_pressed = QtWidgets.QInputDialog.getItem(
+            self.view, 
+            self.tr("Select an Archive"), 
+            self.tr("Choose:"), 
+            list(archive_map.keys()), 
+            0, 
+            False
+        )
+
+        if ok_pressed and selected_text:
+            selected_archive = archive_map[selected_text]
+            print(f"User selected archive id: {selected_archive.id}")
+            self.session.set_archive_id(selected_archive.id)
+
+
 
     def change_language(self,language):
         """Change the language of all the windows"""
@@ -85,6 +128,7 @@ class MainController(QtCore.QObject):
         app = QtWidgets.QApplication.instance()
         if app:
             app.installTranslator(translator)
+
 
     def save_pieces_preset(self):
         """Saves the pieces preset with the given name"""

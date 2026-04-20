@@ -7,6 +7,7 @@ from frontend_pyqt.main_window import Main_window
 from frontend_pyqt.pop_up_windows.yes_no_window import YesNoWindow
 
 class MainView(QtWidgets.QMainWindow):
+    logout = QtCore.pyqtSignal()
     show_preferences = QtCore.pyqtSignal()
     show_presets = QtCore.pyqtSignal()
     show_about_us = QtCore.pyqtSignal()
@@ -49,6 +50,9 @@ class MainView(QtWidgets.QMainWindow):
 
     def create_menu_bar(self):
         """Crete the menu bar"""
+        logout_opt = QtGui.QAction(self.tr("Logout"),self)
+        logout_opt.triggered.connect(self.logout.emit)
+
         preferences_opt = QtGui.QAction(self.tr("Preferences"),self)
         preferences_opt.triggered.connect(self.show_preferences.emit)
 
@@ -63,33 +67,37 @@ class MainView(QtWidgets.QMainWindow):
         #self._load_pieces_preset_opt.triggered.connect(lambda: None)
 
 
-        add_score_opt = QtGui.QAction(self.tr("Add score"),self)
+        add_score_opt = QtGui.QAction(self.tr("Add piece"),self)
         add_score_opt.triggered.connect(self.show_add_piece.emit)
 
-        modify_score_opt = QtGui.QAction(self.tr("Modify score"),self)
+        modify_score_opt = QtGui.QAction(self.tr("Modify piece"),self)
         modify_score_opt.triggered.connect(self.show_update_piece.emit)
 
-        delete_score_opt = QtGui.QAction(self.tr("Delete score"),self)
+        delete_score_opt = QtGui.QAction(self.tr("Delete piece"),self)
         delete_score_opt.triggered.connect(self.show_delete_piece.emit)
 
-        add_scores_to_piece_opt = QtGui.QAction(self.tr("Add score to piece"),self)
+        add_scores_to_piece_opt = QtGui.QAction(self.tr("Add scores to piece"),self)
         add_scores_to_piece_opt.triggered.connect(self.show_add_scores_to_piece.emit)
         
         export_dossier_opt = QtGui.QAction(self.tr("Export dossier"),self)
         export_dossier_opt.triggered.connect(self.export_dossier.emit)
         
-        clasify_scores_opt = QtGui.QAction(self.tr("Clasify scores"),self)
+        clasify_scores_opt = QtGui.QAction(self.tr("Classify scores"),self)
         clasify_scores_opt.triggered.connect(self.clasify_scores.emit)
 
         delete_junk_files_opt = QtGui.QAction(self.tr("Delete junk files"),self)
         delete_junk_files_opt.triggered.connect(self.delete_junk_files.emit)
 
-        about_opt = QtGui.QAction(self.tr("About"),self)
+        about_opt = QtGui.QAction(self.tr("About us"),self)
         about_opt.triggered.connect(self.show_about_us.emit)
 
 
         menu = self.menuBar()
         if isinstance(menu,QtWidgets.QMenuBar):
+            user_menu = menu.addMenu(self.tr("User"))
+            if user_menu:
+                user_menu.addAction(logout_opt)
+
             config_menu = menu.addMenu(self.tr("Configuration"))
             if config_menu:
                 config_menu.addActions([preferences_opt,
@@ -100,7 +108,7 @@ class MainView(QtWidgets.QMainWindow):
                 edit_menu.addActions([self._save_pieces_preset_opt])
                 edit_menu.addMenu(self._load_pieces_preset_opt)
 
-            archive_menu = menu.addMenu(self.tr("Archive"))
+            archive_menu = menu.addMenu(self.tr("Pieces"))
             if archive_menu:
                 archive_menu.addActions([add_score_opt,
                                         modify_score_opt,

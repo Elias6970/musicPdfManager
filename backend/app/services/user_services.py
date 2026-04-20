@@ -2,7 +2,7 @@ import os
 from uuid import uuid4
 from sqlmodel import Session, select
 from backend.app.crud import user_crud
-from backend.app.services.user_config_service import create_user_config, get_user_config_by_user_id
+from backend.app.services.user_config_services import create_user_config, get_user_config_by_user_id
 from backend.app.models.role import Role
 from backend.app.models.user import UserCreate, User
 from backend.app.models.user_config import UserConfigCreate
