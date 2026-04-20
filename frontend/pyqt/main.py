@@ -12,11 +12,6 @@ def main():
     controller = MainController(view)
     view.show()
     view.center_on_screen()
-    #view = MultipleSelectionView()
-    #controller = MultipleSelectionController(view)
-    #view = IndividualSelectionView()
-    #controller = IndividualSelectionController(view)
-
     
     view.show()
 
