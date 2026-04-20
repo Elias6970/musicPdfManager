@@ -4,37 +4,33 @@ Utilizes PyQt6 QSettings to manage session memory.
 """
 from PyQt6.QtCore import QSettings
 
+JWT_SESSION_KEY = "jwt"
+ARCHIVE_ID_SESSION_KEY = "archive_id"
+LANGUAGE_SESSION_KEY = "language"
+
 class SessionManager:
     def __init__(self):
         # QSettings natively behaves exactly like a singleton regarding the 
         # actual data across different instantiations when using the same args
         self.settings = QSettings("MusicPdfManager", "Session")
-        
-        # Hardcoded default values for testing
-        if not self.settings.contains("jwt"):
-            self.settings.setValue("jwt", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzYwODczMDgsInN1YiI6IjEifQ.ESlbfvOA2NfdEK2LVBqK5yusMLi7wRPSCNbIq-0dbrA")
-        if not self.settings.contains("archive_id"):
-            self.settings.setValue("archive_id", 1)
-        if not self.settings.contains("language"):
-            self.settings.setValue("language", "en_US")
 
     def get_jwt(self) -> str:
-        return self.settings.value("jwt", type=str)
+        return self.settings.value(JWT_SESSION_KEY, type=str)
 
     def set_jwt(self, token: str):
-        self.settings.setValue("jwt", token)
+        self.settings.setValue(JWT_SESSION_KEY, token)
 
     def get_archive_id(self) -> int:
-        return self.settings.value("archive_id", type=int)
+        return self.settings.value(ARCHIVE_ID_SESSION_KEY, type=int)
 
     def set_archive_id(self, archive_id: int):
-        self.settings.setValue("archive_id", archive_id)
+        self.settings.setValue(ARCHIVE_ID_SESSION_KEY, archive_id)
 
     def get_language(self) -> str:
-        return self.settings.value("language", type=str)
+        return self.settings.value(LANGUAGE_SESSION_KEY, type=str)
 
     def set_language(self, language: str):
-        self.settings.setValue("language", language)
+        self.settings.setValue(LANGUAGE_SESSION_KEY, language)
 
     def is_logged_in(self) -> bool:
         jwt = self.get_jwt()

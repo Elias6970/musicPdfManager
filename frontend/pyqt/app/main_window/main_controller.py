@@ -8,11 +8,23 @@ from frontend.pyqt.app.selectors.individual_selection_controller import Individu
 from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
 
 
+from frontend.pyqt.app.login.login_view import LoginView
+from frontend.pyqt.app.login.login_controller import LoginController
+from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
+
 class MainController(QtCore.QObject):
     def __init__(self, view:MainView):
         super().__init__()
         self.view = view
         self.session = SessionManager()
+        #self.session.set_jwt("H")
+
+        self.users_api_client = UsersApiClient(self)
+        self.users_api_client.get_me_success.connect(self._on_auth_success)
+        self.users_api_client.get_me_error.connect(self._show_login)
+
+        # Check Auth first
+        self._check_auth()
 
         self.individual_selection_controller = IndividualSelectionController(self.view.individual_selection_window)
         self.multiple_selection_controller = MultipleSelectionController(self.view.multiple_selection_window)
@@ -35,7 +47,28 @@ class MainController(QtCore.QObject):
         self.view.show_add_scores_to_piece.connect(self.show_add_scores_to_piece)
         self.view.save_pieces_preset.connect(self.save_pieces_preset)
 
+    def _check_auth(self):
+        """Check if the user is authenticated, if not, show the login window"""
+        token = self.session.get_jwt()
+        if not token:
+            self._show_login()
+        else:
+            self.users_api_client.get_me()
 
+    def _show_login(self, error: str = ""):
+        """Show the login window and handle the authentication process"""
+        login_view = LoginView(self.view)
+        login_controller = LoginController(login_view)
+        # Assuming LoginController sets up token internally and dialog closes with accept()
+        if login_view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            self.change_language(self.session.get_language())
+            self.multiple_selection_controller.get_pieces_presets_names()
+        else:
+            sys.exit(0)
+
+    def _on_auth_success(self, data: dict):
+        # Already authenticated, proceed normally
+        pass
 
     def change_language(self,language):
         """Change the language of all the windows"""
