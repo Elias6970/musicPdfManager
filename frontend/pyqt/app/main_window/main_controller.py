@@ -27,7 +27,6 @@ class MainController(QtCore.QObject):
         self.view = view
         self.session = SessionManager()
         base_client = get_base_client()
-        self.session.clear_session()
         self.change_language(self.session.get_language())
 
         self.archive_api_client = ArchivesApiClient(base_client, self)
@@ -96,11 +95,12 @@ class MainController(QtCore.QObject):
     def _on_get_all_archives_success(self, items: list[ArchivePublic]):
         """Handle the successful retrieval of all archives and populate the selection combobox."""
         if not items:
+            self.view.selectors.setEnabled(False)
             self.view.archive_combobox.setEnabled(False)
             self.view.archive_combobox.blockSignals(True)
             self.view.archive_combobox.clear()
             self.view.archive_combobox.blockSignals(False)
-            
+
             QtWidgets.QMessageBox.information(
                 self.view,
                 self.tr("No Archives Available"),
@@ -108,7 +108,7 @@ class MainController(QtCore.QObject):
                 QtWidgets.QMessageBox.StandardButton.Ok
             )
             return
-            
+        self.view.selectors.setEnabled(True)    
         self.view.archive_combobox.blockSignals(True) #To avoid triggering the index change event while populating the combobox
         self.view.archive_combobox.clear()
         
