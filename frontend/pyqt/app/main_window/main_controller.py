@@ -10,6 +10,12 @@ from frontend.pyqt.app.models.generated_models import ArchivePublic
 from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
 from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
 
+from frontend.pyqt.app.archive_crud.create_archive.create_archive_view import CreateArchiveView
+from frontend.pyqt.app.archive_crud.create_archive.create_archive_controller import CreateArchiveController
+from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_view import DeleteArchiveView
+from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_controller import DeleteArchiveController
+from frontend.pyqt.app.archive_crud.update_archive.update_archive_view import UpdateArchiveView
+from frontend.pyqt.app.archive_crud.update_archive.update_archive_controller import UpdateArchiveController
 
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.login.login_controller import LoginController
@@ -21,7 +27,6 @@ class MainController(QtCore.QObject):
         self.view = view
         self.session = SessionManager()
         base_client = get_base_client()
-
         self.change_language(self.session.get_language())
 
         self.archive_api_client = ArchivesApiClient(base_client, self)
@@ -31,9 +36,10 @@ class MainController(QtCore.QObject):
         # Check Auth first
         self._check_auth()
 
-        # Check archive selected, if not, show the archive selection window
-        self._check_archive_selected()
-
+        # Start loading archives to populate the combobox
+        self._previous_archive_index = -1
+        self.view.archive_combobox.currentIndexChanged.connect(self._on_archive_combobox_changed)
+        self.archive_api_client.get_all_archives()
 
         self.individual_selection_controller = IndividualSelectionController(self.view.individual_selection_window)
         self.multiple_selection_controller = MultipleSelectionController(self.view.multiple_selection_window)
@@ -47,6 +53,11 @@ class MainController(QtCore.QObject):
         self.view.logout.connect(self.logout)
         self.view.show_preferences.connect(self.show_preferences)
         self.view.show_presets.connect(self.show_presets)
+
+        self.view.show_create_archive.connect(self.show_create_archive)
+        self.view.show_delete_archive.connect(self.show_delete_archive)
+        self.view.show_update_archive.connect(self.show_update_archive)
+
         self.view.show_about_us.connect(self.show_about_us)
         self.view.show_add_piece.connect(self.show_add_piece)
         self.view.show_update_piece.connect(self.show_update_piece)
@@ -81,35 +92,72 @@ class MainController(QtCore.QObject):
         self._show_login()
     
 
-    def _check_archive_selected(self):
-        """Check if the user has an archive selected, if not, show the archive selection window"""
-        if not self.session.has_archive_id():
-            self.archive_api_client.get_all_archives()
-            print("No archive selected, fetching archives for selection...")
-
-
     def _on_get_all_archives_success(self, items: list[ArchivePublic]):
-        """Handle the successful retrieval of all archives, show the archive selection window if no archive is selected"""
+        """Handle the successful retrieval of all archives and populate the selection combobox."""
         if not items:
-            return #TODO: Show create an archive window to create the first archive
-        
-        # Create a mapping of unique display strings to the actual archive objects.
-        # Adding the ID makes it unique and helps users distinguish between archives with the same name.
-        archive_map = {f"{archive.name} (ID: {archive.id})": archive for archive in items}
+            self.view.selectors.setEnabled(False)
+            self.view.archive_combobox.setEnabled(False)
+            self.view.archive_combobox.blockSignals(True)
+            self.view.archive_combobox.clear()
+            self.view.archive_combobox.blockSignals(False)
 
-        selected_text, ok_pressed = QtWidgets.QInputDialog.getItem(
-            self.view, 
-            self.tr("Select an Archive"), 
-            self.tr("Choose:"), 
-            list(archive_map.keys()), 
-            0, 
-            False
+            QtWidgets.QMessageBox.information(
+                self.view,
+                self.tr("No Archives Available"),
+                self.tr("There are no archives available. Please create an archive (Archive > Create Archive) to get started."),
+                QtWidgets.QMessageBox.StandardButton.Ok
+            )
+            return
+        self.view.selectors.setEnabled(True)    
+        self.view.archive_combobox.blockSignals(True) #To avoid triggering the index change event while populating the combobox
+        self.view.archive_combobox.clear()
+        
+        current_archive_id = self.session.get_archive_id()
+        selected_idx = -1
+        
+        for i, archive in enumerate(items):
+            self.view.archive_combobox.addItem(f"{archive.name} (ID: {archive.id})", userData=archive.id)
+            if archive.id == current_archive_id:
+                selected_idx = i
+                
+        if selected_idx >= 0:
+            self.view.archive_combobox.setCurrentIndex(selected_idx)
+            self._previous_archive_index = selected_idx
+        else:
+            # If no archive is currently selected or if the stored ID is invalid, default to the first one available
+            self.view.archive_combobox.setCurrentIndex(0)
+            self._previous_archive_index = 0
+            self.session.set_archive_id(items[0].id)
+            print(f"Set archive via combobox defaults to ID: {items[0].id}")
+            
+        self.view.archive_combobox.setEnabled(True)
+        self.view.archive_combobox.blockSignals(False)
+
+    def _on_archive_combobox_changed(self, index: int):
+        """Prompt to change the archive and clear progress."""
+        if index < 0 or index == self._previous_archive_index:
+            return
+
+        reply = QtWidgets.QMessageBox.warning(
+            self.view,
+            self.tr("Change Archive"),
+            self.tr("Changing the archive will clear any unsaved progress in the selectors.\nDo you want to proceed?"),
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.No
         )
 
-        if ok_pressed and selected_text:
-            selected_archive = archive_map[selected_text]
-            print(f"User selected archive id: {selected_archive.id}")
-            self.session.set_archive_id(selected_archive.id)
+        if reply == QtWidgets.QMessageBox.StandardButton.Yes:
+            new_id = self.view.archive_combobox.itemData(index)
+            self.session.set_archive_id(int(new_id))
+            self._previous_archive_index = index
+            print(f"Changed to archive id: {new_id}")
+            
+            self.individual_selection_controller.refresh()
+            self.multiple_selection_controller.refresh()
+        else:
+            self.view.archive_combobox.blockSignals(True)
+            self.view.archive_combobox.setCurrentIndex(self._previous_archive_index)
+            self.view.archive_combobox.blockSignals(False)
 
 
 
@@ -155,6 +203,26 @@ class MainController(QtCore.QObject):
         #PresetsWindow(self)
         #self.multiple_selection_window.refresh_presets_list(keep_current_index=True)
         pass
+
+    
+    def show_create_archive(self):
+        view = CreateArchiveView()
+        controller = CreateArchiveController(view)
+        if view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            self.archive_api_client.get_all_archives()
+        
+    
+    def show_delete_archive(self):
+        view = DeleteArchiveView()
+        controller = DeleteArchiveController(view)
+        if view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            self.archive_api_client.get_all_archives()
+    
+    def show_update_archive(self):
+        view = UpdateArchiveView()
+        controller = UpdateArchiveController(view)
+        if view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
+            self.archive_api_client.get_all_archives()
 
     #Show the add_scores_window hiding the main menu
     def show_add_piece(self):
