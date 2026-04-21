@@ -155,16 +155,32 @@ class MainView(QtWidgets.QMainWindow):
         Create two buttons in a row to change between windows.
         Returns an horizontal layout
         """
-        main_layout = QtWidgets.QHBoxLayout()
+        main_layout = QtWidgets.QVBoxLayout()
+        archive_layout = QtWidgets.QHBoxLayout()
+        btns_layout = QtWidgets.QHBoxLayout()
 
         self.btn_individual_selection = QtWidgets.QPushButton(self.tr("Single selection"))
         self.btn_individual_selection.clicked.connect(lambda: (self.selectors.setCurrentWidget(self.individual_selection_window), self.change_style_selector_buttons()))
         self.btn_multiple_selection = QtWidgets.QPushButton(self.tr("Multiple selection"))
         self.btn_multiple_selection.clicked.connect(lambda: (self.selectors.setCurrentWidget(self.multiple_selection_window), self.change_style_selector_buttons()))
 
+        self.archive_combobox = QtWidgets.QComboBox()
+        self.archive_combobox.setMinimumWidth(150)
+
         main_layout.setSpacing(0)
-        main_layout.addWidget(self.btn_individual_selection)
-        main_layout.addWidget(self.btn_multiple_selection)
+        btns_layout.addWidget(self.btn_individual_selection)
+        btns_layout.addWidget(self.btn_multiple_selection)
+        
+        # Add stretch to push the combobox to the right side
+        archive_layout.addStretch()
+        
+        self.archive_combobox_label = QtWidgets.QLabel(self.tr("Current Archive:"))
+        self.archive_combobox_label.setStyleSheet("font-size: 13px; padding-right: 5px;")
+        archive_layout.addWidget(self.archive_combobox_label)
+        archive_layout.addWidget(self.archive_combobox)
+
+        main_layout.addLayout(archive_layout)
+        main_layout.addLayout(btns_layout)
 
         #Simulate a button click to set the first window and set the style 
         self.btn_individual_selection.click()
