@@ -1,7 +1,6 @@
 
 from backend.app.models.presets.resolution_preset import UnresolvedInstrumentResponse
 
-
 class PdfNotFoundException(Exception):
     pass
 
@@ -70,3 +69,8 @@ class PresetNotFoundError(Exception):
 
 class PresetAlreadyExistsError(Exception):
     pass
+
+class ClassificationFileExistsError(Exception):
+    def __init__(self, message: str, incorrect_keys: list[str]):
+        super().__init__(message)
+        self.incorrect_keys = incorrect_keys
