@@ -11,17 +11,23 @@ class MainView(QtWidgets.QMainWindow):
     show_preferences = QtCore.pyqtSignal()
     show_presets = QtCore.pyqtSignal()
     show_about_us = QtCore.pyqtSignal()
+
+    show_create_archive = QtCore.pyqtSignal()
+    show_update_archive = QtCore.pyqtSignal()
+    show_delete_archive = QtCore.pyqtSignal()
+
     show_add_piece = QtCore.pyqtSignal()
     show_update_piece = QtCore.pyqtSignal()
     show_delete_piece = QtCore.pyqtSignal()
     show_add_scores_to_piece = QtCore.pyqtSignal()
+    
     export_dossier = QtCore.pyqtSignal()
     clasify_scores = QtCore.pyqtSignal()
     delete_junk_files = QtCore.pyqtSignal()
     save_pieces_preset = QtCore.pyqtSignal()
 
     def __init__(self):
-        super(MainView,self).__init__() #Create the Main_window Object callin QMainWindow constructor(i think)
+        super(MainView,self).__init__()
 
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()
@@ -66,6 +72,14 @@ class MainView(QtWidgets.QMainWindow):
         self._load_pieces_preset_opt = QtWidgets.QMenu(self.tr("Load pieces preset"),self)
         #self._load_pieces_preset_opt.triggered.connect(lambda: None)
 
+        create_archive_opt = QtGui.QAction(self.tr("Create archive"),self)
+        create_archive_opt.triggered.connect(self.show_create_archive.emit)
+
+        delete_archive_opt = QtGui.QAction(self.tr("Delete archive"),self)
+        delete_archive_opt.triggered.connect(self.show_delete_archive.emit)
+
+        update_archive_opt = QtGui.QAction(self.tr("Update archive"),self)
+        update_archive_opt.triggered.connect(self.show_update_archive.emit)
 
         add_score_opt = QtGui.QAction(self.tr("Add piece"),self)
         add_score_opt.triggered.connect(self.show_add_piece.emit)
@@ -84,9 +98,6 @@ class MainView(QtWidgets.QMainWindow):
         
         clasify_scores_opt = QtGui.QAction(self.tr("Classify scores"),self)
         clasify_scores_opt.triggered.connect(self.clasify_scores.emit)
-
-        delete_junk_files_opt = QtGui.QAction(self.tr("Delete junk files"),self)
-        delete_junk_files_opt.triggered.connect(self.delete_junk_files.emit)
 
         about_opt = QtGui.QAction(self.tr("About us"),self)
         about_opt.triggered.connect(self.show_about_us.emit)
@@ -108,9 +119,15 @@ class MainView(QtWidgets.QMainWindow):
                 edit_menu.addActions([self._save_pieces_preset_opt])
                 edit_menu.addMenu(self._load_pieces_preset_opt)
 
-            archive_menu = menu.addMenu(self.tr("Pieces"))
+            archive_menu = menu.addMenu(self.tr("Archive"))
             if archive_menu:
-                archive_menu.addActions([add_score_opt,
+                archive_menu.addActions([create_archive_opt,
+                                        update_archive_opt,
+                                        delete_archive_opt])
+
+            piece_menu = menu.addMenu(self.tr("Pieces"))
+            if piece_menu:
+                piece_menu.addActions([add_score_opt,
                                         modify_score_opt,
                                         delete_score_opt,
                                         menu.addSeparator(),
@@ -124,7 +141,7 @@ class MainView(QtWidgets.QMainWindow):
             
             tools_menu = menu.addMenu(self.tr("Tools"))
             if tools_menu:
-                tools_menu.addActions([delete_junk_files_opt])
+                pass
 
             help_menu = menu.addMenu(self.tr("Help"))
             if help_menu:

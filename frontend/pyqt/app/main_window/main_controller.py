@@ -10,6 +10,12 @@ from frontend.pyqt.app.models.generated_models import ArchivePublic
 from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
 from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
 
+from frontend.pyqt.app.archive_crud.create_archive.create_archive_view import CreateArchiveView
+from frontend.pyqt.app.archive_crud.create_archive.create_archive_controller import CreateArchiveController
+from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_view import DeleteArchiveView
+from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_controller import DeleteArchiveController
+from frontend.pyqt.app.archive_crud.update_archive.update_archive_view import UpdateArchiveView
+from frontend.pyqt.app.archive_crud.update_archive.update_archive_controller import UpdateArchiveController
 
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.login.login_controller import LoginController
@@ -47,6 +53,11 @@ class MainController(QtCore.QObject):
         self.view.logout.connect(self.logout)
         self.view.show_preferences.connect(self.show_preferences)
         self.view.show_presets.connect(self.show_presets)
+
+        self.view.show_create_archive.connect(self.show_create_archive)
+        self.view.show_delete_archive.connect(self.show_delete_archive)
+        self.view.show_update_archive.connect(self.show_update_archive)
+
         self.view.show_about_us.connect(self.show_about_us)
         self.view.show_add_piece.connect(self.show_add_piece)
         self.view.show_update_piece.connect(self.show_update_piece)
@@ -155,6 +166,22 @@ class MainController(QtCore.QObject):
         #PresetsWindow(self)
         #self.multiple_selection_window.refresh_presets_list(keep_current_index=True)
         pass
+
+    
+    def show_create_archive(self):
+        view = CreateArchiveView()
+        controller = CreateArchiveController(view)
+        view.exec()
+    
+    def show_delete_archive(self):
+        view = DeleteArchiveView()
+        controller = DeleteArchiveController(view)
+        view.exec()
+    
+    def show_update_archive(self):
+        view = UpdateArchiveView()
+        controller = UpdateArchiveController(view)
+        view.exec()
 
     #Show the add_scores_window hiding the main menu
     def show_add_piece(self):

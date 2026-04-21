@@ -44,7 +44,7 @@ class ArchivesApiClient(QObject):
         """POST /archives/"""
         url = build_url(Endpoint.ARCHIVES)
         reply = self.client.post(url, data=archive_data)
-        reply.finished.connect(lambda: self._on_create_archive_finished(reply))
+        reply.finished.connect(lambda r=reply: self._on_create_archive_finished(r))
 
     def _on_create_archive_finished(self, reply: QNetworkReply):
         data = self.client.parse_reply(reply)
@@ -62,7 +62,7 @@ class ArchivesApiClient(QObject):
         """GET /archives/{archive_id}"""
         url = build_url(Endpoint.ARCHIVE_BY_ID, path_params={"archive_id": archive_id})
         reply = self.client.get(url)
-        reply.finished.connect(lambda: self._on_get_archive_finished(reply))
+        reply.finished.connect(lambda r=reply: self._on_get_archive_finished(r))
 
     def _on_get_archive_finished(self, reply: QNetworkReply):
         data = self.client.parse_reply(reply)
@@ -80,7 +80,7 @@ class ArchivesApiClient(QObject):
         """GET /archives/"""
         url = build_url(Endpoint.ARCHIVES)
         reply = self.client.get(url)
-        reply.finished.connect(lambda: self._on_get_all_archives_finished(reply))
+        reply.finished.connect(lambda r=reply: self._on_get_all_archives_finished(r))
 
     def _on_get_all_archives_finished(self, reply: QNetworkReply):
         data = self.client.parse_reply(reply)
@@ -99,7 +99,7 @@ class ArchivesApiClient(QObject):
         """PUT /archives/{archive_id}"""
         url = build_url(Endpoint.ARCHIVE_BY_ID, path_params={"archive_id": archive_id})
         reply = self.client.put(url, data=archive_data)
-        reply.finished.connect(lambda: self._on_update_archive_finished(reply))
+        reply.finished.connect(lambda r=reply: self._on_update_archive_finished(r))
 
     def _on_update_archive_finished(self, reply: QNetworkReply):
         data = self.client.parse_reply(reply)
@@ -117,7 +117,7 @@ class ArchivesApiClient(QObject):
         """DELETE /archives/{archive_id}"""
         url = build_url(Endpoint.ARCHIVE_BY_ID, path_params={"archive_id": archive_id})
         reply = self.client.delete(url)
-        reply.finished.connect(lambda: self._on_delete_archive_finished(reply))
+        reply.finished.connect(lambda r=reply: self._on_delete_archive_finished(r))
 
     def _on_delete_archive_finished(self, reply: QNetworkReply):
         data = self.client.parse_reply(reply)
@@ -135,7 +135,7 @@ class ArchivesApiClient(QObject):
             query_params={"role": role}
         )
         reply = self.client.post(url, data=None)
-        reply.finished.connect(lambda: self._on_add_user_to_archive_finished(reply))
+        reply.finished.connect(lambda r=reply: self._on_add_user_to_archive_finished(r))
 
     def _on_add_user_to_archive_finished(self, reply: QNetworkReply):
         data = self.client.parse_reply(reply)
