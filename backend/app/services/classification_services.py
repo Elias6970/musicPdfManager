@@ -10,6 +10,8 @@ from backend.app.models.classification.classification_job import ClassificationJ
 from backend.app.models.classification.classified_document import ClassifiedDocument
 from backend.app.services.archive_services import get_archive_path
 from backend.app.error import ClassificationFileExistsError
+from backend.app.services.pdf_modifiers.crop import crop_page_from_corners
+from backend.app.services.pdf_modifiers.rotate import rotate_page
 
 def precheck_classification(session: Session, job: ClassificationJob):
     """
@@ -114,9 +116,15 @@ def extract_and_merge_pages(classifications: dict[str, ClassifiedDocument], sour
                     open_source_pdfs[source_filename] = fitz.open(source_path)
                     
                 source_pdf = open_source_pdfs[source_filename]
-                
+                pdf_page = source_pdf[page_idx]
+                if page_info.rotation != 0:
+                    rotate_page(pdf_page, page_info.rotation)
+
+                if page_info.corners is not None:
+                    pdf_page = crop_page_from_corners(pdf_page, page_info.corners)
+
                 # Append the specific page
-                merged_pdf.insert_pdf(source_pdf, from_page=page_idx, to_page=page_idx)
+                merged_pdf.insert_pdf(pdf_page.parent, from_page=pdf_page.number, to_page=pdf_page.number) #type: ignore
                 
             # Save newly created document as bytes
             generated_pdfs[target_filename] = merged_pdf.tobytes()

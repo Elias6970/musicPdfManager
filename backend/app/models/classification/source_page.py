@@ -7,7 +7,7 @@ class SourcePage(SQLModel):
     file_name: str = Field(description="The name of the source PDF file from which the page will be extracted")
     page: int = Field(default=0, description="The 0-based index of the page to extract from the source PDF")
     rotation: int = Field(default=0, description="The rotation angle (in degrees) to apply to the extracted page clockwise. Should be a multiple of 90. It is applied before cropping")
-    corners: List[Tuple[float, float]] = Field(
-        ..., 
+    corners: List[Tuple[float, float]] | None = Field(
+        default = None,
         description="A list of 4 [x, y] coordinates representing the rotated bounding box. Order should be: Top-Left, Top-Right, Bottom-Right, Bottom-Left"
     )
