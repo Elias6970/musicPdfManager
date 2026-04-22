@@ -23,7 +23,7 @@ def _extract_and_warp_rect(pixmap: fitz.Pixmap, corners: List[Tuple[float, float
         
     # Ensure points are float32 and apply zoom scale
     rect = np.array(corners, dtype="float32") * scale
-    print(f"Scaled corners for warping: {rect}")
+
     # Compute the new width and height of the upright rectangle
     width_a = np.linalg.norm(rect[0] - rect[1])
     width_b = np.linalg.norm(rect[2] - rect[3])
