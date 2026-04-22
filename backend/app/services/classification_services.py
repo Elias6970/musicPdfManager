@@ -13,6 +13,8 @@ from backend.app.error import ClassificationFileExistsError
 from backend.app.services.pdf_modifiers.crop import crop_page_from_corners
 from backend.app.services.pdf_modifiers.rotate import rotate_page
 
+BACKUP_FOLDER_NAME = "backup"
+
 def precheck_classification(session: Session, job: ClassificationJob):
     """
     Validates a ClassificationJob prior to execution to ensure all dependencies and configurations are correct.
@@ -87,7 +89,8 @@ def precheck_classification(session: Session, job: ClassificationJob):
 def extract_and_merge_pages(classifications: dict[str, ClassifiedDocument], source_dir: str) -> dict[str, bytes]:
     """
     Extracts specified pages from source PDF files and merges them into new PDFs.
-    
+    It also rotates and crops pages as specified in the SourcePage configurations.
+
     Args:
         session (Session): The active database session.
         classifications (dict[str, ClassifiedDocument]): A dictionary mapping output file identifiers 
@@ -145,11 +148,12 @@ def backup_source_files(session: Session, archive_id: int, piece_std_name: str, 
     Returns:
         str: The name of the created backup folder (format YYYY-MM-DD_HH-MM-SS).
     """
+    
     archive_folder = get_archive_path(session, archive_id)
     piece_folder = ArchiveFileManager.parse_name_to_file_manager(piece_std_name)
     piece_path = os.path.join(archive_folder, piece_folder)
     scores_path = os.path.join(piece_path, DIR_SCORES)
-    backup_path = os.path.join(piece_path, "backup")
+    backup_path = os.path.join(piece_path, BACKUP_FOLDER_NAME)
 
     date_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     target_backup_path = os.path.join(backup_path, date_str)
@@ -173,7 +177,7 @@ def restore_last_backup(session: Session, archive_id: int, piece_std_name: str):
     piece_folder = ArchiveFileManager.parse_name_to_file_manager(piece_std_name)
     piece_path = os.path.join(archive_folder, piece_folder)
     scores_path = os.path.join(piece_path, DIR_SCORES)
-    backup_path = os.path.join(piece_path, "backup")
+    backup_path = os.path.join(piece_path, BACKUP_FOLDER_NAME)
 
     if not os.path.exists(backup_path):
         raise FileNotFoundError(f"Backup folder not found at {backup_path}")
