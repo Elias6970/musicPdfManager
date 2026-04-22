@@ -46,7 +46,7 @@ class CropRectangle:
 
 
 
-    def extract_and_warp_rect(self,pixmap:fitz.Pixmap, scale:float=1.0) -> fitz.Pixmap:
+    def extract_and_warp_rect(self,pixmap:fitz.Pixmap, scale:float=1.0) -> tuple[bytes,int,int]:
         """
         Extracts a rotated rectangle from a fitz.Pixmap and warps it to be upright.
         Can raise ValueError if the encoding is not good
