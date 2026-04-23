@@ -87,7 +87,9 @@ def test_login_user_wrong_password(mock_get_user, mock_verify, mock_session):
 @patch("backend.app.services.user_services.user_crud.get_user_by_email")
 @patch("backend.app.services.user_services.user_crud.create_user")
 @patch("backend.app.services.user_services.create_user_config")
+@patch("backend.app.services.user_services.rol_crud.get_role")
 def test_register_user_success(
+    mock_get_role,
     mock_create_user_config,
     mock_create_user,
     mock_get_user,
@@ -96,6 +98,7 @@ def test_register_user_success(
     # Arrange
     user_in = UserCreate(name="Test", email="new@example.com", password="password")
     mock_get_user.return_value = None  # user doesn't exist yet
+    mock_get_role.return_value = MagicMock()
     
     mock_created_user = MagicMock()
     mock_created_user.id = 42
@@ -172,10 +175,26 @@ def test_register_user_default_role_not_found(mock_get_user, mock_session):
 
 
 @patch("backend.app.services.user_services.user_crud.get_user_by_email")
+@patch("backend.app.services.user_services.rol_crud.get_role")
+def test_register_user_provided_role_not_found(mock_get_role, mock_get_user, mock_session):
+    # Arrange
+    user_in = UserCreate(name="Test", email="test@example.com", password="password", role_id=99)
+    mock_get_user.return_value = None  # User doesn't exist
+    mock_get_role.return_value = None
+
+    # Act & Assert
+    with pytest.raises(InvalidUserDataError) as exc_info:
+        register_user(session=mock_session, user_create=user_in)
+
+    assert str(exc_info.value) == "Provided role_id does not exist"
+    mock_get_role.assert_called_once_with(mock_session, 99)
+
+@patch("backend.app.services.user_services.user_crud.get_user_by_email")
 @patch("backend.app.services.user_services.user_crud.create_user")
 @patch("backend.app.services.user_services.create_user_config")
+@patch("backend.app.services.user_services.rol_crud.get_role")
 def test_register_user_default_role_assigned(
-    mock_create_user_config, mock_create_user, mock_get_user, mock_session
+    mock_get_role, mock_create_user_config, mock_create_user, mock_get_user, mock_session
 ):
     # Arrange
     user_in = UserCreate(name="Test", email="test@example.com", password="password", role_id=None)
@@ -188,6 +207,8 @@ def test_register_user_default_role_assigned(
     mock_exec.first.return_value = mock_role
     mock_session.exec.return_value = mock_exec
 
+    mock_get_role.return_value = mock_role
+
     mock_created_user = MagicMock()
     mock_created_user.id = 1
     mock_create_user.return_value = mock_created_user
@@ -197,6 +218,7 @@ def test_register_user_default_role_assigned(
 
     # Assert
     assert user_in.role_id == 5
+    mock_get_role.assert_called_once_with(mock_session, 5)
     mock_create_user.assert_called_once_with(mock_session, user_in)
 
 
@@ -267,4 +289,19 @@ def test_get_user_paths_user_config_not_found_raises(service_fn, mock_session):
 
         assert str(exc_info.value) == "User config not found"
         mock_get_user_config.assert_called_once_with(mock_session, user_id=user_id)
+
+@patch("backend.app.services.user_services.user_crud.get_all_users")
+def test_get_all_users(mock_crud_get_all, mock_session):
+    # Arrange
+    from backend.app.services.user_services import get_all_users
+    mock_users = [MagicMock(), MagicMock()]
+    mock_crud_get_all.return_value = mock_users
+
+    # Act
+    result = get_all_users(mock_session)
+
+    # Assert
+    assert result == mock_users
+    mock_crud_get_all.assert_called_once_with(mock_session)
+
 

@@ -91,3 +91,10 @@ def test_delete_user(session: Session, sample_user: User, test_id_key, expected_
     if result is True:
         # Check that it's actually removed from the DB
         assert get_user_by_id(session, query_id) is None
+
+def test_get_all_users(session: Session, sample_user: User):
+    from backend.app.crud.user_crud import get_all_users
+    users = get_all_users(session)
+    assert len(users) == 1
+    assert users[0].id == sample_user.id
+
