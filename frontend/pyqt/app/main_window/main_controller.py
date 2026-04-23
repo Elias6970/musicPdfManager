@@ -20,6 +20,8 @@ from frontend.pyqt.app.archive_crud.update_archive.update_archive_controller imp
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.login.login_controller import LoginController
 from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
+from frontend.pyqt.app.users_crud.users_controller import UsersController
+from frontend.pyqt.app.users_crud.users_view import UsersView
 
 class MainController(QtCore.QObject):
     def __init__(self, view:MainView):
@@ -49,6 +51,8 @@ class MainController(QtCore.QObject):
 
         #Connect signals
         self.multiple_selection_controller.update_pieces_presets_menu_list.connect(self.update_pieces_presets_menu_list)
+
+        self.view.show_manage_users.connect(self.show_manage_users)
 
         self.view.logout.connect(self.logout)
         self.view.show_preferences.connect(self.show_preferences)
@@ -193,6 +197,11 @@ class MainController(QtCore.QObject):
             action.triggered.connect(lambda _, i=i: self.multiple_selection_controller.load_pieces_preset(i))
             self.view._load_pieces_preset_opt.addAction(action)
 
+
+    def show_manage_users(self):
+        view = UsersView()
+        controller = UsersController(view)
+        view.exec()
 
     #Show the config window
     def show_preferences(self):

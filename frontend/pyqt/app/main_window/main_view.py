@@ -7,6 +7,8 @@ from frontend_pyqt.main_window import Main_window
 from frontend_pyqt.pop_up_windows.yes_no_window import YesNoWindow
 
 class MainView(QtWidgets.QMainWindow):
+    show_manage_users = QtCore.pyqtSignal()
+    
     logout = QtCore.pyqtSignal()
     show_preferences = QtCore.pyqtSignal()
     show_presets = QtCore.pyqtSignal()
@@ -28,6 +30,8 @@ class MainView(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(MainView,self).__init__()
+
+        self.is_admin = True  # Placeholder, replace with actual admin check
 
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()
@@ -102,9 +106,16 @@ class MainView(QtWidgets.QMainWindow):
         about_opt = QtGui.QAction(self.tr("About us"),self)
         about_opt.triggered.connect(self.show_about_us.emit)
 
+        #ADMIN OPTIONS
+        manage_users_opt = QtGui.QAction(self.tr("Manage users and roles"),self)
+        manage_users_opt.triggered.connect(self.show_manage_users.emit)
 
         menu = self.menuBar()
         if isinstance(menu,QtWidgets.QMenuBar):
+            admin = menu.addMenu(self.tr("Admin"))
+            if self.is_admin and admin:
+                admin.addAction(manage_users_opt)
+
             user_menu = menu.addMenu(self.tr("User"))
             if user_menu:
                 user_menu.addAction(logout_opt)

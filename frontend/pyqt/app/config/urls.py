@@ -8,9 +8,13 @@ API_PREFIX = "/api/v1"
 
 
 class Endpoint(StrEnum):
+    USERS = "/users"
     USERS_REGISTER = "/users/register"
     USERS_LOGIN = "/users/login"
     USERS_CONFIG = "/users/config"
+
+    ROLES = "/roles"
+    ROLES_BY_ID = "/roles/{role_id}"    
 
     ARCHIVES = "/archives"
     ARCHIVE_BY_ID = "/archives/{archive_id}"
