@@ -8,7 +8,7 @@ from backend.api.dependencies.auth import get_current_user
 from backend.app.models.user import User, UserCreate, UserPublic
 from backend.app.models.user_config import UserConfigPublic
 from backend.app.models.token import Token
-from backend.app.services.user_services import register_user, login_user
+from backend.app.services.user_services import register_user, login_user, get_all_users as _get_all_users
 from backend.app.services.user_config_services import get_user_config_by_user_id
 from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
 
@@ -42,3 +42,12 @@ def get_user_config(
     if not user_config:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
     return UserConfigPublic.model_validate(user_config)
+
+
+@router.get("/", response_model=list[UserPublic])
+def get_all_users(
+    session: Session = Depends(get_session),
+    _: User = Depends(require_admin)
+) -> list[UserPublic]:
+    users = _get_all_users(session)
+    return [UserPublic.model_validate(user) for user in users]

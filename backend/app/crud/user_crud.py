@@ -18,6 +18,10 @@ def get_user_by_email(session: Session, email: str) -> User | None:
     statement = select(User).where(User.email == email)
     return session.exec(statement).first()
 
+def get_all_users(session: Session) -> list[User]:
+    statement = select(User)
+    return session.exec(statement).all()
+
 def delete_user(session: Session, user_id: int) -> bool:
     user = session.get(User, user_id)
     if not user:

@@ -2,6 +2,7 @@ import os
 from uuid import uuid4
 from sqlmodel import Session, select
 from backend.app.crud import user_crud
+from backend.app.crud import rol_crud
 from backend.app.services.user_config_services import create_user_config, get_user_config_by_user_id
 from backend.app.models.role import Role
 from backend.app.models.user import UserCreate, User
@@ -31,6 +32,11 @@ def register_user(session: Session, user_create: UserCreate) -> User:
             raise InvalidUserDataError("Default role 'user' not found in the database")
         user_create.role_id = role.id
     
+    # Check if the role_id provided is valid
+    role = rol_crud.get_role(session, user_create.role_id)
+    if not role:
+        raise InvalidUserDataError("Provided role_id does not exist")
+
     # Create the user
     user = user_crud.create_user(session, user_create)
     create_user_config(
@@ -92,3 +98,5 @@ def check_user_role(session: Session, user_id: int, allowed_roles: list[str]) ->
     return user
 
 
+def get_all_users(session: Session) -> list[User]:
+    return user_crud.get_all_users(session)
