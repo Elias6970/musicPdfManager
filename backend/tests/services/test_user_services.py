@@ -305,3 +305,57 @@ def test_get_all_users(mock_crud_get_all, mock_session):
     mock_crud_get_all.assert_called_once_with(mock_session)
 
 
+@patch("backend.app.services.user_services.user_crud.update_user")
+@patch("backend.app.services.user_services.rol_crud.get_role")
+def test_update_user_success(mock_get_role, mock_crud_update_user, mock_session):
+    from backend.app.services.user_services import update_user
+    user_id = 1
+    user_in = UserCreate(name="Updated Name", email="updated@example.com", password="newpassword", role_id=2)
+    
+    mock_role = MagicMock()
+    mock_get_role.return_value = mock_role
+    
+    mock_updated_user = MagicMock()
+    mock_crud_update_user.return_value = mock_updated_user
+    
+    result = update_user(session=mock_session, user_id=user_id, user_update=user_in)
+    
+    assert result == mock_updated_user
+    mock_get_role.assert_called_once_with(mock_session, 2)
+    mock_crud_update_user.assert_called_once_with(mock_session, user_id=user_id, user_update=user_in)
+
+def test_update_user_invalid_email(mock_session):
+    from backend.app.services.user_services import update_user
+    user_id = 1
+    user_in = UserCreate(name="Updated Name", email="invalid-email", password="newpassword")
+    
+    with pytest.raises(InvalidUserDataError) as exc_info:
+        update_user(session=mock_session, user_id=user_id, user_update=user_in)
+        
+    assert str(exc_info.value) == "Invalid email format"
+
+def test_update_user_empty_name(mock_session):
+    from backend.app.services.user_services import update_user
+    user_id = 1
+    user_in = UserCreate(name="   ", email="updated@example.com", password="newpassword")
+    
+    with pytest.raises(InvalidUserDataError) as exc_info:
+        update_user(session=mock_session, user_id=user_id, user_update=user_in)
+        
+    assert str(exc_info.value) == "Name can't be empty"
+
+@patch("backend.app.services.user_services.rol_crud.get_role")
+def test_update_user_invalid_role(mock_get_role, mock_session):
+    from backend.app.services.user_services import update_user
+    user_id = 1
+    user_in = UserCreate(name="Updated Name", email="updated@example.com", password="newpassword", role_id=99)
+    
+    mock_get_role.return_value = None
+    
+    with pytest.raises(InvalidUserDataError) as exc_info:
+        update_user(session=mock_session, user_id=user_id, user_update=user_in)
+        
+    assert str(exc_info.value) == "Provided role_id does not exist"
+    mock_get_role.assert_called_once_with(mock_session, 99)
+
+

@@ -59,6 +59,21 @@ def login_user(session: Session, email: str, password: str) -> Token:
     access_token = create_access_token(subject=user.id) #type: ignore
     return Token(access_token=access_token, token_type="bearer")
 
+def update_user(session: Session, user_id: int, user_update: UserCreate) -> User:
+    if user_update.email is not None and "@" not in user_update.email:
+        raise InvalidUserDataError("Invalid email format")
+    
+    if user_update.name is not None and not user_update.name.strip():
+        raise InvalidUserDataError("Name can't be empty")
+
+    # Check if the role_id provided is valid
+    if user_update.role_id is not None:
+        role = rol_crud.get_role(session, user_update.role_id)
+        if not role:
+            raise InvalidUserDataError("Provided role_id does not exist")
+
+    return user_crud.update_user(session, user_id=user_id, user_update=user_update)
+
 
 def get_user_presets_instruments_path(session: Session, user_id: int) -> str:
     user_config = get_user_config_by_user_id(session, user_id=user_id)
