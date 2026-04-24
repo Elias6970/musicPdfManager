@@ -72,8 +72,14 @@ def update_user(session: Session, user_id: int, user_update: UserCreate) -> User
         if not role:
             raise InvalidUserDataError("Provided role_id does not exist")
 
+    if user_update.password is not None and user_update.password.strip() == "":
+        user_update.password = None  # Treat empty password as no update
+    
+
     return user_crud.update_user(session, user_id=user_id, user_update=user_update)
 
+def delete_user(session: Session, user_id: int) -> bool:
+    return user_crud.delete_user(session, user_id=user_id)
 
 def get_user_presets_instruments_path(session: Session, user_id: int) -> str:
     user_config = get_user_config_by_user_id(session, user_id=user_id)

@@ -4,7 +4,7 @@ from PyQt6.QtNetwork import QNetworkReply, QNetworkRequest
 from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.config.urls import build_url, Endpoint
-from frontend.pyqt.app.models.generated_models import UserConfigPublic, UserPublic
+from frontend.pyqt.app.models.generated_models import UserConfigPublic, UserPublic, UserCreate
 
 class UsersApiClient(QObject):
     login_success = pyqtSignal(dict)
@@ -15,6 +15,15 @@ class UsersApiClient(QObject):
 
     get_all_users_success = pyqtSignal(list)
     get_all_users_error = pyqtSignal(str)
+
+    register_success = pyqtSignal(UserPublic)
+    register_error = pyqtSignal(str)
+
+    update_user_success = pyqtSignal(UserPublic)
+    update_user_error = pyqtSignal(str)
+
+    delete_user_success = pyqtSignal()
+    delete_user_error = pyqtSignal(str)
 
     def __init__(self, base_client:BaseApiClient, parent=None):
         super().__init__(parent)
@@ -78,4 +87,50 @@ class UsersApiClient(QObject):
             self.get_all_users_success.emit(list_of_users)
         else:
             self.get_all_users_error.emit(reply.errorString())
+        reply.deleteLater()
+
+    def register(self, user: UserCreate):
+        url = build_url(Endpoint.USERS_REGISTER)
+        reply = self.base_client.post(url, user)
+        reply.finished.connect(lambda r=reply: self._handle_register_finished(r))
+
+    def _handle_register_finished(self, reply: QNetworkReply):
+        data = self.base_client.parse_reply(reply)
+        if data is not None:
+            try:
+                user_public = UserPublic(**data)
+                self.register_success.emit(user_public)
+            except Exception as e:
+                self.register_error.emit(f"Data parsing error: {str(e)}")
+        else:
+            self.register_error.emit(reply.errorString())
+        reply.deleteLater()
+
+    def update_user(self, user_id: int, user: UserCreate):
+        url = build_url(Endpoint.USER_BY_ID, path_params={"user_id": user_id})
+        reply = self.base_client.put(url, user)
+        reply.finished.connect(lambda r=reply: self._handle_update_user_finished(r))
+
+    def _handle_update_user_finished(self, reply: QNetworkReply):
+        data = self.base_client.parse_reply(reply)
+        if data is not None:
+            try:
+                user_public = UserPublic(**data)
+                self.update_user_success.emit(user_public)
+            except Exception as e:
+                self.update_user_error.emit(f"Data parsing error: {str(e)}")
+        else:
+            self.update_user_error.emit(reply.errorString())
+        reply.deleteLater()
+
+    def delete_user(self, user_id: int):
+        url = build_url(Endpoint.USER_BY_ID, path_params={"user_id": user_id})
+        reply = self.base_client.delete(url)
+        reply.finished.connect(lambda r=reply: self._handle_delete_user_finished(r))
+
+    def _handle_delete_user_finished(self, reply: QNetworkReply):
+        if reply.error() == QNetworkReply.NetworkError.NoError:
+            self.delete_user_success.emit()
+        else:
+            self.delete_user_error.emit(reply.errorString())
         reply.deleteLater()

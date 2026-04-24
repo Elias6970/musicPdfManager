@@ -1,7 +1,10 @@
 import sys
-from PyQt6.QtWidgets import (QApplication, QDialog, QVBoxLayout, QTableWidget, 
+from PyQt6 import QtWidgets
+from PyQt6.QtWidgets import (QApplication, QCheckBox, QDialog, QVBoxLayout, QTableWidget, 
                              QTableWidgetItem, QComboBox, QPushButton, QHeaderView)
 from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtGui import QIcon
+from frontend_pyqt.config.constants import TRASH_IMG_PATH
 
 class UsersView(QDialog):
     save_signal = pyqtSignal(list)
@@ -26,8 +29,8 @@ class UsersView(QDialog):
         layout.addWidget(self.add_btn)
 
         # 1. Setup the Table
-        self.table = QTableWidget(0, 3)
-        self.table.setHorizontalHeaderLabels(["Email", "Name", "Role"])
+        self.table = QTableWidget(0, 5)
+        self.table.setHorizontalHeaderLabels(["Email", "Name", "Role", "Password", ""])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         layout.addWidget(self.table)
 
@@ -50,8 +53,8 @@ class UsersView(QDialog):
 
         # ComboBox for the Role
         combo = QComboBox()
-        for role_value, role_name in self.available_roles.items():
-            combo.addItem(role_name, role_value)  # Display role name, store role id as data
+        for role_id, role_name in self.available_roles.items():
+            combo.addItem(role_name, role_id)  # Display role name, store role id as data
 
         # Set the current dropdown text to match the user's role
         if role_id in self.available_roles:
@@ -62,24 +65,34 @@ class UsersView(QDialog):
         # Inject the widget into the table cell
         self.table.setCellWidget(row_position, 2, combo)
 
+        self.table.setItem(row_position, 3, QTableWidgetItem(""))  # Empty password field for user input
 
-    def get_data(self) -> list[tuple[str, str, str, str]]:
+        delete_btn = QPushButton()
+        delete_btn.setIcon(QIcon(TRASH_IMG_PATH))
+        delete_btn.setFixedSize(20, 25)
+        delete_btn.setStyleSheet("background-color: #ff5555")
+        delete_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
+        delete_btn.clicked.connect(lambda _,row=row_position: self.table.removeRow(row)) #Remove the row
+        self.table.setCellWidget(row_position, 4, delete_btn)
+
+
+    def get_data(self) -> list[tuple[int, str, str, int, str]]:
         """
         Extract data from both standard items and cell widgets.
-        :return: A list of tuples containing (user_id, email, name, role)
+            :return: A list of tuples containing (user_id, email, name, role_id, password) for each row.
         """
         elements = []
         for row in range(self.table.rowCount()):
             email = self.table.item(row, 0).text()
             name = self.table.item(row, 1).text()
-            
+            password = self.table.item(row, 3).text()
             # To get data from a custom widget, we have to extract the widget first
             role_widget = self.table.cellWidget(row, 2)
             if role_widget and isinstance(role_widget, QComboBox):
-                role = role_widget.currentText() # Extract text from the QComboBox
+                role_id = role_widget.currentData()  # Extract the stored role_id
                 user_id = self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)  # Retrieve the stored user_id
 
-                elements.append((user_id, email, name, role))
+                elements.append((user_id, email, name, role_id, password))
 
         return elements 
 

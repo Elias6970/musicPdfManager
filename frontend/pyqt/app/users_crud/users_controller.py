@@ -2,7 +2,7 @@
 
 from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
 from frontend.pyqt.app.users_crud.users_view import UsersView
-from frontend.pyqt.app.models.generated_models import RolePublic, UserPublic
+from frontend.pyqt.app.models.generated_models import RolePublic, UserCreate, UserPublic
 from frontend.pyqt.app.api_client.roles_api_client import RolesApiClient
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 
@@ -22,6 +22,10 @@ class UsersController:
         self.users_api_client = UsersApiClient(base_api_client)
         self.users_api_client.get_all_users_success.connect(self._on_users_loaded)
         self.users_api_client.get_all_users_error.connect(lambda error: print(f"Error loading users: {error}"))
+        self.users_api_client.register_error.connect(lambda error: print(f"Error registering user: {error}"))
+        self.users_api_client.update_user_error.connect(lambda error: print(f"Error updating user: {error}"))
+        self.users_api_client.delete_user_error.connect(lambda error: print(f"Error deleting user: {error}"))
+
 
         self.view.save_btn.clicked.connect(self.save_users)
         self.view.create_blank_user.connect(self.create_blank_user)
@@ -65,6 +69,21 @@ class UsersController:
 
 
     def save_users(self):
+        """Extract data from the view and determine which users to create, update, or delete."""
         user_data = self.view.get_data()
-        # Here you would typically send this data to your backend or service layer
-        print("Saving users:", user_data)
+        
+        for data in user_data:
+            if data[0] == -1:  # New user (user_id == -1)
+                self.users_api_client.register(UserCreate(name=data[2], email=data[1], password=data[4], role_id=data[3]))
+
+            for i in self.users:
+                if i.id == data[0]: #Existing user, check for updates
+                    if i.email != data[1] or i.name != data[2] or i.role_id != data[3]:
+                        if data[4] == "":
+                            data[4] = None  # Treat empty password as no update
+                        self.users_api_client.update_user(i.id, UserCreate(name=data[2], email=data[1], password=data[4], role_id=data[3]))
+                    self.users.remove(i) #Remove from the list to keep track of deleted users
+                    break
+            
+        for user in self.users:
+            self.users_api_client.delete_user(user.id)
