@@ -72,11 +72,33 @@ class InteractivePreviewer(QGraphicsView):
     def mouseMoveEvent(self, event):
         if event and self.rectangle:
             #Move the rectangle
-            if self.is_dragging and self.is_pos_inside_image(event.pos()):
-                if not self.is_pos_inside_image(event.pos()):
-                    return
-                scene_pos = self.mapToScene(event.pos())
+            scene_pos = self.mapToScene(event.pos())
+            if self.is_dragging:
                 new_pos = scene_pos - self.moving_offset
+                
+                if self.img_scene.image_item:
+                    scene_rect = self.img_scene.image_item.sceneBoundingRect()
+                    
+                    # Temporarily set position to get true mapping with rotation
+                    self.rectangle.setPos(new_pos)
+                    poly = self.rectangle.mapToScene(self.rectangle.rect())
+                    poly_rect = poly.boundingRect()
+                    
+                    # Compute needed translation if the rotated borders exceed the scene
+                    dx, dy = 0.0, 0.0
+                    if poly_rect.left() < scene_rect.left():
+                        dx = scene_rect.left() - poly_rect.left()
+                    elif poly_rect.right() > scene_rect.right():
+                        dx = scene_rect.right() - poly_rect.right()
+                        
+                    if poly_rect.top() < scene_rect.top():
+                        dy = scene_rect.top() - poly_rect.top()
+                    elif poly_rect.bottom() > scene_rect.bottom():
+                        dy = scene_rect.bottom() - poly_rect.bottom()
+                        
+                    # Apply correction offsets
+                    new_pos = QPointF(new_pos.x() + dx, new_pos.y() + dy)
+
                 self.rectangle.setPos(new_pos)
             
             #Rotating rectangle
@@ -85,16 +107,28 @@ class InteractivePreviewer(QGraphicsView):
 
                 # Calculate the angle change
                 delta_x = scene_pos.x() - self.rotating_offset.x()
-                #delta_y = scene_pos.y() - self.rotating_offset.y()
-                self.angle = self.initial_rotation_angle + math.degrees(-delta_x/240) # Adjust divisor for sensitivity
+                new_angle = self.initial_rotation_angle + math.degrees(-delta_x/240) # Adjust divisor for sensitivity
 
-                self.rectangle.setTransformOriginPoint(self.start_pos.x() + self.rectangle.rect().width()/2,self.start_pos.y() + self.rectangle.rect().height()/2)
-                self.rectangle.setRotation(self.angle)
+                self.rectangle.setTransformOriginPoint(self.rectangle.rect().x() + self.rectangle.rect().width()/2,self.rectangle.rect().y() + self.rectangle.rect().height()/2)
+                
+                # Apply new rotation
+                self.rectangle.setRotation(new_angle)
+                
+                if self.is_rect_inside_image():
+                    self.angle = new_angle
+                else:
+                    # Revert to last valid angle if it goes outside bounds
+                    self.rectangle.setRotation(self.angle)
                 
             #Create the rectangle
-            elif self.is_creating_rect and self.is_pos_inside_image(event.pos()):
-                #print("Pos:", event.pos())
+            elif self.is_creating_rect:
                 scene_pos = self.mapToScene(event.pos())
+                if self.img_scene.image_item:
+                    scene_rect = self.img_scene.image_item.sceneBoundingRect()
+                    clamped_x = max(scene_rect.left(), min(scene_pos.x(), scene_rect.right()))
+                    clamped_y = max(scene_rect.top(), min(scene_pos.y(), scene_rect.bottom()))
+                    scene_pos = QPointF(clamped_x, clamped_y)
+                    
                 self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
 
             
@@ -114,11 +148,17 @@ class InteractivePreviewer(QGraphicsView):
                     pass
 
                 #Create the rectangle
-                elif self.is_creating_rect and self.is_pos_inside_image(event.pos()):
-                        self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
-                        self.rectangle.set_rotation_handler(self.rectangle.rect().topLeft())
-                        
-                        self.rect_is_minimum_size()
+                elif self.is_creating_rect:
+                    if self.img_scene.image_item:
+                        scene_rect = self.img_scene.image_item.sceneBoundingRect()
+                        clamped_x = max(scene_rect.left(), min(scene_pos.x(), scene_rect.right()))
+                        clamped_y = max(scene_rect.top(), min(scene_pos.y(), scene_rect.bottom()))
+                        scene_pos = QPointF(clamped_x, clamped_y)
+
+                    self.rectangle.setRect(QRectF(self.start_pos, scene_pos).normalized())
+                    self.rectangle.set_rotation_handler(self.rectangle.rect().topLeft())
+
+                    self.rect_is_minimum_size()
                     #Mensaje de alerta
             
             self.is_creating_rect = False
@@ -159,3 +199,20 @@ class InteractivePreviewer(QGraphicsView):
         scene_rect.moveTo(scene_initial_pos.x(), scene_initial_pos.y())
 
         return scene_rect.contains(QPointF(pos))
+
+    def is_rect_inside_image(self) -> bool:
+        """Check if the fully rotated rectangle fits entirely inside the image."""
+        if not self.img_scene.image_item:
+            return False
+            
+        scene_rect = self.img_scene.image_item.sceneBoundingRect()
+        
+        # Map the local rectangle to the scene, getting a QPolygonF with the rotated corners
+        polygon = self.rectangle.mapToScene(self.rectangle.rect())
+        
+        # Check if all polygon vertices are inside the image's scene bounding rect
+        for i in range(polygon.count()):
+            if not scene_rect.contains(polygon.at(i)):
+                return False
+                
+        return True

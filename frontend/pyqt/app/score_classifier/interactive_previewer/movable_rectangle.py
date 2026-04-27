@@ -32,12 +32,12 @@ class MovableRectangle(QGraphicsRectItem):
 
     def get_rectangle(self) -> QRectF:
         """
-        Get the rectangle selected for the original pixmap. 
-        The coordinates are in the original pixmap reference frame, so they are affected by the zoom but not by the rotation
+        Get the rectangle selected inside the scene. 
+        The coordinates are in the scene, not affected by the zoom.
         """
-        pos = (self.rect().topLeft() + self.pos()) * self.zoom
-        width = self.rect().width() * self.zoom
-        height = self.rect().height() * self.zoom
+        pos = (self.rect().topLeft() + self.pos())
+        width = self.rect().width()
+        height = self.rect().height()
         return QRectF(pos,QSizeF(width,height))
 
 
