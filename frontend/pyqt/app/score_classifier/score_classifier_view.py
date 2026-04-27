@@ -7,7 +7,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
     rotate_clockwise_signal = QtCore.pyqtSignal() 
     rotate_counterclockwise_signal = QtCore.pyqtSignal()
     previous_btn_signal = QtCore.pyqtSignal()
-    continue_btn_signal = QtCore.pyqtSignal(str, bool) #str: name of the score, bool: if the rotation should be kept for the next page
+    continue_btn_signal = QtCore.pyqtSignal(str, bool, list) #str: name of the score, bool: if the rotation should be kept for the next page, list: corners of the selected area in the interactive previewer
     line_edit_text_changed_signal = QtCore.pyqtSignal(str) #str: text in the line edit, used to update the real time interpreted instrument label
     
     def __init__(self, parent=None):
@@ -15,6 +15,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         self.setWindowFlags(self.windowFlags() | QtCore.Qt.WindowType.WindowMaximizeButtonHint)
         self.setWindowTitle(self.tr("Score classifier")) #traducir 
+        self.setMinimumSize(800, 630)
         self.init_ui()
 
 
@@ -33,9 +34,8 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
 
         #Pdf viewer
-        self.view = InteractivePreviewer()
-        self.view.setMinimumSize(600,400)
-        #self.viewsetMinimumSize(600,400)
+        self.interactive_previewer = InteractivePreviewer()
+        self.interactive_previewer.setMinimumSize(600,400)
 
         #Rotate area
         btn_rotate_left = QtWidgets.QPushButton()
@@ -67,16 +67,19 @@ class ScoreClassifierView(QtWidgets.QDialog):
         btn_prev = QtWidgets.QPushButton(self.tr("Previous"))
         btn_prev.clicked.connect(self.previous_btn_signal.emit)
         btn_prev.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
-        btn_next = QtWidgets.QPushButton(self.tr("Continue"))
-        btn_next.clicked.connect(lambda: self.continue_btn_signal.emit(self.line_edit.text(), self.rotation_cb.isChecked()))
-        btn_next.setAutoDefault(False)
-        btn_next.setDefault(False)
+        self.btn_next = QtWidgets.QPushButton("") # It is set in 
+        self.change_to_continue_btn()
+        self.btn_next.clicked.connect(lambda: self.continue_btn_signal.emit(self.line_edit.text(), 
+                                                                       self.rotation_cb.isChecked(),
+                                                                       self.interactive_previewer.get_rectangle_corners()))
+        self.btn_next.setAutoDefault(False)
+        self.btn_next.setDefault(False)
         btn_close = QtWidgets.QPushButton(self.tr("Close"))
         btn_close.clicked.connect(self.hide)
         btn_close.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
 
         btns_layout.addWidget(btn_prev)
-        btns_layout.addWidget(btn_next)
+        btns_layout.addWidget(self.btn_next)
         btns_layout.addWidget(btn_close)
         
         #Labels
@@ -105,7 +108,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         #Writing line and instrument interpreter
         self.line_edit = QtWidgets.QLineEdit()
-        self.line_edit.returnPressed.connect(btn_next.click) #When you press enter pass to the next page
+        self.line_edit.returnPressed.connect(self.btn_next.click) #When you press enter pass to the next page
         self.line_edit.textChanged.connect(lambda text: self.line_edit_text_changed_signal.emit(text))
 
         self.interpreted_instrument_lbl = QtWidgets.QLabel()
@@ -116,7 +119,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         #Add widgets
         container_layout.addWidget(self.piece_name_lbl)
-        container_layout.addWidget(self.view)
+        container_layout.addWidget(self.interactive_previewer)
         container_layout.addLayout(rotate_btns_layout)
         container_layout.addLayout(writing_line_h_layout)
         container_layout.addLayout(last_classfied_h_layout)
@@ -154,6 +157,16 @@ class ScoreClassifierView(QtWidgets.QDialog):
         main_layout.setContentsMargins(10, 0, 10, 10)
         self.setLayout(main_layout)
     
+    def change_to_finish_btn(self):
+        """Set the button to finish and change its style to indicate the end of the classification process"""
+        self.btn_next.setText(self.tr("Finish"))
+        self.btn_next.setStyleSheet("background-color: green; color: white;")
+
+    def change_to_continue_btn(self):
+        """Set the button to continue and reset its style (in case it was changed to finish)"""
+        self.btn_next.setText(self.tr("Continue"))
+        self.btn_next.setStyleSheet("")
+
     #Opens a pop up window with the instructions
     def show_help(self):
         QtWidgets.QMessageBox.information(self, self.tr("Help"), INSTRUCTIONS_SCORE_CLASSIFIER)
