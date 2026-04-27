@@ -205,7 +205,7 @@
             "en_US" : "Gong",
             "ca_VA" : "Gong"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "go"
     },
     "percusion" : {
         "translations" : {
@@ -245,7 +245,7 @@
             "en_US" : "Vibraphone",
             "ca_VA" : "Vibrafon"
         },
-        "classifier_hotkey" : ""
+        "classifier_hotkey" : "vf"
     },
     "dulzaina" : {
         "translations" : {
