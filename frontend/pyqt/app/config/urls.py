@@ -37,6 +37,10 @@ class Endpoint(StrEnum):
     PIECE_PRESET_BY_NAME = "/presets/pieces/{preset_name}"
     PIECE_PRESETS_NAMES = "/presets/pieces/names"
 
+    INSTRUMENTS_NAMES_SHORTCUTS_AND_INSTRUMENTS = "/instruments_names/shortcuts_and_instruments"
+    INSTRUMENTS_NAMES_INSTRUMENTS_AND_SHORTCUTS = "/instruments_names/instruments_and_shortcuts"
+    INSTRUMENTS_NAMES_TRANSLATED = "/instruments_names/instruments_and_shortcuts/{language_cod}"
+
 def build_url(
     endpoint: Endpoint,
     *,

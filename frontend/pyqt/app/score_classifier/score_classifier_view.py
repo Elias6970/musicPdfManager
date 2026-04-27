@@ -1,6 +1,7 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 
 from frontend.pyqt.app.config.constants import INSTRUCTIONS_SCORE_CLASSIFIER, ROTATE_L_IMG_PATH, ROTATE_R_IMG_PATH
+from frontend.pyqt.app.score_classifier.interactive_previewer.interactive_previewer import InteractivePreviewer
 
 class ScoreClassifierView(QtWidgets.QDialog):
     rotate_clockwise_signal = QtCore.pyqtSignal() 
@@ -8,6 +9,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
     previous_btn_signal = QtCore.pyqtSignal()
     continue_btn_signal = QtCore.pyqtSignal(str, bool) #str: name of the score, bool: if the rotation should be kept for the next page
     line_edit_text_changed_signal = QtCore.pyqtSignal(str) #str: text in the line edit, used to update the real time interpreted instrument label
+    
     def __init__(self, parent=None):
         super().__init__(parent)
 
@@ -32,7 +34,8 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         #Pdf viewer
         self.view = InteractivePreviewer()
-
+        self.view.setMinimumSize(600,400)
+        #self.viewsetMinimumSize(600,400)
 
         #Rotate area
         btn_rotate_left = QtWidgets.QPushButton()
@@ -119,7 +122,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
         container_layout.addLayout(last_classfied_h_layout)
 
         container_layout.addLayout(btns_layout)
-        #self.setGeometry(0,0,500,400)
+        
 
         # Shortcuts instructions
         self.instructions_lbl = QtWidgets.QLabel()
