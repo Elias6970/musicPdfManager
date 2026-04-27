@@ -20,7 +20,10 @@ from backend.app.services.archive_services import (
     get_all_piece_std_names as _get_all_piece_std_names,
     get_all_digitalized_piece_std_names as _get_all_digitalized_piece_std_names
 )
-from backend.app.services.pieces_services import get_scores as _get_piece_scores
+from backend.app.services.pieces_services import (
+    get_scores as _get_piece_scores,
+    get_scores_and_page_counts as _get_scores_and_page_counts
+)
 
 router = APIRouter(prefix="/archives/{archive_id}/pieces", tags=["pieces"])
 
@@ -87,6 +90,30 @@ def get_piece_scores(
             status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
 
+@router.get("/{piece_std_name}/scores/page_counts", response_model=List[tuple[str, int]])
+def get_piece_scores_and_page_counts(
+    archive_id: int,
+    piece_std_name: str,
+    file_manager: ArchiveFileManager = Depends(get_archive_file_manager),
+    _ = Depends(require_archive_viewer)
+):
+    """Get the scores of a piece along with their page counts."""
+    try:
+        scores_and_page_counts = _get_scores_and_page_counts(piece_std_name, file_manager)
+        
+        # Sort the list of tuples by instrument name using the sorter
+        sorted_scores = InstrumentSorter.sort_instruments([score for score, _ in scores_and_page_counts])
+        score_dict = {score: count for score, count in scores_and_page_counts}
+        
+        return [(score, score_dict[score]) for score in sorted_scores]
+    except FileCouldNotBeReadException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
+        )
 
 @router.post("/", response_model=PiecePublic, status_code=status.HTTP_201_CREATED)
 def add_piece_to_archive(
