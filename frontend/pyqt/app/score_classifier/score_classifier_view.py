@@ -64,9 +64,10 @@ class ScoreClassifierView(QtWidgets.QDialog):
         rotate_btns_layout.addLayout(rotate_btns_horizontal_layout)
         
         #buttons
-        btn_prev = QtWidgets.QPushButton(self.tr("Previous"))
-        btn_prev.clicked.connect(self.previous_btn_signal.emit)
-        btn_prev.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+        self.btn_back = QtWidgets.QPushButton(self.tr("Previous"))
+        self.btn_back.clicked.connect(self.previous_btn_signal.emit)
+        self.btn_back.setEnabled(False) # Initially disabled, since the user starts in the first score
+        self.btn_back.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         self.btn_next = QtWidgets.QPushButton("") # It is set in 
         self.change_to_continue_btn()
         self.btn_next.clicked.connect(lambda: self.continue_btn_signal.emit(self.line_edit.text(), 
@@ -78,7 +79,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
         btn_close.clicked.connect(self.hide)
         btn_close.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
 
-        btns_layout.addWidget(btn_prev)
+        btns_layout.addWidget(self.btn_back)
         btns_layout.addWidget(self.btn_next)
         btns_layout.addWidget(btn_close)
         

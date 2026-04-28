@@ -47,10 +47,10 @@ class ScoreClassifierController(QtCore.QObject):
         self.preview_api_client = PreviewApiClient(get_base_client())
         self.preview_api_client.preview_loaded.connect(self._on_image_fetched)
 
-        self.view.rotate_clockwise_signal.connect(lambda: self.rotate(90))
-        self.view.rotate_counterclockwise_signal.connect(lambda: self.rotate(-90))
+        self.view.rotate_clockwise_signal.connect(lambda: self.rotate_and_load(90))
+        self.view.rotate_counterclockwise_signal.connect(lambda: self.rotate_and_load(-90))
         self.view.continue_btn_signal.connect(self.next_page)
-        # self.view.previous_btn_signal.connect(self.go_to_previous_score)      
+        self.view.previous_btn_signal.connect(self.previous_page)
 
         self.text_analizer = TextAnalizer()
         self.view.line_edit_text_changed_signal.connect(self.update_interpreted_instrument_label)
@@ -103,11 +103,29 @@ class ScoreClassifierController(QtCore.QObject):
             self.current_score_index += 1
             self.view.change_to_continue_btn() # In case the button was changed to finish in the previous page, change it back to continue
             self.view.clear_line_edit() # Clear the line edit for the next input
+            self.view.btn_back.setEnabled(True) # Enable the back button, since we are no longer in the first page
         else:
             QtWidgets.QMessageBox.information(self.view, self.view.tr("End"), self.view.tr("You have reached the end of the scores."))
         
         if self.current_score_index == len(self.pages) - 1:
             self.view.change_to_finish_btn()
+    
+    def previous_page(self):
+        """Navigate to the previous page in the classification process."""
+        if self.current_score_index > 0:
+            self.current_score_index -= 1
+            self.load_image_page(self.current_score_index)
+            self.view.change_to_continue_btn() # In case the button was changed to finish in the next page, change it back to continue
+            # Load the user input for the previous page in the line edit, so it can be edited if needed
+            previous_user_input = self.pages[self.current_score_index].user_input
+            if previous_user_input is not None:
+                self.view.line_edit.setText(previous_user_input)
+            
+            if self.current_score_index == 0:
+                self.view.btn_back.setEnabled(False) # Disable the back button, since we are in the first page
+        else:
+            ShowError.show_tooltip_error(self.view.tr("You are already in the first page."), 5000, self.view.btn_back)
+            self.view.btn_back.setEnabled(False)
 
     def finish_classification(self):
         """
@@ -123,7 +141,7 @@ class ScoreClassifierController(QtCore.QObject):
         job = ClassificationJob(
             archive_id=self.archive_id,
             piece_std_name=self.piece_std_name,
-            classified_documents=dict_documents,
+            classifications=dict_documents,
             source_files=list(self.source_files)
         )
         #TODO Create the api client and send.
@@ -153,7 +171,7 @@ class ScoreClassifierController(QtCore.QObject):
 
         if cache_key in self._images_cache:
             if self.view.keep_rotation_cb.isChecked(): # Keep rotation
-                pixmap = self._rotate(self._last_rotation, pixmap)
+                pixmap = self._rotate(self._last_rotation, self._images_cache[cache_key])
                 self._images_cache[cache_key] = pixmap # Update the cache with the rotated pixmap, so if the user goes back to this page it will be shown with the correct rotation
             else:
                 pixmap = self._images_cache[cache_key]
