@@ -14,7 +14,7 @@ class PreviewApiClient(QObject):
     """
 
     # Emits (page_num, image_bytes, total_pages)
-    preview_loaded = pyqtSignal(int, bytes, int)
+    preview_loaded = pyqtSignal(str, str, bytes, int, int)
     preview_error = pyqtSignal(str)
 
     def __init__(self, base_client: BaseApiClient, parent: Optional[QObject] = None):
@@ -29,13 +29,15 @@ class PreviewApiClient(QObject):
         file: str,
         page_number: int,
         dpi: int = 150,
+        abort_previous: bool = True
     ) -> None:
         """
         Initiates a network request to fetch the preview image bytes.
         If a previous request is still running, it is aborted to prevent race conditions.
         """
         # Cancel any pending preview fetch
-        self.abort_current_request()
+        if abort_previous:
+            self.abort_current_request()
 
         # Build URL with query params
         url = build_url(
@@ -54,7 +56,7 @@ class PreviewApiClient(QObject):
 
         # Connect the finished signal to our handler, injecting page_number
         self._current_reply.finished.connect(
-            lambda r=self._current_reply, p=page_number: self._on_fetch_finished(r, p)
+            lambda r=self._current_reply: self._on_fetch_finished(r)
         )
 
     def abort_current_request(self) -> None:
@@ -63,7 +65,7 @@ class PreviewApiClient(QObject):
             self._current_reply.abort()
         self._current_reply = None
 
-    def _on_fetch_finished(self, reply: QNetworkReply, page_num: int) -> None:
+    def _on_fetch_finished(self, reply: QNetworkReply) -> None:
         # Clear the reference since it's finished
         if self._current_reply == reply:
             self._current_reply = None
@@ -79,11 +81,14 @@ class PreviewApiClient(QObject):
             # We don't use parse_reply here because the content is raw image bytes, not JSON
             img_bytes = reply.readAll().data()
             
-            # The FastAPI backend returns total pages in a custom header
-            total_pages_bytes = reply.rawHeader(b"X-Total-Pages")
-            total_pages = int(total_pages_bytes) if total_pages_bytes else 1
+            #Headers
+            piece_std_name = reply.rawHeader(b"X-Piece_Std-Name").data().decode()
+            file_name = reply.rawHeader(b"X-File-Name").data().decode()
+            page_number = int(reply.rawHeader(b"X-Page-Number")) if reply.rawHeader(b"X-Page-Number") else 0
+            total_pages = int(reply.rawHeader(b"X-Total-Pages")) if reply.rawHeader(b"X-Total-Pages") else 1
             
-            self.preview_loaded.emit(page_num, img_bytes, total_pages)
+            self.preview_loaded.emit(piece_std_name, file_name,
+                                     img_bytes, page_number, total_pages)
         else:
             if error_code == QNetworkReply.NetworkError.AuthenticationRequiredError:
                 self.preview_error.emit("Unauthorized access. Please log in again.")

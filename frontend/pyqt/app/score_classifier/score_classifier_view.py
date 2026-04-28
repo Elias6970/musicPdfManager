@@ -53,14 +53,14 @@ class ScoreClassifierView(QtWidgets.QDialog):
         except Exception:
             pass
         
-        self.rotation_cb = QtWidgets.QCheckBox(self.tr("Keep rotation to next scores"))
-        self.rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf page is going to be rotated like the previous"))
-        self.rotation_cb.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
+        self.keep_rotation_cb = QtWidgets.QCheckBox(self.tr("Keep rotation to next scores"))
+        self.keep_rotation_cb.setToolTip(self.tr("If this checkbox is checked the next pdf page is going to be rotated like the previous"))
+        self.keep_rotation_cb.setFocusPolicy(QtCore.Qt.FocusPolicy.NoFocus)
         rotate_btns_horizontal_layout = QtWidgets.QHBoxLayout()
         rotate_btns_horizontal_layout.addWidget(btn_rotate_left)
         rotate_btns_horizontal_layout.addWidget(btn_rotate_right)
 
-        rotate_btns_layout.addWidget(self.rotation_cb)
+        rotate_btns_layout.addWidget(self.keep_rotation_cb)
         rotate_btns_layout.addLayout(rotate_btns_horizontal_layout)
         
         #buttons
@@ -70,7 +70,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
         self.btn_next = QtWidgets.QPushButton("") # It is set in 
         self.change_to_continue_btn()
         self.btn_next.clicked.connect(lambda: self.continue_btn_signal.emit(self.line_edit.text(), 
-                                                                       self.rotation_cb.isChecked(),
+                                                                       self.keep_rotation_cb.isChecked(),
                                                                        self.interactive_previewer.get_rectangle_corners()))
         self.btn_next.setAutoDefault(False)
         self.btn_next.setDefault(False)
