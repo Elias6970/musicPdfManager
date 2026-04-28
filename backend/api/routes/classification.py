@@ -11,7 +11,7 @@ from backend.app.error import ClassificationFileExistsError
 router = APIRouter(prefix="/classification", tags=["Classification"])
 
 @router.post("/{archive_id}", status_code=status.HTTP_200_OK)
-def create_classification(
+def execute_classification(
     archive_id: int,
     job: ClassificationJob,
     session: Session = Depends(get_session),

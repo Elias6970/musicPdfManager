@@ -1,5 +1,6 @@
 from PyQt6 import QtCore, QtWidgets, QtGui
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
+from frontend.pyqt.app.api_client.classification_api_client import ClassificationApiClient
 from frontend.pyqt.app.api_client.instruments_names_api_client import InstrumentsNamesApiClient
 from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
 from frontend.pyqt.app.score_classifier.score_classifier_view import ScoreClassifierView
@@ -7,6 +8,7 @@ from frontend.pyqt.app.config.session_manager import SessionManager
 from frontend.pyqt.app.models.generated_models import SourcePage, ClassificationJob, ClassifiedDocument, ClassifiedDocumentConfig
 from frontend.pyqt.app.score_classifier.text_analizer import TextAnalizer
 from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
+from frontend.pyqt.app.pop_up_windows.collision_resolution_window import CollisionResolutionWindow
 
 class SourcePageWithResolution(SourcePage):
     resolution: str|None = None
@@ -38,7 +40,12 @@ class ScoreClassifierController(QtCore.QObject):
         self.pages:list[SourcePageWithResolution] = self._create_pages_from_scores(scores_and_page_counts) # List with all the pages need to show in order. Each element is a tuple (score_name, page_number)
         self._images_cache: dict[tuple[str, int], QtGui.QPixmap] = {}  # Cache for storing fetched images, key: (file, page_number)
         self._last_rotation = 0 # Track the last rotation applied in degress
+        self.job:ClassificationJob|None = None # Will be created when finishing the classification
 
+        self.classifier_api_client = ClassificationApiClient(get_base_client())
+        self.classifier_api_client.classification_success.connect(self._on_finish_classification_success)
+        self.classifier_api_client.classification_file_exists_error.connect(self._on_finish_classification_file_exists_error)
+        self.classifier_api_client.classification_error.connect(self._on_finish_classification_error)
 
         self.instruments_names_api_client = InstrumentsNamesApiClient(get_base_client())
         self.instruments_names_api_client.get_instruments_and_shortcuts_translated_success.connect(self.on_get_instrument_shortcuts_success)
@@ -63,7 +70,8 @@ class ScoreClassifierController(QtCore.QObject):
         self.load_image_page(self.current_score_index) # Load the first page
         if len(self.pages) > 1:
             self.load_image_page(self.current_score_index+1) # Preload the second page for smoother navigation
-        
+
+
     def _create_pages_from_scores(self, scores_and_page_counts: list[tuple[str,int]]) -> list[SourcePageWithResolution]:
         """
         Creates a list of pages to be displayed based on the scores and their corresponding page counts.
@@ -138,18 +146,37 @@ class ScoreClassifierController(QtCore.QObject):
         
         dict_documents = {instrument: ClassifiedDocument(config=None, pages=pages) for instrument, pages in dict_pages.items()}
         
-        job = ClassificationJob(
+        self.job = ClassificationJob(
             archive_id=self.archive_id,
             piece_std_name=self.piece_std_name,
             classifications=dict_documents,
             source_files=list(self.source_files)
         )
-        #TODO Create the api client and send.
 
+        self.classifier_api_client.execute_classification(self.archive_id, self.job)
             
 
     def _on_finish_classification_success(self):
-        pass
+        QtWidgets.QMessageBox.information(self.view, self.view.tr("Success"), self.view.tr("Classification completed successfully."))
+        #self.view.hide()
+    
+    def _on_finish_classification_file_exists_error(self, missing_names:list[str]):
+        self.collision_window = CollisionResolutionWindow(missing_names, self.view)
+        self.collision_window.resolved_signal.connect(self._on_collision_resolved)
+        self.collision_window.exec()
+        
+    def _on_collision_resolved(self, resolution_dict: dict[str, str | None]):
+        if not self.job or not self.job.classifications:
+            return
+            
+        for missing_name, new_name in resolution_dict.items():
+            if missing_name in self.job.classifications:
+                if new_name is None:
+                    self.job.classifications[missing_name].config.overwrite = True
+                else:
+                    self.job.classifications[missing_name].config.rename = new_name
+                    
+        self.classifier_api_client.execute_classification(self.archive_id, self.job)
 
     def _on_finish_classification_error(self, error:str):
         pass
