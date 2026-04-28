@@ -21,7 +21,7 @@ class ScoreClassifierController(QtCore.QObject):
         Args:
             view (ScoreClassifierView): The view associated with this controller.
             piece_std_name (str): The standardized name of the piece being classified.
-            scores_and_page_counts (list[tuple[str,int]], optional): A list of tuples containing score names and their corresponding page numbers. Defaults to an empty list.
+            scores_and_page_counts (list[tuple[str,int]], optional): A list of tuples containing score names and their page_counts.
         """
         super().__init__()
         #List of tasks needed to show the first page.
@@ -59,7 +59,9 @@ class ScoreClassifierController(QtCore.QObject):
             QtCore.QCoreApplication.processEvents()
         
         self.load_image_page(self.current_score_index) # Load the first page
-
+        if len(self.pages) > 1:
+            self.load_image_page(self.current_score_index+1) # Preload the second page for smoother navigation
+        
     def _create_pages_from_scores(self, scores_and_page_counts: list[tuple[str,int]]) -> list[SourcePageWithResolution]:
         """
         Creates a list of pages to be displayed based on the scores and their corresponding page counts.
@@ -77,29 +79,32 @@ class ScoreClassifierController(QtCore.QObject):
                                         corners=None))
 
         self._tasks.remove(self._LOAD_PAGES) # Remove the task of loading the first page, since it is already done in the constructor
-
+        print(pages)
+        print(scores_and_page_counts)
         return pages
     
 
-    def next_page(self, instrument_name:str, keep_rotation:bool, corners:list[tuple[float, float]]):
+    def next_page(self, user_input:str, keep_rotation:bool, corners:list[tuple[float, float]]):
         """Navigate to the next page in the classification process."""
-        parsed_instrument_name = self.text_analizer.analyze(instrument_name)
-        if not parsed_instrument_name or parsed_instrument_name.isspace():
-            ShowError.show_tooltip_error(self.view.tr("Please enter a valid instrument name."), 5000, self.view.line_edit)
+        parsed_instrument_name = self.get_instrument_from_input(user_input)
+        if parsed_instrument_name is None:
+            ShowError.show_tooltip_error(self.view.tr("The first page can't be left empty."), 5000, self.view.line_edit)
             return
-        
-        self.pages[self.current_score_index].resolution = instrument_name # Save the interpreted instrument name in the page object, so it can be used later when saving the classification
+                
+        self.pages[self.current_score_index].resolution = parsed_instrument_name # Save the interpreted instrument name in the page object, so it can be used later when saving the classification
         self.pages[self.current_score_index].corners = corners
 
         if self.current_score_index < len(self.pages) - 1:
-            self.load_image_page(self.current_score_index)
-            self.load_image_page(self.current_score_index+1) # Preload the next page for smoother navigation
+            self.load_image_page(self.current_score_index+1)
+            self.load_image_page(self.current_score_index+2) # Preload the next page for smoother navigation
             self.current_score_index += 1
             self.view.change_to_continue_btn() # In case the button was changed to finish in the previous page, change it back to continue
-        if self.current_score_index == len(self.pages) - 1:
-            self.view.change_to_finish_btn()
+            self.view.clear_line_edit() # Clear the line edit for the next input
         else:
             QtWidgets.QMessageBox.information(self.view, self.view.tr("End"), self.view.tr("You have reached the end of the scores."))
+        
+        if self.current_score_index == len(self.pages) - 1:
+            self.view.change_to_finish_btn()
 
 
     def load_image_page(self, index: int):
@@ -116,38 +121,38 @@ class ScoreClassifierController(QtCore.QObject):
             QtWidgets.QMessageBox.warning(self.view, self.view.tr("Invalid page"), self.view.tr("The requested page does not have a valid page number."))
             return
         cache_key:tuple[str,int] = (page.file_name, page.page)
-        
+        print("Checking cache for key:", cache_key)
         if cache_key in self._images_cache:
+            print("LOADED FROM CACHE")
             pixmap = self._images_cache[cache_key]
             self.view.interactive_previewer.load_img(pixmap)
         else:
-            self.preview_api_client.fetch_preview(self.archive_id, self.piece, page.file_name, page.page, self.DPI)
+            self.preview_api_client.fetch_preview(self.archive_id, self.piece, page.file_name, page.page, self.DPI, abort_previous=False)
 
-    def _on_image_fetched(self, page_num: int, img_bytes: bytes, total_pages: int):
+    def _on_image_fetched(self, piece_std_name: str, file_name: str, img_bytes: bytes, page_number: int, total_pages: int):
         """
         Handle the event when an image is fetched from the API.
         It saves the image in a cache and displays it if it corresponds to the currently displayed page.
         If not, it is saved in the cache.
         """
-        print(f"Image fetched for page {page_num}, total pages: {total_pages}")
+        print(f"Image fetched for page {page_number}, total pages: {total_pages}")
         if self.current_score_index >= len(self.pages):
             QtWidgets.QMessageBox.warning(self.view, self.view.tr("Invalid page"), self.view.tr("Received an image for a page index that is out of range."))
             return
         print(f"Current page index: {self.current_score_index}")
-        page = self.pages[self.current_score_index]
         
-        if not isinstance(page.page, int):
+        if not isinstance(page_number, int):
             QtWidgets.QMessageBox.warning(self.view, self.view.tr("Invalid page"), self.view.tr("The fetched page number is invalid."))
             return
-        cache_key = (page.file_name, page.page)
+        cache_key = (file_name, page_number)
         if cache_key in self._images_cache:
             return  # Image already cached, no need to process it again
-        
+        print(f"Caching image for file: {file_name}, page: {page_number} with key: {cache_key}")
         self._images_cache[cache_key] = QtGui.QPixmap()
         self._images_cache[cache_key].loadFromData(img_bytes)
-
-        #TODO: ERROR IN THE PREVIEW API BECAUSE IT CANT GET THE SCORE NAME AND THE PIECE NAME. IT NEED TO BE CHANGED IN THE API
-        if self.pages[self.current_score_index].page == page_num: # Ensure that the fetched image corresponds to the currently displayed page
+        
+        #Ensure that the fetched image corresponds to the currently displayed page
+        if self.pages[self.current_score_index].file_name == file_name and self.pages[self.current_score_index].page == page_number:
             self.view.interactive_previewer.load_img(self._images_cache[cache_key])
 
 
@@ -161,7 +166,25 @@ class ScoreClassifierController(QtCore.QObject):
         self.view.set_shortcuts(shortcuts)
         self._tasks.remove(self._LOAD_SHORTCUTS)
 
-
+    def get_instrument_from_input(self, text:str) -> str | None:
+        """
+        Get the interpreted instrument name from a text input.
+        If the text is empty it return the last interpreted instrument.
+        Returns:
+            String with the interpreted isntrument.
+            None is interpreted as the first empty input that is invalid.
+        """
+        try:
+            if text.strip() == "":
+                if self.current_score_index > 0:
+                    return self.pages[self.current_score_index-1].resolution or ""
+                else:
+                    return None
+            else:
+                return self.text_analizer.analyze(text)
+        except ValueError:
+            return self.view.tr("Invalid characters.")
+        
     def update_interpreted_instrument_label(self, text:str):
         """Update the interpreted instrument label in real time as the user types in the line edit."""
-        self.view.interpreted_instrument_lbl.setText(self.text_analizer.analyze(text))
+        self.view.interpreted_instrument_lbl.setText(self.get_instrument_from_input(text))

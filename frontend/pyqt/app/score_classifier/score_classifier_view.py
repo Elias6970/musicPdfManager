@@ -167,6 +167,9 @@ class ScoreClassifierView(QtWidgets.QDialog):
         self.btn_next.setText(self.tr("Continue"))
         self.btn_next.setStyleSheet("")
 
+    def clear_line_edit(self):
+        self.line_edit.clear()
+
     #Opens a pop up window with the instructions
     def show_help(self):
         QtWidgets.QMessageBox.information(self, self.tr("Help"), INSTRUCTIONS_SCORE_CLASSIFIER)
