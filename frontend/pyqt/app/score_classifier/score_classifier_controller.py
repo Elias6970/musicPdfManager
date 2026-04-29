@@ -19,9 +19,6 @@ class ScoreClassifierController(QtCore.QObject):
     _LOAD_SHORTCUTS = "load_shortcuts"
     _LOAD_PAGES = "load_first_page"
 
-    classification_success = QtCore.pyqtSignal()
-    classification_error = QtCore.pyqtSignal(str)
-
     def __init__(self, view: ScoreClassifierView, piece_std_name: str, scores_and_page_counts: list[tuple[str,int]] = []):
         """
         Args:
@@ -37,6 +34,7 @@ class ScoreClassifierController(QtCore.QObject):
         
         self.archive_id = self.session.get_archive_id()
         self.piece_std_name: str = piece_std_name
+        self.view.piece_name_lbl.setText(piece_std_name)
         self.source_files: set[str] = set(score_name for score_name, _ in scores_and_page_counts) # Set with the names of the source files, to be sent when finishing the classification
 
         self.current_score_index = 0 # Start before the first score, so that the first call to next_page() loads the first score
@@ -162,8 +160,7 @@ class ScoreClassifierController(QtCore.QObject):
     def _on_finish_classification_success(self):
         """Handle the successful completion of the classification by showing a success message and emitting a signal to notify other parts of the application."""
         QtWidgets.QMessageBox.information(self.view, self.view.tr("Success"), self.view.tr("Classification completed successfully."))
-        self.classification_success.emit()
-        self.view.hide()
+        self.view.accept()
     
     def _on_finish_classification_file_exists_error(self, missing_names:list[str]):
         """Handle the case when the classification fails because some of the output files already exist in the backend. It opens a collision resolution window where the user can choose to rename the new files or overwrite the existing ones."""
@@ -189,8 +186,6 @@ class ScoreClassifierController(QtCore.QObject):
     def _on_finish_classification_error(self, error:str):
         """Handle unexpected errors during classification by showing an error message to the user."""
         QtWidgets.QMessageBox.critical(self.view, self.view.tr("Error"), self.view.tr(f"An error occurred while finishing the classification: {error}"))
-        self.classification_error.emit(error)
-
 
     def load_image_page(self, index: int):
         """

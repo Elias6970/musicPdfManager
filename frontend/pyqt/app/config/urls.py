@@ -19,6 +19,7 @@ class Endpoint(StrEnum):
     PIECES = "/archives/{archive_id}/pieces"
     PIECE_BY_ID = "/archives/{archive_id}/pieces/{piece_id}"
     PIECE_SCORES = "/archives/{archive_id}/pieces/{piece_std_name}/scores"
+    PIECE_SCORES_PAGE_COUNTS = "/archives/{archive_id}/pieces/{piece_std_name}/scores/page_counts"
     PIECE_FILES = "/archives/{archive_id}/pieces/{piece_id}/files"
     PIECES_STD = "/archives/{archive_id}/pieces/std"
     PIECES_STD_DIGITALIZED = "/archives/{archive_id}/pieces/std/digitalized"
