@@ -107,7 +107,7 @@ class MainView(QtWidgets.QMainWindow):
         about_opt.triggered.connect(self.show_about_us.emit)
 
         #ADMIN OPTIONS
-        manage_users_opt = QtGui.QAction(self.tr("Manage users and roles"),self)
+        manage_users_opt = QtGui.QAction(self.tr("Manage users"),self)
         manage_users_opt.triggered.connect(self.show_manage_users.emit)
 
         menu = self.menuBar()
@@ -271,4 +271,3 @@ class MainView(QtWidgets.QMainWindow):
     def clear_load_pieces_preset_menu(self):
         """Clear the load pieces preset menu"""
         self._load_pieces_preset_opt.clear()
-    

@@ -62,8 +62,7 @@ class IndividualSelectionController(QObject):
         self.preview_controller.enable_previous.connect(self.view.btn_mv_back_preview.setEnabled)
         self.preview_controller.enable_next.connect(self.view.btn_mv_forward_preview.setEnabled)
 
-        self.refresh()
-        
+
     def generate_pdf(self):
         """
         Generate the PDF with the added scores.
