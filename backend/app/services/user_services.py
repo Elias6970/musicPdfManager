@@ -59,7 +59,7 @@ def login_user(session: Session, email: str, password: str) -> Token:
     access_token = create_access_token(subject=user.id) #type: ignore
     return Token(access_token=access_token, token_type="bearer")
 
-def update_user(session: Session, user_id: int, user_update: UserCreate) -> User:
+def update_user(session: Session, user_id: int, user_update: UserCreate) -> User | None:
     if user_update.email is not None and "@" not in user_update.email:
         raise InvalidUserDataError("Invalid email format")
     
@@ -70,11 +70,7 @@ def update_user(session: Session, user_id: int, user_update: UserCreate) -> User
     if user_update.role_id is not None:
         role = rol_crud.get_role(session, user_update.role_id)
         if not role:
-            raise InvalidUserDataError("Provided role_id does not exist")
-
-    if user_update.password is not None and user_update.password.strip() == "":
-        user_update.password = None  # Treat empty password as no update
-    
+            raise InvalidUserDataError("Provided role_id does not exist")  
 
     return user_crud.update_user(session, user_id=user_id, user_update=user_update)
 

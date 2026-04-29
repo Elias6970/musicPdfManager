@@ -4,7 +4,8 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QDialog, QVBoxLayout, QTab
                              QTableWidgetItem, QComboBox, QPushButton, QHeaderView)
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtGui import QIcon
-from frontend_pyqt.config.constants import TRASH_IMG_PATH
+from frontend.pyqt.app.config.constants import TRASH_IMG_PATH
+from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
 
 class UsersView(QDialog):
     save_signal = pyqtSignal(list)
@@ -40,21 +41,21 @@ class UsersView(QDialog):
         layout.addWidget(self.save_btn)
 
 
-    def add_user_row(self, user_id:int, email:str, name:str, role_id:int):
+    def add_user_row(self, user_id:int, email:str, name:str, role_id:int | None):
         """Helper method to add a row with text items and a combobox."""
         row_position = self.table.rowCount()
         self.table.insertRow(row_position)
 
         # Standard Text Cells for Email and Name
-        email = QTableWidgetItem(email)
-        email.setData(Qt.ItemDataRole.UserRole, user_id)  # Store user_id in the item for later retrieval
-        self.table.setItem(row_position, 0, email)
+        email_item = QTableWidgetItem(email)
+        email_item.setData(Qt.ItemDataRole.UserRole, user_id)  # Store user_id in the item for later retrieval
+        self.table.setItem(row_position, 0, email_item)
         self.table.setItem(row_position, 1, QTableWidgetItem(name))
 
         # ComboBox for the Role
         combo = QComboBox()
-        for role_id, role_name in self.available_roles.items():
-            combo.addItem(role_name, role_id)  # Display role name, store role id as data
+        for _role_id, _role_name in self.available_roles.items():
+            combo.addItem(_role_name, _role_id)  # Display role name, store role id as data
 
         # Set the current dropdown text to match the user's role
         if role_id in self.available_roles:
@@ -72,14 +73,15 @@ class UsersView(QDialog):
         delete_btn.setFixedSize(20, 25)
         delete_btn.setStyleSheet("background-color: #ff5555")
         delete_btn.setSizePolicy(QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Preferred)
-        delete_btn.clicked.connect(lambda _,row=row_position: self.table.removeRow(row)) #Remove the row
+        # Compute the row index dynamically when the button is clicked 
+        delete_btn.clicked.connect(lambda _, btn=delete_btn: self.table.removeRow(self.table.indexAt(btn.pos()).row()))
         self.table.setCellWidget(row_position, 4, delete_btn)
 
 
-    def get_data(self) -> list[tuple[int, str, str, int, str]]:
+    def get_data(self) -> list[tuple[int, str, str, int, str, int]]:
         """
         Extract data from both standard items and cell widgets.
-            :return: A list of tuples containing (user_id, email, name, role_id, password) for each row.
+            :return: A list of tuples containing (user_id, email, name, role_id, password, row) for each row.
         """
         elements = []
         for row in range(self.table.rowCount()):
@@ -89,10 +91,24 @@ class UsersView(QDialog):
             # To get data from a custom widget, we have to extract the widget first
             role_widget = self.table.cellWidget(row, 2)
             if role_widget and isinstance(role_widget, QComboBox):
-                role_id = role_widget.currentData()  # Extract the stored role_id
+                role_id = role_widget.currentData()  # Extract the stored role_id or None
                 user_id = self.table.item(row, 0).data(Qt.ItemDataRole.UserRole)  # Retrieve the stored user_id
+                
+                if user_id == -1 and email == "" and name == "" and password == "" and role_id == None:
+                    continue #This is a blank user, skip it
 
-                elements.append((user_id, email, name, role_id, password))
+                elements.append((user_id, email, name, role_id, password, row))
 
         return elements 
 
+    def show_tooltip_error_in_a_row(self, row:int, message:str):
+        """Show a tooltip in a specific row. This can be used to show validation errors."""
+        # Since ShowError.show_tooltip_error requires a QWidget and QTableWidgetItem is NOT a widget,
+        # we can attach the tooltip to the QComboBox widget that lives in cell column 2 of this row.
+        role_combo_widget = self.table.cellWidget(row, 2)
+        
+        if role_combo_widget:
+            ShowError.show_tooltip_error(message, 5000, role_combo_widget)
+        else:
+            # Fallback: display it in the center of the table if the widget is missing
+            ShowError.show_tooltip_error(message, 5000, self.table)
