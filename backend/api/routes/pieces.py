@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
+from requests import session
 from sqlmodel import Session
 
 from backend.api.dependencies.database import get_session
@@ -151,16 +152,28 @@ def update_piece(
     archive_id: int,
     piece_id: int,
     piece: PieceCreate,
+    added_files: List[str] | None = None,
+    removed_files: List[str] | None = None,
     session: Session = Depends(get_session),
     file_manager: ArchiveFileManager = Depends(get_archive_file_manager),
     _ = Depends(require_archive_editor)
 ):
     """Update an existing piece in the archive."""
     try:
+        
+        if removed_files is None:
+            pass #TODO: Implement the remove of the files
+        if added_files is not None and added_files != []:
+            print("DEntro")
+            _add_files_to_existing_piece(session, piece_id, added_files, file_manager) # Add new files first to handle potential file-related errors before updating piece data
         return _update_piece_in_archive(session, piece_id, piece, file_manager)
     except (PieceCodAlreadyExistsError, PieceNameAlreadyExistsError) as e:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail=str(e)
+        )
+    except FileCouldNotBeReadException as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         )
     except ValueError as e:
         raise HTTPException(

@@ -29,6 +29,14 @@ class PiecesApiClient(QObject):
     piece_created_success = pyqtSignal(generated_models.PiecePublic)
     piece_created_error = pyqtSignal(str)
 
+    # Emits upon piece update
+    piece_updated_success = pyqtSignal(generated_models.PiecePublic)
+    piece_updated_error = pyqtSignal(str)
+
+    # Emits upon adding files to existing piece
+    files_added_success = pyqtSignal(generated_models.PiecePublic)
+    files_added_error = pyqtSignal(str)
+
     def __init__(self, base_client: BaseApiClient, parent: Optional[QObject] = None):
         super().__init__(parent)
         self.client = base_client
@@ -122,5 +130,45 @@ class PiecesApiClient(QObject):
                 self.piece_created_error.emit(f"Data parsing error on creation: {str(e)}")
         else:
             self.piece_created_error.emit(reply.errorString() if reply.errorString() else "Failed to create piece.")
+        reply.deleteLater()
+
+    def update_piece(self, archive_id: int, piece_id: int, payload: generated_models.BodyUpdatePieceApiV1ArchivesArchiveIdPiecesPieceIdPut):
+        """
+        Updates an existing piece in the archive.
+        """
+        url = build_url(Endpoint.PIECE_BY_ID, path_params={"archive_id": archive_id, "piece_id": piece_id})
+        reply = self.client.put(url, data=payload)
+        reply.finished.connect(lambda r=reply: self._on_update_piece_finished(r))
+
+    def _on_update_piece_finished(self, reply: QNetworkReply):
+        data = self.client.parse_reply(reply)
+        if data is not None:
+            try:
+                piece = generated_models.PiecePublic(**data)
+                self.piece_updated_success.emit(piece)
+            except Exception as e:
+                self.piece_updated_error.emit(f"Parsing error: {str(e)}")
+        else:
+            self.piece_updated_error.emit(reply.errorString() if reply.errorString() else "Failed to update piece.")
+        reply.deleteLater()
+
+    def add_files_to_existing_piece(self, archive_id: int, piece_id: int, files: list[str]):
+        """
+        Adds additional files to an existing piece in the archive.
+        """
+        url = build_url(Endpoint.PIECE_FILES, path_params={"archive_id": archive_id, "piece_id": piece_id})
+        reply = self.client.post(url, data=files)
+        reply.finished.connect(lambda r=reply: self._on_add_files_finished(r))
+
+    def _on_add_files_finished(self, reply: QNetworkReply):
+        data = self.client.parse_reply(reply)
+        if data is not None:
+            try:
+                piece = generated_models.PiecePublic(**data)
+                self.files_added_success.emit(piece)
+            except Exception as e:
+                self.files_added_error.emit(f"Parsing error: {str(e)}")
+        else:
+            self.files_added_error.emit(reply.errorString() if reply.errorString() else "Failed to add files.")
         reply.deleteLater()
 

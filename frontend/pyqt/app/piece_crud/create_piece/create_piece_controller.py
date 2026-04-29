@@ -92,7 +92,7 @@ class CreatePieceController(QObject):
                     raise Exception(f"Failed to upload file: {file_path}")
 
             # Check Author against known list
-            author_input_text = form_data["author"].strip()
+            author_input_text = str(form_data["author"]).strip()
             author_id = None
             author_name = None
             if author_input_text:
@@ -104,7 +104,7 @@ class CreatePieceController(QObject):
                     author_name = author_input_text
 
             # Check Type against known list
-            type_input_text = form_data["type"].strip()
+            type_input_text = str(form_data["type"]).strip()
             type_id = None
             type_name = None
             if type_input_text:

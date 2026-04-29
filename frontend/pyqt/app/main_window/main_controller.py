@@ -9,6 +9,8 @@ from frontend.pyqt.app.main_window.main_view import MainView
 from frontend.pyqt.app.models.generated_models import ArchivePublic
 from frontend.pyqt.app.piece_crud.create_piece.create_piece_controller import CreatePieceController
 from frontend.pyqt.app.piece_crud.create_piece.create_piece_view import CreatePieceView
+from frontend.pyqt.app.piece_crud.update_piece.update_piece_controller import UpdatePieceController
+from frontend.pyqt.app.piece_crud.update_piece.update_piece_view import UpdatePieceView
 from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
 from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
 
@@ -62,7 +64,6 @@ class MainController(QtCore.QObject):
         self.view.show_add_piece.connect(self.show_add_piece)
         self.view.show_update_piece.connect(self.show_update_piece)
         self.view.show_delete_piece.connect(self.show_delete_piece)
-        self.view.show_add_scores_to_piece.connect(self.show_add_scores_to_piece)
         self.view.clasify_scores.connect(self.clasify_scores)
         self.view.save_pieces_preset.connect(self.save_pieces_preset)
 
@@ -243,15 +244,9 @@ class MainController(QtCore.QObject):
 
     #Show the modifiy scores window hiding the main menu
     def show_update_piece(self):
-        # Modify_piece_window(self.archive,self)
-        # self.update_autocompleter_scores()
-        pass
-
-    #Show the add to exisiting piece window
-    def show_add_scores_to_piece(self):
-        # Add_scores_to_existing_piece_window(self.archive,self)
-        # self.update_autocompleter_scores()
-        pass
+        view = UpdatePieceView()
+        controller = UpdatePieceController(view)
+        view.exec()
 
     #Show delete score menu hiding main menu
     def show_delete_piece(self):
