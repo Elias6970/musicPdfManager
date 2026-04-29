@@ -69,17 +69,17 @@ class PreviewerController(QObject):
             dpi=dpi
         )
 
-    def _on_fetch_success(self, page_num: int, img_bytes: bytes, total_pages: int):
+    def _on_fetch_success(self, piece_std_name: str, file_name: str, img_bytes: bytes, page_number: int, total_pages: int):
         self.loading_finished.emit()
         self.total_pages = total_pages
         
         # Save to memory cache
-        cache_key = (self.current_archive_id, self.current_piece_std_name, self.current_file, page_num, self.current_dpi)
+        cache_key = (self.current_archive_id, self.current_piece_std_name, self.current_file, page_number, self.current_dpi)
         self._cache[cache_key] = img_bytes
         
         # If the user hasn't quickly navigated away, update the view
-        if page_num == self.current_page:
-            self._display_bytes(img_bytes, page_num)
+        if page_number == self.current_page:
+            self._display_bytes(img_bytes, page_number)
 
     def _on_fetch_error(self, error_msg: str):
         self.loading_finished.emit()

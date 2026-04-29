@@ -56,38 +56,3 @@ PRESETS_OTHER_OPTIONS = "other_options"
 PIECES_PRESETS_PRESET = "preset" 
 PIECES_PRESETS_PIECES = "pieces"
 PIECES_PRESETS_COPIES = "copies"
-
-INSTRUCTIONS_SCORE_CLASSIFIER = """*******Herramienta clasificador de partituras*******
-
-Introducción
-    En el clasificador de partituras tendrás que seleccionar las partituras que quieres clasificar. Una vez seleccionadas irá apareciendo cada página de cada pdf de esa partitura para ponerle nombre.
-
-Instrucciones
-    Nombre:
-        Una letra: se pondrá la letra entre parentesis si el instrumento aparece en el cuadro de arriba.
-        Nombre Completo: si el instrumento no aparece en el cuadro.
-    
-        Si la partitura pertenece a la obra anterior puedes dejar el recuadro en blanco. El programa le pondrá el nombre de la partitura anterior automáticamente.
-    
-        Ejemplo:(Introducción de una secuencia de partituras)
-            1. Entrada:'c' --> salida: 'clarinete'
-            2. Entrada:'timbales' --> salida: 'timbales'
-            3. Entrada: '' --> salida: 'timbales'` (apunte: porque al no introducir nada se presupone que es parte de la partitura anterior.)
-
-
-    Numero
-        Se introduce el número de la partitura (primero, segundo, tercero, etc).
-        Puede no introducirse el número pero si hay mas de un papel de un mismo instrumento se debe hacer.
-        Ejemplo:(Introducción de una secuencia de partituras)
-            1. Entrada:'c3' --> salida: 'clarinete 3'
-            2. Entrada:'dulzaina 1' --> salida: 'dulzaina 1'
-            3. Entrada: '' --> salida: 'dulzaina 1'
-
-
-Excepción:
-    El clarinete principal no tiene número su nombre es cp.
-        Ejemplo:
-            Entrada: 'cp' --> salida: 'clariente principal'
-
-Lógica aplicación
-    La aplicación no efectua los cambios hasta que no se acabe de clasificar una obra entera."""

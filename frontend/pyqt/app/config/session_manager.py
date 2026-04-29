@@ -27,9 +27,11 @@ class SessionManager:
         self.settings.setValue(ARCHIVE_ID_SESSION_KEY, archive_id)
 
     def get_language(self) -> str:
+        """Returns the language code (en_US, es_ES, etc.)"""
         return self.settings.value(LANGUAGE_SESSION_KEY, type=str)
 
     def set_language(self, language: str):
+        """Sets the language code (en_US, es_ES, etc.)"""
         self.settings.setValue(LANGUAGE_SESSION_KEY, language)
 
     def is_logged_in(self) -> bool:
