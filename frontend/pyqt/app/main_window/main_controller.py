@@ -7,8 +7,8 @@ from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.config.session_manager import SessionManager
 from frontend.pyqt.app.main_window.main_view import MainView
 from frontend.pyqt.app.models.generated_models import ArchivePublic
-from frontend.pyqt.app.piece_crud.create_piece_controller import CreatePieceController
-from frontend.pyqt.app.piece_crud.create_piece_view import CreatePieceView
+from frontend.pyqt.app.piece_crud.create_piece.create_piece_controller import CreatePieceController
+from frontend.pyqt.app.piece_crud.create_piece.create_piece_view import CreatePieceView
 from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
 from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
 

@@ -2,7 +2,7 @@ import os
 from PyQt6.QtCore import QObject, Qt
 from PyQt6.QtWidgets import QFileDialog, QApplication, QMessageBox
 
-from frontend.pyqt.app.piece_crud.create_piece_view import CreatePieceView
+from frontend.pyqt.app.piece_crud.create_piece.create_piece_view import CreatePieceView
 from frontend.pyqt.app.api_client.uploads_api_client import UploadsApiClient
 from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
 from frontend.pyqt.app.api_client.authors_api_client import AuthorsApiClient
