@@ -12,11 +12,16 @@ from backend.app.crud.piece_crud import (
     get_piece as _get_piece,
     get_pieces as _get_pieces
 )
-from backend.app.error import FileCouldNotBeReadException
+from backend.app.error import (
+    FileCouldNotBeReadException,
+    PieceCodAlreadyExistsError,
+    PieceNameAlreadyExistsError
+)
 from backend.app.services.archive_services import (
     add_piece_to_archive as _add_piece_to_archive,
     add_files_to_existing_piece as _add_files_to_existing_piece,
     delete_piece_from_archive as _delete_piece_from_archive,
+    update_piece_in_archive as _update_piece_in_archive,
     get_all_piece_std_names as _get_all_piece_std_names,
     get_all_digitalized_piece_std_names as _get_all_digitalized_piece_std_names
 )
@@ -127,6 +132,10 @@ def add_piece_to_archive(
     """Add a new piece to an archive with associated files."""
     try:
         return _add_piece_to_archive(session, piece, files, file_manager)
+    except (PieceCodAlreadyExistsError, PieceNameAlreadyExistsError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
+        )
     except FileCouldNotBeReadException as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
@@ -134,6 +143,28 @@ def add_piece_to_archive(
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
+        )
+
+
+@router.put("/{piece_id}", response_model=PiecePublic)
+def update_piece(
+    archive_id: int,
+    piece_id: int,
+    piece: PieceCreate,
+    session: Session = Depends(get_session),
+    file_manager: ArchiveFileManager = Depends(get_archive_file_manager),
+    _ = Depends(require_archive_editor)
+):
+    """Update an existing piece in the archive."""
+    try:
+        return _update_piece_in_archive(session, piece_id, piece, file_manager)
+    except (PieceCodAlreadyExistsError, PieceNameAlreadyExistsError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT, detail=str(e)
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(e)
         )
 
 

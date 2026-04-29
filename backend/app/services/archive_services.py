@@ -4,8 +4,8 @@ from sqlmodel import Session, select
 from backend.app.models.archive import Archive
 from backend.app.models.author import Author
 from backend.app.models.type import Type
-from backend.app.crud.author_crud import get_or_create_author
-from backend.app.crud.type_crud import get_or_create_type
+from backend.app.services.author_service import get_or_create_author
+from backend.app.services.type_service import get_or_create_type
 from backend.app.models.user import User
 from backend.app.models.user_archive_link import UserArchiveLink, ArchiveRole
 from backend.app.error import (

@@ -25,6 +25,10 @@ class PiecesApiClient(QObject):
     piece_scores_and_page_counts_loaded = pyqtSignal(int, str, list)
     piece_scores_and_page_counts_error = pyqtSignal(str)
 
+    # Emits upon piece creation
+    piece_created_success = pyqtSignal(generated_models.PiecePublic)
+    piece_created_error = pyqtSignal(str)
+
     def __init__(self, base_client: BaseApiClient, parent: Optional[QObject] = None):
         super().__init__(parent)
         self.client = base_client
@@ -98,5 +102,25 @@ class PiecesApiClient(QObject):
             else:
                 self.piece_scores_and_page_counts_error.emit("Unexpected data format returned for scores and page counts.")
                 
+        reply.deleteLater()
+
+    def create_piece(self, archive_id: int, payload: generated_models.BodyAddPieceToArchiveApiV1ArchivesArchiveIdPiecesPost):
+        """
+        Creates a new piece with assigned files in the archive.
+        """
+        url = build_url(Endpoint.PIECES, path_params={"archive_id": archive_id})
+        reply = self.client.post(url, data=payload)
+        reply.finished.connect(lambda r=reply: self._on_create_piece_finished(r))
+
+    def _on_create_piece_finished(self, reply: QNetworkReply):
+        data = self.client.parse_reply(reply)
+        if data is not None:
+            try:
+                piece = generated_models.PiecePublic(**data)
+                self.piece_created_success.emit(piece)
+            except Exception as e:
+                self.piece_created_error.emit(f"Data parsing error on creation: {str(e)}")
+        else:
+            self.piece_created_error.emit(reply.errorString() if reply.errorString() else "Failed to create piece.")
         reply.deleteLater()
 

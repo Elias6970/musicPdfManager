@@ -12,7 +12,7 @@ class CreateArchiveView(QtWidgets.QDialog):
         self.setModal(True)
         self.resize(400, 200)
 
-        self.layout = QtWidgets.QVBoxLayout(self)
+        self._layout = QtWidgets.QVBoxLayout(self)
 
         self.name_label = QtWidgets.QLabel("Archive Name:", self)
         self.name_input = QtWidgets.QLineEdit(self)
@@ -26,6 +26,6 @@ class CreateArchiveView(QtWidgets.QDialog):
         self.button_layout.addWidget(self.create_button)
         self.button_layout.addWidget(self.cancel_button)
 
-        self.layout.addWidget(self.name_label)
-        self.layout.addWidget(self.name_input)
-        self.layout.addLayout(self.button_layout)
+        self._layout.addWidget(self.name_label)
+        self._layout.addWidget(self.name_input)
+        self._layout.addLayout(self.button_layout)
