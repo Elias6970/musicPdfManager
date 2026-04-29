@@ -120,12 +120,12 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         #Add widgets
         container_layout.addWidget(self.piece_name_lbl)
-        container_layout.addWidget(self.interactive_previewer)
         container_layout.addLayout(rotate_btns_layout)
         container_layout.addLayout(writing_line_h_layout)
         container_layout.addLayout(last_classfied_h_layout)
 
         container_layout.addLayout(btns_layout)
+        container_layout.addWidget(self.interactive_previewer)
         
 
         # Shortcuts instructions
