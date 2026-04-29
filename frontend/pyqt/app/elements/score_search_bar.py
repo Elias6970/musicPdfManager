@@ -1,4 +1,4 @@
-from PyQt6 import QtWidgets,QtCore
+from PyQt6 import QtWidgets,QtCore, QtGui
 
 #Search bar + autocompleter that shows the score selected
 class ScoreSearchBar(QtWidgets.QLineEdit):
@@ -23,15 +23,16 @@ class ScoreSearchBar(QtWidgets.QLineEdit):
         self.pieces_parsed_names =  pieces_parsed_names
         self.auto_completer.setModel(QtCore.QStringListModel(self.pieces_parsed_names))
 
-    def keyPressEvent(self, event):
+    def keyPressEvent(self, a0):
         """Override keyPressEvent to handle Enter key."""
-        if event.key() == QtCore.Qt.Key.Key_Enter or event.key() == QtCore.Qt.Key.Key_Return:
-            completer = self.auto_completer
-            
-            if completer and completer.model().rowCount() > 0:  # Check if there are suggestions
-                # Select the first suggestion
-                completer.setCurrentRow(0)  # First suggestion
-                self.setText(completer.currentCompletion())  # Set text to the first suggestion
+        if isinstance(a0, QtGui.QKeyEvent):
+            if a0.key() == QtCore.Qt.Key.Key_Enter or a0.key() == QtCore.Qt.Key.Key_Return:
+                completer = self.auto_completer
+                model = completer.model()
+                if completer and model and model.rowCount() > 0:  # Check if there are suggestions
+                    # Select the first suggestion
+                    completer.setCurrentRow(0)  # First suggestion
+                    self.setText(completer.currentCompletion())  # Set text to the first suggestion
 
-        # Call the base class to ensure default event processing
-        super().keyPressEvent(event)
+            # Call the base class to ensure default event processing
+            super().keyPressEvent(a0)

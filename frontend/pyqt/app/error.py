@@ -1,3 +1,5 @@
+class OptionNotSelectedError(ValueError):
+    pass
 
-class PageNotFoundError(Exception):
+class EmptyNameError(ValueError):
     pass

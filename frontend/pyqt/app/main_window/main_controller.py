@@ -63,6 +63,7 @@ class MainController(QtCore.QObject):
         self.view.show_update_piece.connect(self.show_update_piece)
         self.view.show_delete_piece.connect(self.show_delete_piece)
         self.view.show_add_scores_to_piece.connect(self.show_add_scores_to_piece)
+        self.view.clasify_scores.connect(self.clasify_scores)
         self.view.save_pieces_preset.connect(self.save_pieces_preset)
 
 
@@ -252,7 +253,11 @@ class MainController(QtCore.QObject):
     def clasify_scores(self):
         #PieceSelectorToClassifyWindow(self.archive,self)
         #self.update_autocompleter_scores()
-        pass
+        from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_controller import PieceSelectorController
+        from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
+        self.piece_selector_view = PieceSelectorView(self.view)
+        self.piece_selector_controller = PieceSelectorController(self.piece_selector_view)
+        self.piece_selector_view.exec()
 
     #Show about us window
     def show_about_us(self):

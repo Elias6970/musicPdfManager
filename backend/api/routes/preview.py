@@ -35,6 +35,11 @@ def get_pdf_preview(
         headers={
             "Cache-Control": "public, max-age=604800",
             "Access-Control-Expose-Headers": "X-Total-Pages",
+            "X-Archive-ID": str(request.archive_id),
+            "X-Piece_Std-Name": request.piece_std_name,
+            "X-File-Name": request.file,
+            "X-Page-Number": str(request.page_number),
             "X-Total-Pages": str(total_pages),
+            "X-DPI": str(request.dpi)
         }
     )

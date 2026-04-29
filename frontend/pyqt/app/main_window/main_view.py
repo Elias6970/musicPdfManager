@@ -3,8 +3,6 @@ from PyQt6 import QtWidgets, QtCore, QtGui
 from frontend.pyqt.app.config.constants import CLIENT_VERSION, ICON_PATH
 from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
 from frontend.pyqt.app.selectors.multiple_selection_view import MultipleSelectionView
-from frontend_pyqt.main_window import Main_window
-from frontend_pyqt.pop_up_windows.yes_no_window import YesNoWindow
 
 class MainView(QtWidgets.QMainWindow):
     logout = QtCore.pyqtSignal()
@@ -150,7 +148,7 @@ class MainView(QtWidgets.QMainWindow):
         return menu
     
 
-    def create_buttons_for_selectors(self) -> QtWidgets.QHBoxLayout:
+    def create_buttons_for_selectors(self) -> QtWidgets.QVBoxLayout:
         """
         Create two buttons in a row to change between windows.
         Returns an horizontal layout

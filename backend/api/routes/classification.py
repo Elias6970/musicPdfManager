@@ -11,7 +11,7 @@ from backend.app.error import ClassificationFileExistsError
 router = APIRouter(prefix="/classification", tags=["Classification"])
 
 @router.post("/{archive_id}", status_code=status.HTTP_200_OK)
-def create_classification(
+def execute_classification(
     archive_id: int,
     job: ClassificationJob,
     session: Session = Depends(get_session),
@@ -51,6 +51,7 @@ def create_classification(
             detail=str(e)
         )
     except Exception as e:
+        print(f"Unexpected error during classification: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An unexpected error occurred during classification: {str(e)}"

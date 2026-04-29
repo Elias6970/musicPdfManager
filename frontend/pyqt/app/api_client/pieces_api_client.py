@@ -21,6 +21,10 @@ class PiecesApiClient(QObject):
     piece_scores_loaded = pyqtSignal(list)
     piece_scores_error = pyqtSignal(str)
 
+    # Emits a list of lists/tuples (archive_id, piece_std_name, [["instrument", pages], ...])
+    piece_scores_and_page_counts_loaded = pyqtSignal(int, str, list)
+    piece_scores_and_page_counts_error = pyqtSignal(str)
+
     def __init__(self, base_client: BaseApiClient, parent: Optional[QObject] = None):
         super().__init__(parent)
         self.client = base_client
@@ -74,3 +78,25 @@ class PiecesApiClient(QObject):
                 self.piece_scores_error.emit("Unexpected data format returned for scores.")
                 
         reply.deleteLater()
+
+    def get_piece_scores_and_page_counts(self, archive_id: int, piece_std_name: str):
+        """
+        Fetches the specific instrument scores available for a piece along with their page counts.
+        """
+        url = build_url(
+            Endpoint.PIECE_SCORES_PAGE_COUNTS, 
+            path_params={"archive_id": archive_id, "piece_std_name": piece_std_name}
+        )
+        reply = self.client.get(url)
+        reply.finished.connect(lambda r=reply,a=archive_id,p=piece_std_name: self._on_get_piece_scores_and_page_counts_finished(r, a, p))
+
+    def _on_get_piece_scores_and_page_counts_finished(self, reply: QNetworkReply, archive_id: int, piece_std_name: str):
+        data = self.client.parse_reply(reply)
+        if data is not None:
+            if isinstance(data, list):
+                self.piece_scores_and_page_counts_loaded.emit(archive_id, piece_std_name, data)
+            else:
+                self.piece_scores_and_page_counts_error.emit("Unexpected data format returned for scores and page counts.")
+                
+        reply.deleteLater()
+
