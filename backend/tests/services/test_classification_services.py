@@ -100,7 +100,16 @@ def test_extract_and_merge_pages_success(mock_fitz_open):
     mock_merged_doc.tobytes.return_value = b"mocked_pdf_bytes"
     
     mock_source_a = MagicMock()
+    mock_page_a = MagicMock()
+    mock_page_a.parent = mock_source_a
+    mock_page_a.number = 0
+    mock_source_a.__getitem__.return_value = mock_page_a
+    
     mock_source_b = MagicMock()
+    mock_page_b = MagicMock()
+    mock_page_b.parent = mock_source_b
+    mock_page_b.number = 1
+    mock_source_b.__getitem__.return_value = mock_page_b
     
     def mock_open_side_effect(*args, **kwargs):
         if not args:
