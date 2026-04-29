@@ -39,7 +39,7 @@ def get_piece(session: Session, piece_id: int) -> Optional[Piece]:
     return session.get(Piece, piece_id)
 
 def get_pieces(session: Session, archive_id: int) -> list[Piece]:
-    return session.exec(select(Piece).where(Piece.archive_id == archive_id)).all()
+    return list(session.exec(select(Piece).where(Piece.archive_id == archive_id)).all())
 
 def delete_piece(session: Session, piece_id: int) -> bool:
     db_piece = session.get(Piece, piece_id)
