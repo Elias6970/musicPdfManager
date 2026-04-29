@@ -20,35 +20,33 @@ from frontend.pyqt.app.archive_crud.update_archive.update_archive_controller imp
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.login.login_controller import LoginController
 from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
+from frontend.pyqt.app.users_crud.users_controller import UsersController
+from frontend.pyqt.app.users_crud.users_view import UsersView
 
 class MainController(QtCore.QObject):
     def __init__(self, view:MainView):
         super().__init__()
         self.view = view
         self.session = SessionManager()
-        base_client = get_base_client()
+
         self.change_language(self.session.get_language())
 
-        self.archive_api_client = ArchivesApiClient(base_client, self)
+        self.archive_api_client = ArchivesApiClient(get_base_client(), self)
         self.archive_api_client.get_all_archives_success.connect(self._on_get_all_archives_success)
         
-
-        # Check Auth first
-        self._check_auth()
-
-        # Start loading archives to populate the combobox
-        self._previous_archive_index = -1
-        self.view.archive_combobox.currentIndexChanged.connect(self._on_archive_combobox_changed)
-        self.archive_api_client.get_all_archives()
+        self._previous_archive_index = -1    
 
         self.individual_selection_controller = IndividualSelectionController(self.view.individual_selection_window)
         self.multiple_selection_controller = MultipleSelectionController(self.view.multiple_selection_window)
-
-        #Load pieces_presets in the menu list
-        self.multiple_selection_controller.get_pieces_presets_names() #To update the pieces presets names in the menu when a new preset is created
+        self.multiple_selection_controller.update_pieces_presets_menu_list.connect(self.update_pieces_presets_menu_list)
+        
+        # Check Auth first
+        self._check_auth()
 
         #Connect signals
-        self.multiple_selection_controller.update_pieces_presets_menu_list.connect(self.update_pieces_presets_menu_list)
+        self.view.archive_combobox.currentIndexChanged.connect(self._on_archive_combobox_changed)
+
+        self.view.show_manage_users.connect(self.show_manage_users)
 
         self.view.logout.connect(self.logout)
         self.view.show_preferences.connect(self.show_preferences)
@@ -66,12 +64,13 @@ class MainController(QtCore.QObject):
         self.view.clasify_scores.connect(self.clasify_scores)
         self.view.save_pieces_preset.connect(self.save_pieces_preset)
 
-
+    
     def _check_auth(self):
         """Check if the user is authenticated, if not, show the login window"""
         if not self.session.is_logged_in():
             self._show_login()
-    
+        else:
+            self._after_login_setup()
 
     def _show_login(self, error: str = ""):
         """Show the login window and handle the authentication process"""
@@ -80,12 +79,18 @@ class MainController(QtCore.QObject):
         # Assuming LoginController sets up token internally and dialog closes with accept()
         if not login_view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             sys.exit(0)
+        else:
+            self._after_login_setup()
+    
+    
+    def _after_login_setup(self):
+        """Setup the archives and the presets (user related data)"""
+        self._previous_archive_index = -1
+        self.archive_api_client.get_all_archives()    
 
-
-    def _on_auth_success(self, data: dict):
-        # Already authenticated, proceed normally
-        pass
-
+        #Refresh the selectors to load the data of the first archive
+        self.individual_selection_controller.refresh()
+        self.multiple_selection_controller.refresh()
 
     def logout(self):
         """Logout the user and show the login window"""
@@ -129,7 +134,6 @@ class MainController(QtCore.QObject):
             self.view.archive_combobox.setCurrentIndex(0)
             self._previous_archive_index = 0
             self.session.set_archive_id(items[0].id)
-            print(f"Set archive via combobox defaults to ID: {items[0].id}")
             
         self.view.archive_combobox.setEnabled(True)
         self.view.archive_combobox.blockSignals(False)
@@ -151,7 +155,6 @@ class MainController(QtCore.QObject):
             new_id = self.view.archive_combobox.itemData(index)
             self.session.set_archive_id(int(new_id))
             self._previous_archive_index = index
-            print(f"Changed to archive id: {new_id}")
             
             self.individual_selection_controller.refresh()
             self.multiple_selection_controller.refresh()
@@ -194,6 +197,11 @@ class MainController(QtCore.QObject):
             action.triggered.connect(lambda _, i=i: self.multiple_selection_controller.load_pieces_preset(i))
             self.view._load_pieces_preset_opt.addAction(action)
 
+
+    def show_manage_users(self):
+        view = UsersView()
+        controller = UsersController(view)
+        view.exec()
 
     #Show the config window
     def show_preferences(self):

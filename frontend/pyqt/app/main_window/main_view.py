@@ -5,6 +5,8 @@ from frontend.pyqt.app.selectors.individual_selection_view import IndividualSele
 from frontend.pyqt.app.selectors.multiple_selection_view import MultipleSelectionView
 
 class MainView(QtWidgets.QMainWindow):
+    show_manage_users = QtCore.pyqtSignal()
+    
     logout = QtCore.pyqtSignal()
     show_preferences = QtCore.pyqtSignal()
     show_presets = QtCore.pyqtSignal()
@@ -26,6 +28,8 @@ class MainView(QtWidgets.QMainWindow):
 
     def __init__(self):
         super(MainView,self).__init__()
+
+        self.is_admin = True  # Placeholder, replace with actual admin check
 
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()
@@ -100,9 +104,16 @@ class MainView(QtWidgets.QMainWindow):
         about_opt = QtGui.QAction(self.tr("About us"),self)
         about_opt.triggered.connect(self.show_about_us.emit)
 
+        #ADMIN OPTIONS
+        manage_users_opt = QtGui.QAction(self.tr("Manage users"),self)
+        manage_users_opt.triggered.connect(self.show_manage_users.emit)
 
         menu = self.menuBar()
         if isinstance(menu,QtWidgets.QMenuBar):
+            admin = menu.addMenu(self.tr("Admin"))
+            if self.is_admin and admin:
+                admin.addAction(manage_users_opt)
+
             user_menu = menu.addMenu(self.tr("User"))
             if user_menu:
                 user_menu.addAction(logout_opt)
@@ -258,4 +269,3 @@ class MainView(QtWidgets.QMainWindow):
     def clear_load_pieces_preset_menu(self):
         """Clear the load pieces preset menu"""
         self._load_pieces_preset_opt.clear()
-    

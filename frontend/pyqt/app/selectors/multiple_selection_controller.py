@@ -99,9 +99,6 @@ class MultipleSelectionController(QObject):
         self.view.save_pieces_preset_signal.connect(self._save_pieces_preset)
 
 
-        #Set presets in combo box
-        self.refresh()
-
     def export(self, config: PresetPrintJobConfig):
         """Export the PDF with the selected pieces, preset and configuration."""
         if not self.selected_instruments_preset:
@@ -400,6 +397,7 @@ class MultipleSelectionController(QObject):
         self.get_pieces()
         self.get_instruments_presets_names()
         self.get_pieces_presets()
+        self.get_pieces_presets_names()
 
 
     def save_pieces_preset(self):

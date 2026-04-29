@@ -7,7 +7,7 @@ import backend.app.models
 
 import backend.app.settings as settings
 from backend.api.dependencies.database import engine, insert_default_roles, insert_root_user
-from backend.api.routes import archives, instruments_presets, pieces_presets, pieces, users, uploads, printers, preview, classification, instruments_names
+from backend.api.routes import archives, instruments_presets, pieces_presets, pieces, users, uploads, printers, preview, classification, instruments_names, roles
 from backend.app.services.upload_services import cleanup_temp_uploads_routine
 import asyncio
 
@@ -35,6 +35,7 @@ def create_app() -> FastAPI:
     )
     router = APIRouter(prefix="/api/v1")
     router.include_router(users.router)
+    router.include_router(roles.router)
     router.include_router(archives.router)
     router.include_router(pieces.router)
     router.include_router(uploads.router)

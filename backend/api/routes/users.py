@@ -8,7 +8,7 @@ from backend.api.dependencies.auth import get_current_user
 from backend.app.models.user import User, UserCreate, UserPublic
 from backend.app.models.user_config import UserConfigPublic
 from backend.app.models.token import Token
-from backend.app.services.user_services import register_user, login_user
+from backend.app.services.user_services import register_user, login_user, get_all_users as _get_all_users, update_user as _update_user, delete_user as _delete_user
 from backend.app.services.user_config_services import get_user_config_by_user_id
 from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
 
@@ -33,6 +33,32 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = D
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
+@router.put("/{user_id}", response_model=UserPublic)
+def update_user(
+    user_id: int,
+    user_update: UserCreate,
+    session: Session = Depends(get_session),
+    _: User = Depends(require_admin)
+):
+    try:
+        updated_user = _update_user(session, user_id=user_id, user_update=user_update)
+        if not updated_user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return UserPublic.model_validate(updated_user)
+    except InvalidUserDataError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    user_id: int,
+    session: Session = Depends(get_session),
+    _: User = Depends(require_admin)
+):
+    result = _delete_user(session, user_id)
+    if not result:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return
+
 @router.get("/config", response_model=UserConfigPublic)
 def get_user_config(
     session: Session = Depends(get_session),
@@ -42,3 +68,12 @@ def get_user_config(
     if not user_config:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
     return UserConfigPublic.model_validate(user_config)
+
+
+@router.get("/", response_model=list[UserPublic])
+def get_all_users(
+    session: Session = Depends(get_session),
+    _: User = Depends(require_admin)
+) -> list[UserPublic]:
+    users = _get_all_users(session)
+    return [UserPublic.model_validate(user) for user in users]

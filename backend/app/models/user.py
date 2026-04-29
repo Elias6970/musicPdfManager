@@ -14,7 +14,7 @@ class User(UserBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     password_hash: str = Field()
     role: Role | None = Relationship(back_populates="users")
-    archive_links: list["UserArchiveLink"] = Relationship(back_populates="user")
+    archive_links: list["UserArchiveLink"] = Relationship(back_populates="user", cascade_delete=True)
 
 class UserCreate(UserBase):
     password: str

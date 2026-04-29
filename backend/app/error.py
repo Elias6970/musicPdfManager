@@ -74,3 +74,9 @@ class ClassificationFileExistsError(Exception):
     def __init__(self, message: str, incorrect_keys: list[str]):
         super().__init__(message)
         self.incorrect_keys = incorrect_keys
+
+class RoleNameAlreadyExistsError(Exception):
+    pass
+
+class RoleNotFoundError(Exception):
+    pass
