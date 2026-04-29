@@ -10,7 +10,10 @@ from backend.app.models.user import User
 from backend.app.models.author import Author
 from backend.app.models.type import Type
 from backend.app.models.role import Role
-from backend.app.error import FileCouldNotBeReadException, InsufficientPermissionsError
+from backend.app.error import (
+    FileCouldNotBeReadException, InsufficientPermissionsError,
+    PieceCodAlreadyExistsError, PieceNameAlreadyExistsError
+)
 
 from backend.app.services.archive_services import (
     check_archive_role,
@@ -19,6 +22,7 @@ from backend.app.services.archive_services import (
     get_all_piece_std_names,
     get_all_digitalized_piece_std_names,
     add_piece_to_archive,
+    update_piece_in_archive,
     delete_piece_from_archive,
     add_files_to_existing_piece
 )
@@ -140,6 +144,77 @@ def test_add_piece_to_archive_with_author_and_type_names(session: Session, file_
     type_obj = session.get(Type, piece.type_id)
     assert type_obj is not None
     assert type_obj.name == "Sonata"
+
+def test_add_piece_to_archive_cod_exists(session: Session, file_manager: MagicMock):
+    p1 = Piece(cod=13, name="Existing Cod", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    session.add(p1)
+    session.commit()
+
+    piece_in = PieceCreate(
+        cod=13, name="New Name", archive_id=1, handwrited=False, parted=False, digitalized=True
+    )
+    
+    with pytest.raises(PieceCodAlreadyExistsError):
+        add_piece_to_archive(session, piece_in, [], file_manager)
+
+def test_add_piece_to_archive_name_exists(session: Session, file_manager: MagicMock):
+    p1 = Piece(cod=14, name="Existing Name", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    session.add(p1)
+    session.commit()
+
+    piece_in = PieceCreate(
+        cod=15, name="Existing Name", archive_id=1, handwrited=False, parted=False, digitalized=True
+    )
+    
+    with pytest.raises(PieceNameAlreadyExistsError):
+        add_piece_to_archive(session, piece_in, [], file_manager)
+
+def test_update_piece_in_archive_success(session: Session, file_manager: MagicMock):
+    p1 = Piece(cod=20, name="To Update", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    session.add(p1)
+    session.commit()
+
+    piece_in = PieceCreate(
+        cod=21, name="Updated", archive_id=1, handwrited=False, parted=False, digitalized=True
+    )
+    
+    assert p1.id is not None
+    
+    file_manager.parse_name_to_file_manager.side_effect = lambda x: x
+    
+    updated_piece = update_piece_in_archive(session, p1.id, piece_in, file_manager)
+    
+    assert updated_piece.cod == 21
+    assert updated_piece.name == "Updated"
+    file_manager.change_piece_dir_name.assert_called_once_with("20-To Update", "21-Updated")
+
+def test_update_piece_in_archive_cod_exists(session: Session, file_manager: MagicMock):
+    p1 = Piece(cod=22, name="First", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    p2 = Piece(cod=23, name="Second", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    session.add_all([p1, p2])
+    session.commit()
+
+    piece_in = PieceCreate(
+        cod=23, name="Changed", archive_id=1, handwrited=False, parted=False, digitalized=True
+    )
+    
+    assert p1.id is not None
+    with pytest.raises(PieceCodAlreadyExistsError):
+        update_piece_in_archive(session, p1.id, piece_in, file_manager)
+
+def test_update_piece_in_archive_name_exists(session: Session, file_manager: MagicMock):
+    p1 = Piece(cod=24, name="Third", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    p2 = Piece(cod=25, name="Fourth", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    session.add_all([p1, p2])
+    session.commit()
+
+    piece_in = PieceCreate(
+        cod=26, name="Fourth", archive_id=1, handwrited=False, parted=False, digitalized=True
+    )
+    
+    assert p1.id is not None
+    with pytest.raises(PieceNameAlreadyExistsError):
+        update_piece_in_archive(session, p1.id, piece_in, file_manager)
 
 def test_delete_piece_from_archive_success(session: Session, file_manager: MagicMock):
     p1 = Piece(cod=1, name="ToDelete", archive_id=1, digitalized=False, handwrited=False, parted=False)

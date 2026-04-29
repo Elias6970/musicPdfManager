@@ -40,6 +40,12 @@ class IncorrectCodOrNameError(Exception):
 class CodAlreadyExistsError(Exception):
     pass
 
+class PieceCodAlreadyExistsError(Exception):
+    pass
+
+class PieceNameAlreadyExistsError(Exception):
+    pass
+
 class EmailAlreadyRegisteredError(Exception):
     pass
 
