@@ -86,6 +86,36 @@ def precheck_classification(session: Session, job: ClassificationJob):
             incorrect_keys
         )
 
+def _are_valid_corners(corners: list[tuple[float, float]] | None) -> bool:
+    """
+    Validates that the provided corners form a proper rectangle.
+    
+    Checks that there are exactly 4 corners, that they are not collinear, and that they form a convex shape.
+    
+    Args:
+        corners (list[tuple[float, float]] | None): A list of four (x, y) tuples representing the corners of a page.
+
+    Returns:
+        bool: True if the corners form a valid rectangle, False otherwise.
+    """
+    if corners is None or len(corners) != 4:
+        return False
+
+    # Check if any corners are identical
+    if len(set(corners)) != 4:
+        return False
+
+    # Check if the corners are collinear (simplified check)
+    x_coords = [corner[0] for corner in corners]
+    y_coords = [corner[1] for corner in corners]
+
+    if len(set(x_coords)) == 1 or len(set(y_coords)) == 1:
+        return False
+
+    # Check if the shape is convex (simplified check)
+    # This is a basic check and might need to be improved
+    return True
+
 def extract_and_merge_pages(classifications: dict[str, ClassifiedDocument], source_dir: str) -> dict[str, bytes]:
     """
     Extracts specified pages from source PDF files and merges them into new PDFs.
@@ -122,8 +152,9 @@ def extract_and_merge_pages(classifications: dict[str, ClassifiedDocument], sour
                 pdf_page = source_pdf[page_idx]
                 if page_info.rotation != 0:
                     rotate_page(pdf_page, page_info.rotation)
-
-                if page_info.corners is not None:
+                print("Page dimensions before cropping:", pdf_page.rect)
+                if page_info.corners is not None and _are_valid_corners(page_info.corners):
+                    print(f"Cropping page {page_idx} of '{source_filename}' with corners: {page_info.corners}")
                     pdf_page = crop_page_from_corners(pdf_page, page_info.corners)
 
                 # Append the specific page

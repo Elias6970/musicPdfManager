@@ -187,3 +187,24 @@ class ScoreClassifierView(QtWidgets.QDialog):
         instructions_lbl_width = max(font_metrics.horizontalAdvance(line) for line in text.split('\n'))
         instructions_lbl_width += 20 # Add some padding
         self.shortcuts_scroll_area.setFixedWidth(instructions_lbl_width)
+    
+    def keyPressEvent(self, a0: QtGui.QKeyEvent | None) -> None:
+        """Focus the input box when typing anywhere in the dialog."""
+        if isinstance(a0, QtGui.QKeyEvent):
+            if a0.key() == QtCore.Qt.Key.Key_Escape:
+                return # Disable closing the window with the Escape key
+
+            modifiers = a0.modifiers()
+            text = a0.text()
+
+            if (not self.line_edit.hasFocus()
+                and text
+                and not text.isspace()
+                and not (modifiers & (QtCore.Qt.KeyboardModifier.ControlModifier
+                                    | QtCore.Qt.KeyboardModifier.AltModifier
+                                    | QtCore.Qt.KeyboardModifier.MetaModifier))):
+                self.line_edit.setFocus()
+                self.line_edit.insert(text)
+                return
+
+            super().keyPressEvent(a0)

@@ -58,10 +58,14 @@ def crop_page_from_corners(page: fitz.Page, corners: List[Tuple[float, float]], 
     Takes a specific page, crops out a specific polygon (corners),
     and returns a new single-page Document containing the extracted crop warped upright.
      :param page: The fitz.Page object to crop.
-     :param corners: List of 4 [x, y] coordinates representing the corners of the polygon to crop. Order should be: Top-Left, Top-Right, Bottom-Right, Bottom-Left
+     :param corners: List of 4 [x,y] corndinates percentages relative to the page dimensions. Order should be: Top-Left, Top-Right, Bottom-Right, Bottom-Left
      :param landscape: Whether the output page should be in landscape orientation (default True). If False, output will be portrait.
      :return: A new fitz.Page containing the cropped and warped page.
     """
+    page_width = page.rect.width
+    page_height = page.rect.height
+    actual_corners = [(x_pct * page_width, y_pct * page_height) for x_pct, y_pct in corners]
+
     if landscape:
         a4_width, a4_height = 842, 595 # A4 size in points (landscape)
     else:
@@ -74,7 +78,7 @@ def crop_page_from_corners(page: fitz.Page, corners: List[Tuple[float, float]], 
 
 
     # Extract and warp with OpenCV
-    jpg_data, img_width, img_height = _extract_and_warp_rect(original_pixmap, corners, scale=zoom)
+    jpg_data, img_width, img_height = _extract_and_warp_rect(original_pixmap, actual_corners, scale=zoom)
 
     # Scale the warped image while maintaining aspect ratio to fit within an A4 page, minus a 10pt margin
     scale_factor = min(a4_width / img_width, a4_height / img_height)

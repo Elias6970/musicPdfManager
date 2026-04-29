@@ -64,7 +64,7 @@ class InteractivePreviewer(QGraphicsView):
                             self.start_pos = scene_pos
                             
                             self.rectangle = MovableRectangle(QRectF(scene_pos, scene_pos))
-                            self.rectangle.set_zoom(self.qpixmap.width(),self.img_scene.qpixmap.width())
+                            self.rectangle.set_zoom(self.qpixmap.width(),self.img_scene.qpixmap.width(), self.img_scene.qpixmap.height())
                             self.img_scene.addItem(self.rectangle)
                             self.is_creating_rect = True
 

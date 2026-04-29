@@ -19,6 +19,9 @@ class ScoreClassifierController(QtCore.QObject):
     _LOAD_SHORTCUTS = "load_shortcuts"
     _LOAD_PAGES = "load_first_page"
 
+    classification_success = QtCore.pyqtSignal()
+    classification_error = QtCore.pyqtSignal(str)
+
     def __init__(self, view: ScoreClassifierView, piece_std_name: str, scores_and_page_counts: list[tuple[str,int]] = []):
         """
         Args:
@@ -85,7 +88,7 @@ class ScoreClassifierController(QtCore.QObject):
             for page_number in range(page_count):
                 pages.append(SourcePageWithResolution(file_name=score_name,
                                         page=page_number,
-                                        rotation=None,
+                                        rotation=0,
                                         corners=None))
 
         self._tasks.remove(self._LOAD_PAGES) # Remove the task of loading the first page, since it is already done in the constructor
@@ -113,7 +116,7 @@ class ScoreClassifierController(QtCore.QObject):
             self.view.clear_line_edit() # Clear the line edit for the next input
             self.view.btn_back.setEnabled(True) # Enable the back button, since we are no longer in the first page
         else:
-            QtWidgets.QMessageBox.information(self.view, self.view.tr("End"), self.view.tr("You have reached the end of the scores."))
+            self.finish_classification()
         
         if self.current_score_index == len(self.pages) - 1:
             self.view.change_to_finish_btn()
@@ -144,7 +147,7 @@ class ScoreClassifierController(QtCore.QObject):
             if page.resolution is not None:
                 dict_pages.setdefault(page.resolution, []).append(SourcePage(**page.model_dump()))
         
-        dict_documents = {instrument: ClassifiedDocument(config=None, pages=pages) for instrument, pages in dict_pages.items()}
+        dict_documents = {instrument: ClassifiedDocument(config=ClassifiedDocumentConfig(overwrite=False, rename = None), pages=pages) for instrument, pages in dict_pages.items()}
         
         self.job = ClassificationJob(
             archive_id=self.archive_id,
@@ -157,29 +160,37 @@ class ScoreClassifierController(QtCore.QObject):
             
 
     def _on_finish_classification_success(self):
+        """Handle the successful completion of the classification by showing a success message and emitting a signal to notify other parts of the application."""
         QtWidgets.QMessageBox.information(self.view, self.view.tr("Success"), self.view.tr("Classification completed successfully."))
-        #self.view.hide()
+        self.classification_success.emit()
+        self.view.hide()
     
     def _on_finish_classification_file_exists_error(self, missing_names:list[str]):
-        self.collision_window = CollisionResolutionWindow(missing_names, self.view)
-        self.collision_window.resolved_signal.connect(self._on_collision_resolved)
-        self.collision_window.exec()
+        """Handle the case when the classification fails because some of the output files already exist in the backend. It opens a collision resolution window where the user can choose to rename the new files or overwrite the existing ones."""
+        if missing_names:
+            self.collision_window = CollisionResolutionWindow(missing_names, self.view)
+            self.collision_window.resolved_signal.connect(self._on_collision_resolved)
+            self.collision_window.exec()
         
     def _on_collision_resolved(self, resolution_dict: dict[str, str | None]):
+        """Handle the resolution of filename collisions by updating the classification job configs with the new names or overwrite flags, and then re-executing the classification."""
         if not self.job or not self.job.classifications:
             return
             
         for missing_name, new_name in resolution_dict.items():
             if missing_name in self.job.classifications:
                 if new_name is None:
-                    self.job.classifications[missing_name].config.overwrite = True
+                    self.job.classifications[missing_name].config.overwrite = True #type: ignore
                 else:
-                    self.job.classifications[missing_name].config.rename = new_name
+                    self.job.classifications[missing_name].config.rename = new_name #type: ignore
                     
         self.classifier_api_client.execute_classification(self.archive_id, self.job)
 
     def _on_finish_classification_error(self, error:str):
-        pass
+        """Handle unexpected errors during classification by showing an error message to the user."""
+        QtWidgets.QMessageBox.critical(self.view, self.view.tr("Error"), self.view.tr(f"An error occurred while finishing the classification: {error}"))
+        self.classification_error.emit(error)
+
 
     def load_image_page(self, index: int):
         """

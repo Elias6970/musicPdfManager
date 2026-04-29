@@ -11,7 +11,7 @@ class CollisionItem(QtWidgets.QFrame):
         
         self.label = QtWidgets.QLabel(missing_name)
         layout.addWidget(self.label)
-        
+        layout.addStretch()
         self.overwrite_radio = QtWidgets.QRadioButton(self.tr("Overwrite"))
         self.rename_radio = QtWidgets.QRadioButton(self.tr("Rename to:"))
         self.rename_input = QtWidgets.QLineEdit()
@@ -26,6 +26,8 @@ class CollisionItem(QtWidgets.QFrame):
         layout.addWidget(self.rename_radio)
         layout.addWidget(self.rename_input)
         
+        self.setFrameShape(QtWidgets.QFrame.Shape.Box)
+        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
         self.rename_radio.toggled.connect(self.rename_input.setEnabled)
         
     def get_result(self) -> tuple[str, str | None]:
