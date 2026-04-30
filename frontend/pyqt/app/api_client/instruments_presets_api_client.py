@@ -5,6 +5,7 @@ from PyQt6.QtNetwork import QNetworkReply
 
 from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
 from frontend.pyqt.app.config.urls import Endpoint, build_url
+from frontend.pyqt.app.models.generated_models import InstrumentsPreset
 
 
 class InstrumentsPresetsApiClient(QObject):
@@ -18,8 +19,14 @@ class InstrumentsPresetsApiClient(QObject):
     presets_loaded = pyqtSignal(list)
     presets_error = pyqtSignal(str)
 
-    preset_created = pyqtSignal(dict)
+    preset_created = pyqtSignal(InstrumentsPreset)
     preset_create_error = pyqtSignal(str)
+
+    preset_updated = pyqtSignal(InstrumentsPreset)
+    preset_update_error = pyqtSignal(str)
+
+    preset_loaded_single = pyqtSignal(InstrumentsPreset)
+    preset_load_error = pyqtSignal(str)
 
     preset_deleted = pyqtSignal(str)
     preset_delete_error = pyqtSignal(str)
@@ -66,13 +73,53 @@ class InstrumentsPresetsApiClient(QObject):
 
         # BaseApiClient parse_reply returns parsed dict or empty dict on 204 or None on error
         if data is not None:
-            self.preset_created.emit(data)
+            preset = InstrumentsPreset(**data)  # Validate data format
+            self.preset_created.emit(preset)
         else:
             if reply.error() != QNetworkReply.NetworkError.NoError:
                 # Basic error handling
                 msg = reply.errorString()
                 # You might parse the server's error message from reply.readAll() if BaseApiClient doesn't, but here's a default
                 self.preset_create_error.emit(msg if msg else "Failed to create preset.")
+
+        reply.deleteLater()
+
+    def get_preset(self, preset_name: str):
+        """
+        Initiates a network request to fetch a specific instrument preset.
+        """
+        url = build_url(Endpoint.INSTRUMENT_PRESET_BY_NAME, path_params={"preset_name": preset_name})
+        reply = self.client.get(url)
+        reply.finished.connect(lambda r=reply: self._on_get_preset_finished(r))
+
+    def _on_get_preset_finished(self, reply: QNetworkReply):
+        data = self.client.parse_reply(reply)
+        if data is not None:
+            preset = InstrumentsPreset(**data)  # Validate data format
+            self.preset_loaded_single.emit(preset)
+        else:
+            msg = reply.errorString()
+            self.preset_load_error.emit(msg if msg else "Failed to load preset.")
+
+        reply.deleteLater()
+
+    def update_preset(self, preset_name: str, preset_data):
+        """
+        Initiates a network request to update an existing instrument preset.
+        """
+        url = build_url(Endpoint.INSTRUMENT_PRESET_BY_NAME, path_params={"preset_name": preset_name})
+        reply = self.client.put(url, data=preset_data)
+        reply.finished.connect(lambda r=reply: self._on_update_preset_finished(r))
+
+    def _on_update_preset_finished(self, reply: QNetworkReply):
+        data = self.client.parse_reply(reply)
+        if data is not None:
+            updated = InstrumentsPreset(**data)  # Validate data format
+            self.preset_updated.emit(updated)
+        else:
+            if reply.error() != QNetworkReply.NetworkError.NoError:
+                msg = reply.errorString()
+                self.preset_update_error.emit(msg if msg else "Failed to update preset.")
 
         reply.deleteLater()
 

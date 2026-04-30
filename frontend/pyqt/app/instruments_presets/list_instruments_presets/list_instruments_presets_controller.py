@@ -3,6 +3,7 @@ from PyQt6.QtCore import QObject
 
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.api_client.instruments_presets_api_client import InstrumentsPresetsApiClient
+from frontend.pyqt.app.instruments_presets.update_instruments_preset_controller import UpdateInstrumentsPresetController
 from frontend.pyqt.app.models.generated_models import InstrumentsPreset
 from frontend.pyqt.app.instruments_presets.list_instruments_presets.list_instruments_presets_view import ListInstrumentsPresetsView
 from frontend.pyqt.app.instruments_presets.instruments_preset_view import InstrumentsPresetView
@@ -86,5 +87,9 @@ class ListInstrumentsPresetsController(QObject):
         QMessageBox.critical(self.view, self.tr("Error"), self.tr(f"Could not delete preset:\n{error}"))
 
     def _on_edit_item_signal(self, preset_name: str):
-        # TODO: Implement edit button logic in the future
-        pass
+        update_view = InstrumentsPresetView(parent=self.view, title="Update Preset")
+        update_controller = UpdateInstrumentsPresetController(update_view, preset_name)
+        
+        if update_view.exec():
+            # If accepted, refresh the list
+            self._load_presets()

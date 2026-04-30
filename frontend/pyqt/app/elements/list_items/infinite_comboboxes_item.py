@@ -5,11 +5,12 @@ from frontend.pyqt.app.elements.list_items.instrument_and_number_item import Ins
 class InfiniteComboBoxesItem(QtWidgets.QFrame):
     changed = pyqtSignal(object)
 
-    def __init__(self, instrument_names: list[str], initial_combos:int|None=None,parent=None) -> None:
+    def __init__(self, instrument_names: list[str], copies: int = 1, initial_combos: int | None = None, parent=None) -> None:
         """
         Item for a list with generative comboboxes. When you edit the last combobox in the item it generates a new one.
         Params:
             - instrument_names: list of the names of the instruments to show in the comboboxes
+            - copies: number of copies of the item
             - initial_combos: number of comboboxes that are generated when you create the object
         """
         super().__init__(parent)
@@ -22,7 +23,9 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
         self.num_copies = QtWidgets.QComboBox()
         self.num_copies.setFixedWidth(48)
         self.num_copies.addItems([str(i+1) for i in range(self.max_copies)])
-        
+        if 1 <= copies <= self.max_copies:
+            self.num_copies.setCurrentText(str(copies))
+            
         _space_font = QtGui.QFont()
         _space_font.setPointSize(20)
         _space = QtWidgets.QLabel("|")

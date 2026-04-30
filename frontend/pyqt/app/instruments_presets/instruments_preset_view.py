@@ -39,21 +39,27 @@ class InstrumentsPresetView(QDialog):
         self.instruments_names = instrument_names
 
 
-    def add_item(self, preset_instrument: list[tuple[str, str]]):
+    def add_item(self, preset_instrument: list[tuple[str, str]], copies: int = 1, add_empty_at_end: bool = False):
         """Add an InfiniteComboBoxesItem to the layout. It fills the item with the given data"""
-        item = InfiniteComboBoxesItem(self.instruments_names, 0, parent=self)
+        item = InfiniteComboBoxesItem(instrument_names=self.instruments_names, 
+                                      copies=copies, 
+                                      initial_combos=0,
+                                      parent=self)
         item.changed.connect(self.change_detected.emit)
         if preset_instrument != None:
             for i, (instrument, number) in enumerate(preset_instrument):
                 item.add_instrument_combo(instrument, number)
-
+        
+        if add_empty_at_end:
+            item.add_instrument_combo()
+        
         self.items.append(item)
         self.status_console.add_item(item)
 
 
     def add_emtpy_item(self):
         """Add an empty item to the layout."""
-        item = InfiniteComboBoxesItem(self.instruments_names, parent=self)
+        item = InfiniteComboBoxesItem(instrument_names=self.instruments_names, parent=self)
         item.changed.connect(self.change_detected.emit)
         self.items.append(item)
         self.status_console.add_item(item)
