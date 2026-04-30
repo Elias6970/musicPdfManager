@@ -92,9 +92,6 @@ class MainView(QtWidgets.QMainWindow):
         delete_score_opt = QtGui.QAction(self.tr("Delete piece"),self)
         delete_score_opt.triggered.connect(self.show_delete_piece.emit)
 
-        add_scores_to_piece_opt = QtGui.QAction(self.tr("Add scores to piece"),self)
-        add_scores_to_piece_opt.triggered.connect(self.show_add_scores_to_piece.emit)
-        
         export_dossier_opt = QtGui.QAction(self.tr("Export dossier"),self)
         export_dossier_opt.triggered.connect(self.export_dossier.emit)
         
@@ -139,8 +136,6 @@ class MainView(QtWidgets.QMainWindow):
                 piece_menu.addActions([add_score_opt,
                                         modify_score_opt,
                                         delete_score_opt,
-                                        menu.addSeparator(),
-                                        add_scores_to_piece_opt,
                                         menu.addSeparator(),
                                         clasify_scores_opt])
             

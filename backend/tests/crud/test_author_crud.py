@@ -3,11 +3,12 @@ from sqlmodel import SQLModel, Session, create_engine, Field, Relationship
 from typing import Optional
 from backend.app.models.author import Author
 from backend.app.crud.author_crud import (
-    get_or_create_author,
+    create_author,
     get_author_by_id,
     get_author_by_name,
     delete_author
 )
+from backend.app.services.author_service import get_or_create_author
 
 
 @pytest.fixture

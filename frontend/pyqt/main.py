@@ -9,8 +9,6 @@ def main():
     controller = MainController(view)
     view.show()
     view.center_on_screen()
-    
-    view.show()
 
     sys.exit(app.exec())
     

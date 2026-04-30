@@ -3,11 +3,12 @@ from sqlmodel import SQLModel, Session, create_engine, Field, Relationship
 from typing import Optional
 from backend.app.models.type import Type
 from backend.app.crud.type_crud import (
-    get_or_create_type,
+    create_type,
     get_type_by_id,
     get_type_by_name,
     delete_type
 )
+from backend.app.services.type_service import get_or_create_type
 
 @pytest.fixture
 def session():

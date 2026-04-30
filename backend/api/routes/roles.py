@@ -7,7 +7,7 @@ from backend.api.dependencies.permissions import RequireRoleFastAPI,require_user
 from backend.api.dependencies.auth import get_current_user
 from backend.app.models.role import RoleCreate, RolePublic
 
-from backend.app.services.rol_services import create_role, get_role, get_all_roles, update_role, delete_role
+from backend.app.services.rol_services import create_role, get_role as _get_role, get_all_roles, update_role, delete_role
 
 
 router = APIRouter(prefix="/roles", tags=["roles"])
@@ -26,7 +26,7 @@ def get_role(
     session: Session = Depends(get_session),
     _: None = Depends(require_user)
 ):
-    return get_role(session, role_id)
+    return _get_role(session, role_id)
 
 @router.post("/", response_model=RolePublic, status_code=status.HTTP_201_CREATED)
 def create_new_role(

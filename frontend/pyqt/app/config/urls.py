@@ -31,6 +31,9 @@ class Endpoint(StrEnum):
 
     PREVIEW = "/preview/"
 
+    AUTHORS = "/authors"
+    TYPES = "/types"
+
     UPLOADS_STAGING = "/uploads/staging"
 
     SIMPLE_PRINTER = "/printers/simple"

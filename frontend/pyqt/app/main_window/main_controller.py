@@ -7,6 +7,7 @@ from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.config.session_manager import SessionManager
 from frontend.pyqt.app.main_window.main_view import MainView
 from frontend.pyqt.app.models.generated_models import ArchivePublic
+
 from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
 from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
 
@@ -16,6 +17,16 @@ from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_view import De
 from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_controller import DeleteArchiveController
 from frontend.pyqt.app.archive_crud.update_archive.update_archive_view import UpdateArchiveView
 from frontend.pyqt.app.archive_crud.update_archive.update_archive_controller import UpdateArchiveController
+
+from frontend.pyqt.app.piece_crud.create_piece.create_piece_controller import CreatePieceController
+from frontend.pyqt.app.piece_crud.create_piece.create_piece_view import CreatePieceView
+from frontend.pyqt.app.piece_crud.delete_piece.delete_piece_controller import DeletePieceController
+from frontend.pyqt.app.piece_crud.delete_piece.delete_piece_view import DeletePieceView
+from frontend.pyqt.app.piece_crud.update_piece.update_piece_controller import UpdatePieceController
+from frontend.pyqt.app.piece_crud.update_piece.update_piece_view import UpdatePieceView
+
+from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_controller import PieceSelectorController
+from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
 
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.login.login_controller import LoginController
@@ -60,7 +71,6 @@ class MainController(QtCore.QObject):
         self.view.show_add_piece.connect(self.show_add_piece)
         self.view.show_update_piece.connect(self.show_update_piece)
         self.view.show_delete_piece.connect(self.show_delete_piece)
-        self.view.show_add_scores_to_piece.connect(self.show_add_scores_to_piece)
         self.view.clasify_scores.connect(self.clasify_scores)
         self.view.save_pieces_preset.connect(self.save_pieces_preset)
 
@@ -235,34 +245,24 @@ class MainController(QtCore.QObject):
 
     #Show the add_scores_window hiding the main menu
     def show_add_piece(self):
-        # Add_piece_window(self.archive,self)
-        # self.update_autocompleter_scores()
-        pass
+        view = CreatePieceView()
+        controller = CreatePieceController(view)
+        view.exec()
 
     #Show the modifiy scores window hiding the main menu
     def show_update_piece(self):
-        # Modify_piece_window(self.archive,self)
-        # self.update_autocompleter_scores()
-        pass
-
-    #Show the add to exisiting piece window
-    def show_add_scores_to_piece(self):
-        # Add_scores_to_existing_piece_window(self.archive,self)
-        # self.update_autocompleter_scores()
-        pass
+        view = UpdatePieceView()
+        controller = UpdatePieceController(view)
+        view.exec()
 
     #Show delete score menu hiding main menu
     def show_delete_piece(self):
-        # Delete_piece_window(self.archive,self)
-        # self.update_autocompleter_scores()
-        pass
+        view = DeletePieceView()
+        controller = DeletePieceController(view)
+        view.exec()
 
     #Show the window to classify the scores
     def clasify_scores(self):
-        #PieceSelectorToClassifyWindow(self.archive,self)
-        #self.update_autocompleter_scores()
-        from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_controller import PieceSelectorController
-        from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
         self.piece_selector_view = PieceSelectorView(self.view)
         self.piece_selector_controller = PieceSelectorController(self.piece_selector_view)
         self.piece_selector_view.exec()

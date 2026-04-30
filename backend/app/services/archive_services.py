@@ -4,13 +4,16 @@ from sqlmodel import Session, select
 from backend.app.models.archive import Archive
 from backend.app.models.author import Author
 from backend.app.models.type import Type
-from backend.app.crud.author_crud import get_or_create_author
-from backend.app.crud.type_crud import get_or_create_type
+from backend.app.services.author_service import get_or_create_author
+from backend.app.services.type_service import get_or_create_type
 from backend.app.models.user import User
 from backend.app.models.user_archive_link import UserArchiveLink, ArchiveRole
-from backend.app.error import FileCouldNotBeReadException, InsufficientPermissionsError
+from backend.app.error import (
+    FileCouldNotBeReadException, InsufficientPermissionsError,
+    PieceCodAlreadyExistsError, PieceNameAlreadyExistsError
+)
 from backend.app.models.piece import Piece, PieceCreate
-from backend.app.crud.piece_crud import create_piece, get_piece, delete_piece
+from backend.app.crud.piece_crud import create_piece, get_piece, delete_piece, update_piece
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.settings import get_server_settings
 
@@ -115,8 +118,20 @@ def add_piece_to_archive(
         Piece: The created Piece object.
         
     Raises:
+        PieceCodAlreadyExistsError: If a piece with the same cod already exists in the archive.
+        PieceNameAlreadyExistsError: If a piece with the same name already exists in the archive.
         FileCouldNotBeReadException: If file operations fail.
     """
+
+    # Check if cod already exists in the archive
+    existing_cod = session.exec(select(Piece).where(Piece.cod == piece.cod, Piece.archive_id == piece.archive_id)).first()
+    if existing_cod:
+        raise PieceCodAlreadyExistsError(f"A piece with cod {piece.cod} already exists in archive {piece.archive_id}.")
+
+    # Check if name already exists in the archive
+    existing_name = session.exec(select(Piece).where(Piece.name == piece.name, Piece.archive_id == piece.archive_id)).first()
+    if existing_name:
+        raise PieceNameAlreadyExistsError(f"A piece with name '{piece.name}' already exists in archive {piece.archive_id}.")
 
     #Create directory and copy the files
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
@@ -142,6 +157,65 @@ def add_piece_to_archive(
 
     return create_piece(session, piece)
 
+def update_piece_in_archive(
+    session: Session,
+    piece_id: int,
+    piece_in: "PieceCreate",
+    file_manager: ArchiveFileManager
+) -> "Piece":
+    """
+    Update an existing piece in the archive.
+    
+    Args:
+        session: The database session.
+        piece_id: The ID of the existing piece.
+        piece_in: PieceCreate object containing updated piece metadata.
+        file_manager: ArchiveFileManager instance tied to the specific archive path.
+        
+    Returns:
+        Piece: The updated Piece object.
+        
+    Raises:
+        ValueError: If the piece does not exist.
+        PieceCodAlreadyExistsError: If a piece with the same cod already exists in the archive.
+        PieceNameAlreadyExistsError: If a piece with the same name already exists in the archive.
+    """
+    piece = get_piece(session, piece_id)
+    if not piece:
+        raise ValueError(f"Piece with ID {piece_id} not found")
+
+    # Check if new cod already exists for another piece
+    existing_cod = session.exec(select(Piece).where(Piece.cod == piece_in.cod, Piece.archive_id == piece_in.archive_id, Piece.id != piece_id)).first()
+    if existing_cod:
+        raise PieceCodAlreadyExistsError(f"A piece with cod {piece_in.cod} already exists in archive {piece_in.archive_id}.")
+
+    # Check if new name already exists for another piece
+    existing_name = session.exec(select(Piece).where(Piece.name == piece_in.name, Piece.archive_id == piece_in.archive_id, Piece.id != piece_id)).first()
+    if existing_name:
+        raise PieceNameAlreadyExistsError(f"A piece with name '{piece_in.name}' already exists in archive {piece_in.archive_id}.")
+
+    # Handle author and type update if names are provided instead of IDs
+    if piece_in.author_id is None and piece_in.author_name:
+        author = get_or_create_author(session, piece_in.author_name)
+        piece_in.author_id = author.id
+
+    if piece_in.type_id is None and piece_in.type_name:
+        type_ = get_or_create_type(session, piece_in.type_name)
+        piece_in.type_id = type_.id
+
+    # Store the old folder name before the update because the std_name might change after the update
+    old_folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
+
+    updated_piece = update_piece(session, piece_id, piece_in)
+    if not updated_piece:
+        raise ValueError(f"Piece with ID {piece_id} not found")
+    
+    # Update the folder name if changed
+    new_folder_name = file_manager.parse_name_to_file_manager(updated_piece.std_name)
+    if old_folder_name != new_folder_name:
+        file_manager.change_piece_dir_name(old_folder_name, new_folder_name)
+        
+    return updated_piece
 
 def add_files_to_existing_piece(
     session: Session,
