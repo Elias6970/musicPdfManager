@@ -33,6 +33,10 @@ class PiecesApiClient(QObject):
     piece_updated_success = pyqtSignal(generated_models.PiecePublic)
     piece_updated_error = pyqtSignal(str)
 
+    # Emits upon piece deletion
+    piece_deleted_success = pyqtSignal(int)
+    piece_deleted_error = pyqtSignal(str)
+
     # Emits upon adding files to existing piece
     files_added_success = pyqtSignal(generated_models.PiecePublic)
     files_added_error = pyqtSignal(str)
@@ -171,4 +175,20 @@ class PiecesApiClient(QObject):
         else:
             self.files_added_error.emit(reply.errorString() if reply.errorString() else "Failed to add files.")
         reply.deleteLater()
+
+    def delete_piece(self, archive_id: int, piece_id: int):
+        """
+        Deletes a piece from the archive.
+        """
+        url = build_url(Endpoint.PIECE_BY_ID, path_params={"archive_id": archive_id, "piece_id": piece_id})
+        reply = self.client.delete(url)
+        reply.finished.connect(lambda r=reply, pid=piece_id: self._on_delete_piece_finished(r, pid))
+
+    def _on_delete_piece_finished(self, reply: QNetworkReply, piece_id: int):
+        if reply.error() == QNetworkReply.NetworkError.NoError:
+            self.piece_deleted_success.emit(piece_id)
+        else:
+            self.piece_deleted_error.emit(reply.errorString() if reply.errorString() else "Failed to delete piece.")
+        reply.deleteLater()
+
 
