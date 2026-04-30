@@ -28,6 +28,7 @@ class CreateInstrumentsPresetController(QObject):
         self.presets_api_client = InstrumentsPresetsApiClient(get_base_client())
         self.presets_api_client.preset_created.connect(self._on_preset_created)
         self.presets_api_client.preset_create_error.connect(self._on_preset_create_error)
+        self.presets_api_client.preset_name_already_exists_error.connect(self._on_preset_already_exists)
         
         # Load available instrument names initially
         self.names_api_client.get_instruments()
@@ -101,3 +102,8 @@ class CreateInstrumentsPresetController(QObject):
         """Handle preset creation failure."""
         self.view.setEnabled(True)
         QMessageBox.critical(self.view, self.tr("Error"), self.tr(f"Failed to create preset:\n{error}"))
+
+    def _on_preset_already_exists(self, error_msg: str):
+        """Handle when the preset already exists."""
+        self.view.setEnabled(True)
+        ShowError.show_tooltip_error(self.tr("A preset with this name already exists."), 5000, self.view.preset_name)

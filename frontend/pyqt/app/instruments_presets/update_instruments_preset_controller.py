@@ -30,6 +30,7 @@ class UpdateInstrumentsPresetController(QObject):
         self.presets_api_client.preset_load_error.connect(self._on_preset_load_error)
         self.presets_api_client.preset_updated.connect(self._on_preset_updated)
         self.presets_api_client.preset_update_error.connect(self._on_preset_update_error)
+        self.presets_api_client.preset_name_already_exists_error.connect(self._on_preset_already_exists)
         
         self.view.setEnabled(False) # Disable view until data is loaded
         
@@ -143,3 +144,8 @@ class UpdateInstrumentsPresetController(QObject):
         """Handle preset update failure."""
         self.view.setEnabled(True)
         QMessageBox.critical(self.view, self.tr("Error"), self.tr(f"Failed to update preset:\n{error}"))
+
+    def _on_preset_already_exists(self, error_msg: str):
+        """Handle when the preset already exists."""
+        self.view.setEnabled(True)
+        ShowError.show_tooltip_error(self.tr("A preset with this name already exists."), 5000, self.view.preset_name)
