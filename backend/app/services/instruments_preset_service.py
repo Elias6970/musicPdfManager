@@ -57,16 +57,28 @@ def add_preset(session: Session, user_id: int, preset: InstrumentsPreset) -> Ins
     instruments_preset_crud.save_instruments_preset(filepath, preset)
     return preset
 
-def update_preset(session: Session, user_id: int, preset: InstrumentsPreset) -> InstrumentsPreset:
+def update_preset(session: Session, user_id: int, old_preset_name: str, preset: InstrumentsPreset) -> InstrumentsPreset:
     """Update an existing instrument preset. Fails if the preset doesn't exist."""
     filepath = _get_user_preset_file_path(session, user_id)
     
-    # Check if it actually exists before updating
-    existing_preset = instruments_preset_crud.get_instruments_preset(filepath, preset.name)
-    if not existing_preset:
-        raise PresetNotFoundError(f"Preset '{preset.name}' not found")
+    # Check if the old preset exists before updating
+    existing_old_preset = instruments_preset_crud.get_instruments_preset(filepath, old_preset_name)
+    if not existing_old_preset:
+        raise PresetNotFoundError(f"Preset '{old_preset_name}' not found")
         
-    instruments_preset_crud.save_instruments_preset(filepath, preset)
+    if old_preset_name != preset.name:
+        # Check if the new name already exists
+        existing_new_preset = instruments_preset_crud.get_instruments_preset(filepath, preset.name)
+        if existing_new_preset:
+            raise PresetAlreadyExistsError(f"Preset '{preset.name}' already exists")
+            
+        # Save the new preset and delete the old one
+        instruments_preset_crud.save_instruments_preset(filepath, preset)
+        instruments_preset_crud.delete_instruments_preset(filepath, old_preset_name)
+    else:
+        # Just save it (overwrite)
+        instruments_preset_crud.save_instruments_preset(filepath, preset)
+        
     return preset
 
 def delete_preset(session: Session, user_id: int, preset_name: str) -> None:

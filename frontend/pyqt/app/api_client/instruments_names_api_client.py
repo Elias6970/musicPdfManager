@@ -20,6 +20,9 @@ class InstrumentsNamesApiClient(QObject):
     get_instruments_and_shortcuts_translated_success = pyqtSignal(list)
     get_instruments_and_shortcuts_translated_error = pyqtSignal(str)
 
+    get_instruments_success = pyqtSignal(list)
+    get_instruments_error = pyqtSignal(str)
+
     def __init__(self, base_client: BaseApiClient, parent: Optional[QObject] = None):
         super().__init__(parent)
         self.client = base_client
@@ -64,4 +67,18 @@ class InstrumentsNamesApiClient(QObject):
             self.get_instruments_and_shortcuts_translated_success.emit(data)
         else:
             self.get_instruments_and_shortcuts_translated_error.emit(reply.errorString())
+        reply.deleteLater()
+
+    def get_instruments(self):
+        """GET /instruments_names/"""
+        url = build_url(Endpoint.INSTRUMENTS_NAMES)
+        reply = self.client.get(url)
+        reply.finished.connect(lambda r=reply: self._on_get_instruments_finished(r))
+
+    def _on_get_instruments_finished(self, reply: QNetworkReply):
+        data = self.client.parse_reply(reply)
+        if data is not None:
+            self.get_instruments_success.emit(data)
+        else:
+            self.get_instruments_error.emit(reply.errorString())
         reply.deleteLater()

@@ -12,9 +12,11 @@ The application is currently transitioning from a monolith to a stateless client
 ## Strict Guidelines
 
 ### Frontend (PyQt6)
-- **Framework:** Use `PyQt6` exclusively.
-- **Pattern:** Always inherit from the `abstract_windows/` module (e.g., `abstract_fields_window.py`) for CRUD screens to reduce boilerplate. Do not tightly couple UI elements to business logic.
-- **Previews:** For graphical/PDF scenes, utilize the custom `interactive_previewer/` subsystem.
+- **Framework:** Use `PyQt6` exclusively. All the texts in the UI should be translatable using `self.tr()`.
+- **Pattern:** Follow the MVC pattern. All new UI components should have a corresponding controller (e.g., `create_instruments_preset_controller.py` for `instruments_preset_view.py`). Controllers are QObjects and should handle all logic and interactions, while views should only manage UI rendering and user input. The views talk to the controllers via signals and slots. Controllers can call view methods of the view to update it. The controller use the api clients to connect to the backend.
+- **API Connection:** For connection to the API backend, use the `api_client/` layer. Do not make direct HTTP calls from controllers or views. To get the default API client, use `get_base_client()` from `base_api_client_factory.py` and then instantiate the specific API client (e.g., `InstrumentsPresetsApiClient`) with it. All the API-clients receive the base client as a parameter in their constructor, so they can use it to make the calls to the backend. The urls and endpoints are build using the build_url() from `urls.py` file.
+- **Code:** All the code in the frontend should be inside the `frontend/` folder (not the `frontend_pyqt/` folder. This is the old code). The `app/` folder contains all the code related to the application, including views, controllers, models, and API clients.
+
 
 ### Backend (FastAPI & SQLModel)
 - **API:** The main API framework is **FastAPI**. All new backend logic, including endpoints, should be developed using FastAPI and exposed via routes (in `backend/api/routes/`).
@@ -23,17 +25,12 @@ The application is currently transitioning from a monolith to a stateless client
 - **Services:** Place shared business logic and operations in `backend/app/services/` to keep controllers and routes clean.
 - **Stateless:** Design new backend logic to be stateless.
 - **File Management:** Rely on `backend/app/files_management/` to strictly enforce the physical directory structure (`[id]-[PIECE_NAME]/partituras/[instrument]_[number].pdf`).
-- **Dependencies:** The application strictly requires a `data/` folder (with `config.yml`, `instruments.json`, `presets.json`, etc.) next to the executable to function correctly.
+- **Dependencies:** The application strictly requires a `data/` folder next to the executable to function correctly.
+- **Code:** All the new code develop in the backend is inside the `backend/` folder.
 
-### Document Processing
-- Rely on `PyMuPDF` (fitz) and `reportlab` for PDF rotation, splitting, and preview generation.
-- Use `opencv-python` and `numpy` for image and score heuristics.
-
-### Heuristics
-- The `autodetect/` heuristics layer is deprecated. Do not use or expand it.
-- Stick to the Score Classifying paradigm (`backend/app/classifier/` and `frontend_pyqt/score_classifier/`) which ingests PDF pages and processes shorthand strings (like "c3" -> "clarinete 3").
+ ### Document Processing
+- For pdf manipulation, rely only on `PyMuPDF` (fitz) rotating, splitting, and preview generation.
 
 ## Approach
 1. Carefully analyze what domain the change belongs to (Frontend UI vs API Backend vs File Logic).
 2. Discover existing patterns (e.g. read existing abstract windows or CRUD files) before creating new ones from scratch.
-3. Validate your operations by running tests via `pytest backend/tests/` when modifying backend behavior.

@@ -73,19 +73,14 @@ def update_instrument_preset(
     preset: InstrumentsPreset,
     session: Session = Depends(get_session),
     user: User = Depends(require_user)
-):
-    # Ensure the preset name in URL matches the preset payload
-    if preset_name != preset.name:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Preset name in URL must match the name in the payload"
-        )
-        
+):   
     try:
-        return update_preset(session=session, user_id=user.id, preset=preset) # type: ignore
-    except UserConfigNotFoundError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+        return update_preset(session=session, user_id=user.id, old_preset_name=preset_name, preset=preset) # type: ignore
+    except PresetAlreadyExistsError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except PresetNotFoundError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except UserConfigNotFoundError as e:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
 
 @router.delete("/{preset_name}", status_code=status.HTTP_204_NO_CONTENT)

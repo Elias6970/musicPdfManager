@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 import json
+from backend.app.custom_order.instrument_sorter import InstrumentSorter
 from backend.app.instruments_names_manager import InstrumentsNamesManager
 from backend.api.dependencies.database import get_session
 from backend.api.dependencies.permissions import require_user
@@ -27,5 +28,13 @@ def get_instruments_and_shortcuts_translated(language_cod: str, _: None = Depend
         return InstrumentsNamesManager.get_instruments_and_shortcuts_translated(language_cod)
     except KeyError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Language code '{language_cod}' not found in translations.")
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/", status_code=status.HTTP_200_OK, response_model=list[str])
+def get_instrument_names(_: None = Depends(require_user)):
+    try:
+        names = InstrumentsNamesManager.get_instruments()
+        return InstrumentSorter.sort_instruments(names)
     except (FileNotFoundError, json.JSONDecodeError) as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
