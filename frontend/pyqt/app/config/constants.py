@@ -1,6 +1,9 @@
 import sys,os
 
 CLIENT_VERSION = "0.1.0"
+APP_NAME = "Music Pdf Manager"
+APP_AUTHOR = "Elías Iborra Pérez"
+GITHUB = "https://github.com/Elias6970/musicPdfManager"
 
 #The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
 #Every time you execute the application a temp folder is created
