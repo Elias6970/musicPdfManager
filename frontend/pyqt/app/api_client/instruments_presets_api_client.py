@@ -15,8 +15,14 @@ class InstrumentsPresetsApiClient(QObject):
     presets_names_loaded = pyqtSignal(list)
     presets_names_error = pyqtSignal(str)
 
+    presets_loaded = pyqtSignal(list)
+    presets_error = pyqtSignal(str)
+
     preset_created = pyqtSignal(dict)
     preset_create_error = pyqtSignal(str)
+
+    preset_deleted = pyqtSignal(str)
+    preset_delete_error = pyqtSignal(str)
 
     def __init__(self, base_client: BaseApiClient, parent: Optional[QObject] = None):
         super().__init__(parent)
@@ -67,5 +73,52 @@ class InstrumentsPresetsApiClient(QObject):
                 msg = reply.errorString()
                 # You might parse the server's error message from reply.readAll() if BaseApiClient doesn't, but here's a default
                 self.preset_create_error.emit(msg if msg else "Failed to create preset.")
+
+        reply.deleteLater()
+
+    def get_all_presets(self):
+        """
+        Initiates a network request to fetch all instrument presets.
+        """
+        url = build_url(Endpoint.INSTRUMENT_PRESETS)
+        reply = self.client.get(url)
+        reply.finished.connect(lambda r=reply: self._on_get_all_presets_finished(r))
+        
+    def _on_get_all_presets_finished(self, reply: QNetworkReply):
+        data = self.client.parse_reply(reply)
+
+        if data is not None:
+            from frontend.pyqt.app.models.generated_models import InstrumentsPreset
+            res = []
+            if isinstance(data, list):
+                for item in data:
+                    try:
+                        res.append(InstrumentsPreset(**item))
+                    except Exception as e:
+                        pass
+                self.presets_loaded.emit(res)
+            else:
+                self.presets_error.emit("Unexpected data format returned for presets.")
+        else:
+            if reply.error() != QNetworkReply.NetworkError.NoError:
+                self.presets_error.emit("Failed to load presets.")
+
+        reply.deleteLater()
+
+    def delete_preset(self, preset_name: str):
+        """
+        Initiates a network request to delete an instrument preset.
+        """
+        url = build_url(Endpoint.INSTRUMENT_PRESET_BY_NAME, path_params={"preset_name": preset_name})
+        reply = self.client.delete(url)
+        reply.finished.connect(lambda r=reply, n=preset_name: self._on_delete_preset_finished(r, n))
+
+    def _on_delete_preset_finished(self, reply: QNetworkReply, preset_name: str):
+        # We expect 204 No Content for a successful deletion
+        if reply.error() == QNetworkReply.NetworkError.NoError:
+            self.preset_deleted.emit(preset_name)
+        else:
+            msg = reply.errorString()
+            self.preset_delete_error.emit(msg if msg else "Failed to delete preset.")
 
         reply.deleteLater()

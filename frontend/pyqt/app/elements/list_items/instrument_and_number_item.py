@@ -34,7 +34,7 @@ class InstrumentAndNumberItem(QtWidgets.QFrame):
         #Fill the comboboxes
         if instrument != None and instrument in instrument_names:
             self.instrument.setCurrentText(instrument)
-        if number != None and (number.strip() == '' or int(number) <= self.max_number):
+        if number != None and (str(number).strip() == '' or int(number) <= self.max_number):
             self.number.setCurrentText(str(number))
 
         self.instrument.currentIndexChanged.connect(self._emit_changed)
@@ -63,7 +63,7 @@ class InstrumentAndNumberItem(QtWidgets.QFrame):
 
     def get_instrument_and_number(self) -> tuple[str,str]:
         """
-        Return a tuple with the instrument and number. Number can be 
+        Return a tuple with the instrument and number. Number can be '' if not selected
         Example: ("oboe","2")
         """
         return (self.instrument.currentText(),self.number.currentText())

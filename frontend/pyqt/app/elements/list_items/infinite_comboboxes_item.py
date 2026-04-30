@@ -71,11 +71,11 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
         #Delete the streach and add it at the end of the layout
         for i in reversed(range(_layout.count())):
             item = _layout.itemAt(i)
-            if item.spacerItem():
+            if item and item.spacerItem():
                 _layout.takeAt(i)
                 break
         _layout.addWidget(l1)
-        #_layout.addStretch()
+        _layout.addStretch() # type:ignore -> It works, idk why pylance don't detect it
         
         self.instruments.append(l1)
 
@@ -95,10 +95,14 @@ class InfiniteComboBoxesItem(QtWidgets.QFrame):
                 return False
         return True
 
-    def get_data(self) -> list[tuple[str, str]]:
-        """Return a list of non-empty instrument and number tuples for this item."""
+    def get_data(self) -> tuple[int, list[tuple[str, str]]]:
+        """Return a list of non-empty instrument and number tuples for this item.
+        Returns:
+            A tuple with the number of copies and a list of tuples (instrument, number) for each non-empty instrument combo.
+        """
         data = []
         for i in self.instruments:
             if not i.is_empty():
                 data.append(i.get_instrument_and_number())
-        return data
+
+        return (int(self.num_copies.currentText()), data)

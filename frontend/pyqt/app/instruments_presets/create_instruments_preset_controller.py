@@ -1,6 +1,7 @@
 
 
 from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtCore import QObject
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.instruments_presets.instruments_preset_view import InstrumentsPresetView
 from frontend.pyqt.app.api_client.instruments_presets_api_client import InstrumentsPresetsApiClient
@@ -8,8 +9,9 @@ from frontend.pyqt.app.api_client.instruments_names_api_client import Instrument
 from frontend.pyqt.app.models.generated_models import InstrumentsPreset, InstrumentConfig
 from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
 
-class CreateInstrumentsPresetController:
+class CreateInstrumentsPresetController(QObject):
     def __init__(self, view: InstrumentsPresetView):
+        super().__init__()
         self.view = view
 
         # View signals
@@ -19,8 +21,8 @@ class CreateInstrumentsPresetController:
 
         # Names API Client signals
         self.names_api_client = InstrumentsNamesApiClient(get_base_client())
-        self.names_api_client.get_shortcuts_and_instruments_success.connect(self._on_instruments_loaded)
-        self.names_api_client.get_shortcuts_and_instruments_error.connect(self._on_instruments_error)
+        self.names_api_client.get_instruments_success.connect(self._on_instruments_loaded)
+        self.names_api_client.get_instruments_error.connect(self._on_instruments_error)
 
         # Presets API Client signals
         self.presets_api_client = InstrumentsPresetsApiClient(get_base_client())
@@ -28,14 +30,14 @@ class CreateInstrumentsPresetController:
         self.presets_api_client.preset_create_error.connect(self._on_preset_create_error)
         
         # Load available instrument names initially
-        self.names_api_client.get_shortcuts_and_instruments()
+        self.names_api_client.get_instruments()
+        self.view.setEnabled(False) # Disable view until instruments are loaded
 
-    def _on_instruments_loaded(self, data: dict):
+    def _on_instruments_loaded(self, data: list[str]):
         """Called when the instruments map is successfully loaded."""
-        # Typically the map has instrument names as values or keys. Using list of values/keys
-        instruments = sorted(list(set(data.values()))) if isinstance(data, dict) else []
-        self.view.set_instruments_options(instruments)
+        self.view.set_instruments_options(data)
         self.view.add_emtpy_item() # Start with one empty item
+        self.view.setEnabled(True)
 
 
     def _on_instruments_error(self, error: str):
@@ -54,7 +56,7 @@ class CreateInstrumentsPresetController:
         """Handle preset confirmation."""
         preset_name = self.view.get_name().strip()
         if not preset_name:
-            ShowError.show_tooltip_error(self.view.preset_name, self.tr("Preset name cannot be empty."))
+            ShowError.show_tooltip_error(self.tr("Preset name cannot be empty."), 5000, self.view.preset_name)
             return
 
         raw_data = self.view.get_data()
@@ -79,7 +81,7 @@ class CreateInstrumentsPresetController:
             )
 
         if not instruments_payload:
-            ShowError.show_tooltip_error(self.view.btn_confirm, self.tr("You must provide at least one instrument."))
+            ShowError.show_tooltip_error(self.tr("You must provide at least one instrument."), 5000, self.view.btn_confirm)
             return
 
         preset_data = InstrumentsPreset(

@@ -8,12 +8,13 @@ class InstrumentsPresetView(QDialog):
     cancelled = pyqtSignal()
     change_detected = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, title: str = "", parent=None):
         super().__init__(parent)
         self.instruments_names = []
         
         self.setMinimumSize(600, 400)
-        
+        self.setWindowTitle(self.tr(title))
+
         self.preset_name = QLineEdit()
         self.preset_name.setPlaceholderText(self.tr("New preset name"))
 
@@ -55,12 +56,13 @@ class InstrumentsPresetView(QDialog):
         item = InfiniteComboBoxesItem(self.instruments_names, parent=self)
         item.changed.connect(self.change_detected.emit)
         self.items.append(item)
+        self.status_console.add_item(item)
 
 
-    def get_data(self) -> list[tuple[str, list[tuple[str, str]]]]:
+    def get_data(self) -> list[tuple[int, list[tuple[str, str]]]]:
         """
         Return all the non-empty data from the form.
-        Each element in the outer list represents one InfiniteComboBoxesItem as (copies, instruments).
+        Each element in the outer list represents one InfiniteComboBoxesItem as (copies, [(instrument1, number1), (instrument2, number2), ...]).
         """
         all_data = []
         for item in self.items:

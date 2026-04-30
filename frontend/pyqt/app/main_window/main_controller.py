@@ -28,6 +28,9 @@ from frontend.pyqt.app.piece_crud.update_piece.update_piece_view import UpdatePi
 from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_controller import PieceSelectorController
 from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
 
+from frontend.pyqt.app.instruments_presets.list_instruments_presets.list_instruments_presets_controller import ListInstrumentsPresetsController
+from frontend.pyqt.app.instruments_presets.list_instruments_presets.list_instruments_presets_view import ListInstrumentsPresetsView
+
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.login.login_controller import LoginController
 from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
@@ -221,11 +224,10 @@ class MainController(QtCore.QObject):
         pass
 
     def show_presets(self):
-        #PresetsWindow(self)
-        #self.multiple_selection_window.refresh_presets_list(keep_current_index=True)
-        pass
+        view = ListInstrumentsPresetsView(self.view)
+        controller = ListInstrumentsPresetsController(view)
+        view.exec()
 
-    
     def show_create_archive(self):
         view = CreateArchiveView()
         controller = CreateArchiveController(view)
