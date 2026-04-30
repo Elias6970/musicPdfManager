@@ -34,6 +34,8 @@ from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
 from frontend.pyqt.app.users_crud.users_controller import UsersController
 from frontend.pyqt.app.users_crud.users_view import UsersView
 
+from frontend.pyqt.app.pop_up_windows.about_us_view import AboutUsView
+
 class MainController(QtCore.QObject):
     def __init__(self, view:MainView):
         super().__init__()
@@ -269,6 +271,6 @@ class MainController(QtCore.QObject):
 
     #Show about us window
     def show_about_us(self):
-        #About_us_window(self)
-        pass
+        view = AboutUsView(self.view)
+        view.exec()
 
