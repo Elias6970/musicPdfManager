@@ -67,7 +67,22 @@ class CreatePieceView(QDialog):
 
         # Submit button
         self.create_btn = QPushButton(self.tr("Create Piece"))
-        self.create_btn.setStyleSheet("font-weight: bold; padding: 8px;")
+        self.create_btn.setStyleSheet("""
+            QPushButton {
+                font-weight: bold; 
+                padding: 8px; 
+                font-size: 14px; 
+                background-color: #2F80ED; 
+                color: white; 
+                border-radius: 5px;
+            }
+            QPushButton:hover {
+                background-color: #1A6BDA;
+            }
+            QPushButton:pressed {
+                background-color: #1153AD;
+            }
+        """)
         self.create_btn.clicked.connect(self.create_clicked.emit)
         main_layout.addWidget(self.create_btn)
 

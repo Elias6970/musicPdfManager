@@ -76,7 +76,7 @@ class UpdatePieceView(QDialog):
         main_layout.addWidget(self.skip_classification_cb)
 
         # Existing Files Area
-        existing_group = QGroupBox(self.tr("Existing Assigned Files"))
+        existing_group = QGroupBox(self.tr("Existing Scores"))
         existing_layout = QVBoxLayout()
         existing_lbl = QLabel(self.tr("Click ❌ to mark for removal, freeing the file from this piece."))
         existing_lbl.setStyleSheet("color: gray; font-style: italic; font-size: 11px;")
@@ -88,7 +88,7 @@ class UpdatePieceView(QDialog):
         main_layout.addWidget(existing_group)
 
         # Add New Files Area
-        new_files_group = QGroupBox(self.tr("Add New Output Files"))
+        new_files_group = QGroupBox(self.tr("Add New Scores"))
         new_files_layout = QVBoxLayout()
         self.select_files_btn = QPushButton(self.tr("Browse Local Files to Upload..."))
         self.select_files_btn.clicked.connect(self.select_files_clicked.emit)

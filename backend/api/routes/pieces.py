@@ -164,7 +164,6 @@ def update_piece(
         if removed_files is None:
             pass #TODO: Implement the remove of the files
         if added_files is not None and added_files != []:
-            print("DEntro")
             _add_files_to_existing_piece(session, piece_id, added_files, file_manager) # Add new files first to handle potential file-related errors before updating piece data
         return _update_piece_in_archive(session, piece_id, piece, file_manager)
     except (PieceCodAlreadyExistsError, PieceNameAlreadyExistsError) as e:

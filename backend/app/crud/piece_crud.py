@@ -10,16 +10,27 @@ def create_piece(session: Session, piece_in: PieceCreate) -> Piece:
     return db_piece
 
 def update_piece(session: Session, piece_id: int, piece_in: PieceCreate) -> Optional[Piece]:
+    """
+    Updates the piece with the given ID using the piece_in data.
+    Params:
+    - session: The database session to use for the operation.
+    - piece_id: The ID of the piece to update.
+    - piece_in: The data to update the piece with. It ignores author_name and type_names. They need to be set in author_id and type_id respectively.
+    Returns:
+    - The updated Piece object if the update was successful, or None if the piece with the given ID does not exist.
+    """
     db_piece = session.get(Piece, piece_id)
     if not db_piece:
         return None
     piece_data = piece_in.model_dump(exclude_unset=True, exclude_computed_fields=True)
+
     for key, value in piece_data.items():
-        setattr(db_piece, key, value)
-        
+            if hasattr(db_piece, key):
+                setattr(db_piece, key, value)
+
     # Increment version manually on update
     db_piece.version = (db_piece.version or 0) + 1
-        
+    
     session.add(db_piece)
     session.commit()
     session.refresh(db_piece)
