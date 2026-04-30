@@ -171,17 +171,44 @@ def test_add_preset_already_exists(mock_get_path, mock_crud_get, mock_crud_save,
 @patch("backend.app.services.instruments_preset_service.instruments_preset_crud.save_instruments_preset")
 @patch("backend.app.services.instruments_preset_service.instruments_preset_crud.get_instruments_preset")
 @patch("backend.app.services.instruments_preset_service._get_user_preset_file_path")
-def test_update_preset_success(mock_get_path, mock_crud_get, mock_crud_save, mock_session, sample_preset):
+def test_update_preset_success_same_name(mock_get_path, mock_crud_get, mock_crud_save, mock_session, sample_preset):
     # Arrange
     mock_get_path.return_value = "/dummy/presets.json"
     mock_crud_get.return_value = sample_preset  # Existing preset found
 
     # Act
-    result = update_preset(mock_session, 1, sample_preset)
+    result = update_preset(mock_session, 1, "test_preset", sample_preset)
 
     # Assert
     assert result == sample_preset
     mock_crud_save.assert_called_once_with("/dummy/presets.json", sample_preset)
+
+@patch("backend.app.services.instruments_preset_service.instruments_preset_crud.delete_instruments_preset")
+@patch("backend.app.services.instruments_preset_service.instruments_preset_crud.save_instruments_preset")
+@patch("backend.app.services.instruments_preset_service.instruments_preset_crud.get_instruments_preset")
+@patch("backend.app.services.instruments_preset_service._get_user_preset_file_path")
+def test_update_preset_success_different_name(mock_get_path, mock_crud_get, mock_crud_save, mock_crud_delete, mock_session, sample_preset):
+    # Arrange
+    mock_get_path.return_value = "/dummy/presets.json"
+    # first call is for old name, second is for new name
+    old_preset_mock = InstrumentsPreset(name="old_preset", instruments={})
+    
+    def mock_get_side_effect(path, name):
+        if name == "old_preset":
+            return old_preset_mock
+        elif name == sample_preset.name:
+            return None
+        return None
+        
+    mock_crud_get.side_effect = mock_get_side_effect
+
+    # Act
+    result = update_preset(mock_session, 1, "old_preset", sample_preset)
+
+    # Assert
+    assert result == sample_preset
+    mock_crud_save.assert_called_once_with("/dummy/presets.json", sample_preset)
+    mock_crud_delete.assert_called_once_with("/dummy/presets.json", "old_preset")
 
 @patch("backend.app.services.instruments_preset_service.instruments_preset_crud.save_instruments_preset")
 @patch("backend.app.services.instruments_preset_service.instruments_preset_crud.get_instruments_preset")
@@ -192,8 +219,31 @@ def test_update_preset_not_found(mock_get_path, mock_crud_get, mock_crud_save, m
     mock_crud_get.return_value = None  # No existing preset found
 
     # Act & Assert
-    with pytest.raises(PresetNotFoundError, match="Preset 'test_preset' not found"):
-        update_preset(mock_session, 1, sample_preset)
+    with pytest.raises(PresetNotFoundError, match="Preset 'old_preset' not found"):
+        update_preset(mock_session, 1, "old_preset", sample_preset)
+        
+    mock_crud_save.assert_not_called()
+
+@patch("backend.app.services.instruments_preset_service.instruments_preset_crud.save_instruments_preset")
+@patch("backend.app.services.instruments_preset_service.instruments_preset_crud.get_instruments_preset")
+@patch("backend.app.services.instruments_preset_service._get_user_preset_file_path")
+def test_update_preset_already_exists_different_name(mock_get_path, mock_crud_get, mock_crud_save, mock_session, sample_preset):
+    # Arrange
+    mock_get_path.return_value = "/dummy/presets.json"
+    old_preset_mock = InstrumentsPreset(name="old_preset", instruments={})
+    
+    def mock_get_side_effect(path, name):
+        if name == "old_preset":
+            return old_preset_mock
+        elif name == sample_preset.name:
+            return sample_preset
+        return None
+        
+    mock_crud_get.side_effect = mock_get_side_effect
+
+    # Act & Assert
+    with pytest.raises(PresetAlreadyExistsError, match="Preset 'test_preset' already exists"):
+        update_preset(mock_session, 1, "old_preset", sample_preset)
         
     mock_crud_save.assert_not_called()
 
