@@ -19,7 +19,7 @@ def massive_import(
     session: Session,
     file_manager: ArchiveFileManager,
     ignore_first_excel_row: bool = True
-) -> tuple[list[Piece], list[Piece], list[tuple[int, str, str]]]:
+) -> tuple[list[Piece], list[Piece], list[tuple[str, str]]]:
     """
     Perform a massive import of pieces and their associated files based on an Excel file and an archive. 
     It takes the cod from the excel and search for a folder with the same name in the archive, if it exist, it import the files in that folder to the system.
@@ -43,11 +43,11 @@ def massive_import(
         archive_name_path (str): Name of the archive containing the pieces files in the temporary folder.
         file_manager (ArchiveFileManager): An instance of ArchiveFileManager to handle file operations.
     Returns:
-        tuple(list[Piece], list[Piece], list[tuple[int, str, str]]): A tuple containing the list of successfully added pieces and files, the list of added pieces without files, and the list of pieces that could not be created.
+        tuple(list[Piece], list[Piece], list[tuple[str, str]]): A tuple containing the list of successfully added pieces and files, the list of added pieces without files, and the list of pieces that could not be created (std_name, error).
     """
     full_added_pieces: list[Piece] = []
     pieces_without_files: list[Piece] = []
-    not_added_pieces: list[tuple[int, str, str]] = [] # List of tuples with the code, name and error for the pieces that could not be created
+    not_added_pieces: list[tuple[str, str]] = [] # List of tuples with the code, name and error for the pieces that could not be created
     settings = get_server_settings()
     temp_folder = settings.temp_upload_folder
 
@@ -71,7 +71,7 @@ def massive_import(
             piece_added = add_piece_to_archive(session=session, piece=piece, files = [], file_manager=file_manager)
         except Exception as e: #TODO: Change to a more specific exception
             print(f"Error adding piece {name}: {e}")
-            not_added_pieces.append((cod, name, str(e)))
+            not_added_pieces.append((str(cod)+"-"+name, str(e)))
             continue
 
         if piece_added is not None and piece_added.id is not None:
