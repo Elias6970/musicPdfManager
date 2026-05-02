@@ -5,7 +5,7 @@ from PyQt6.QtNetwork import QNetworkReply
 
 from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
 from frontend.pyqt.app.config.urls import Endpoint, build_url
-
+import urllib.parse
 
 class PreviewApiClient(QObject):
     """
@@ -82,8 +82,8 @@ class PreviewApiClient(QObject):
             img_bytes = reply.readAll().data()
             
             #Headers
-            piece_std_name = reply.rawHeader(b"X-Piece_Std-Name").data().decode()
-            file_name = reply.rawHeader(b"X-File-Name").data().decode()
+            piece_std_name = urllib.parse.unquote(reply.rawHeader(b"X-Piece_Std-Name").data().decode())
+            file_name = urllib.parse.unquote(reply.rawHeader(b"X-File-Name").data().decode())
             page_number = int(reply.rawHeader(b"X-Page-Number")) if reply.rawHeader(b"X-Page-Number") else 0
             total_pages = int(reply.rawHeader(b"X-Total-Pages")) if reply.rawHeader(b"X-Total-Pages") else 1
             
