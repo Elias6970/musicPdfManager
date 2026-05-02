@@ -87,7 +87,6 @@ class ArchivesApiClient(QObject):
         if data is not None:
             try:
                 archives = [ArchivePublic(**item) for item in data]
-                print(data)
                 self.get_all_archives_success.emit(archives)
             except Exception as e:
                 self.get_all_archives_error.emit(f"Data parsing error: {str(e)}")

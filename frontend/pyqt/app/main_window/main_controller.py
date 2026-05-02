@@ -28,6 +28,8 @@ from frontend.pyqt.app.piece_crud.update_piece.update_piece_view import UpdatePi
 from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_controller import PieceSelectorController
 from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
 
+from frontend.pyqt.app.preferences.preferences_controller import PreferencesController
+from frontend.pyqt.app.preferences.preferences_view import PreferencesView
 from frontend.pyqt.app.instruments_presets.list_instruments_presets.list_instruments_presets_controller import ListInstrumentsPresetsController
 from frontend.pyqt.app.instruments_presets.list_instruments_presets.list_instruments_presets_view import ListInstrumentsPresetsView
 
@@ -220,8 +222,9 @@ class MainController(QtCore.QObject):
 
     #Show the config window
     def show_preferences(self):
-        #Preferences_window(False,self)
-        pass
+        view = PreferencesView(self.view)
+        controller = PreferencesController(view)
+        view.exec()
 
     def show_presets(self):
         view = ListInstrumentsPresetsView(self.view)

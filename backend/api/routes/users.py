@@ -6,10 +6,20 @@ from backend.api.dependencies.database import get_session
 from backend.api.dependencies.permissions import RequireRoleFastAPI,require_admin
 from backend.api.dependencies.auth import get_current_user
 from backend.app.models.user import User, UserCreate, UserPublic
-from backend.app.models.user_config import UserConfigPublic
+from backend.app.models.user_config import UserConfigCreate, UserConfigCreatePublic, UserConfigPublic
 from backend.app.models.token import Token
-from backend.app.services.user_services import register_user, login_user, get_all_users as _get_all_users, update_user as _update_user, delete_user as _delete_user
-from backend.app.services.user_config_services import get_user_config_by_user_id
+from backend.app.services.user_services import (
+    register_user, 
+    login_user, 
+    get_all_users as _get_all_users, 
+    update_user as _update_user, 
+    delete_user as _delete_user,
+)
+from backend.app.services.user_config_services import (
+    get_user_config_by_user_id,
+    update_user_config as _update_user_config
+)
+
 from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -32,6 +42,40 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = D
         return token
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+
+
+@router.get("/config", response_model=UserConfigPublic)
+def get_user_config(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+    ) -> UserConfigPublic:
+    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
+    if not user_config:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
+    return UserConfigPublic.model_validate(user_config)
+
+
+@router.put("/config", response_model=UserConfigPublic)
+def update_user_config(
+    user_config_in: UserConfigCreatePublic,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+) -> UserConfigPublic:
+    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
+    if not user_config or not user_config.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
+    
+    # Only allow updating the config for the current user
+    if user_config.user_id != current_user.id or not current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot update another user's config")
+    
+    in_config = UserConfigCreate(**user_config_in.model_dump(), user_id=current_user.id)
+    updated_config = _update_user_config(session, user_config_id=user_config.id, user_config_in=in_config)
+    if not updated_config:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found during update")
+    
+    return UserConfigPublic.model_validate(updated_config)
+
 
 @router.put("/{user_id}", response_model=UserPublic)
 def update_user(
@@ -58,17 +102,6 @@ def delete_user(
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return
-
-@router.get("/config", response_model=UserConfigPublic)
-def get_user_config(
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-    ) -> UserConfigPublic:
-    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
-    if not user_config:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
-    return UserConfigPublic.model_validate(user_config)
-
 
 @router.get("/", response_model=list[UserPublic])
 def get_all_users(
