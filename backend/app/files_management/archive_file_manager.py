@@ -53,11 +53,41 @@ class ArchiveFileManager:
         """Formats a filename with a UUID prefix for temporary storage."""
         return f"{file_uuid}_{os.path.basename(filename)}"
     
-    
+    def add_file_to_piece(self, piece_path: str, source_file_bytes: bytes, filename: str, check_duplicates: bool = True) -> bool:
+        """
+        Copy a file to the internal archive depending on if it is a score or an extra
+        and remove the temporally prefix of the name of the file.
+            :param piece_path: name of the piece in the internal archive (without the relative archive path, only the name)
+            :param source_file_bytes: bytes of the file to be copied
+            :param filename: original filename (with extension) to determine if it's a score or extra
+            :param check_duplicates: whether to check for duplicate files in the destination folder
+        Returns:
+            - True if the files was copied successfully or if a duplicate identical file already exists (when check_duplicates is True)
+            - False if there was an error copying the file.
+        """
+        folder = DIR_SCORES if File.is_pdf(filename) else DIR_EXTRAS    
+        destination_path = os.path.join(self.archive_path, piece_path, folder, filename)
+        
+        if check_duplicates:
+            if os.path.exists(destination_path):
+                for existing_file in os.listdir(os.path.dirname(destination_path)):
+                        existing_file_path = os.path.join(os.path.dirname(destination_path), existing_file)
+                        if self.are_the_same(source_file_bytes, existing_file_path):
+                            print(f"File {filename} already exists in the destination and is identical. Skipping copy.")
+                            return True
+        try:
+            with open(destination_path, "wb") as dest_file:
+                dest_file.write(source_file_bytes)
+            return True
+        except Exception as e:
+            print(f"Error copying file {filename} to archive: {type(e)}:{e}")
+            return False
+        
+
     def copy_files_in_archive(self,piece_path:str,files:list) -> bool:
         """
         Copy the files to the internal archive deppending if they are scores or extras
-        and remove the temporally prefix of the name of the files.
+        and remove the temporarily prefix of the name of the files.
         If an error is produced, nothing is copied and it returns false.
             :param piece_path: name of the piece in the internal archive (without the relative archive path, only the name)
             :param files: list of strs with the absolute path of each file
@@ -178,28 +208,42 @@ class ArchiveFileManager:
         return ""
     
     
-    def md5_hash(self,file_path:str) -> str:
+    def _md5_hash(self,file_path:str) -> str:
         hash_md5 = hashlib.md5()
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(65536), b""):
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
-    
-    def are_the_same(self,path1:str,path2:str) -> bool:
+
+    def _md5_hash_bytes(self,file_bytes:bytes) -> str:
+        hash_md5 = hashlib.md5()
+        hash_md5.update(file_bytes)
+        return hash_md5.hexdigest()
+
+
+    def are_the_same(self,path1:str|bytes,path2:str|bytes) -> bool:
         """
         Check if two files are the sameones using md5
-        
-        :param path1: first file abs path
-        :type path1: str
-        :param path2: second file abs path
-        :type path2: str
-        :return: If the files are the sameones return True
-        :rtype: bool
+        Params:
+            - path1: path of the first file or bytes of the first file
+            - path2: path of the second file or bytes of the second file
+        Returns:
+            - True if the files are the same, False otherwise
         """
-        return self.md5_hash(path1) == self.md5_hash(path2)
-        
-    
+        if isinstance(path1, str):
+            hash1 = self._md5_hash(path1)
+        else:
+            hash1 = self._md5_hash_bytes(path1)
+
+        if isinstance(path2, str):
+            hash2 = self._md5_hash(path2)
+        else:
+            hash2 = self._md5_hash_bytes(path2)
+
+        return hash1 == hash2
+
+
     def sanitize_archive_folder_names(self):
         """
         Rename archive folders replacing forbidden characters using parse_name_to_file_manager.

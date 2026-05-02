@@ -217,6 +217,43 @@ def update_piece_in_archive(
         
     return updated_piece
 
+def add_file_to_existing_piece(
+        session: Session,
+        piece_id: int,
+        file_bytes: bytes,
+        filename: str,
+        file_manager: ArchiveFileManager
+) -> "Piece":
+    """
+    Add a new file to an existing piece in the archive.
+    
+    Args:
+        session: The database session.
+        piece_id: The ID of the existing piece.
+        file_bytes: The content of the file as bytes.
+        filename: The name of the file to be added.
+        file_manager: ArchiveFileManager instance tied to the specific archive path.
+        
+    Returns:
+        Piece: The updated Piece object with the new file added.
+        
+    Raises:
+        ValueError: If the piece does not exist.
+        FileCouldNotBeReadException: If file operations fail.
+    """
+    piece = get_piece(session, piece_id)
+    if not piece:
+        raise ValueError(f"Piece with ID {piece_id} not found")
+        
+    folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
+    file_added = file_manager.add_file_to_piece(folder_name, file_bytes, filename)
+
+    if file_added:
+        return piece
+    else:
+        raise FileCouldNotBeReadException("Failed to add file to existing piece in archive")
+
+
 def add_files_to_existing_piece(
     session: Session,
     piece_id: int,

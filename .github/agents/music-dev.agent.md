@@ -28,8 +28,12 @@ The application is currently transitioning from a monolith to a stateless client
 - **Dependencies:** The application strictly requires a `data/` folder next to the executable to function correctly.
 - **Code:** All the new code develop in the backend is inside the `backend/` folder.
 
- ### Document Processing
+### Document Processing
 - For pdf manipulation, rely only on `PyMuPDF` (fitz) rotating, splitting, and preview generation.
+
+### Testing
+- Use pytest.
+- The tests need to cover the 100% of the code, and be located in the `tests/` folder. 
 
 ## Approach
 1. Carefully analyze what domain the change belongs to (Frontend UI vs API Backend vs File Logic).

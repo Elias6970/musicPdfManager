@@ -5,6 +5,7 @@ from backend.api.dependencies.database import get_session
 from backend.api.dependencies.permissions import require_archive_viewer
 from backend.app.models.preview import PreviewRequest
 from backend.app.services.preview_services import generate_preview_bytes
+import urllib.parse
 
 router = APIRouter(prefix="/preview", tags=["Preview"])
 
@@ -36,8 +37,8 @@ def get_pdf_preview(
             "Cache-Control": "public, max-age=604800",
             "Access-Control-Expose-Headers": "X-Total-Pages",
             "X-Archive-ID": str(request.archive_id),
-            "X-Piece_Std-Name": request.piece_std_name,
-            "X-File-Name": request.file,
+            "X-Piece_Std-Name": urllib.parse.quote(request.piece_std_name),
+            "X-File-Name": urllib.parse.quote(request.file),
             "X-Page-Number": str(request.page_number),
             "X-Total-Pages": str(total_pages),
             "X-DPI": str(request.dpi)

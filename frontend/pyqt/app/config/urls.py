@@ -35,7 +35,8 @@ class Endpoint(StrEnum):
     TYPES = "/types"
 
     UPLOADS_STAGING = "/uploads/staging"
-
+    UPLOADS_STAGING_COMPRESSED = "/uploads/staging/{folder_id}/compressed"
+    
     SIMPLE_PRINTER = "/printers/simple"
     PRESET_PRINTER = "/printers/preset"
 
@@ -47,6 +48,8 @@ class Endpoint(StrEnum):
     PIECE_PRESETS_NAMES = "/presets/pieces/names"
 
     CLASSIFICATION_BY_ID = "/classification/{archive_id}"
+
+    MASSIVE_IMPORT = "/massive_import"
 
     INSTRUMENTS_NAMES = "/instruments_names/"
     INSTRUMENTS_NAMES_SHORTCUTS_AND_INSTRUMENTS = "/instruments_names/shortcuts_and_instruments"
