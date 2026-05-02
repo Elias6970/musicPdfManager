@@ -7,9 +7,11 @@ from backend.api.dependencies.file_manager import get_archive_file_manager
 from backend.api.dependencies.permissions import RequireArchiveRoleFastAPI, ArchiveRole
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.massive_import.massive_importer_services import massive_import
+from backend.app.models.massive_import import MassiveImportResponse
+
 router = APIRouter(prefix="/massive_import", tags=["massive_import"])
 
-@router.post("/", response_model=dict)
+@router.post("/", response_model=MassiveImportResponse)
 def make_import(
     archive_id: int,
     excel_name_path: str,
@@ -27,9 +29,8 @@ def make_import(
         file_manager=file_manager,
         ignore_first_excel_row=ignore_first_excel_row
     )
-    return {
-        "message": "Massive import completed successfully.",
-        "full_added_pieces": [i.std_name for i in full_added_pieces],
-        "pieces_without_files": [i.std_name for i in pieces_without_files],
-        "not_added_pieces": [{ "std_name": std_name, "error": error } for std_name, error in not_added_pieces]
-    }
+    return MassiveImportResponse(
+        full_added_pieces=[i.std_name for i in full_added_pieces],
+        pieces_without_files=[i.std_name for i in pieces_without_files],
+        not_added_pieces=[{"std_name": std_name, "error": error} for std_name, error in not_added_pieces]
+    )

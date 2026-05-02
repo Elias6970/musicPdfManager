@@ -18,3 +18,17 @@ class ZipExtractor(BaseExtractor):
                     if base_name:
                         with archive.open(info) as f:
                             yield base_name, f.read()
+    
+
+    def extract_all(self, file_data: io.BytesIO) -> dict[str, bytes]:
+        """
+        Extracts all files from a ZIP preserving the directory structure. 
+        It returns a dictionary mapping the full path (including directories) to the file bytes.
+        """
+        extracted_files = {}
+        with zipfile.ZipFile(file_data, 'r') as archive:
+            for info in archive.infolist():
+                if not info.is_dir():
+                    with archive.open(info) as f:
+                        extracted_files[info.filename] = f.read()
+        return extracted_files

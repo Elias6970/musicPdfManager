@@ -1,4 +1,5 @@
 import asyncio
+import io
 import os
 import uuid
 import time
@@ -8,10 +9,11 @@ from fastapi import Request
 
 from backend.app.settings import get_server_settings
 from backend.app.error import FileTooLargeException
-from backend.app.models.upload import UploadStagingResponse
+from backend.app.models.upload import UploadStagingResponse, UploadToFolderResponse
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.massive_import.file_decompressor.file_decompressor_services import get_strategy
 
-async def process_upload_stream(request: Request) -> UploadStagingResponse:
+async def process_upload_stream(request: Request, folder_id: str|None = None) -> UploadStagingResponse:
     """
     Processes an incoming file upload stream and saves it to a temporary staging folder.
     
@@ -39,8 +41,11 @@ async def process_upload_stream(request: Request) -> UploadStagingResponse:
     file_uuid = str(uuid.uuid4())
     temp_filename = ArchiveFileManager.format_temp_filename(file_uuid, filename)
     
-    os.makedirs(settings.temp_upload_folder, exist_ok=True)
-    filepath = os.path.join(settings.temp_upload_folder, temp_filename)
+    if folder_id and folder_id.strip() != "":
+        filepath = os.path.join(settings.temp_upload_folder, folder_id, temp_filename)
+        os.makedirs(filepath, exist_ok=True)
+    else:
+        filepath = os.path.join(settings.temp_upload_folder, temp_filename)
     
     bytes_written = 0
     
@@ -74,7 +79,62 @@ async def process_upload_stream(request: Request) -> UploadStagingResponse:
                 os.remove(filepath)
             except OSError:
                 pass
+        print(f"Error processing upload stream: {e}")
         raise e
+
+async def process_upload_stream_to_folder_compressed(request: Request, folder_id: str|None = None) -> UploadToFolderResponse:
+    """
+    Uploads a compressed file stream to staging , extracts its contents, and saves them in the staging folder_id folder. Deletes the original compressed file.
+    WARNING: The user can provide a folder_id that doesn't exits and it will be created. Be careful
+        Params:
+        - request: The incoming HTTP request containing the file stream and headers.
+        - folder_id: A string identifier for the staging folder (e.g., "massive_import"). 
+                    If it is not provided, it creates a new subfolder and return the identifier.
+    
+    """
+    upload_response = await process_upload_stream(request)
+    
+    if folder_id is None or folder_id.strip() == "" or folder_id == "None":
+        folder_id = str(uuid.uuid4())
+
+    piece_folder_name = os.path.splitext(upload_response.original_filename)[0] #Remove extension
+    extraction_folder_path = os.path.join(get_server_settings().temp_upload_folder, folder_id, piece_folder_name)
+    os.makedirs(extraction_folder_path, exist_ok=True)
+
+    compressed_filepath = os.path.join(get_server_settings().temp_upload_folder, upload_response.file_id)
+    strategy = get_strategy(upload_response.original_filename)
+    if strategy:
+        try:
+            with open(compressed_filepath, 'rb') as f:
+                file_data = f.read()
+                extracted_files = strategy.extract_all(io.BytesIO(file_data))
+                
+                # Save extracted files to the extraction folder
+                for filename, file_bytes in extracted_files.items():
+                    extracted_filepath = os.path.join(extraction_folder_path, filename)
+                    os.makedirs(os.path.dirname(extracted_filepath), exist_ok=True)
+                    
+                    # Skip if it is just a directory entry
+                    if not filename.endswith('/') and not filename.endswith('\\'):
+                        async with aiofiles.open(extracted_filepath, 'wb') as ef:
+                            await ef.write(file_bytes)
+            
+            # Delete compressed
+            os.remove(compressed_filepath)
+            
+            return UploadToFolderResponse(
+                folder_id=folder_id,
+                original_filename=upload_response.original_filename,
+                    size_bytes=upload_response.size_bytes,
+                    message="Successfully uploaded and extracted compressed file"
+                )
+            
+        except Exception as e:
+            raise Exception(f"Error processing compressed file: {str(e)}")
+    else:
+        raise Exception("Unsupported compressed file format")
+
+
 
 async def cleanup_temp_uploads_routine():
     """Background routine that periodically deletes expired temporary files."""

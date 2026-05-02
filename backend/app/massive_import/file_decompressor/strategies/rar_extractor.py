@@ -63,3 +63,16 @@ class RarExtractor(BaseExtractor):
                     base_name = os.path.basename(info.filename or "")
                     if base_name:
                         yield base_name, archive.read(info)
+    
+
+    def extract_all(self, file_data: io.BytesIO) -> dict[str, bytes]:
+        """
+        Extracts all files from a RAR preserving the directory structure. 
+        It returns a dictionary mapping the full path (including directories) to the file bytes.
+        """
+        extracted_files = {}
+        with rarfile.RarFile(file_data, 'r') as archive:
+            for info in archive.infolist():
+                if isinstance(info, rarfile.RarInfo) and not info.isdir():
+                    extracted_files[info.filename] = archive.read(info)
+        return extracted_files

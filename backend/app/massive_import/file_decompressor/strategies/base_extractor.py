@@ -12,3 +12,11 @@ class BaseExtractor(abc.ABC):
         Must be implemented by all concrete subclasses.
         """
         pass
+
+    @abc.abstractmethod
+    def extract_all(self, file_data: io.BytesIO) -> dict[str, bytes]:
+        """
+        Takes an in-memory file object and returns a dictionary mapping base_filenames to their bytes.
+        Must be implemented by all concrete subclasses.
+        """
+        pass

@@ -18,3 +18,18 @@ class TarExtractor(BaseExtractor):
                         f = archive.extractfile(member)
                         if f:
                             yield base_name, f.read()
+    
+
+    def extract_all(self, file_data: io.BytesIO) -> dict[str, bytes]:
+        """
+        Extracts all files from a TAR preserving the directory structure. 
+        It returns a dictionary mapping the full path (including directories) to the file bytes.
+        """
+        extracted_files = {}
+        with tarfile.open(fileobj=file_data, mode='r:*') as archive:
+            for member in archive.getmembers():
+                if member.isreg(): # Check if it's a regular file
+                    f = archive.extractfile(member)
+                    if f:
+                        extracted_files[member.name] = f.read()
+        return extracted_files
