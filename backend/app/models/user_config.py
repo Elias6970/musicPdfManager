@@ -12,6 +12,8 @@ class UserConfig(UserConfigBase, table=True):
     presets_pieces_path: str
     dossier_cover_path: str
 
+class UserConfigCreatePublic(UserConfigBase):
+    pass
 
 class UserConfigCreate(UserConfigBase):
     user_id: int

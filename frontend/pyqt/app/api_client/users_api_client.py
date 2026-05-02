@@ -4,7 +4,7 @@ from PyQt6.QtNetwork import QNetworkReply, QNetworkRequest
 from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.config.urls import build_url, Endpoint
-from frontend.pyqt.app.models.generated_models import UserConfigPublic, UserPublic, UserCreate
+from frontend.pyqt.app.models.generated_models import UserConfigCreatePublic, UserConfigPublic, UserPublic, UserCreate
 
 class UsersApiClient(QObject):
     login_success = pyqtSignal(dict)
@@ -21,6 +21,9 @@ class UsersApiClient(QObject):
 
     update_user_success = pyqtSignal(UserPublic)
     update_user_error = pyqtSignal(str)
+
+    update_user_config_success = pyqtSignal(UserConfigPublic)
+    update_user_config_error = pyqtSignal(str)
 
     delete_user_success = pyqtSignal()
     delete_user_error = pyqtSignal(str)
@@ -133,4 +136,27 @@ class UsersApiClient(QObject):
             self.delete_user_success.emit()
         else:
             self.delete_user_error.emit(reply.errorString())
+        reply.deleteLater()
+
+    def update_user_config(self, user_config: UserConfigCreatePublic):
+        """Update the current user's configuration.
+        
+        Args:
+            user_config (UserConfigCreatePublic): The user configuration data to update
+        """
+        url = build_url(Endpoint.USERS_CONFIG)
+        reply = self.base_client.put(url, user_config)
+        reply.finished.connect(lambda r=reply: self._handle_update_user_config_finished(r))
+
+    def _handle_update_user_config_finished(self, reply: QNetworkReply):
+        """Handle the response for update_user_config."""
+        data = self.base_client.parse_reply(reply)
+        if data is not None:
+            try:
+                user_config = UserConfigPublic(**data)
+                self.update_user_config_success.emit(user_config)
+            except Exception as e:
+                self.update_user_config_error.emit(f"Data parsing error: {str(e)}")
+        else:
+            self.update_user_config_error.emit(reply.errorString())
         reply.deleteLater()
