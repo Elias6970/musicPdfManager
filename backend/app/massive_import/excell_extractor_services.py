@@ -35,7 +35,11 @@ def _read_csv(file_path:str, ignore_first_row:bool=False):
             if i < start:
                 continue 
             try:
-                readed.append((int(float(row[0])),str(row[1]),str(row[2]),str(row[3])))
+                code = clean_to_int(str(row[0]))
+                name = clean_str(str(row[1]))
+                composer = clean_str(str(row[2]))
+                type = clean_str(str(row[3]))
+                readed.append((code, name, composer, type))
             except Exception as e:
                 logger.error(f"Error reading row {i+1}: {str(row)}. Error: {str(e)}")
 
@@ -60,7 +64,11 @@ def _read_xlsx(file_path:str, ignore_first_row:bool=False):
         if row_values[0] == None:
             continue
         try:
-            readed.append((int(float(row_values[0])),str(row_values[1]),str(row_values[2]),str(row_values[3])))
+            code = clean_to_int(str(row_values[0]))
+            name = clean_str(str(row_values[1]))
+            composer = clean_str(str(row_values[2]))
+            type = clean_str(str(row_values[3]))
+            readed.append((code, name, composer, type))
         except Exception as e:
             logger.error(f"Error reading row {i+1}: {str(row_values)}. Error: {str(e)}")
 
@@ -78,9 +86,36 @@ def _read_xls(file_path:str, ignore_first_row:bool=False):
     for i in range(start,sheet.nrows):
         row = sheet.row_values(i)
         try:
-            readed.append((int(float(row[0])),str(row[1]),str(row[2]),str(row[3])))
+            code = clean_to_int(str(row[0]))
+            name = clean_str(str(row[1]))
+            composer = clean_str(str(row[2]))
+            type = clean_str(str(row[3]))
+            readed.append((code, name, composer, type))
         except Exception as e:
             logger.error(f"Error reading row {i+1}: {str(row)}. Error: {str(e)}")
 
     logger.info("Finished reading xls file %s",file_path)
     return readed
+
+def clean_str(value_str:str) -> str:
+    """
+    Cleans a string by removing leading and trailing whitespace, and replacing multiple spaces with a single space.
+    Args:
+        value_str (str): The input string to clean.
+    Returns:
+        str: The cleaned string.
+    """
+    return value_str.replace("\t", " ").replace("\n", " ").strip()
+
+def clean_to_int(value_str:str) -> int:
+    """
+    Cleans a string to extract an integer value. It removes any non-digit characters and converts the result to an integer.
+    Args:
+        value_str (str): The input string to clean.
+    Returns:
+        int: The cleaned integer value. If the input string does not contain any digits, it returns 0.
+    """
+    cleaned = clean_str(value_str)
+    cleaned = cleaned.replace(" ", "").replace(".'", "").replace(",", "")
+    digits = ''.join(filter(str.isdigit, cleaned))
+    return int(digits) if digits else 0

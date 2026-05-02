@@ -64,6 +64,7 @@ class MassiveImportView(QtWidgets.QDialog):
             self.progress_bar.setVisible(True)
     
     def set_finished_uploading(self):
+        self.set_progress(100)
         self.processing_lbl.setVisible(True)
     
     def set_data_file_lbl(self, file_name: str):

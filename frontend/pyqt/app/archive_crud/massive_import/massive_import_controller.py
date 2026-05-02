@@ -4,8 +4,9 @@ import zipfile, io, os
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.api_client.massive_import_api_client import MassiveImportApiClient
 from frontend.pyqt.app.api_client.uploads_api_client import UploadsApiClient
-from frontend.pyqt.app.piece_crud.massive_import.massive_import_view import MassiveImportView
+from frontend.pyqt.app.archive_crud.massive_import.massive_import_view import MassiveImportView
 from frontend.pyqt.app.models.generated_models import ArchivePublic, MassiveImportResponse
+from frontend.pyqt.app.pop_up_windows.massive_import_result_window import MassiveImportResultWindow
 from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
 
 class MassiveImportController(QtCore.QObject):
@@ -80,15 +81,13 @@ class MassiveImportController(QtCore.QObject):
         )
 
     def _on_make_import_success(self, response: MassiveImportResponse):
-        message = self.tr("Massive import completed successfully.\n\n")
-        if response.full_added_pieces:
-            message += self.tr("Pieces fully added with their files:\n") + "\n".join(response.full_added_pieces) + "\n\n"
-        if response.pieces_without_files:
-            message += self.tr("Pieces added without files:\n") + "\n".join(response.pieces_without_files) + "\n\n"
-        if response.not_added_pieces:
-            message += self.tr("Pieces not added due to errors:\n") + "\n".join([f"{item['std_name']}: {item['error']}" for item in response.not_added_pieces])
-        
-        QtWidgets.QMessageBox.information(self.view, self.tr("Import Result"), message)
+        result_window = MassiveImportResultWindow(
+            full_added_pieces=response.full_added_pieces,
+            pieces_without_files=response.pieces_without_files,
+            not_added_pieces=response.not_added_pieces,
+            parent=self.view,
+        )
+        result_window.exec()
         self.view.accept()
 
     def _on_make_import_error(self, error: str):
