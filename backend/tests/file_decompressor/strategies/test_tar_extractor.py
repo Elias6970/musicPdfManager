@@ -70,3 +70,61 @@ def test_extract_items_empty_tar():
     results = list(extractor.extract_items(mock_tar))
     
     assert len(results) == 0
+
+def test_extract_all_preserves_directory_structure():
+    mock_tar = create_mock_tar({
+        "score_1.pdf": b"content1",
+        "folder/score_2.pdf": b"content2",
+        "folder/sub/score_3.pdf": b"content3",
+        "folder/": None,
+    })
+
+    extractor = TarExtractor()
+    result = extractor.extract_all(mock_tar)
+
+    assert result == {
+        "score_1.pdf": b"content1",
+        "folder/score_2.pdf": b"content2",
+        "folder/sub/score_3.pdf": b"content3",
+    }
+    assert "folder" not in result
+
+
+def test_extract_all_empty_tar_returns_empty_dict():
+    mock_tar = create_mock_tar({})
+
+    extractor = TarExtractor()
+    result = extractor.extract_all(mock_tar)
+
+    assert result == {}
+
+
+def test_extract_all_ignores_directory_only_archive():
+    mock_tar = create_mock_tar({
+        "empty_folder/": None,
+        "nested/": None,
+        "nested/sub/": None,
+    })
+
+    extractor = TarExtractor()
+    result = extractor.extract_all(mock_tar)
+
+    assert result == {}
+
+
+def test_extract_all_with_mixed_entries_includes_only_files():
+    mock_tar = create_mock_tar({
+        "a/file1.txt": b"f1",
+        "a/b/": None,
+        "a/b/file2.pdf": b"f2",
+        "root.png": b"img",
+    })
+
+    extractor = TarExtractor()
+    result = extractor.extract_all(mock_tar)
+
+    assert result == {
+        "a/file1.txt": b"f1",
+        "a/b/file2.pdf": b"f2",
+        "root.png": b"img",
+    }

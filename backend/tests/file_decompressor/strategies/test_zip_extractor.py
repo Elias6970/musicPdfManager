@@ -69,3 +69,76 @@ def test_extract_items_empty_zip():
     results = list(extractor.extract_items(mock_zip))
     
     assert len(results) == 0
+
+def test_extract_all_preserves_directory_structure():
+    mock_zip = create_mock_zip({
+        "score_1.pdf": b"content1",
+        "folder/score_2.pdf": b"content2",
+        "folder/sub/score_3.pdf": b"content3",
+        "folder/": None,
+    })
+
+    extractor = ZipExtractor()
+    result = extractor.extract_all(mock_zip)
+
+    assert result == {
+        "score_1.pdf": b"content1",
+        "folder/score_2.pdf": b"content2",
+        "folder/sub/score_3.pdf": b"content3",
+    }
+    assert "folder/" not in result
+
+
+def test_extract_all_empty_zip_returns_empty_dict():
+    mock_zip = create_mock_zip({})
+
+    extractor = ZipExtractor()
+    result = extractor.extract_all(mock_zip)
+
+    assert result == {}
+
+
+def test_extract_all_ignores_directory_only_archive():
+    mock_zip = create_mock_zip({
+        "empty_folder/": None,
+        "nested/": None,
+        "nested/sub/": None,
+    })
+
+    extractor = ZipExtractor()
+    result = extractor.extract_all(mock_zip)
+
+    assert result == {}
+
+
+def test_extract_all_with_mixed_entries_includes_only_files():
+    mock_zip = create_mock_zip({
+        "a/file1.txt": b"f1",
+        "a/b/": None,
+        "a/b/file2.pdf": b"f2",
+        "root.png": b"img",
+    })
+
+    extractor = ZipExtractor()
+    result = extractor.extract_all(mock_zip)
+
+    assert result == {
+        "a/file1.txt": b"f1",
+        "a/b/file2.pdf": b"f2",
+        "root.png": b"img",
+    }
+
+
+def test_extract_all_keeps_same_basename_in_different_directories():
+    mock_zip = create_mock_zip({
+        "set_a/score.pdf": b"a",
+        "set_b/score.pdf": b"b",
+    })
+
+    extractor = ZipExtractor()
+    result = extractor.extract_all(mock_zip)
+
+    assert result == {
+        "set_a/score.pdf": b"a",
+        "set_b/score.pdf": b"b",
+    }
