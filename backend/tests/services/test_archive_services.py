@@ -24,7 +24,8 @@ from backend.app.services.archive_services import (
     add_piece_to_archive,
     update_piece_in_archive,
     delete_piece_from_archive,
-    add_files_to_existing_piece
+    add_files_to_existing_piece,
+    add_file_to_existing_piece
 )
 
 @pytest.fixture(name="engine")
@@ -260,6 +261,38 @@ def test_add_files_to_existing_piece_copy_fail(session: Session, file_manager: M
     with pytest.raises(FileCouldNotBeReadException):
         assert p1.id is not None
         add_files_to_existing_piece(session, p1.id, ["test.pdf"], file_manager)
+
+
+def test_add_file_to_existing_piece_success(session: Session, file_manager: MagicMock):
+    p1 = Piece(cod=7, name="ExistingSingle", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    session.add(p1)
+    session.commit()
+
+    file_manager.parse_name_to_file_manager.side_effect = lambda x: x
+    file_manager.add_file_to_piece.return_value = True
+
+    assert p1.id is not None
+    result = add_file_to_existing_piece(session, p1.id, b"content", "new.pdf", file_manager)
+    assert result.id == p1.id
+    file_manager.add_file_to_piece.assert_called_once_with("7-ExistingSingle", b"content", "new.pdf")
+
+
+def test_add_file_to_existing_piece_not_found(session: Session, file_manager: MagicMock):
+    with pytest.raises(ValueError, match="Piece with ID 999 not found"):
+        add_file_to_existing_piece(session, 999, b"data", "a.pdf", file_manager)
+
+
+def test_add_file_to_existing_piece_copy_fail(session: Session, file_manager: MagicMock):
+    p1 = Piece(cod=8, name="ExistingFail", archive_id=1, digitalized=False, handwrited=False, parted=False)
+    session.add(p1)
+    session.commit()
+
+    file_manager.parse_name_to_file_manager.side_effect = lambda x: x
+    file_manager.add_file_to_piece.return_value = False
+
+    with pytest.raises(FileCouldNotBeReadException):
+        if p1.id is not None:
+            add_file_to_existing_piece(session, p1.id, b"content", "fail.pdf", file_manager)
 
 
 @patch("backend.app.services.archive_services.get_server_settings")

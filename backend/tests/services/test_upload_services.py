@@ -6,6 +6,7 @@ from fastapi import Request
 from backend.app.services.upload_services import process_upload_stream
 from backend.app.error import FileTooLargeException
 from backend.app.models.upload import UploadStagingResponse
+from unittest.mock import MagicMock
 
 @pytest.fixture
 def mock_settings():
@@ -135,3 +136,69 @@ async def test_cleanup_temp_uploads_routine_ignores_missing_folder(mock_settings
         with pytest.raises(StopLoop):
             # Should silently fail and reach the sleep statement
             await cleanup_temp_uploads_routine()
+
+
+@pytest.mark.asyncio
+async def test_process_upload_stream_to_folder_compressed_success(mock_settings, tmp_path):
+    mock_settings.temp_upload_folder = str(tmp_path)
+
+    # Prepare upload response
+    upload_resp = UploadStagingResponse(file_id="1234-archive.zip", original_filename="archive.zip", size_bytes=10, message="")
+
+    with patch("backend.app.services.upload_services.process_upload_stream", new=AsyncMock(return_value=upload_resp)):
+        strategy = MagicMock()
+        strategy.extract_all.return_value = {
+            "file1.txt": b"hello",
+            "subdir/file2.txt": b"bye"
+        }
+        with patch("backend.app.services.upload_services.get_strategy", return_value=strategy):
+            # Create the compressed file that will be read
+            (tmp_path / upload_resp.file_id).write_bytes(b"dummy-compressed")
+            from backend.app.services.upload_services import process_upload_stream_to_folder_compressed
+
+            mock_request = AsyncMock(spec=Request)
+            res = await process_upload_stream_to_folder_compressed(mock_request, folder_id="myfolder")
+
+            assert res.folder_id == "myfolder"
+            extraction_base = tmp_path / "myfolder" / "archive"
+            assert (extraction_base / "file1.txt").exists()
+            assert (extraction_base / "subdir" / "file2.txt").exists()
+            # compressed file must be removed
+            assert not (tmp_path / upload_resp.file_id).exists()
+
+
+@pytest.mark.asyncio
+async def test_process_upload_stream_to_folder_compressed_generates_folder_id_if_none(mock_settings, tmp_path):
+    mock_settings.temp_upload_folder = str(tmp_path)
+    upload_resp = UploadStagingResponse(file_id="id2.zip", original_filename="piece.zip", size_bytes=1, message="")
+
+    with patch("backend.app.services.upload_services.process_upload_stream", new=AsyncMock(return_value=upload_resp)):
+        strategy = MagicMock()
+        strategy.extract_all.return_value = {"a.txt": b"x"}
+        with patch("backend.app.services.upload_services.get_strategy", return_value=strategy):
+            (tmp_path / upload_resp.file_id).write_bytes(b"data")
+            with patch("backend.app.services.upload_services.uuid.uuid4", return_value="fixed-uuid"):
+                from backend.app.services.upload_services import process_upload_stream_to_folder_compressed
+
+                mock_request = AsyncMock(spec=Request)
+                res = await process_upload_stream_to_folder_compressed(mock_request, folder_id=None)
+
+                assert res.folder_id == "fixed-uuid"
+                assert (tmp_path / "fixed-uuid" / "piece" / "a.txt").exists()
+
+
+@pytest.mark.asyncio
+async def test_process_upload_stream_to_folder_compressed_unsupported_strategy_raises(mock_settings, tmp_path):
+    mock_settings.temp_upload_folder = str(tmp_path)
+    upload_resp = UploadStagingResponse(file_id="u.zip", original_filename="unknown.ext", size_bytes=0, message="")
+
+    with patch("backend.app.services.upload_services.process_upload_stream", new=AsyncMock(return_value=upload_resp)):
+        with patch("backend.app.services.upload_services.get_strategy", return_value=None):
+            (tmp_path / upload_resp.file_id).write_bytes(b"data")
+            from backend.app.services.upload_services import process_upload_stream_to_folder_compressed
+
+            mock_request = AsyncMock(spec=Request)
+            with pytest.raises(Exception) as exc:
+                await process_upload_stream_to_folder_compressed(mock_request, folder_id="fld")
+
+            assert "Unsupported compressed file format" in str(exc.value)

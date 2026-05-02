@@ -161,3 +161,68 @@ def test_extract_original_filename():
 def test_format_temp_filename():
     assert ArchiveFileManager.format_temp_filename("123e4567-e89b", "myscore.pdf") == "123e4567-e89b_myscore.pdf"
     assert ArchiveFileManager.format_temp_filename("123e4567-e89b", "/user/local/downloads/myscore.pdf") == "123e4567-e89b_myscore.pdf"
+
+
+def test_add_file_to_piece_scores_and_extras(manager):
+    piece = "1-TEST"
+    manager.make_dir(piece)
+
+    # Add a PDF (score)
+    data_pdf = b"%PDF-1.4\n%EOF"
+    assert manager.add_file_to_piece(piece, data_pdf, "score.pdf") is True
+    assert os.path.exists(os.path.join(manager.archive_path, piece, DIR_SCORES, "score.pdf"))
+
+    # Add a non-pdf (extra)
+    data_txt = b"notes"
+    assert manager.add_file_to_piece(piece, data_txt, "notes.txt") is True
+    assert os.path.exists(os.path.join(manager.archive_path, piece, DIR_EXTRAS, "notes.txt"))
+
+
+def test_add_file_to_piece_duplicate_detection_and_overwrite(manager):
+    piece = "1-TEST"
+    manager.make_dir(piece)
+
+    dest = os.path.join(manager.archive_path, piece, DIR_SCORES, "dup.pdf")
+    Path(dest).write_bytes(b"same")
+
+    # Same content -> should detect duplicate and return True without writing a new file
+    assert manager.add_file_to_piece(piece, b"same", "dup.pdf") is True
+    assert Path(dest).read_bytes() == b"same"
+
+    # Different content but same filename -> should overwrite and return True
+    Path(dest).write_bytes(b"old")
+    assert manager.add_file_to_piece(piece, b"new", "dup.pdf") is True
+    assert Path(dest).read_bytes() == b"new"
+
+
+def test_add_file_to_piece_write_error(manager):
+    piece = "1-TEST"
+    manager.make_dir(piece)
+
+    # Simulate an IO error when opening the destination file for writing
+    with patch("builtins.open", side_effect=IOError("disk full")):
+        assert manager.add_file_to_piece(piece, b"data", "file.pdf") is False
+
+    # Ensure file was not created
+    assert not os.path.exists(os.path.join(manager.archive_path, piece, DIR_SCORES, "file.pdf"))
+
+
+def test_md5_hash_bytes_and_are_the_same_bytes_and_mixed(manager, tmp_path):
+    import hashlib
+
+    b1 = b"abc123"
+    b2 = b"other"
+
+    # _md5_hash_bytes should match hashlib.md5
+    expected = hashlib.md5(b1).hexdigest()
+    assert manager._md5_hash_bytes(b1) == expected
+
+    # bytes vs bytes comparisons
+    assert manager.are_the_same(b1, b1) is True
+    assert manager.are_the_same(b1, b2) is False
+
+    # mixed path and bytes
+    f = tmp_path / "mix.bin"
+    f.write_bytes(b1)
+    assert manager.are_the_same(str(f), b1) is True
+    assert manager.are_the_same(b1, str(f)) is True

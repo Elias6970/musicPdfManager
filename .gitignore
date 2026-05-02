@@ -21,4 +21,8 @@ pieces_presets.json
 !instruments_order.txt
 .pytest_cache
 data/logs/
+data/archives/
+data/presets/
+data/temp_uploads/
+server_settings.json
 tests/**/data

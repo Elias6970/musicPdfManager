@@ -13,7 +13,7 @@ from backend.app.models.upload import UploadStagingResponse, UploadToFolderRespo
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.massive_import.file_decompressor.file_decompressor_services import get_strategy
 
-async def process_upload_stream(request: Request, folder_id: str|None = None) -> UploadStagingResponse:
+async def process_upload_stream(request: Request) -> UploadStagingResponse:
     """
     Processes an incoming file upload stream and saves it to a temporary staging folder.
     
@@ -40,13 +40,8 @@ async def process_upload_stream(request: Request, folder_id: str|None = None) ->
     
     file_uuid = str(uuid.uuid4())
     temp_filename = ArchiveFileManager.format_temp_filename(file_uuid, filename)
-    
-    if folder_id and folder_id.strip() != "":
-        filepath = os.path.join(settings.temp_upload_folder, folder_id, temp_filename)
-        os.makedirs(filepath, exist_ok=True)
-    else:
-        filepath = os.path.join(settings.temp_upload_folder, temp_filename)
-    
+    filepath = os.path.join(settings.temp_upload_folder, temp_filename)
+
     bytes_written = 0
     
     try:
