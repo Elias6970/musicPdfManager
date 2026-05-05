@@ -4,7 +4,7 @@
 - **Language**: Python 3.12.
 - **Frontend Framework**: Built strictly with **PyQt6** (`frontend_pyqt/`). 
 - **Backend ORM**: Uses **SQLModel** (built on SQLAlchemy) for SQLite database interactions (`backend/app/models/`, `backend/app/crud/`).
-- **PDF & Image Processing**: Relies heavily on `PyMuPDF` (fitz), `reportlab`, and `opencv-python`/`numpy`.
+- **PDF & Image Processing**: Relies heavily on `PyMuPDF` (fitz) and `opencv-python`/`numpy`.
 
 ## Architecture
 - **Paradigm Migration**: The architecture is currently a monolith but is actively migrating to a stateless client-server model using **FastAPI**.
