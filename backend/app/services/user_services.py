@@ -9,7 +9,7 @@ from backend.app.models.user import UserCreate, User
 from backend.app.models.user_config import UserConfigCreate
 from backend.app.models.token import Token
 from backend.app.security.auth import verify_password, create_access_token
-from backend.app.settings import get_server_settings
+from backend.app.utils.settings import get_server_settings
 from backend.app.error import EmailAlreadyRegisteredError, InsufficientPermissionsError, InvalidCredentialsError, InvalidUserDataError
 
 

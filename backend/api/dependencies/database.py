@@ -1,7 +1,7 @@
 
 
 from sqlmodel import Session, create_engine, select
-import backend.app.settings as settings
+import backend.app.utils.settings as settings
 from backend.app.models.role import Role
 from backend.app.models.user import UserCreate
 from backend.app.services.user_services import register_user

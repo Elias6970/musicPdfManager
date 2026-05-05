@@ -2,8 +2,6 @@ import os
 from typing import List
 from sqlmodel import Session, select
 from backend.app.models.archive import Archive
-from backend.app.models.author import Author
-from backend.app.models.type import Type
 from backend.app.services.author_service import get_or_create_author
 from backend.app.services.type_service import get_or_create_type
 from backend.app.models.user import User
@@ -15,7 +13,7 @@ from backend.app.error import (
 from backend.app.models.piece import Piece, PieceCreate
 from backend.app.crud.piece_crud import create_piece, get_piece, delete_piece, update_piece
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
-from backend.app.settings import get_server_settings
+from backend.app.utils.settings import get_server_settings
 
 
 def check_archive_role(

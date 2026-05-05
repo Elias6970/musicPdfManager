@@ -1,6 +1,5 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from requests import session
 from sqlmodel import Session
 
 from backend.api.dependencies.database import get_session

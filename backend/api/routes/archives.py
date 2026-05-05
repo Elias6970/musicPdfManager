@@ -3,7 +3,7 @@ from sqlmodel import Session
 from backend.api.dependencies.database import get_session
 from backend.api.dependencies.auth import get_current_user
 from backend.api.dependencies.permissions import RequireArchiveRoleFastAPI
-from backend.app.models.archive import Archive, ArchiveCreate, ArchivePublic
+from backend.app.models.archive import ArchiveCreate, ArchivePublic
 from backend.app.models.user import User
 from backend.app.models.user_archive_link import ArchiveRole
 from backend.app.crud import archive_crud

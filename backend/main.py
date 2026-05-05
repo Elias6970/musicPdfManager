@@ -5,7 +5,7 @@ from sqlmodel import SQLModel
 # Import the models module to register all SQLModel schemas
 import backend.app.models
 
-import backend.app.settings as settings
+import backend.app.utils.settings as settings
 from backend.api.dependencies.database import engine, insert_default_roles, insert_root_user
 from backend.api.routes import archives, instruments_presets, pieces_presets, pieces, users, uploads, printers, preview, classification, instruments_names, roles, authors, types, massive_importer
 from backend.app.services.upload_services import cleanup_temp_uploads_routine

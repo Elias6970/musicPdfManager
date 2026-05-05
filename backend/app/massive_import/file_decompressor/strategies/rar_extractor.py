@@ -1,6 +1,4 @@
-import sys
-
-import rarfile, os, io, shutil
+import sys, rarfile, os, io, shutil
 from typing import Generator
 from backend.app.massive_import.file_decompressor.strategies.base_extractor import BaseExtractor
 

@@ -1,5 +1,5 @@
 import json
-from backend.app.settings import get_server_settings
+from backend.app.utils.settings import get_server_settings
 
 class InstrumentsNamesManager:
     """

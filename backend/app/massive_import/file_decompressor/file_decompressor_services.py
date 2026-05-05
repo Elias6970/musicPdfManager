@@ -2,7 +2,6 @@ from backend.app.massive_import.file_decompressor.strategies import base_extract
 
 import io
 
-# --- 3. Strategy Router ---
 # Map file extensions to their corresponding instantiated strategy
 STRATEGIES = {
     '.zip': zip_extractor.ZipExtractor(),
@@ -23,7 +22,6 @@ def get_strategy(filename: str) -> base_extractor.BaseExtractor | None:
     return None
 
 
-# --- 4. The Core Recursive Engine (The Context) ---
 def extract_nested_archives_in_memory(file_data: str | io.BytesIO, filename: str, current_depth: int = 0, max_depth: int = 10):
     """
     Recursively decompresses nested files using the Strategy Pattern.
@@ -75,12 +73,3 @@ def extract_nested_archives_in_memory(file_data: str | io.BytesIO, filename: str
 
     except Exception as e:
         print(f"Warning: Failed to process archive '{filename}': {e}")
-
-
-# --- 5. Execution ---
-if __name__ == "__main__":
-    initial_archive_path = "D:\\22\\programacion\\archivo\\musicPdfManager\\backend\\tests\\file_decompressor\\assets\\assets.rar" 
-    
-    # Notice how the execution call remains exactly the same
-    for final_filename, final_bytes in extract_nested_archives_in_memory(initial_archive_path, initial_archive_path):
-        print(f"Successfully extracted: {final_filename} (Size: {len(final_bytes)} bytes)")

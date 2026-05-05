@@ -1,14 +1,10 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 from frontend.pyqt.app.config.constants import REFRESH_IMG_PATH
-from frontend.pyqt.app.pop_up_windows.error.error_window import Error_window, ShowError
+from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
 from frontend.pyqt.app.elements.status_console import StatusConsole
 from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar
 from frontend.pyqt.app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 from frontend.pyqt.app.elements.previwer.previewer import Preview
-
-from backend.app.files_management.dir import Dir_Error
-from backend.app.validate import Validate
-from backend.app.presets.pieces_preset.pieces_preset import PiecesPreset
 
 class MultipleSelectionView(QtWidgets.QWidget):
     MAX_COPIES = 20
@@ -60,7 +56,7 @@ class MultipleSelectionView(QtWidgets.QWidget):
         
         self.num_copies = QtWidgets.QComboBox()
         self.num_copies.setFixedWidth(50)
-        self.num_copies.addItems([str(i+1) for i in range(MultipleSelectionView.MAX_COPIES)])
+        self.num_copies.addItems([str(i+1) for i in range(self.MAX_COPIES)])
         self.num_copies.setToolTip(self.tr("Number of copies"))
         
         self.btn_add_piece = QtWidgets.QPushButton(self.tr("Add")) #traducir

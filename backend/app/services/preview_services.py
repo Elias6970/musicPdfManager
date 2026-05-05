@@ -1,7 +1,6 @@
 import os
 import fitz
 from sqlmodel import Session
-from backend.app.models.archive import Archive
 from backend.app.models.preview import PreviewRequest
 from backend.app.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.constants.constants import DIR_SCORES

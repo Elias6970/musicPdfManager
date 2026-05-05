@@ -10,7 +10,6 @@ from backend.app.services.export_strategies.base_strategy import PresetExportStr
 from backend.app.services.export_strategies.by_element import ByElementExporter
 from backend.app.services.export_strategies.splitted import SplittedExporter
 from backend.app.services.instruments_preset_service import get_preset
-from backend.app.settings import get_server_settings
 from backend.app.constants.constants import DIR_SCORES
 from backend.app.utils.name_manager import NameManager
 from backend.app.services.preset_preprocessing_services import _preprocess_preset_print_job

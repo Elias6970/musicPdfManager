@@ -1,6 +1,6 @@
 import json
 
-from backend.app.settings import (
+from backend.app.utils.settings import (
     ServerSettings,
     ServerSettingsRepository,
 )

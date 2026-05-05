@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta, timezone
 from pwdlib import PasswordHash
 import jwt
-import backend.app.settings as settings
+import backend.app.utils.settings as settings
 
 pwd_context = PasswordHash.recommended()
 

@@ -1,5 +1,3 @@
-
-
 from typing import Generator
 import zipfile, os, io
 from backend.app.massive_import.file_decompressor.strategies.base_extractor import BaseExtractor

@@ -1,10 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, status
 from sqlmodel import Session
 
 from backend.api.dependencies.database import get_session
-from backend.api.dependencies.permissions import RequireRoleFastAPI,require_user,require_admin
-from backend.api.dependencies.auth import get_current_user
+from backend.api.dependencies.permissions import require_user,require_admin
 from backend.app.models.role import RoleCreate, RolePublic
 
 from backend.app.services.rol_services import create_role, get_role as _get_role, get_all_roles, update_role, delete_role
