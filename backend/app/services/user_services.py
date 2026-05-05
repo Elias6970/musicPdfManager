@@ -117,3 +117,9 @@ def check_user_role(session: Session, user_id: int, allowed_roles: list[str]) ->
 
 def get_all_users(session: Session) -> list[User]:
     return user_crud.get_all_users(session)
+
+
+def is_admin(session: Session, user: User) -> bool:
+    if user.role is None:
+        return False
+    return user.role.name == "admin"
