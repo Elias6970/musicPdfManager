@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QObject
+from PyQt6.QtCore import QObject, pyqtSignal
 from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
 from frontend.pyqt.app.login.login_view import LoginView
 from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
@@ -6,6 +6,7 @@ from frontend.pyqt.app.config.session_manager import SessionManager
 from frontend.pyqt.app.models.generated_models import UserConfigPublic
 
 class LoginController(QObject):
+    is_admin_signal = pyqtSignal(bool)
     def __init__(self, view: LoginView, parent=None):
         super().__init__(parent)
         self.view = view
@@ -38,6 +39,7 @@ class LoginController(QObject):
 
     def on_get_user_config_success(self, user_config: UserConfigPublic):
         self.session.set_language(user_config.language)
+        self.is_admin_signal.emit(user_config.is_admin)
         self.view.accept()
 
     def on_get_user_config_error(self, error: str):

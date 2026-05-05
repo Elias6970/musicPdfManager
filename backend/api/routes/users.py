@@ -14,6 +14,7 @@ from backend.app.services.user_services import (
     get_all_users as _get_all_users, 
     update_user as _update_user, 
     delete_user as _delete_user,
+    is_admin as _is_admin,
 )
 from backend.app.services.user_config_services import (
     get_user_config_by_user_id,
@@ -42,40 +43,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = D
         return token
     except InvalidCredentialsError as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
-
-
-@router.get("/config", response_model=UserConfigPublic)
-def get_user_config(
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-    ) -> UserConfigPublic:
-    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
-    if not user_config:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
-    return UserConfigPublic.model_validate(user_config)
-
-
-@router.put("/config", response_model=UserConfigPublic)
-def update_user_config(
-    user_config_in: UserConfigCreatePublic,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(get_current_user)
-) -> UserConfigPublic:
-    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
-    if not user_config or not user_config.id:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
-    
-    # Only allow updating the config for the current user
-    if user_config.user_id != current_user.id or not current_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot update another user's config")
-    
-    in_config = UserConfigCreate(**user_config_in.model_dump(), user_id=current_user.id)
-    updated_config = _update_user_config(session, user_config_id=user_config.id, user_config_in=in_config)
-    if not updated_config:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found during update")
-    
-    return UserConfigPublic.model_validate(updated_config)
-
 
 @router.put("/{user_id}", response_model=UserPublic)
 def update_user(
@@ -110,3 +77,36 @@ def get_all_users(
 ) -> list[UserPublic]:
     users = _get_all_users(session)
     return [UserPublic.model_validate(user) for user in users]
+
+@router.get("/config", response_model=UserConfigPublic)
+def get_user_config(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+    ) -> UserConfigPublic:
+    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
+    is_admin = _is_admin(session, current_user)
+    
+    if not user_config:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
+    return UserConfigPublic.model_validate(user_config, update={"is_admin": is_admin})
+
+@router.put("/config", response_model=UserConfigPublic)
+def update_user_config(
+    user_config_in: UserConfigCreatePublic,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+) -> UserConfigPublic:
+    user_config = get_user_config_by_user_id(session, current_user.id) #type: ignore
+    if not user_config or not user_config.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found")
+    
+    # Only allow updating the config for the current user
+    if user_config.user_id != current_user.id or not current_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot update another user's config")
+    
+    in_config = UserConfigCreate(**user_config_in.model_dump(), user_id=current_user.id)
+    updated_config = _update_user_config(session, user_config_id=user_config.id, user_config_in=in_config)
+    if not updated_config:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found during update")
+    
+    return UserConfigPublic.model_validate(updated_config, update={"is_admin": _is_admin(session, current_user)})
