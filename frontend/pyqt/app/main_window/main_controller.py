@@ -53,7 +53,7 @@ class MainController(QtCore.QObject):
         self.archive_api_client.get_all_archives_success.connect(self._on_get_all_archives_success)
         
         self._previous_archive_index = -1    
-
+        self.is_admin = False
         self.individual_selection_controller = IndividualSelectionController(self.view.individual_selection_window)
         self.multiple_selection_controller = MultipleSelectionController(self.view.multiple_selection_window)
         self.multiple_selection_controller.update_pieces_presets_menu_list.connect(self.update_pieces_presets_menu_list)
@@ -93,6 +93,7 @@ class MainController(QtCore.QObject):
         """Show the login window and handle the authentication process"""
         login_view = LoginView(self.view)
         login_controller = LoginController(login_view)
+        login_controller.is_admin_signal.connect(self.set_is_admin)
         # Assuming LoginController sets up token internally and dialog closes with accept()
         if not login_view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             sys.exit(0)
@@ -114,6 +115,12 @@ class MainController(QtCore.QObject):
         self.session.clear_session()
         self._show_login()
     
+
+    def set_is_admin(self, is_admin: bool):
+        """Set the is_admin variable and show/hide the admin options in the menu"""
+        self.is_admin = is_admin
+        self.view.set_admin_options_visibility(is_admin)
+
 
     def _on_get_all_archives_success(self, items: list[ArchivePublic]):
         """Handle the successful retrieval of all archives and populate the selection combobox."""

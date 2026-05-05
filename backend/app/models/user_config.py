@@ -22,3 +22,4 @@ class UserConfigCreate(UserConfigBase):
 class UserConfigPublic(UserConfigBase):
     id: int
     user_id: int
+    is_admin: bool

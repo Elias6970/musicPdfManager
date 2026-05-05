@@ -29,8 +29,6 @@ class MainView(QtWidgets.QMainWindow):
     def __init__(self):
         super(MainView,self).__init__()
 
-        self.is_admin = True  # Placeholder, replace with actual admin check
-
         container = QtWidgets.QWidget()
         container_layout = QtWidgets.QVBoxLayout()
         
@@ -107,9 +105,10 @@ class MainView(QtWidgets.QMainWindow):
 
         menu = self.menuBar()
         if isinstance(menu,QtWidgets.QMenuBar):
-            admin = menu.addMenu(self.tr("Admin"))
-            if self.is_admin and admin:
-                admin.addAction(manage_users_opt)
+            self.admin_menu = menu.addMenu(self.tr("Admin"))
+            if self.admin_menu:
+                self.admin_menu.addAction(manage_users_opt)
+                self.admin_menu.menuAction().setVisible(False)
 
             user_menu = menu.addMenu(self.tr("User"))
             if user_menu:
@@ -264,3 +263,9 @@ class MainView(QtWidgets.QMainWindow):
     def clear_load_pieces_preset_menu(self):
         """Clear the load pieces preset menu"""
         self._load_pieces_preset_opt.clear()
+    
+
+    def set_admin_options_visibility(self, is_admin: bool):
+        """Show or hide the admin options in the menu"""
+        if hasattr(self, 'admin_menu') and self.admin_menu:
+            self.admin_menu.menuAction().setVisible(is_admin)
