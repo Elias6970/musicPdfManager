@@ -36,7 +36,8 @@ class ServerSettings(BaseModel):
     access_token_expire_minutes: int = Field(default=60 * 24 * 7, ge=1)
 
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
-
+    log_path:str = "data/logs"
+    
     base_presets_instruments_path: str = "data/presets/instruments"
     base_presets_pieces_path: str = "data/presets/pieces"
     base_dossier_cover_path: str = "data/dossier_covers"

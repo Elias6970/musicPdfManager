@@ -94,7 +94,6 @@ def create_index(elements: list[str], title: str = "Índice", subtitle: str = ""
         row = idx % rows_per_column
         x = left_margin + col * column_width
         
-        # Base Y position calculated mirroring original reportlab bottom-up translation
         box_y = title_space + bottom_margin + (row * line_height)
         target_y = box_y + best_font_size # adjust to baseline
         
@@ -182,7 +181,7 @@ def add_piece_number(doc: fitz.Document, page_number: int | str):
     start_x = target_x - num_width
     
     bottom_y = orig_height - 7
-    top_y = 32 # equivalent to height - 25 - 7 in reportlab translated to top align baseline
+    top_y = 32
 
     # hebo font is bugged and it doesn't generate the name correctly
     new_page.insert_text((start_x, top_y), num_str, fontsize=font_size, fontname=font_name)

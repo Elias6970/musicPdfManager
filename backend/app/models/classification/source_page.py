@@ -1,5 +1,4 @@
 from typing import List, Tuple
-
 from sqlmodel import SQLModel, Field
 
 class SourcePage(SQLModel):

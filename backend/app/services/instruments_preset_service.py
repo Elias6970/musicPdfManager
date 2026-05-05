@@ -3,7 +3,7 @@ from sqlmodel import Session, select
 
 from backend.app.models.presets.instruments_preset import InstrumentsPreset
 from backend.app.models.user_config import UserConfig
-from backend.app.settings import get_server_settings
+from backend.app.utils.settings import get_server_settings
 from backend.app.crud import instruments_preset_crud
 from backend.app.error import UserConfigNotFoundError, PresetNotFoundError, PresetAlreadyExistsError
 

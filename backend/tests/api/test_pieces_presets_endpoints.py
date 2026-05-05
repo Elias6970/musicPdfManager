@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from backend.main import app
 from backend.app.models.presets.pieces_preset import PiecesPreset, PiecesPresetCreate
+from backend.app.models.printers.elements.printeable_piece import PrinteablePiece
 from backend.app.models.user import User
 from backend.api.dependencies.database import get_session
 from backend.api.dependencies.permissions import require_user
@@ -18,7 +19,7 @@ def sample_preset():
         name="Test Preset",
         instruments_preset_name="Standard Orch",
         user_id=1,
-        pieces=["pieceA", "pieceB"]
+        pieces=[PrinteablePiece(std_name="pieceA", copies=1), PrinteablePiece(std_name="pieceB", copies=1)]
     )
 
 @pytest.fixture
@@ -26,7 +27,7 @@ def sample_preset_create():
     return PiecesPresetCreate(
         name="Test Preset",
         instruments_preset_name="Standard Orch",
-        pieces=["pieceA", "pieceB"]
+        pieces=[PrinteablePiece(std_name="pieceA", copies=1), PrinteablePiece(std_name="pieceB", copies=1)]
     )
 
 @pytest.fixture

@@ -158,6 +158,9 @@ class ScoreClassifierView(QtWidgets.QDialog):
         main_layout.setContentsMargins(10, 0, 10, 10)
         self.setLayout(main_layout)
     
+    def set_last_classified(self, text:str):
+        self.last_classfied_lbl.setText(text)
+
     def change_to_finish_btn(self):
         """Set the button to finish and change its style to indicate the end of the classification process"""
         self.btn_next.setText(self.tr("Finish"))

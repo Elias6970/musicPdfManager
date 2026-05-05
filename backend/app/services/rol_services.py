@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from sqlmodel import Session
 from backend.app.models.role import Role, RoleCreate
 import backend.app.crud.rol_crud as rol_crud

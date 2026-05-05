@@ -105,6 +105,7 @@ class ScoreClassifierController(QtCore.QObject):
         self.pages[self.current_score_index].user_input = user_input
         self.pages[self.current_score_index].resolution = parsed_instrument_name # Save the interpreted instrument name in the page object, so it can be used later when saving the classification
         self.pages[self.current_score_index].corners = corners
+        self.view.set_last_classified(parsed_instrument_name)
 
         if self.current_score_index < len(self.pages) - 1:
             self.load_image_page(self.current_score_index+1)
@@ -129,6 +130,10 @@ class ScoreClassifierController(QtCore.QObject):
             previous_user_input = self.pages[self.current_score_index].user_input
             if previous_user_input is not None:
                 self.view.line_edit.setText(previous_user_input)
+            try:
+                self.view.set_last_classified(self.pages[self.current_score_index-1].resolution or "")
+            except IndexError:
+                self.view.set_last_classified("")
             
             if self.current_score_index == 0:
                 self.view.btn_back.setEnabled(False) # Disable the back button, since we are in the first page

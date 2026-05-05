@@ -1,5 +1,4 @@
 import os,shutil,hashlib
-from backend.app.files_management.file import File
 from backend.app.constants.constants import DIR_SCORES,DIR_EXTRAS, HYPHEN
 import unicodedata
 from pathlib import Path
@@ -8,7 +7,14 @@ from pathlib import Path
 class ArchiveFileManager:
     def __init__(self, archive_path:str):
         self.archive_path = archive_path
-        
+
+    @staticmethod
+    def is_pdf(path:str):
+        extension = os.path.splitext(path)[1].lower() #Extract the extension
+        if ".pdf" == extension:
+            return True
+        return False
+    
     @staticmethod
     def parse_name_to_file_manager(parsed_name: str) -> str:
         r"""
@@ -65,7 +71,7 @@ class ArchiveFileManager:
             - True if the files was copied successfully or if a duplicate identical file already exists (when check_duplicates is True)
             - False if there was an error copying the file.
         """
-        folder = DIR_SCORES if File.is_pdf(filename) else DIR_EXTRAS    
+        folder = DIR_SCORES if self.is_pdf(filename) else DIR_EXTRAS    
         destination_path = os.path.join(self.archive_path, piece_path, folder, filename)
         
         if check_duplicates:
@@ -95,7 +101,7 @@ class ArchiveFileManager:
         copied_files = []
         try:
             for i in files:
-                folder = DIR_SCORES if File.is_pdf(i) else DIR_EXTRAS    
+                folder = DIR_SCORES if self.is_pdf(i) else DIR_EXTRAS    
                 filename = self.extract_original_filename(i)
                 path = os.path.join(self.archive_path,piece_path,folder,filename)
                 shutil.copy(i,path)

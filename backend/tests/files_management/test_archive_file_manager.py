@@ -27,7 +27,7 @@ def manager(tmp_path):
 def test_parse_name_to_file_manager(manager, input_name, expected):
     assert manager.parse_name_to_file_manager(input_name) == expected
 
-@patch('backend.app.files_management.archive_file_manager.File.is_pdf')
+@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.is_pdf')
 def test_copy_files_in_archive(mock_is_pdf, manager, tmp_path):
     mock_is_pdf.side_effect = lambda path: str(path).endswith('.pdf')
     piece_path = "1-TEST"
@@ -43,7 +43,7 @@ def test_copy_files_in_archive(mock_is_pdf, manager, tmp_path):
     assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_SCORES, "test.pdf"))
     assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_EXTRAS, "test.txt"))
 
-@patch('backend.app.files_management.archive_file_manager.File.is_pdf')
+@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.is_pdf')
 def test_copy_files_in_archive_removes_uuid_prefix(mock_is_pdf, manager, tmp_path):
     mock_is_pdf.side_effect = lambda path: str(path).endswith('.pdf')
     piece_path = "1-TEST"

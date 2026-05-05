@@ -1,14 +1,14 @@
 import logging,os
-from backend.app.constants.constants import LOGS_PATH
+from backend.app.utils.settings import get_server_settings
 
 
 class DefaultLogger(logging.Logger):
     def __init__(self, name="DefaultLogger", level = 0):
         super().__init__(name, level)
-
+        logs_folder = get_server_settings().log_path
         # Try to create the dir if doesn't exist
-        os.makedirs(LOGS_PATH(), exist_ok=True)
-        log_path = os.path.join(LOGS_PATH(),name.lower()+".log")
+        os.makedirs(logs_folder, exist_ok=True)
+        log_path = os.path.join(logs_folder,name.lower()+".log")
 
         self.setLevel(logging.DEBUG)  # Guardar todo en archivo, aunque filtres en consola
 

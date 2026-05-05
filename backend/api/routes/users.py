@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
 
 from backend.api.dependencies.database import get_session
-from backend.api.dependencies.permissions import RequireRoleFastAPI,require_admin
+from backend.api.dependencies.permissions import require_admin
 from backend.api.dependencies.auth import get_current_user
 from backend.app.models.user import User, UserCreate, UserPublic
 from backend.app.models.user_config import UserConfigCreate, UserConfigCreatePublic, UserConfigPublic

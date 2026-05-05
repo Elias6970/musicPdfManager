@@ -1,6 +1,5 @@
 from sqlmodel import Session, select
 from backend.app.error import RoleNotFoundError
-from backend.app.error import RoleNotFoundError
 from backend.app.models.role import Role, RoleCreate
 
 def create_role(session: Session, role: RoleCreate) -> Role:

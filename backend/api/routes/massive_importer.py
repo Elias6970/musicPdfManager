@@ -2,7 +2,6 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 from backend.api.dependencies.database import get_session
-from backend.api.dependencies.auth import get_current_user
 from backend.api.dependencies.file_manager import get_archive_file_manager
 from backend.api.dependencies.permissions import RequireArchiveRoleFastAPI, ArchiveRole
 from backend.app.files_management.archive_file_manager import ArchiveFileManager

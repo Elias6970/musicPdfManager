@@ -53,43 +53,30 @@ def test_extract_and_warp_rect_invalid_corners():
 
 def test_crop_page_from_corners_success_landscape():
     pdf_bytes = create_dummy_pdf_bytes()
-    corners = [(50.0, 50.0), (200.0, 50.0), (200.0, 150.0), (50.0, 150.0)]
-    
-    result_bytes = crop_page_from_corners(pdf_bytes, corners, page_number=0, landscape=True)
-    
-    assert isinstance(result_bytes, bytes)
-    doc = fitz.open("pdf", result_bytes)
-    assert doc.page_count == 1
+    doc = fitz.open("pdf", pdf_bytes)
     page = doc[0]
+    corners = [(0.1, 0.1), (0.4, 0.1), (0.4, 0.3), (0.1, 0.3)]
+    
+    result_page = crop_page_from_corners(page, corners, landscape=True)
+    
+    assert isinstance(result_page, fitz.Page)
     # Landscape A4 size
-    assert int(page.rect.width) == 842
-    assert int(page.rect.height) == 595
+    assert int(result_page.rect.width) == 842
+    assert int(result_page.rect.height) == 595
     doc.close()
+    result_page.parent.close()
 
 def test_crop_page_from_corners_success_portrait():
     pdf_bytes = create_dummy_pdf_bytes()
-    corners = [(50.0, 50.0), (200.0, 50.0), (200.0, 150.0), (50.0, 150.0)]
-    
-    result_bytes = crop_page_from_corners(pdf_bytes, corners, page_number=0, landscape=False)
-    
-    doc = fitz.open("pdf", result_bytes)
+    doc = fitz.open("pdf", pdf_bytes)
     page = doc[0]
+    corners = [(0.1, 0.1), (0.4, 0.1), (0.4, 0.3), (0.1, 0.3)]
+    
+    result_page = crop_page_from_corners(page, corners, landscape=False)
+    
+    assert isinstance(result_page, fitz.Page)
     # Portrait A4 size
-    assert int(page.rect.width) == 595
-    assert int(page.rect.height) == 842
+    assert int(result_page.rect.width) == 595
+    assert int(result_page.rect.height) == 842
     doc.close()
-
-def test_crop_page_from_corners_invalid_pdf():
-    garbage_bytes = b"Not a real PDF file"
-    corners = [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0)]
-    
-    with pytest.raises(fitz.FileDataError):
-        crop_page_from_corners(garbage_bytes, corners)
-
-def test_crop_page_from_corners_invalid_page_number():
-    pdf_bytes = create_dummy_pdf_bytes()
-    corners = [(0.0, 0.0), (10.0, 0.0), (10.0, 10.0), (0.0, 10.0)]
-    
-    with pytest.raises(IndexError):
-        # The dummy PDF only has 1 page (index 0)
-        crop_page_from_corners(pdf_bytes, corners, page_number=5)
+    result_page.parent.close()

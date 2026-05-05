@@ -12,8 +12,8 @@ class InstrumentsPreset(SQLModel):
     Example preset:
     {
         "oboe" : {
-            PRESETS_COPIES : 3,
-            PRESETS_OTHER_OPTIONS : ["flauta_1","clarinete_1"]
+            copies : 3,
+            other_options : ["flauta_1","clarinete_1"]
         }
     }
     """

@@ -1,9 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlmodel import Session
 import json
 from backend.app.custom_order.instrument_sorter import InstrumentSorter
-from backend.app.instruments_names_manager import InstrumentsNamesManager
-from backend.api.dependencies.database import get_session
+from backend.app.utils.instruments_names_manager import InstrumentsNamesManager
 from backend.api.dependencies.permissions import require_user
 
 router = APIRouter(prefix="/instruments_names", tags=["Instruments Names"])
