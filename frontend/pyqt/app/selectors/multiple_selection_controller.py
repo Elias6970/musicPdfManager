@@ -48,7 +48,14 @@ class MultipleSelectionController(QObject):
         self.printing_api = PrintersApiClient(base_client)
         
         self.preview_controller = PreviewerController(self.view.preview, self.preview_api)
+        # Connect preview controller signals to view buttons
+        self.view.btn_mv_back_preview.clicked.connect(self.preview_controller.previous_page)
+        self.view.btn_mv_forward_preview.clicked.connect(self.preview_controller.next_page)
         
+        self.preview_controller.enable_previous.connect(self.view.btn_mv_back_preview.setEnabled)
+        self.preview_controller.enable_next.connect(self.view.btn_mv_forward_preview.setEnabled)
+
+
         self.type_of_export_window = TypeOfExportView()
         self.type_of_export_controller = TypeOfExportController(self.type_of_export_window)
         self.type_of_export_controller.export_signal.connect(self.export)
@@ -257,7 +264,7 @@ class MultipleSelectionController(QObject):
         self.selected_instruments_preset = preset.instruments_preset_name
         self.view.set_instrument_preset_in_combo_box(preset.instruments_preset_name)
         for piece in preset.pieces:
-            self.add_piece(piece.std_name, preset.instruments_preset_name, piece.copies)
+            self.add_piece(piece.std_name, preset.instruments_preset_name, piece.copies or 1)
         self._preset_to_load = None
 
 
@@ -418,7 +425,11 @@ class MultipleSelectionController(QObject):
             QtWidgets.QMessageBox.warning(self.view, self.tr("Error"), self.tr("You need to add at least one piece to save a preset"))
             return
 
-        pieces=[PrinteablePiece(std_name=piece.std_name, copies=piece.copies) for piece in self.added_pieces]
+        if not self.selected_instruments_preset:
+            QtWidgets.QMessageBox.warning(self.view, self.tr("Error"), self.tr("You need to select an instruments preset to save a pieces preset"))
+            return
+
+        pieces=[PrinteablePiece(std_name=piece.std_name, copies=piece.copies or 1) for piece in self.added_pieces]
         preset = PiecesPresetCreate(name = pieces_preset_name, instruments_preset_name=self.selected_instruments_preset, pieces=pieces)
         self.pieces_presets_api.create_preset(preset)
     

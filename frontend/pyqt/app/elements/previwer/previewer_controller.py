@@ -18,7 +18,7 @@ class PreviewerController(QObject):
         self.api_client.preview_loaded.connect(self._on_fetch_success)
         self.api_client.preview_error.connect(self._on_fetch_error)
         
-        self._cache = {}  # Dict mapping (archive_id, piece_std_name, file, page_number, dpi) -> image_bytes
+        self._cache = {}  # Dict mapping (archive_id, piece_std_name, file, page_number, dpi) -> (image_bytes, total_pages)
         
         self.current_archive_id = None
         self.current_piece_std_name = None
@@ -52,7 +52,9 @@ class PreviewerController(QObject):
         
         if cache_key in self._cache:
             # Hit cache! Display instantly.
-            self._display_bytes(self._cache[cache_key], page_num)
+            img_bytes, total_pages = self._cache[cache_key]
+            self.total_pages = total_pages  # Update total pages from cache
+            self._display_bytes(img_bytes, page_num)
         else:
             self._start_api_worker(self.current_archive_id, self.current_piece_std_name, self.current_file, page_num, self.current_dpi)
 
@@ -75,7 +77,7 @@ class PreviewerController(QObject):
         
         # Save to memory cache
         cache_key = (self.current_archive_id, self.current_piece_std_name, self.current_file, page_number, self.current_dpi)
-        self._cache[cache_key] = img_bytes
+        self._cache[cache_key] = (img_bytes, total_pages)
         
         # If the user hasn't quickly navigated away, update the view
         if page_number == self.current_page:
