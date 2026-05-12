@@ -16,8 +16,6 @@ class ServerSettings(BaseModel):
     environment: Literal["development", "staging", "production"] = "development" #Unused for now
     debug: bool = True #Unused for now
 
-    host: str = "127.0.0.1" #Unused for now
-    port: int = Field(default=8000, ge=1, le=65535) #Unused for now
     api_prefix: str = "/api/v1"
 
     root_user_email: str = "admin@example.com"

@@ -3,7 +3,7 @@ from typing import Any, Mapping
 from urllib.parse import urlencode
 
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "http://192.168.1.102:8000"
 API_PREFIX = "/api/v1"
 
 

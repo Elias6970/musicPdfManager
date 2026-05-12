@@ -15,6 +15,7 @@ dist
 !portada_dossier_partituras.pdf
 *.exe
 *.yml
+!docker-compose.yml
 *.db
 presets.json
 pieces_presets.json
