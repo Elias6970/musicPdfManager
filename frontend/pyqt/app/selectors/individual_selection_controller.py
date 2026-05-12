@@ -1,12 +1,12 @@
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
-from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
-from frontend.pyqt.app.api_client.printers_api_client import PrintersApiClient
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.elements.previwer.previewer_controller import PreviewerController
+from app.api_client.base_api_client_factory import get_base_client
+from app.api_client.preview_api_client import PreviewApiClient
+from app.api_client.pieces_api_client import PiecesApiClient
+from app.api_client.printers_api_client import PrintersApiClient
+from app.config.session_manager import SessionManager
+from app.elements.previwer.previewer_controller import PreviewerController
 from PyQt6.QtCore import QObject
-from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
-import frontend.pyqt.app.models.generated_models as generated_models
+from app.selectors.individual_selection_view import IndividualSelectionView
+import app.models.generated_models as generated_models
 from uuid import uuid4
 
 class PrinteableFile(generated_models.PrinteableFile):
@@ -161,8 +161,11 @@ class IndividualSelectionController(QObject):
         Set the selected instrument to add to the PDF.
         """
         self.selected_instrument = instrument
-        if self.selected_piece and self.selected_instrument: #To avoid removing the image when the user is typing another piece
-            self.preview_controller.load_document(archive_id=self.session.get_archive_id(), piece_std_name=self.selected_piece, file=instrument)
+        if self.selected_instrument:
+            if self.selected_instrument == self.view.NO_SCORES_TEXT:
+                self.preview_controller.clear()
+            elif self.selected_piece: #To avoid removing the image when the user is typing another piece
+                self.preview_controller.load_document(archive_id=self.session.get_archive_id(), piece_std_name=self.selected_piece, file=instrument)
 
     def get_pieces(self):
         """

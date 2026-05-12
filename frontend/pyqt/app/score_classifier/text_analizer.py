@@ -1,6 +1,6 @@
 import os,re
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.api_client.instruments_names_api_client import InstrumentsNamesApiClient
+from app.api_client.base_api_client_factory import get_base_client
+from app.api_client.instruments_names_api_client import InstrumentsNamesApiClient
 
 class TextAnalizer():
     """

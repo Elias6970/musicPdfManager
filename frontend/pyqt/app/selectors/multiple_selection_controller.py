@@ -1,21 +1,21 @@
 from uuid import uuid4
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import QObject, QByteArray, pyqtSignal
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
-from frontend.pyqt.app.api_client.pieces_presets_api_client import PiecesPresetsApiClient
-from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
-from frontend.pyqt.app.api_client.instruments_presets_api_client import InstrumentsPresetsApiClient
-from frontend.pyqt.app.api_client.printers_api_client import PrintersApiClient
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.elements.previwer.previewer_controller import PreviewerController
-from frontend.pyqt.app.pop_up_windows.resolve_unmached_presets.resolve_unmatched_presets_controller import ResolveUnmatchedPresetsController
-from frontend.pyqt.app.pop_up_windows.resolve_unmached_presets.resolve_unmatched_presets_view import  ResolveUnmatchedPresetsView, ResolveUnmatchedPresetsView
-from frontend.pyqt.app.pop_up_windows.type_of_export.type_of_export_controller import TypeOfExportController
-from frontend.pyqt.app.pop_up_windows.type_of_export.type_of_export_view import TypeOfExportView
-from frontend.pyqt.app.selectors.multiple_selection_view import MultipleSelectionView
-from frontend.pyqt.app.models.generated_models import PiecesPresetCreate, PresetPrintJobPublic, PresetPrintJobConfig, PiecePublic, PrinteablePiece, PiecesPreset
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
+from app.api_client.base_api_client_factory import get_base_client
+from app.api_client.pieces_api_client import PiecesApiClient
+from app.api_client.pieces_presets_api_client import PiecesPresetsApiClient
+from app.api_client.preview_api_client import PreviewApiClient
+from app.api_client.instruments_presets_api_client import InstrumentsPresetsApiClient
+from app.api_client.printers_api_client import PrintersApiClient
+from app.config.session_manager import SessionManager
+from app.elements.previwer.previewer_controller import PreviewerController
+from app.pop_up_windows.resolve_unmached_presets.resolve_unmatched_presets_controller import ResolveUnmatchedPresetsController
+from app.pop_up_windows.resolve_unmached_presets.resolve_unmatched_presets_view import  ResolveUnmatchedPresetsView, ResolveUnmatchedPresetsView
+from app.pop_up_windows.type_of_export.type_of_export_controller import TypeOfExportController
+from app.pop_up_windows.type_of_export.type_of_export_view import TypeOfExportView
+from app.selectors.multiple_selection_view import MultipleSelectionView
+from app.models.generated_models import PiecesPresetCreate, PresetPrintJobPublic, PresetPrintJobConfig, PiecePublic, PrinteablePiece, PiecesPreset
+from app.pop_up_windows.error.error_window import ShowError
 import zipfile, io, os
 
 class PrinteablePieceWithId(PrinteablePiece):
@@ -207,8 +207,11 @@ class MultipleSelectionController(QObject):
         Set the selected instrument to add to the PDF.
         """
         self.selected_instrument = instrument
-        if self.selected_piece and self.selected_instrument: #To avoid removing the image when the user is typing another piece
-            self.preview_controller.load_document(archive_id=self.session.get_archive_id(), piece_std_name=self.selected_piece, file=instrument)
+        if self.selected_instrument:
+            if self.selected_instrument == self.view.NO_SCORES_TEXT:
+                self.preview_controller.clear()
+            elif self.selected_piece: #To avoid removing the image when the user is typing another piece
+                self.preview_controller.load_document(archive_id=self.session.get_archive_id(), piece_std_name=self.selected_piece, file=instrument)
 
 
     def set_option_of_instruments(self,piece_name:str):

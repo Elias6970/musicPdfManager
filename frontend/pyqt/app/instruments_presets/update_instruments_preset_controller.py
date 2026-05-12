@@ -1,11 +1,11 @@
 from PyQt6.QtWidgets import QMessageBox
 from PyQt6.QtCore import QObject
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.instruments_presets.instruments_preset_view import InstrumentsPresetView
-from frontend.pyqt.app.api_client.instruments_presets_api_client import InstrumentsPresetsApiClient
-from frontend.pyqt.app.api_client.instruments_names_api_client import InstrumentsNamesApiClient
-from frontend.pyqt.app.models.generated_models import InstrumentsPreset, InstrumentConfig
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
+from app.api_client.base_api_client_factory import get_base_client
+from app.instruments_presets.instruments_preset_view import InstrumentsPresetView
+from app.api_client.instruments_presets_api_client import InstrumentsPresetsApiClient
+from app.api_client.instruments_names_api_client import InstrumentsNamesApiClient
+from app.models.generated_models import InstrumentsPreset, InstrumentConfig
+from app.pop_up_windows.error.error_window import ShowError
 
 class UpdateInstrumentsPresetController(QObject):
     def __init__(self, view: InstrumentsPresetView, preset_name: str):

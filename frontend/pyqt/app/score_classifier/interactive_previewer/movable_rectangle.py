@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QGraphicsRectItem
 from PyQt6.QtGui import QPen, QBrush, QColor
 from PyQt6.QtCore import Qt, QRectF, QPointF, QSizeF
-from frontend.pyqt.app.score_classifier.interactive_previewer.rotation_handler import RotationHandler
+from app.score_classifier.interactive_previewer.rotation_handler import RotationHandler
 import numpy as np
 
 # Custom rectangle class

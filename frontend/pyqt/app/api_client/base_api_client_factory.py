@@ -1,5 +1,5 @@
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.config.session_manager import SessionManager
+from app.api_client.base_api_client import BaseApiClient
+from app.config.session_manager import SessionManager
 
 # We maintain a single global instance of BaseApiClient so that
 # the underlying QNetworkAccessManager can connection-pool and share cookies/headers.

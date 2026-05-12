@@ -1,8 +1,8 @@
 from PyQt6 import QtWidgets, QtCore
 
-from frontend.pyqt.app.elements.status_console import StatusConsole
-from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar
-from frontend.pyqt.app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
+from app.elements.status_console import StatusConsole
+from app.elements.score_search_bar import ScoreSearchBar
+from app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 
 class PieceSelectorView(QtWidgets.QDialog):
     """

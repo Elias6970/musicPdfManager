@@ -3,9 +3,9 @@ from typing import Any, Optional, Dict, List
 from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtNetwork import QNetworkReply
 
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.config.urls import Endpoint, build_url
-from frontend.pyqt.app.models.generated_models import ArchiveCreate, ArchivePublic
+from app.api_client.base_api_client import BaseApiClient
+from app.config.urls import Endpoint, build_url
+from app.models.generated_models import ArchiveCreate, ArchivePublic
 
 class ArchivesApiClient(QObject):
     """

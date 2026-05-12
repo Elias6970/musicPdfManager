@@ -8,9 +8,9 @@ GITHUB = "https://github.com/Elias6970/musicPdfManager"
 #The sys._MEIPASS is variable that has the path to a temp folder where data folder is created. 
 #Every time you execute the application a temp folder is created
 if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-    IMAGES_PATH = os.path.join(sys._MEIPASS,'data','img') #type: ignore
+    IMAGES_PATH = os.path.join(sys._MEIPASS,'resources','images') #type: ignore
 else:
-    IMAGES_PATH = os.path.join('data','img')
+    IMAGES_PATH = os.path.join('resources','images')
     
 ICON_PATH = os.path.join(IMAGES_PATH,'icon.ico')
 EDIT_IMG_PATH = os.path.join(IMAGES_PATH,'edit.png')

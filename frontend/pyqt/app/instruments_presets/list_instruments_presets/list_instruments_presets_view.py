@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
-from frontend.pyqt.app.elements.status_console import StatusConsole
-from frontend.pyqt.app.elements.list_items.status_console_item_with_two_buttons import StatusConsoleItemWithTwoButtons
+from app.elements.status_console import StatusConsole
+from app.elements.list_items.status_console_item_with_two_buttons import StatusConsoleItemWithTwoButtons
 
 class ListInstrumentsPresetsView(QtWidgets.QDialog):
     add_signal = QtCore.pyqtSignal()

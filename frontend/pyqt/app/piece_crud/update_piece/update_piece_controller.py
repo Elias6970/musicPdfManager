@@ -2,16 +2,16 @@ import os
 from PyQt6.QtWidgets import QFileDialog, QApplication, QMessageBox
 from PyQt6.QtCore import QObject, Qt
 
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
-from frontend.pyqt.app.api_client.authors_api_client import AuthorsApiClient
-from frontend.pyqt.app.api_client.types_api_client import TypesApiClient
-from frontend.pyqt.app.api_client.uploads_api_client import UploadsApiClient
-import frontend.pyqt.app.models.generated_models as generated_models
+from app.config.session_manager import SessionManager
+from app.api_client.base_api_client_factory import get_base_client
+from app.api_client.pieces_api_client import PiecesApiClient
+from app.api_client.authors_api_client import AuthorsApiClient
+from app.api_client.types_api_client import TypesApiClient
+from app.api_client.uploads_api_client import UploadsApiClient
+import app.models.generated_models as generated_models
 
-from frontend.pyqt.app.piece_crud.update_piece.update_piece_view import UpdatePieceView
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
+from app.piece_crud.update_piece.update_piece_view import UpdatePieceView
+from app.pop_up_windows.error.error_window import ShowError
 
 class UpdatePieceController(QObject):
     def __init__(self, view: UpdatePieceView, parent: QObject | None = None):

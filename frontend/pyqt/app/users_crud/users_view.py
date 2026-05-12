@@ -4,8 +4,8 @@ from PyQt6.QtWidgets import (QApplication, QCheckBox, QDialog, QVBoxLayout, QTab
                              QTableWidgetItem, QComboBox, QPushButton, QHeaderView)
 from PyQt6.QtCore import pyqtSignal, Qt
 from PyQt6.QtGui import QIcon
-from frontend.pyqt.app.config.constants import TRASH_IMG_PATH
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
+from app.config.constants import TRASH_IMG_PATH
+from app.pop_up_windows.error.error_window import ShowError
 
 class UsersView(QDialog):
     save_signal = pyqtSignal(list)

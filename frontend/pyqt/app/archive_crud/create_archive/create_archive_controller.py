@@ -1,11 +1,11 @@
 from PyQt6 import QtCore, QtWidgets
 
-from frontend.pyqt.app.archive_crud.create_archive.create_archive_view import CreateArchiveView
-from frontend.pyqt.app.models.generated_models import ArchiveCreate, ArchivePublic
-from frontend.pyqt.app.api_client.archives_api_client import ArchivesApiClient
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.archive_crud.massive_import.massive_import_controller import MassiveImportController
-from frontend.pyqt.app.archive_crud.massive_import.massive_import_view import MassiveImportView
+from app.archive_crud.create_archive.create_archive_view import CreateArchiveView
+from app.models.generated_models import ArchiveCreate, ArchivePublic
+from app.api_client.archives_api_client import ArchivesApiClient
+from app.api_client.base_api_client_factory import get_base_client
+from app.archive_crud.massive_import.massive_import_controller import MassiveImportController
+from app.archive_crud.massive_import.massive_import_view import MassiveImportView
 
 class CreateArchiveController(QtCore.QObject):
     def __init__(self, view:CreateArchiveView):

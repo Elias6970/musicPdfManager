@@ -3,9 +3,9 @@ from urllib.parse import quote
 import httpx
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from frontend.pyqt.app.config.urls import Endpoint, build_url
-from frontend.pyqt.app.config.session_manager import SessionManager
-import frontend.pyqt.app.models.generated_models as generated_models
+from app.config.urls import Endpoint, build_url
+from app.config.session_manager import SessionManager
+import app.models.generated_models as generated_models
 
 class UploadsApiClient(QObject):
     """

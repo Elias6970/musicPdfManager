@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import MagicMock, patch
-from frontend.pyqt.app.config.session_manager import SessionManager
+from app.config.session_manager import SessionManager
 
 @pytest.fixture
-@patch("frontend.pyqt.app.config.session_manager.QSettings")
+@patch("app.config.session_manager.QSettings")
 def session_manager(mock_qsettings_class):
     """
     Fixture that provides a SessionManager instance with a mocked QSettings.

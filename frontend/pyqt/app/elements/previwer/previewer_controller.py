@@ -1,6 +1,6 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from frontend.pyqt.app.elements.previwer.previewer import Preview
-from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
+from app.elements.previwer.previewer import Preview
+from app.api_client.preview_api_client import PreviewApiClient
 
 
 class PreviewerController(QObject):

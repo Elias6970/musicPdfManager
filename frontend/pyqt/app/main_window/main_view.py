@@ -1,8 +1,8 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 
-from frontend.pyqt.app.config.constants import CLIENT_VERSION, ICON_PATH
-from frontend.pyqt.app.selectors.individual_selection_view import IndividualSelectionView
-from frontend.pyqt.app.selectors.multiple_selection_view import MultipleSelectionView
+from app.config.constants import CLIENT_VERSION, ICON_PATH
+from app.selectors.individual_selection_view import IndividualSelectionView
+from app.selectors.multiple_selection_view import MultipleSelectionView
 
 class MainView(QtWidgets.QMainWindow):
     show_manage_users = QtCore.pyqtSignal()

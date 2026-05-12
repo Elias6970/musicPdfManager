@@ -1,9 +1,9 @@
 from PyQt6.QtWidgets import QGraphicsView, QGraphicsRectItem
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import Qt, QRectF, QPointF, QPoint
-from frontend.pyqt.app.score_classifier.interactive_previewer.movable_rectangle import MovableRectangle
-from frontend.pyqt.app.score_classifier.interactive_previewer.rotation_handler import RotationHandler
-from frontend.pyqt.app.score_classifier.interactive_previewer.scene import Scene
+from app.score_classifier.interactive_previewer.movable_rectangle import MovableRectangle
+from app.score_classifier.interactive_previewer.rotation_handler import RotationHandler
+from app.score_classifier.interactive_previewer.scene import Scene
 import math
 
 

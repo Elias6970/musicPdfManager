@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets,QtCore
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
-from frontend.pyqt.app.models.generated_models import ExportStrategyType
+from app.pop_up_windows.error.error_window import ShowError
+from app.models.generated_models import ExportStrategyType
 import enum
 
 

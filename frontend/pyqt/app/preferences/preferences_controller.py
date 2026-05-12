@@ -1,11 +1,11 @@
 from PyQt6.QtCore import QObject
 from PyQt6.QtWidgets import QMessageBox
 
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.models.generated_models import UserConfigCreatePublic
-from frontend.pyqt.app.preferences.preferences_view import PreferencesView
+from app.api_client.base_api_client_factory import get_base_client
+from app.api_client.users_api_client import UsersApiClient
+from app.config.session_manager import SessionManager
+from app.models.generated_models import UserConfigCreatePublic
+from app.preferences.preferences_view import PreferencesView
 
 
 # Dictionary of available languages

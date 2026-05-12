@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QDialog, QVBoxLayout, QPushButton, QLineEdit, QHBoxLayout
 from PyQt6.QtCore import pyqtSignal
-from frontend.pyqt.app.elements.status_console import StatusConsole
-from frontend.pyqt.app.elements.list_items.infinite_comboboxes_item import InfiniteComboBoxesItem
+from app.elements.status_console import StatusConsole
+from app.elements.list_items.infinite_comboboxes_item import InfiniteComboBoxesItem
 
 class InstrumentsPresetView(QDialog):
     confirmed = pyqtSignal()

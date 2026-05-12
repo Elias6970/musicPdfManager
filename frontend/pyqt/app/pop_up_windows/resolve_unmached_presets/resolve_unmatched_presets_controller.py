@@ -1,7 +1,7 @@
 from PyQt6.QtCore import QObject, pyqtSignal
 
-from frontend.pyqt.app.pop_up_windows.resolve_unmached_presets.resolve_unmatched_presets_view import ResolveUnmatchedPresetsView
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
+from app.pop_up_windows.resolve_unmached_presets.resolve_unmatched_presets_view import ResolveUnmatchedPresetsView
+from app.pop_up_windows.error.error_window import ShowError
 
 class ResolveUnmatchedPresetsController(QObject):
     resolved_signal = pyqtSignal(list) #Tuple is (piece,preset_instrument,score_selected)

@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
-from frontend.pyqt.app.config.constants import CLIENT_VERSION, APP_AUTHOR, APP_NAME, GITHUB
+from app.config.constants import CLIENT_VERSION, APP_AUTHOR, APP_NAME, GITHUB
 
 #Show a window with a description of the app
 class AboutUsView(QtWidgets.QDialog):

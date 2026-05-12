@@ -1,12 +1,13 @@
 from PyQt6 import QtWidgets,QtGui,QtCore
-from frontend.pyqt.app.config.constants import REFRESH_IMG_PATH
-from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar
-from frontend.pyqt.app.elements.previwer.previewer import Preview
-from frontend.pyqt.app.elements.status_console import StatusConsole
-from frontend.pyqt.app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
+from app.config.constants import REFRESH_IMG_PATH
+from app.elements.score_search_bar import ScoreSearchBar
+from app.elements.previwer.previewer import Preview
+from app.elements.status_console import StatusConsole
+from app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
 
 class IndividualSelectionView(QtWidgets.QWidget):
     MAX_COPIES = 20
+    NO_SCORES_TEXT = "NO SCORES"
     instrument_changed = QtCore.pyqtSignal(str)
     add_score_signal = QtCore.pyqtSignal(str,str,int)
     generate_pdf_signal = QtCore.pyqtSignal()
@@ -200,7 +201,7 @@ class IndividualSelectionView(QtWidgets.QWidget):
         """
         self.part_combo_box.setEnabled(False)
         self.btn_add_score.setEnabled(False)
-        self.part_combo_box.insertItem(0,self.tr("NO SCORES"))
+        self.part_combo_box.insertItem(0,self.tr(self.NO_SCORES_TEXT))
 
     def clean_instruments_combo_box(self):
         self.part_combo_box.clear()

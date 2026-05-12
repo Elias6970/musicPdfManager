@@ -1,10 +1,10 @@
 
 
-from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
-from frontend.pyqt.app.users_crud.users_view import UsersView
-from frontend.pyqt.app.models.generated_models import RolePublic, UserCreate, UserPublic
-from frontend.pyqt.app.api_client.roles_api_client import RolesApiClient
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
+from app.api_client.users_api_client import UsersApiClient
+from app.users_crud.users_view import UsersView
+from app.models.generated_models import RolePublic, UserCreate, UserPublic
+from app.api_client.roles_api_client import RolesApiClient
+from app.api_client.base_api_client_factory import get_base_client
 from PyQt6 import QtWidgets, QtCore
 
 class UsersController(QtCore.QObject):

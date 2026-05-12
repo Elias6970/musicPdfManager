@@ -1,13 +1,14 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
-from frontend.pyqt.app.config.constants import REFRESH_IMG_PATH
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
-from frontend.pyqt.app.elements.status_console import StatusConsole
-from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar
-from frontend.pyqt.app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
-from frontend.pyqt.app.elements.previwer.previewer import Preview
+from app.config.constants import REFRESH_IMG_PATH
+from app.pop_up_windows.error.error_window import ShowError
+from app.elements.status_console import StatusConsole
+from app.elements.score_search_bar import ScoreSearchBar
+from app.elements.list_items.status_console_item_two_texts import StatusConsoleItemWithTwoTexts
+from app.elements.previwer.previewer import Preview
 
 class MultipleSelectionView(QtWidgets.QWidget):
     MAX_COPIES = 20
+    NO_SCORES_TEXT = "NO SCORES"
     instrument_changed = QtCore.pyqtSignal(str)
     add_piece_signal = QtCore.pyqtSignal(str,str,int)
     generate_pdf_signal = QtCore.pyqtSignal()
@@ -258,7 +259,7 @@ class MultipleSelectionView(QtWidgets.QWidget):
         """
         self.instruments_combo_box.setEnabled(False)
         self.btn_add_piece.setEnabled(False)
-        self.instruments_combo_box.insertItem(0,self.tr("NO SCORES"))
+        self.instruments_combo_box.insertItem(0,self.tr(self.NO_SCORES_TEXT))
     
     def set_combo_box_presets(self, presets:list[str]):
         """

@@ -1,9 +1,9 @@
 from PyQt6.QtCore import QObject, pyqtSignal
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.login.login_view import LoginView
-from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.models.generated_models import UserConfigPublic
+from app.api_client.base_api_client_factory import get_base_client
+from app.login.login_view import LoginView
+from app.api_client.users_api_client import UsersApiClient
+from app.config.session_manager import SessionManager
+from app.models.generated_models import UserConfigPublic
 
 class LoginController(QObject):
     is_admin_signal = pyqtSignal(bool)

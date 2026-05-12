@@ -1,8 +1,8 @@
 from PyQt6 import QtWidgets, QtCore
-from frontend.pyqt.app.elements.status_console import StatusConsole
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
-from frontend.pyqt.app.error import OptionNotSelectedError, EmptyNameError
-from frontend.pyqt.app.elements.list_items.collition_item import CollisionItem
+from app.elements.status_console import StatusConsole
+from app.pop_up_windows.error.error_window import ShowError
+from app.error import OptionNotSelectedError, EmptyNameError
+from app.elements.list_items.collition_item import CollisionItem
 
 class CollisionResolutionWindow(QtWidgets.QDialog):
     resolved_signal = QtCore.pyqtSignal(dict) # dict[str, str | None]

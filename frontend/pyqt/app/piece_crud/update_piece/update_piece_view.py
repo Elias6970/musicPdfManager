@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import pyqtSignal, Qt, QStringListModel
 
-from frontend.pyqt.app.elements.score_search_bar import ScoreSearchBar
+from app.elements.score_search_bar import ScoreSearchBar
 
 
 class UpdatePieceView(QDialog):

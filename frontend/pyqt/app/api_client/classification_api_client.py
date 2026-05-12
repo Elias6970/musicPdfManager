@@ -3,8 +3,8 @@ from typing import Optional, List, Dict, Any
 from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtNetwork import QNetworkReply, QNetworkRequest
 
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.config.urls import Endpoint, build_url
+from app.api_client.base_api_client import BaseApiClient
+from app.config.urls import Endpoint, build_url
 
 class ClassificationApiClient(QObject):
     """

@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets,QtCore, QtGui
 from PyQt6.QtCore import pyqtSignal
-from frontend.pyqt.app.elements.list_items.instrument_and_number_item import InstrumentAndNumberItem
+from app.elements.list_items.instrument_and_number_item import InstrumentAndNumberItem
 
 class InfiniteComboBoxesItem(QtWidgets.QFrame):
     changed = pyqtSignal(object)

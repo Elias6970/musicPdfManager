@@ -1,10 +1,10 @@
 from PyQt6 import QtCore, QtWidgets
 
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.models.generated_models import PiecePublic
-from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.piece_crud.delete_piece.delete_piece_view import DeletePieceView
+from app.config.session_manager import SessionManager
+from app.models.generated_models import PiecePublic
+from app.api_client.pieces_api_client import PiecesApiClient
+from app.api_client.base_api_client_factory import get_base_client
+from app.piece_crud.delete_piece.delete_piece_view import DeletePieceView
 
 class DeletePieceController(QtCore.QObject):
     def __init__(self, view: DeletePieceView):

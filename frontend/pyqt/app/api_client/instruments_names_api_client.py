@@ -3,8 +3,8 @@ from typing import Optional, Dict, List, Tuple
 from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtNetwork import QNetworkReply
 
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.config.urls import Endpoint, build_url
+from app.api_client.base_api_client import BaseApiClient
+from app.config.urls import Endpoint, build_url
 
 class InstrumentsNamesApiClient(QObject):
     """

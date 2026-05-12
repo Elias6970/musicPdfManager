@@ -1,5 +1,5 @@
 from PyQt6 import QtWidgets
-from frontend.pyqt.app.error import OptionNotSelectedError, EmptyNameError
+from app.error import OptionNotSelectedError, EmptyNameError
 
 class CollisionItem(QtWidgets.QFrame):
     def __init__(self, missing_name: str, parent=None):

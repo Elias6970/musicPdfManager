@@ -1,13 +1,13 @@
 from PyQt6 import QtCore, QtWidgets
 import zipfile, io, os
 
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.api_client.massive_import_api_client import MassiveImportApiClient
-from frontend.pyqt.app.api_client.uploads_api_client import UploadsApiClient
-from frontend.pyqt.app.archive_crud.massive_import.massive_import_view import MassiveImportView
-from frontend.pyqt.app.models.generated_models import ArchivePublic, MassiveImportResponse
-from frontend.pyqt.app.pop_up_windows.massive_import_result_window import MassiveImportResultWindow
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
+from app.api_client.base_api_client_factory import get_base_client
+from app.api_client.massive_import_api_client import MassiveImportApiClient
+from app.api_client.uploads_api_client import UploadsApiClient
+from app.archive_crud.massive_import.massive_import_view import MassiveImportView
+from app.models.generated_models import ArchivePublic, MassiveImportResponse
+from app.pop_up_windows.massive_import_result_window import MassiveImportResultWindow
+from app.pop_up_windows.error.error_window import ShowError
 
 class MassiveImportController(QtCore.QObject):
     

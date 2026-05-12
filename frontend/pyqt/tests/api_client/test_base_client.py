@@ -7,7 +7,7 @@ from PyQt6.QtCore import QByteArray, QUrl
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 
 # Absolute import for the user's namespace package
-from frontend.pyqt.app.api_client.base_client import BaseApiClient
+from app.api_client.base_client import BaseApiClient
 
 
 @pytest.fixture

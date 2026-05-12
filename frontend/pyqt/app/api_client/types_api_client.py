@@ -3,9 +3,9 @@ from typing import Optional
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtNetwork import QNetworkReply
 
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.config.urls import Endpoint, build_url
-import frontend.pyqt.app.models.generated_models as generated_models
+from app.api_client.base_api_client import BaseApiClient
+from app.config.urls import Endpoint, build_url
+import app.models.generated_models as generated_models
 
 class TypesApiClient(QObject):
     """

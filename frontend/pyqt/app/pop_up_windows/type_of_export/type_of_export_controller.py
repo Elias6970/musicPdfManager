@@ -1,7 +1,7 @@
 from PyQt6 import QtCore
 
-from frontend.pyqt.app.pop_up_windows.type_of_export.type_of_export_view import TypeOfExportView
-from frontend.pyqt.app.models.generated_models import ExportStrategyType, PresetPrintJobConfig
+from app.pop_up_windows.type_of_export.type_of_export_view import TypeOfExportView
+from app.models.generated_models import ExportStrategyType, PresetPrintJobConfig
 
 class TypeOfExportController(QtCore.QObject):
     export_signal = QtCore.pyqtSignal(PresetPrintJobConfig)

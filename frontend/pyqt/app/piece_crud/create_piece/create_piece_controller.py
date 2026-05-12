@@ -2,14 +2,14 @@ import os
 from PyQt6.QtCore import QObject, Qt
 from PyQt6.QtWidgets import QFileDialog, QApplication, QMessageBox
 
-from frontend.pyqt.app.piece_crud.create_piece.create_piece_view import CreatePieceView
-from frontend.pyqt.app.api_client.uploads_api_client import UploadsApiClient
-from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
-from frontend.pyqt.app.api_client.authors_api_client import AuthorsApiClient
-from frontend.pyqt.app.api_client.types_api_client import TypesApiClient
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.config.session_manager import SessionManager
-import frontend.pyqt.app.models.generated_models as generated_models
+from app.piece_crud.create_piece.create_piece_view import CreatePieceView
+from app.api_client.uploads_api_client import UploadsApiClient
+from app.api_client.pieces_api_client import PiecesApiClient
+from app.api_client.authors_api_client import AuthorsApiClient
+from app.api_client.types_api_client import TypesApiClient
+from app.api_client.base_api_client_factory import get_base_client
+from app.config.session_manager import SessionManager
+import app.models.generated_models as generated_models
 
 class CreatePieceController(QObject):
     def __init__(self, view: CreatePieceView, parent: QObject | None = None):

@@ -1,7 +1,7 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
 
-from frontend.pyqt.app.config.constants import INSTRUCTIONS_SCORE_CLASSIFIER, ROTATE_L_IMG_PATH, ROTATE_R_IMG_PATH
-from frontend.pyqt.app.score_classifier.interactive_previewer.interactive_previewer import InteractivePreviewer
+from app.config.constants import INSTRUCTIONS_SCORE_CLASSIFIER, ROTATE_L_IMG_PATH, ROTATE_R_IMG_PATH
+from app.score_classifier.interactive_previewer.interactive_previewer import InteractivePreviewer
 
 class ScoreClassifierView(QtWidgets.QDialog):
     rotate_clockwise_signal = QtCore.pyqtSignal() 

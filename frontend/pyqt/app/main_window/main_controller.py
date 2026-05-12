@@ -2,44 +2,44 @@ import os, sys
 
 from PyQt6 import QtCore, QtWidgets, QtGui
 
-from frontend.pyqt.app.api_client.archives_api_client import ArchivesApiClient
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.main_window.main_view import MainView
-from frontend.pyqt.app.models.generated_models import ArchivePublic
+from app.api_client.archives_api_client import ArchivesApiClient
+from app.api_client.base_api_client_factory import get_base_client
+from app.config.session_manager import SessionManager
+from app.main_window.main_view import MainView
+from app.models.generated_models import ArchivePublic
 
-from frontend.pyqt.app.selectors.individual_selection_controller import IndividualSelectionController
-from frontend.pyqt.app.selectors.multiple_selection_controller import MultipleSelectionController
+from app.selectors.individual_selection_controller import IndividualSelectionController
+from app.selectors.multiple_selection_controller import MultipleSelectionController
 
-from frontend.pyqt.app.archive_crud.create_archive.create_archive_view import CreateArchiveView
-from frontend.pyqt.app.archive_crud.create_archive.create_archive_controller import CreateArchiveController
-from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_view import DeleteArchiveView
-from frontend.pyqt.app.archive_crud.delete_archive.delete_archive_controller import DeleteArchiveController
-from frontend.pyqt.app.archive_crud.update_archive.update_archive_view import UpdateArchiveView
-from frontend.pyqt.app.archive_crud.update_archive.update_archive_controller import UpdateArchiveController
+from app.archive_crud.create_archive.create_archive_view import CreateArchiveView
+from app.archive_crud.create_archive.create_archive_controller import CreateArchiveController
+from app.archive_crud.delete_archive.delete_archive_view import DeleteArchiveView
+from app.archive_crud.delete_archive.delete_archive_controller import DeleteArchiveController
+from app.archive_crud.update_archive.update_archive_view import UpdateArchiveView
+from app.archive_crud.update_archive.update_archive_controller import UpdateArchiveController
 
-from frontend.pyqt.app.piece_crud.create_piece.create_piece_controller import CreatePieceController
-from frontend.pyqt.app.piece_crud.create_piece.create_piece_view import CreatePieceView
-from frontend.pyqt.app.piece_crud.delete_piece.delete_piece_controller import DeletePieceController
-from frontend.pyqt.app.piece_crud.delete_piece.delete_piece_view import DeletePieceView
-from frontend.pyqt.app.piece_crud.update_piece.update_piece_controller import UpdatePieceController
-from frontend.pyqt.app.piece_crud.update_piece.update_piece_view import UpdatePieceView
+from app.piece_crud.create_piece.create_piece_controller import CreatePieceController
+from app.piece_crud.create_piece.create_piece_view import CreatePieceView
+from app.piece_crud.delete_piece.delete_piece_controller import DeletePieceController
+from app.piece_crud.delete_piece.delete_piece_view import DeletePieceView
+from app.piece_crud.update_piece.update_piece_controller import UpdatePieceController
+from app.piece_crud.update_piece.update_piece_view import UpdatePieceView
 
-from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_controller import PieceSelectorController
-from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
+from app.score_classifier.piece_selector.piece_selector_controller import PieceSelectorController
+from app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
 
-from frontend.pyqt.app.preferences.preferences_controller import PreferencesController
-from frontend.pyqt.app.preferences.preferences_view import PreferencesView
-from frontend.pyqt.app.instruments_presets.list_instruments_presets.list_instruments_presets_controller import ListInstrumentsPresetsController
-from frontend.pyqt.app.instruments_presets.list_instruments_presets.list_instruments_presets_view import ListInstrumentsPresetsView
+from app.preferences.preferences_controller import PreferencesController
+from app.preferences.preferences_view import PreferencesView
+from app.instruments_presets.list_instruments_presets.list_instruments_presets_controller import ListInstrumentsPresetsController
+from app.instruments_presets.list_instruments_presets.list_instruments_presets_view import ListInstrumentsPresetsView
 
-from frontend.pyqt.app.login.login_view import LoginView
-from frontend.pyqt.app.login.login_controller import LoginController
-from frontend.pyqt.app.api_client.users_api_client import UsersApiClient
-from frontend.pyqt.app.users_crud.users_controller import UsersController
-from frontend.pyqt.app.users_crud.users_view import UsersView
+from app.login.login_view import LoginView
+from app.login.login_controller import LoginController
+from app.api_client.users_api_client import UsersApiClient
+from app.users_crud.users_controller import UsersController
+from app.users_crud.users_view import UsersView
 
-from frontend.pyqt.app.pop_up_windows.about_us_view import AboutUsView
+from app.pop_up_windows.about_us_view import AboutUsView
 
 class MainController(QtCore.QObject):
     def __init__(self, view:MainView):

@@ -1,6 +1,6 @@
 from PyQt6 import QtWidgets,QtCore,QtGui
-from frontend.pyqt.app.elements.status_console import StatusConsole
-from frontend.pyqt.app.elements.list_items.status_console_item_with_two_texts_and_one_field import StatusConsoleItemWithTwoTextsAndOneField
+from app.elements.status_console import StatusConsole
+from app.elements.list_items.status_console_item_with_two_texts_and_one_field import StatusConsoleItemWithTwoTextsAndOneField
 
 class ResolveUnmatchedPresetsView(QtWidgets.QDialog):
     confirm_signal = QtCore.pyqtSignal()

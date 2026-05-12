@@ -1,6 +1,6 @@
 import pytest
 
-from frontend.pyqt.app.config.urls import API_PREFIX, BASE_URL, Endpoint, build_url
+from app.config.urls import API_PREFIX, BASE_URL, Endpoint, build_url
 
 
 def test_build_url_static_endpoint():

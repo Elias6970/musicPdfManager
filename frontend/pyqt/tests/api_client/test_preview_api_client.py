@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 from PyQt6.QtCore import QByteArray
 from PyQt6.QtNetwork import QNetworkReply
 
-from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
+from app.api_client.preview_api_client import PreviewApiClient
 
 
 @pytest.fixture

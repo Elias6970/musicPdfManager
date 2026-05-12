@@ -1,14 +1,14 @@
 from PyQt6 import QtCore, QtWidgets, QtGui
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.api_client.classification_api_client import ClassificationApiClient
-from frontend.pyqt.app.api_client.instruments_names_api_client import InstrumentsNamesApiClient
-from frontend.pyqt.app.api_client.preview_api_client import PreviewApiClient
-from frontend.pyqt.app.score_classifier.score_classifier_view import ScoreClassifierView
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.models.generated_models import SourcePage, ClassificationJob, ClassifiedDocument, ClassifiedDocumentConfig
-from frontend.pyqt.app.score_classifier.text_analizer import TextAnalizer
-from frontend.pyqt.app.pop_up_windows.error.error_window import ShowError
-from frontend.pyqt.app.pop_up_windows.collision_resolution_window import CollisionResolutionWindow
+from app.api_client.base_api_client_factory import get_base_client
+from app.api_client.classification_api_client import ClassificationApiClient
+from app.api_client.instruments_names_api_client import InstrumentsNamesApiClient
+from app.api_client.preview_api_client import PreviewApiClient
+from app.score_classifier.score_classifier_view import ScoreClassifierView
+from app.config.session_manager import SessionManager
+from app.models.generated_models import SourcePage, ClassificationJob, ClassifiedDocument, ClassifiedDocumentConfig
+from app.score_classifier.text_analizer import TextAnalizer
+from app.pop_up_windows.error.error_window import ShowError
+from app.pop_up_windows.collision_resolution_window import CollisionResolutionWindow
 
 class SourcePageWithResolution(SourcePage):
     resolution: str|None = None

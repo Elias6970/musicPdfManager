@@ -1,12 +1,12 @@
 
 
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.config.session_manager import SessionManager
-from frontend.pyqt.app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
-from frontend.pyqt.app.api_client.pieces_api_client import PiecesApiClient
-from frontend.pyqt.app.score_classifier.score_classifier_view import ScoreClassifierView
-from frontend.pyqt.app.score_classifier.score_classifier_controller import ScoreClassifierController
-from frontend.pyqt.app.models.generated_models import PiecePublic
+from app.api_client.base_api_client_factory import get_base_client
+from app.config.session_manager import SessionManager
+from app.score_classifier.piece_selector.piece_selector_view import PieceSelectorView
+from app.api_client.pieces_api_client import PiecesApiClient
+from app.score_classifier.score_classifier_view import ScoreClassifierView
+from app.score_classifier.score_classifier_controller import ScoreClassifierController
+from app.models.generated_models import PiecePublic
 from PyQt6 import QtWidgets, QtCore
 
 class PieceSelectorController(QtCore.QObject):

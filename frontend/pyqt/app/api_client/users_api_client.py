@@ -1,10 +1,10 @@
 import json
 from PyQt6.QtCore import QObject, pyqtSignal, QByteArray
 from PyQt6.QtNetwork import QNetworkReply, QNetworkRequest
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.api_client.base_api_client_factory import get_base_client
-from frontend.pyqt.app.config.urls import build_url, Endpoint
-from frontend.pyqt.app.models.generated_models import UserConfigCreatePublic, UserConfigPublic, UserPublic, UserCreate
+from app.api_client.base_api_client import BaseApiClient
+from app.api_client.base_api_client_factory import get_base_client
+from app.config.urls import build_url, Endpoint
+from app.models.generated_models import UserConfigCreatePublic, UserConfigPublic, UserPublic, UserCreate
 
 class UsersApiClient(QObject):
     login_success = pyqtSignal(dict)

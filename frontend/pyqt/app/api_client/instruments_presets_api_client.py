@@ -3,9 +3,9 @@ from typing import Optional
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtNetwork import QNetworkReply, QNetworkRequest
 
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.config.urls import Endpoint, build_url
-from frontend.pyqt.app.models.generated_models import InstrumentsPreset
+from app.api_client.base_api_client import BaseApiClient
+from app.config.urls import Endpoint, build_url
+from app.models.generated_models import InstrumentsPreset
 
 
 class InstrumentsPresetsApiClient(QObject):
@@ -143,7 +143,7 @@ class InstrumentsPresetsApiClient(QObject):
         data = self.client.parse_reply(reply)
 
         if data is not None:
-            from frontend.pyqt.app.models.generated_models import InstrumentsPreset
+            from app.models.generated_models import InstrumentsPreset
             res = []
             if isinstance(data, list):
                 for item in data:

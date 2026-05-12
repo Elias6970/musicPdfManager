@@ -2,9 +2,9 @@
 
 from typing import Optional
 
-from frontend.pyqt.app.api_client.base_api_client import BaseApiClient
-from frontend.pyqt.app.models.generated_models import RolePublic, RoleCreate
-from frontend.pyqt.app.config.urls import Endpoint, build_url
+from app.api_client.base_api_client import BaseApiClient
+from app.models.generated_models import RolePublic, RoleCreate
+from app.config.urls import Endpoint, build_url
 from PyQt6.QtCore import pyqtSignal, QObject
 from PyQt6.QtNetwork import QNetworkReply
 
