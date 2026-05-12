@@ -1,6 +1,6 @@
 -r backend/requirements.txt
 -r frontend_pyqt/requirements.txt
 pyinstaller==6.3.0
-pytest==8.3.5
+pytest==9.0.3
 pytest-asyncio==1.3.0
 datamodel-code-generator==0.56.0
