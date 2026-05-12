@@ -194,10 +194,9 @@ class MainController(QtCore.QObject):
         translator = QtCore.QTranslator(self)
 
         #TODO: Change this to a function that return the path of the translation file, and also check if it exists, if not, show an error message and exit the program
+        path = os.path.join("resources","translations",language,"compiled",language+".qm")
         if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
-            path = os.path.join(sys._MEIPASS,"frontend","pyqt","translate",language,"compiled",language+".qm") #type:ignore
-        else:
-            path = os.path.join("frontend","pyqt","translate",language,"compiled",language+".qm")
+            path = os.path.join(sys._MEIPASS, path)
 
         translator.load(path)
 
