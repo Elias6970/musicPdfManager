@@ -121,6 +121,10 @@ class ByElementExporter(PresetExportStrategy):
         
         # Prepare parallel jobs
         futures = []
+
+        #import multiprocessing as mp
+        #mp_context = mp.get_context('spawn')
+        #with ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) - 1), mp_context=mp_context) as executor:
         with ProcessPoolExecutor(max_workers=max(1, (os.cpu_count() or 2) - 1)) as executor:
             for element_name, inner_items in solved_preset.solution.items():
                 inner_items_dict = {

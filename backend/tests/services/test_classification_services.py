@@ -1,4 +1,4 @@
-import pytest
+import pytest, os
 from unittest.mock import patch, MagicMock, mock_open
 
 from sqlmodel import Session
@@ -309,10 +309,12 @@ def test_save_generated_pdfs(mock_file_open, mock_parse_name, mock_get_archive, 
     assert mock_file_open.call_count == 2
     
     # Check Flauta_1.pdf write properly resolving paths
-    mock_file_open.assert_any_call(f"/mock/archive\\Test_Piece\\{DIR_SCORES}\\Flauta_1.pdf", "wb")
+    expected_path_flauta = os.path.join("/mock/archive", "Test_Piece", DIR_SCORES, "Flauta_1.pdf")
+    mock_file_open.assert_any_call(expected_path_flauta, "wb")
     
     # Check Oboe_1.pdf write
-    mock_file_open.assert_any_call(f"/mock/archive\\Test_Piece\\{DIR_SCORES}\\Oboe_1.pdf", "wb")
+    expected_path_oboe = os.path.join("/mock/archive", "Test_Piece", DIR_SCORES, "Oboe_1.pdf")
+    mock_file_open.assert_any_call(expected_path_oboe, "wb")
     
     # Check that bytes were written correctly
     file_handles = mock_file_open.return_value
