@@ -43,6 +43,7 @@ class ServerSettings(BaseModel):
     base_dossier_cover_path: str = "data/dossier_covers"
 
     instruments_names_file: str = "data/instruments.json"
+    instruments_order_file: str = "data/instruments_order.txt"
 
 class ServerSettingsRepository:
     """Load/save/validate ServerSettings from a versioned JSON file."""

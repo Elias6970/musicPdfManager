@@ -1,7 +1,10 @@
 import re
 from pathlib import Path
+from backend.app.utils.settings import get_server_settings
 
-def load_instruments_order(file_path: str = "data\\instruments_order.txt") -> list[str]:
+def load_instruments_order(file_path: str = None) -> list[str]:
+    if file_path is None:
+        file_path = get_server_settings().instruments_order_file
     return [line.strip() for line in Path(file_path).read_text(encoding="utf-8").splitlines()]
 
 class InstrumentSorter:
