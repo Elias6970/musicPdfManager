@@ -7,7 +7,7 @@ from PyQt6.QtCore import QByteArray, QUrl
 from PyQt6.QtNetwork import QNetworkAccessManager, QNetworkReply, QNetworkRequest
 
 # Absolute import for the user's namespace package
-from app.api_client.base_client import BaseApiClient
+from app.api_client.base_api_client import BaseApiClient
 
 
 @pytest.fixture
@@ -82,8 +82,8 @@ def test_post_dict_payload(base_client):
 
 def test_post_pydantic_v2_payload(base_client):
     mock_model = MagicMock()
-    mock_model.model_dump.return_value = {"field": "v2_test"}
-    del mock_model.dict  # Ensure it doesn't fallback to v1 accidentally
+    mock_model.model_dump_json.return_value = '{"field": "v2_test"}'
+    del mock_model.json  # Ensure it doesn't fallback to v1 accidentally
     
     base_client.post("http://test.local/post", data=mock_model)
     payload = base_client.manager.post.call_args[0][1]
@@ -92,8 +92,8 @@ def test_post_pydantic_v2_payload(base_client):
 
 def test_post_pydantic_v1_payload(base_client):
     mock_model = MagicMock()
-    mock_model.dict.return_value = {"field": "v1_test"}
-    del mock_model.model_dump  # Simulate it doesn't have v2 method
+    mock_model.json.return_value = '{"field": "v1_test"}'
+    del mock_model.model_dump_json  # Simulate it doesn't have v2 method
     
     base_client.post("http://test.local/post", data=mock_model)
     payload = base_client.manager.post.call_args[0][1]

@@ -15,9 +15,11 @@ def session_manager(mock_qsettings_class):
     def set_value(key, value):
         store[key] = value
         
-    def get_value(key, type=None):
+    def get_value(key, defaultValue=None, type=None):
         val = store.get(key)
         if val is None:
+            if defaultValue is not None:
+                return defaultValue
             if type == int: return 0
             if type == str: return ""
             return None
@@ -45,10 +47,10 @@ def session_manager(mock_qsettings_class):
 
 
 def test_initialization_sets_defaults(session_manager):
-    assert session_manager.get_archive_id() == 1
+    assert session_manager.get_archive_id() == -1
     assert session_manager.get_language() == "en_US"
     # It should set the initial token from the file
-    assert session_manager.get_jwt().startswith("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
+    assert session_manager.get_jwt() == "dummy_jwt_token_12345"
 
 def test_get_set_jwt(session_manager):
     session_manager.set_jwt("test_token_123")

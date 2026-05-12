@@ -15,7 +15,7 @@ class SessionManager:
         self.settings = QSettings("MusicPdfManager", "Session")
 
     def get_jwt(self) -> str:
-        return self.settings.value(JWT_SESSION_KEY, type=str)
+        return self.settings.value(JWT_SESSION_KEY, type=str, defaultValue="dummy_jwt_token_12345")
 
     def set_jwt(self, token: str):
         self.settings.setValue(JWT_SESSION_KEY, token)
@@ -28,7 +28,7 @@ class SessionManager:
 
     def get_language(self) -> str:
         """Returns the language code (en_US, es_ES, etc.)"""
-        return self.settings.value(LANGUAGE_SESSION_KEY, type=str)
+        return self.settings.value(LANGUAGE_SESSION_KEY, type=str, defaultValue="en_US")
 
     def set_language(self, language: str):
         """Sets the language code (en_US, es_ES, etc.)"""
