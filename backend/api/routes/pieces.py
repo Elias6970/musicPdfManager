@@ -6,8 +6,8 @@ from backend.api.dependencies.database import get_session
 from backend.api.dependencies.file_manager import get_archive_file_manager
 from backend.api.dependencies.permissions import require_archive_viewer, require_archive_editor
 from backend.app.models.piece import PieceCreate, PiecePublic
-from backend.app.custom_order.instrument_sorter import InstrumentSorter
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.custom_order.instrument_sorter import InstrumentSorter
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.crud.piece_crud import (
     get_piece as _get_piece,
     get_pieces as _get_pieces

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 import json
-from backend.app.custom_order.instrument_sorter import InstrumentSorter
+from backend.app.services.custom_order.instrument_sorter import InstrumentSorter
 from backend.app.utils.instruments_names_manager import InstrumentsNamesManager
 from backend.api.dependencies.permissions import require_user
 

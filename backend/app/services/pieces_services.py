@@ -1,6 +1,6 @@
 import os, fitz
 from backend.app.constants.constants import DIR_SCORES
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 
 def get_scores(piece_std_name: str, file_manager: ArchiveFileManager, extension: bool = True) -> list[str]:
     """

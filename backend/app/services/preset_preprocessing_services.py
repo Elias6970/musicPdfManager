@@ -2,10 +2,10 @@ from sqlmodel import Session
 from backend.app.models.presets.instruments_preset import InstrumentsPreset
 from backend.app.models.presets.resolution_preset import SolvedInstrument, SolvedPreset, UnresolvedInstrumentResponse
 from backend.app.models.printers.jobs.preset_print_job import PresetPrintJob
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.services.archive_services import get_archive_path
 from backend.app.services.pieces_services import get_scores
-from backend.app.custom_order.instrument_sorter import InstrumentSorter
+from backend.app.services.custom_order.instrument_sorter import InstrumentSorter
 
 def _add_to_solution(solvedPreset: SolvedPreset, archive_id: int, piece_std_name: str, instrument: str, file_name: str, copies: int, by_instrument: bool):
     """

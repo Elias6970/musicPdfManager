@@ -12,7 +12,7 @@ from backend.app.error import (
 )
 from backend.app.models.piece import Piece, PieceCreate
 from backend.app.crud.piece_crud import create_piece, get_piece, delete_piece, update_piece
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.utils.settings import get_server_settings
 
 

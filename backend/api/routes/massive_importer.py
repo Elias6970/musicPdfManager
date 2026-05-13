@@ -4,8 +4,8 @@ from sqlmodel import Session
 from backend.api.dependencies.database import get_session
 from backend.api.dependencies.file_manager import get_archive_file_manager
 from backend.api.dependencies.permissions import RequireArchiveRoleFastAPI, ArchiveRole
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
-from backend.app.massive_import.massive_importer_services import massive_import
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.massive_import.massive_importer_services import massive_import
 from backend.app.models.massive_import import MassiveImportResponse
 
 router = APIRouter(prefix="/massive_import", tags=["massive_import"])

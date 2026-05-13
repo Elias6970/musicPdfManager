@@ -10,7 +10,7 @@ from backend.app.services.export_strategies.base_strategy import PresetExportStr
 from backend.app.models.presets.resolution_preset import SolvedPreset
 from backend.app.models.printers.jobs.preset_print_job import PresetPrintJobConfig
 from backend.app.services.archive_services import get_archive_path
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.constants.constants import DIR_SCORES
 from backend.app.utils.name_manager import NameManager
 from backend.app.services.pdf_modifiers_service import (

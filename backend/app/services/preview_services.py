@@ -2,7 +2,7 @@ import os
 import fitz
 from sqlmodel import Session
 from backend.app.models.preview import PreviewRequest
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.constants.constants import DIR_SCORES
 from backend.app.services.archive_services import get_archive_path
 

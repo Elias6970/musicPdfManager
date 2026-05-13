@@ -5,7 +5,7 @@ import fitz
 import shutil
 import datetime
 from backend.app.constants.constants import DIR_SCORES
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.models.classification.classification_job import ClassificationJob
 from backend.app.models.classification.classified_document import ClassifiedDocument
 from backend.app.services.archive_services import get_archive_path

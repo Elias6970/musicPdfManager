@@ -1,5 +1,5 @@
 import pytest
-from backend.app.custom_order.instrument_sorter import InstrumentSorter
+from backend.app.services.custom_order.instrument_sorter import InstrumentSorter
 
 # 1. Define the Fixture
 # This fixture runs BEFORE the test. It reads the parameter passed to it

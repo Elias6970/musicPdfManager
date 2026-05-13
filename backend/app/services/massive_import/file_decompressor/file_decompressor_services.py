@@ -1,4 +1,4 @@
-from backend.app.massive_import.file_decompressor.strategies import base_extractor, zip_extractor, rar_extractor, tar_extractor
+from backend.app.services.massive_import.file_decompressor.strategies import base_extractor, zip_extractor, rar_extractor, tar_extractor
 
 import io
 

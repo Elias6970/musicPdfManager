@@ -1,6 +1,6 @@
 import tarfile, os, io
 from typing import Generator
-from backend.app.massive_import.file_decompressor.strategies.base_extractor import BaseExtractor 
+from backend.app.services.massive_import.file_decompressor.strategies.base_extractor import BaseExtractor 
 
 class TarExtractor(BaseExtractor):
     def extract_items(self, file_data: io.BytesIO) -> Generator[tuple[str, bytes], None, None]:

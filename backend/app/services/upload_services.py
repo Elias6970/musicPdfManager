@@ -5,8 +5,8 @@ from fastapi import Request
 from backend.app.utils.settings import get_server_settings
 from backend.app.error import FileTooLargeException
 from backend.app.models.upload import UploadStagingResponse, UploadToFolderResponse
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
-from backend.app.massive_import.file_decompressor.file_decompressor_services import get_strategy
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.massive_import.file_decompressor.file_decompressor_services import get_strategy
 
 async def process_upload_stream(request: Request) -> UploadStagingResponse:
     """

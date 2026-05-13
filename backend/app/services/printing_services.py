@@ -3,7 +3,7 @@ from sqlmodel import Session
 from backend.app.error import UnresolvedInstrumentsException
 from backend.app.models.printers.jobs.preset_print_job import ExportStrategyType, PresetPrintJob
 from backend.app.models.printers.jobs.simple_print_job import SimplePrintJob
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.services.archive_services import get_archive_path
 from backend.app.services.export_strategies.all_in_one import AllInOneExporter
 from backend.app.services.export_strategies.base_strategy import PresetExportStrategy

@@ -1,7 +1,7 @@
 import io
 import tarfile
 import pytest
-from backend.app.massive_import.file_decompressor.strategies.tar_extractor import TarExtractor
+from backend.app.services.massive_import.file_decompressor.strategies.tar_extractor import TarExtractor
 
 def create_mock_tar(file_structure: dict) -> io.BytesIO:
     """

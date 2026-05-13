@@ -1,5 +1,5 @@
 from fastapi import Depends
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.services.archive_services import get_archive_path
 from sqlmodel import Session
 from backend.api.dependencies.database import get_session

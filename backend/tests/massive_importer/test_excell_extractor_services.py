@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import MagicMock
 
-import backend.app.massive_import.excell_extractor_services as services
-from backend.app.massive_import.excell_extractor_services import (
+import backend.app.services.massive_import.excell_extractor_services as services
+from backend.app.services.massive_import.excell_extractor_services import (
     _read_csv,
     _read_xls,
     _read_xlsx,

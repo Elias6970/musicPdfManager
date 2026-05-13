@@ -1,6 +1,6 @@
 import sys, rarfile, os, io, shutil
 from typing import Generator
-from backend.app.massive_import.file_decompressor.strategies.base_extractor import BaseExtractor
+from backend.app.services.massive_import.file_decompressor.strategies.base_extractor import BaseExtractor
 
 def get_unrar_path() -> str | None:
     """

@@ -3,7 +3,7 @@ import os
 from unittest.mock import MagicMock, patch
 import pytest
 
-from backend.app.massive_import.file_decompressor.file_decompressor_services import (
+from backend.app.services.massive_import.file_decompressor.file_decompressor_services import (
     get_strategy,
     extract_nested_archives_in_memory,
     STRATEGIES
@@ -35,7 +35,7 @@ def test_extract_not_archive_file_path(tmp_path):
     assert len(results) == 1
     assert results[0] == (str(filepath), b"dummy file content")
 
-@patch('backend.app.massive_import.file_decompressor.file_decompressor_services.get_strategy')
+@patch('backend.app.services.massive_import.file_decompressor.file_decompressor_services.get_strategy')
 def test_extract_archive_success(mock_get_strategy):
     mock_strategy = MagicMock()
     mock_strategy.extract_items.return_value = [("file1.txt", b"content1"), ("file2.txt", b"content2")]
@@ -50,7 +50,7 @@ def test_extract_archive_success(mock_get_strategy):
     assert ("file1.txt", b"content1") in results
     assert ("file2.txt", b"content2") in results
 
-@patch('backend.app.massive_import.file_decompressor.file_decompressor_services.get_strategy')
+@patch('backend.app.services.massive_import.file_decompressor.file_decompressor_services.get_strategy')
 def test_extract_archive_from_file_path(mock_get_strategy, tmp_path):
     mock_strategy = MagicMock()
     mock_strategy.extract_items.return_value = [("file.txt", b"content")]
@@ -70,7 +70,7 @@ def test_extract_archive_from_file_path(mock_get_strategy, tmp_path):
     assert isinstance(args[0], io.BytesIO)
     assert args[0].getvalue() == b"dummy zip data on disk"
     
-@patch('backend.app.massive_import.file_decompressor.file_decompressor_services.get_strategy')
+@patch('backend.app.services.massive_import.file_decompressor.file_decompressor_services.get_strategy')
 def test_extract_nested_archive(mock_get_strategy):
     outer_strategy = MagicMock()
     inner_strategy = MagicMock()
@@ -93,7 +93,7 @@ def test_extract_nested_archive(mock_get_strategy):
     assert ("deep.pdf", b"deep") in results
     assert ("normal.txt", b"normal") in results
     
-@patch('backend.app.massive_import.file_decompressor.file_decompressor_services.get_strategy')
+@patch('backend.app.services.massive_import.file_decompressor.file_decompressor_services.get_strategy')
 def test_extract_nested_archive_max_depth(mock_get_strategy, capsys):
     mock_strategy = MagicMock()
     # Constantly yields another zip
@@ -110,7 +110,7 @@ def test_extract_nested_archive_max_depth(mock_get_strategy, capsys):
     captured = capsys.readouterr()
     assert "Warning: Max depth (1) reached at 'next.zip'" in captured.out
 
-@patch('backend.app.massive_import.file_decompressor.file_decompressor_services.get_strategy')
+@patch('backend.app.services.massive_import.file_decompressor.file_decompressor_services.get_strategy')
 def test_extract_exception_handling(mock_get_strategy, capsys):
     mock_strategy = MagicMock()
     mock_strategy.extract_items.side_effect = Exception("Corrupt archive")

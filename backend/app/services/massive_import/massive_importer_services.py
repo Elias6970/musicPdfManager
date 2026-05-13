@@ -1,11 +1,11 @@
 from sqlmodel import Session
 
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
-from backend.app.massive_import.excell_extractor_services import read_data
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.massive_import.excell_extractor_services import read_data
 from backend.app.utils.settings import get_server_settings
 from backend.app.services.archive_services import add_piece_to_archive, add_file_to_existing_piece
 from backend.app.models.piece import Piece, PieceCreate
-from backend.app.massive_import.file_decompressor.file_decompressor_services import extract_nested_archives_in_memory
+from backend.app.services.massive_import.file_decompressor.file_decompressor_services import extract_nested_archives_in_memory
 from backend.app.error import FileCouldNotBeReadException
 
 import os

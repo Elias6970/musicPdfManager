@@ -5,11 +5,11 @@ from unittest.mock import patch, MagicMock
 import pytest
 import rarfile
 
-from backend.app.massive_import.file_decompressor.strategies.rar_extractor import RarExtractor, get_unrar_path
+from backend.app.services.massive_import.file_decompressor.strategies.rar_extractor import RarExtractor, get_unrar_path
 
 @pytest.fixture
 def mock_rarfile_class():
-    with patch('backend.app.massive_import.file_decompressor.strategies.rar_extractor.rarfile.RarFile') as mock_class:
+    with patch('backend.app.services.massive_import.file_decompressor.strategies.rar_extractor.rarfile.RarFile') as mock_class:
         yield mock_class
 
 def test_extract_items_rar(mock_rarfile_class):

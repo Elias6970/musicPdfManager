@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 from unittest.mock import patch
 
-from backend.app.files_management.archive_file_manager import ArchiveFileManager
+from backend.app.services.files_management.archive_file_manager import ArchiveFileManager
 from backend.app.constants.constants import DIR_SCORES, DIR_EXTRAS, HYPHEN
 
 
@@ -27,8 +27,8 @@ def manager(tmp_path):
 def test_parse_name_to_file_manager(manager, input_name, expected):
     assert manager.parse_name_to_file_manager(input_name) == expected
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.is_pdf')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.is_pdf')
 def test_copy_files_in_archive(mock_is_pdf, mock_parse, manager, tmp_path):
     mock_parse.return_value = "1-TEST"
     mock_is_pdf.side_effect = lambda path: str(path).endswith('.pdf')
@@ -45,8 +45,8 @@ def test_copy_files_in_archive(mock_is_pdf, mock_parse, manager, tmp_path):
     assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_SCORES, "test.pdf"))
     assert os.path.exists(os.path.join(manager.archive_path, piece_path, DIR_EXTRAS, "test.txt"))
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.is_pdf')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.is_pdf')
 def test_copy_files_in_archive_removes_uuid_prefix(mock_is_pdf, mock_parse, manager, tmp_path):
     mock_parse.return_value = "1-TEST"
     mock_is_pdf.side_effect = lambda path: str(path).endswith('.pdf')
@@ -82,7 +82,7 @@ def test_get_file_names(manager, tmp_path):
     assert "file1.txt" in names
     assert ".DS_Store" not in names
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_get_scores_and_extras(mock_parse, manager):
     mock_parse.return_value = "1-TEST"
     piece = "1-TEST"
@@ -96,21 +96,21 @@ def test_get_scores_and_extras(mock_parse, manager):
     assert "score.pdf" in manager.get_scores(os.path.join(piece))
     assert "extra.txt" in manager.get_extras(os.path.join(piece))
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_make_dir(mock_parse, manager):
     mock_parse.return_value = "new_piece"
     manager.make_dir("new_piece")
     assert os.path.exists(os.path.join(manager.archive_path, "new_piece", DIR_SCORES))
     assert os.path.exists(os.path.join(manager.archive_path, "new_piece", DIR_EXTRAS))
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_delete_piece(mock_parse, manager):
     mock_parse.return_value = "to_delete"
     manager.make_dir("to_delete")
     manager.delete_piece("to_delete")
     assert not os.path.exists(os.path.join(manager.archive_path, "to_delete"))
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_change_piece_dir_name(mock_parse, manager):
     mock_parse.return_value = "old_name"
     manager.make_dir("old_name")
@@ -118,7 +118,7 @@ def test_change_piece_dir_name(mock_parse, manager):
     assert not os.path.exists(os.path.join(manager.archive_path, "old_name"))
     assert os.path.exists(os.path.join(manager.archive_path, "new_name"))
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_get_piece_path(mock_parse, manager):
     mock_parse.return_value = "101-TEST_PIECE"
     manager.make_dir("101-TEST_PIECE")
@@ -147,7 +147,7 @@ def test_sanitize_archive_folder_names(manager):
     expected_good = f"1{HYPHEN}BADNAME"
     assert os.path.exists(os.path.join(manager.archive_path, expected_good))
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_move_uppercase_pdfs_to_scores(mock_parse, manager):
     mock_parse.return_value = "1-TEST"
     piece = "1-TEST"
@@ -179,7 +179,7 @@ def test_format_temp_filename():
     assert ArchiveFileManager.format_temp_filename("123e4567-e89b", "/user/local/downloads/myscore.pdf") == "123e4567-e89b_myscore.pdf"
 
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_add_file_to_piece_scores_and_extras(mock_parse, manager):
     mock_parse.return_value = "1-TEST"
     piece = "1-TEST"
@@ -196,7 +196,7 @@ def test_add_file_to_piece_scores_and_extras(mock_parse, manager):
     assert os.path.exists(os.path.join(manager.archive_path, piece, DIR_EXTRAS, "notes.txt"))
 
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_add_file_to_piece_duplicate_detection_and_overwrite(mock_parse, manager):
     mock_parse.return_value = "1-TEST"
     piece = "1-TEST"
@@ -215,7 +215,7 @@ def test_add_file_to_piece_duplicate_detection_and_overwrite(mock_parse, manager
     assert Path(dest).read_bytes() == b"new"
 
 
-@patch('backend.app.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
+@patch('backend.app.services.files_management.archive_file_manager.ArchiveFileManager.parse_name_to_file_manager')
 def test_add_file_to_piece_write_error(mock_parse, manager):
     mock_parse.return_value = "1-TEST"
     piece = "1-TEST"

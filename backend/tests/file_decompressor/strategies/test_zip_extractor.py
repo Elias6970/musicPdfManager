@@ -1,7 +1,7 @@
 import io
 import zipfile
 import pytest
-from backend.app.massive_import.file_decompressor.strategies.zip_extractor import ZipExtractor
+from backend.app.services.massive_import.file_decompressor.strategies.zip_extractor import ZipExtractor
 
 def create_mock_zip(file_structure: dict) -> io.BytesIO:
     """
