@@ -41,6 +41,9 @@ class MassiveImportView(QtWidgets.QDialog):
         self.confirm_button = QtWidgets.QPushButton(self.tr("Confirm"), self)
         self.confirm_button.clicked.connect(self.confirm_signal.emit)
 
+        self.skip_button = QtWidgets.QPushButton(self.tr("Skip"), self)
+        self.skip_button.clicked.connect(self.reject)
+
         self.progress_bar = QtWidgets.QProgressBar(self)
         self.progress_bar.setValue(0)
         self.progress_bar.setVisible(False)
@@ -49,9 +52,13 @@ class MassiveImportView(QtWidgets.QDialog):
         self.processing_lbl = QtWidgets.QLabel(self.tr("Importing the files into the archive... This can take a few minutes. Please wait."), self)
         self.processing_lbl.setVisible(False)
         
+        _action_btn_layout = QtWidgets.QHBoxLayout()
+        _action_btn_layout.addWidget(self.skip_button)
+        _action_btn_layout.addWidget(self.confirm_button)
+
         self._layout.addLayout(_data_layout)
         self._layout.addLayout(_files_layout)
-        self._layout.addWidget(self.confirm_button)
+        self._layout.addLayout(_action_btn_layout)
         self._layout.addWidget(self.progress_bar)
         self._layout.addWidget(self.processing_lbl)
 

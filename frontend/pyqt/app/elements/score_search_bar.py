@@ -1,4 +1,48 @@
 from PyQt6 import QtWidgets,QtCore, QtGui
+import unicodedata
+
+def strip_accents(text: str) -> str:
+    return ''.join(c for c in unicodedata.normalize('NFD', text) if unicodedata.category(c) != 'Mn')
+
+class AccentInsensitiveProxyModel(QtCore.QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.filter_text = ""
+
+    def setFilterText(self, text: str):
+        self.filter_text = text
+        self.invalidateFilter()
+
+    def filterAcceptsRow(self, source_row: int, source_parent: QtCore.QModelIndex) -> bool:
+        source_model = self.sourceModel()
+        if source_model is None:
+            return False
+        
+        index = source_model.index(source_row, self.filterKeyColumn(), source_parent)
+        data = source_model.data(index, QtCore.Qt.ItemDataRole.DisplayRole)
+        if data is None:
+            return False
+            
+        if not self.filter_text:
+            return True
+            
+        data_stripped = strip_accents(str(data)).lower()
+        search_term_stripped = strip_accents(self.filter_text).lower()
+        
+        return search_term_stripped in data_stripped
+
+class AccentInsensitiveCompleter(QtWidgets.QCompleter):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.proxy_model = AccentInsensitiveProxyModel(self)
+        
+    def setModel(self, c):
+        self.proxy_model.setSourceModel(c)
+        super().setModel(self.proxy_model)
+
+    def splitPath(self, path: str | None) -> list[str]:
+        self.proxy_model.setFilterText(path or "")
+        return [""]
 
 #Search bar + autocompleter that shows the score selected
 class ScoreSearchBar(QtWidgets.QLineEdit):
@@ -12,7 +56,7 @@ class ScoreSearchBar(QtWidgets.QLineEdit):
         self.pieces_parsed_names =  []  # List to hold the names for autocompletion
 
         #Auto Completer
-        self.auto_completer = QtWidgets.QCompleter(self.pieces_parsed_names)
+        self.auto_completer = AccentInsensitiveCompleter(self)
         self.auto_completer.setCaseSensitivity(QtCore.Qt.CaseSensitivity.CaseInsensitive)
         self.auto_completer.setFilterMode(QtCore.Qt.MatchFlag.MatchContains)
         
