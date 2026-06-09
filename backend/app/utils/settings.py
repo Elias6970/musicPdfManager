@@ -22,7 +22,7 @@ class ServerSettings(BaseModel):
     root_user_password: str = "admin"
 
     database_url: str = "sqlite:///data/global.db"
-    archive_root: str = ""
+    archive_root: str = "data/archives"
     
     temp_upload_folder: str = "data/temp_uploads"
     max_upload_size_mb: int = Field(default=100, ge=1)

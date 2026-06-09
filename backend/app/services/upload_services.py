@@ -36,6 +36,7 @@ async def process_upload_stream(request: Request) -> UploadStagingResponse:
     file_uuid = str(uuid.uuid4())
     temp_filename = ArchiveFileManager.format_temp_filename(file_uuid, filename)
     filepath = os.path.join(settings.temp_upload_folder, temp_filename)
+    create_temp_upload_folder() # Ensure temp folder exists before writing
 
     bytes_written = 0
     
@@ -86,6 +87,8 @@ async def process_upload_stream_to_folder_compressed(request: Request, folder_id
     
     if folder_id is None or folder_id.strip() == "" or folder_id == "None":
         folder_id = str(uuid.uuid4())
+    
+    create_temp_upload_folder() # Ensure temp folder exists before writing
 
     piece_folder_name = os.path.splitext(upload_response.original_filename)[0] #Remove extension
     extraction_folder_path = os.path.join(get_server_settings().temp_upload_folder, folder_id, piece_folder_name)
@@ -153,3 +156,8 @@ async def cleanup_temp_uploads_routine():
             pass
             
         await asyncio.sleep(settings.cleanup_uploads_interval_minutes * 60)
+    
+def create_temp_upload_folder():
+    """Ensures the temporary upload folder exists."""
+    settings = get_server_settings()
+    os.makedirs(settings.temp_upload_folder, exist_ok=True)
