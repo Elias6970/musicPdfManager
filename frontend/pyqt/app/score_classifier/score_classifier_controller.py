@@ -211,6 +211,7 @@ class ScoreClassifierController(QtCore.QObject):
             if self.view.keep_rotation_cb.isChecked(): # Keep rotation
                 pixmap = self._rotate(self._last_rotation, self._images_cache[cache_key])
                 self._images_cache[cache_key] = pixmap # Update the cache with the rotated pixmap, so if the user goes back to this page it will be shown with the correct rotation
+                self.pages[index].rotation = self._last_rotation # Update the rotation in the page object, so it can be saved when finishing the classification
             else:
                 pixmap = self._images_cache[cache_key]
             self.view.interactive_previewer.load_img(pixmap)
