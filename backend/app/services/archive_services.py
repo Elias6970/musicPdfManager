@@ -129,7 +129,7 @@ def add_piece_to_archive(
     # Check if name already exists in the archive
     existing_name = session.exec(select(Piece).where(Piece.name == piece.name, Piece.archive_id == piece.archive_id)).first()
     if existing_name:
-        raise PieceNameAlreadyExistsError(f"A piece with name '{piece.name}' already exists in archive {piece.archive_id}.")
+        raise PieceNameAlreadyExistsError(f"A piece with name '{piece.name}' already exists in archive {piece.archive_id} with code {existing_name.cod}.")
 
     #Create directory and copy the files
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
