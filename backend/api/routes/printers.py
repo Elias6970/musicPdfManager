@@ -2,11 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlmodel import Session
 
 from backend.api.dependencies.database import get_session
-from backend.api.dependencies.permissions import require_user
+from backend.api.dependencies.permissions import require_user, require_archive_viewer
+from backend.app.models.catalog_generation_config import CatalogGenerationConfig, CatalogGenerationConfigCreate
 from backend.app.models.user import User
 from backend.app.models.user_archive_link import ArchiveRole
 from backend.app.services.archive_services import check_archive_role
 from backend.app.error import InsufficientPermissionsError, UnresolvedInstrumentsException
+from backend.app.services.catalog_services import generate_pdf_catalog_for_archive
 from backend.app.services.printing_services import process_simple_print_job, process_preset_print_job
 from backend.app.models.printers.jobs.simple_print_job import SimplePrintJob
 from backend.app.models.printers.jobs.preset_print_job import PresetPrintJob, PresetPrintJobPublic, ExportStrategyType
@@ -95,3 +97,15 @@ def preset_print(
     headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
     return Response(content=result_bytes, media_type=media_type, headers=headers)
 
+
+@router.get("/catalog/{archive_id}")
+def get_catalog(
+    archive_id: int,
+    config: CatalogGenerationConfigCreate, 
+    session: Session = Depends(get_session),
+    _: User = Depends(require_archive_viewer)
+):
+    config_obj = CatalogGenerationConfig(**config.model_dump(), archive_id=archive_id)
+    pdf_bytes = generate_pdf_catalog_for_archive(session, config_obj)
+    headers = {"Content-Disposition": 'attachment; filename="catalog.pdf"'}
+    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)

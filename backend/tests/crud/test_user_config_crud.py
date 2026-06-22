@@ -23,7 +23,7 @@ def test_create_user_config_success(mock_session):
         language="en",
         presets_instruments_path="data/presets/instruments",
         presets_pieces_path="data/presets/pieces",
-        dossier_cover_path="data/covers/default.pdf",
+        catalog_cover_path="data/covers/default.pdf",
         user_id=1,
     )
 
@@ -41,7 +41,7 @@ def test_get_user_config_success(mock_session):
         language="es",
         presets_instruments_path="a",
         presets_pieces_path="b",
-        dossier_cover_path="c",
+        catalog_cover_path="c",
         user_id=7,
     )
     mock_session.get.return_value = config
@@ -58,7 +58,7 @@ def test_get_user_config_by_user_id_found(mock_session):
         language="en",
         presets_instruments_path="inst",
         presets_pieces_path="pieces",
-        dossier_cover_path="cover",
+        catalog_cover_path="cover",
         user_id=99,
     )
     exec_result = MagicMock()
@@ -90,7 +90,7 @@ def test_update_user_config_success(mock_session):
         language="en",
         presets_instruments_path="new_inst",
         presets_pieces_path="new_pieces",
-        dossier_cover_path="new_cover",
+        catalog_cover_path="new_cover",
         user_id=5,
     )
 
@@ -108,7 +108,7 @@ def test_delete_user_config_success(mock_session):
         language="en",
         presets_instruments_path="inst",
         presets_pieces_path="pieces",
-        dossier_cover_path="cover",
+        catalog_cover_path="cover",
         user_id=2,
     )
     mock_session.get.return_value = existing

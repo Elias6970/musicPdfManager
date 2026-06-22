@@ -57,10 +57,12 @@ def crop_page_from_corners(page: fitz.Page, corners: List[Tuple[float, float]], 
     """
     Takes a specific page, crops out a specific polygon (corners),
     and returns a new single-page Document containing the extracted crop warped upright.
-     :param page: The fitz.Page object to crop.
-     :param corners: List of 4 [x,y] corndinates percentages relative to the page dimensions. Order should be: Top-Left, Top-Right, Bottom-Right, Bottom-Left
-     :param landscape: Whether the output page should be in landscape orientation (default True). If False, output will be portrait.
-     :return: A new fitz.Page containing the cropped and warped page.
+    Params:
+        page: The fitz.Page object to crop.
+        corners: List of 4 [x,y] coordinates percentages relative to the page dimensions. Order should be: Top-Left, Top-Right, Bottom-Right, Bottom-Left
+        landscape: Whether the output page should be in landscape orientation (default True). If False, output will be portrait.
+    Returns:
+        A new fitz.Page containing the cropped and warped page.
     """
     page_width = page.rect.width
     page_height = page.rect.height

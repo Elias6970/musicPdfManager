@@ -5,14 +5,22 @@ from datetime import datetime
 
 from backend.app.models.piece import Piece
 from backend.app.crud.piece_crud import get_pieces
+from backend.app.models.catalog_generation_config import CatalogGenerationConfigBase
 
-def generate_pdf_catalog_for_archive(session:Session, archive_id: int) -> bytes:
-    pieces = get_pieces(session, archive_id)
-    return generate_pdf_catalog(pieces)
+def generate_pdf_catalog_for_archive(session:Session, config: CatalogGenerationConfigBase) -> bytes:
+    pieces = get_pieces(session, config.archive_id)
+    return generate_pdf_catalog(pieces, config)
 
-def generate_pdf_catalog(pieces: List[Piece], blank_rows: int = 50) -> bytes:
+def generate_pdf_catalog(pieces: List[Piece], config: CatalogGenerationConfigBase) -> bytes:
     """
     Generates a PDF containing a table of pieces sorted alphabetically by name.
+    Args:
+        pieces (List[Piece]): List of Piece objects to include in the catalog.
+        config (CatalogGenerationConfigBase): Configuration for catalog generation, including language and number of blank rows.
+    Returns:
+        bytes: The generated PDF as a byte string.
+    Raises:
+        ValueError: If an unsupported language code is provided in the config.
     """
     doc = fitz.open()
 
@@ -30,7 +38,7 @@ def generate_pdf_catalog(pieces: List[Piece], blank_rows: int = 50) -> bytes:
     PAGE_NUMBER_FONT_SIZE = 12
 
     # Vertical line X positions
-    # Cols: Cod (40), Name (350), Author (200), Type (remaining)
+    # Cols: Cod (40), Name (331 (to be centered)), Author (219), Type (remaining)
     v_lines = [
         MARGIN_LEFT, 
         MARGIN_LEFT + 40, 
@@ -47,8 +55,16 @@ def generate_pdf_catalog(pieces: List[Piece], blank_rows: int = 50) -> bytes:
 
     # Sort pieces alphabetically by name
     sorted_pieces = sorted(pieces, key=lambda p: (p.name or "").lower())
-    headers = ["Cod", "Nombre", "Autor", "Tipo"]
     current_date = datetime.now().strftime("%d/%m/%Y")
+
+    if config.language == "en_US":
+        headers = ["Code", "Name", "Author", "Type"]
+    elif config.language == "ca_VA":
+        headers = ["Codi", "Nom", "Autor", "Tipus"]
+    elif config.language == "es_ES":
+        headers = ["Cod", "Nombre", "Autor", "Tipo"]
+    else:
+        raise ValueError(f"Unsupported language code: {config.language}")
 
     def draw_headers(p, curr_y):
         # Draw top center date in italics ('heit')
@@ -109,7 +125,7 @@ def generate_pdf_catalog(pieces: List[Piece], blank_rows: int = 50) -> bytes:
             page.draw_line(fitz.Point(vx, y - LINE_HEIGHT), fitz.Point(vx, y))
 
     # Add blank rows at the end
-    for _ in range(blank_rows):
+    for _ in range(config.blank_rows):
         # Check if we need to paginate for the blank row
         if y > PAGE_HEIGHT - MARGIN_BOTTOM - LINE_HEIGHT:
             page = doc.new_page(width=PAGE_WIDTH, height=PAGE_HEIGHT)

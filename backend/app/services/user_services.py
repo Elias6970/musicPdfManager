@@ -95,13 +95,13 @@ def get_user_presets_pieces_path(session: Session, user_id: int) -> str:
     return os.path.join(settings.base_presets_pieces_path, user_config.presets_pieces_path)
 
 
-def get_user_dossier_cover_path(session: Session, user_id: int) -> str:
+def get_user_catalog_cover_path(session: Session, user_id: int) -> str:
     user_config = get_user_config_by_user_id(session, user_id=user_id)
     if not user_config:
         raise InvalidUserDataError("User config not found")
 
     settings = get_server_settings()
-    return os.path.join(settings.base_dossier_cover_path, user_config.dossier_cover_path)
+    return os.path.join(settings.base_catalog_cover_path, user_config.catalog_cover_path)
 
 
 def check_user_role(session: Session, user_id: int, allowed_roles: list[str]) -> User:

@@ -57,7 +57,7 @@ def test_create_and_get_user_config(session: Session):
             language="en",
             presets_instruments_path="data/presets/instruments",
             presets_pieces_path="data/presets/pieces",
-            dossier_cover_path="data/covers/default.pdf",
+            catalog_cover_path="data/covers/default.pdf",
             user_id=user.id,
         ),
     )
@@ -81,7 +81,7 @@ def test_update_user_config_persists_changes(session: Session):
             language="es",
             presets_instruments_path="old_inst",
             presets_pieces_path="old_pieces",
-            dossier_cover_path="old_cover",
+            catalog_cover_path="old_cover",
             user_id=user.id,
         ),
     )
@@ -89,7 +89,7 @@ def test_update_user_config_persists_changes(session: Session):
     created.language = "en"
     created.presets_instruments_path = "new_inst"
     created.presets_pieces_path = "new_pieces"
-    created.dossier_cover_path = "new_cover"
+    created.catalog_cover_path = "new_cover"
 
     updated = update_user_config(session, created)
 
@@ -97,7 +97,7 @@ def test_update_user_config_persists_changes(session: Session):
     assert updated.language == "en"
     assert updated.presets_instruments_path == "new_inst"
     assert updated.presets_pieces_path == "new_pieces"
-    assert updated.dossier_cover_path == "new_cover"
+    assert updated.catalog_cover_path == "new_cover"
 
     persisted = get_user_config(session, created.id)
     assert persisted is not None
@@ -112,7 +112,7 @@ def test_delete_user_config_removes_row(session: Session):
             language="en",
             presets_instruments_path="inst",
             presets_pieces_path="pieces",
-            dossier_cover_path="cover",
+            catalog_cover_path="cover",
             user_id=user.id,
         ),
     )
@@ -132,7 +132,7 @@ def test_create_user_config_requires_existing_user(session: Session):
                 language="en",
                 presets_instruments_path="inst",
                 presets_pieces_path="pieces",
-                dossier_cover_path="cover",
+                catalog_cover_path="cover",
                 user_id=999999,
             ),
         )

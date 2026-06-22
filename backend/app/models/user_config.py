@@ -10,7 +10,7 @@ class UserConfig(UserConfigBase, table=True):
     user_id: int = Field(foreign_key="user.id")
     presets_instruments_path: str
     presets_pieces_path: str
-    dossier_cover_path: str
+    catalog_cover_path: str
 
 class UserConfigCreatePublic(UserConfigBase):
     pass

@@ -123,8 +123,8 @@ class ArchiveFileManager:
         
         return False
     
-    
-    def move_files(self,path:str,new_path:str) -> str:
+    @staticmethod
+    def move_files(path:str,new_path:str) -> str:
         """
         Move a file, files of folder from path to new_path
         Returns the new path if the file was moved successfully
@@ -141,6 +141,25 @@ class ArchiveFileManager:
         
         return ""
 
+    @staticmethod
+    def move_catalog_cover_from_temp(source_path:str, new_path:str) -> str:
+        """
+        Move a catalog cover from the temporary upload folder to the catalog cover folder.
+        Returns the new path if the file was moved successfully
+        If the file is already in the new path, it returns the same path
+        If the file couldn't be moved, it returns an empty string
+        """
+        try:
+            new_name = ArchiveFileManager.extract_original_filename(source_path)
+            new_path = os.path.join(new_path, new_name)
+            shutil.move(source_path,new_path)
+            return new_path
+        
+        except Exception as e:
+            if source_path == new_path: # if the name is the same
+                return source_path
+        
+        return ""
 
     
     def _get_file_names(self,path:str) -> list[str]:

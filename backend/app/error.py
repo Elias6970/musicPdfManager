@@ -53,3 +53,6 @@ class RoleNameAlreadyExistsError(Exception):
 
 class RoleNotFoundError(Exception):
     pass
+
+class MovingTheCoverFileError(Exception):
+    pass

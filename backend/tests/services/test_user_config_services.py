@@ -30,7 +30,7 @@ def test_create_user_config(mock_crud, mock_session):
         user_id=1,
         presets_instruments_path="mock.json",
         presets_pieces_path="mock.json",
-        dossier_cover_path="mock.json"
+        catalog_cover_path="mock.json"
     )
     mock_crud.create_user_config.return_value = expected_returned_config
 
@@ -47,14 +47,14 @@ def test_create_user_config(mock_crud, mock_session):
     assert db_obj_passed.user_id == 1
     assert db_obj_passed.presets_instruments_path.endswith(".json")
     assert db_obj_passed.presets_pieces_path.endswith(".json")
-    assert db_obj_passed.dossier_cover_path.endswith(".json")
+    assert db_obj_passed.catalog_cover_path.endswith(".json")
 
 
 @patch("backend.app.services.user_config_services.user_config_crud")
 def test_get_user_config(mock_crud, mock_session):
     expected_config = UserConfig(
         id=1, language="en", user_id=1, 
-        presets_instruments_path="a", presets_pieces_path="b", dossier_cover_path="c"
+        presets_instruments_path="a", presets_pieces_path="b", catalog_cover_path="c"
     )
     mock_crud.get_user_config.return_value = expected_config
 
@@ -68,7 +68,7 @@ def test_get_user_config(mock_crud, mock_session):
 def test_get_user_config_by_user_id(mock_crud, mock_session):
     expected_config = UserConfig(
         id=2, language="es", user_id=99,
-        presets_instruments_path="a", presets_pieces_path="b", dossier_cover_path="c"
+        presets_instruments_path="a", presets_pieces_path="b", catalog_cover_path="c"
     )
     mock_crud.get_user_config_by_user_id.return_value = expected_config
 
@@ -86,7 +86,7 @@ def test_update_user_config_success(mock_crud, mock_session):
         user_id=5,
         presets_instruments_path="inst.json",
         presets_pieces_path="pieces.json",
-        dossier_cover_path="cover.json"
+        catalog_cover_path="cover.json"
     )
     mock_crud.get_user_config.return_value = existing_db_obj
     mock_crud.update_user_config.return_value = existing_db_obj

@@ -20,8 +20,9 @@ from backend.app.services.user_config_services import (
     get_user_config_by_user_id,
     update_user_config as _update_user_config
 )
+from backend.app.services.catalog_cover_services import save_catalog_cover
 
-from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError
+from backend.app.error import EmailAlreadyRegisteredError, InvalidCredentialsError, InvalidUserDataError, MovingTheCoverFileError
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -110,3 +111,19 @@ def update_user_config(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User config not found during update")
     
     return UserConfigPublic.model_validate(updated_config, update={"is_admin": _is_admin(session, current_user)})
+
+@router.post("/catalog-cover/{file_id}")
+def update_catalog_cover(
+    file_id: str,
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    try:
+        success = save_catalog_cover(session, current_user.id, file_id)  # type: ignore
+        return {"success": success}
+    except InvalidUserDataError as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except MovingTheCoverFileError as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+

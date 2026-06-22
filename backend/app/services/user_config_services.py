@@ -12,7 +12,7 @@ def create_user_config(session: Session, user_config_in: UserConfigCreate) -> Us
     db_obj = UserConfig(**user_config_in.model_dump(),
                         presets_instruments_path=f"{uuid4()}.json",
                         presets_pieces_path=f"{uuid4()}.json",
-                        dossier_cover_path=f"{uuid4()}.json",
+                        catalog_cover_path="",
             )
     
     # Delegate to CRUD layer

@@ -8,7 +8,7 @@ from backend.app.services.user_services import (
     register_user,
     get_user_presets_instruments_path,
     get_user_presets_pieces_path,
-    get_user_dossier_cover_path,
+    get_user_catalog_cover_path,
 )
 from backend.app.models.token import Token
 from backend.app.models.user import UserCreate
@@ -236,9 +236,9 @@ def test_register_user_default_role_assigned(
             "presets_pieces_path",
         ),
         (
-            get_user_dossier_cover_path,
-            "base_dossier_cover_path",
-            "dossier_cover_path",
+            get_user_catalog_cover_path,
+            "base_catalog_cover_path",
+            "catalog_cover_path",
         ),
     ],
 )
@@ -273,7 +273,7 @@ def test_get_user_paths_success(service_fn, base_attr, user_attr, mock_session):
     [
         get_user_presets_instruments_path,
         get_user_presets_pieces_path,
-        get_user_dossier_cover_path,
+        get_user_catalog_cover_path,
     ],
 )
 def test_get_user_paths_user_config_not_found_raises(service_fn, mock_session):

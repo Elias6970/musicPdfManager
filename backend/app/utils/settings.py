@@ -38,7 +38,7 @@ class ServerSettings(BaseModel):
     
     base_presets_instruments_path: str = "data/presets/instruments"
     base_presets_pieces_path: str = "data/presets/pieces"
-    base_dossier_cover_path: str = "data/dossier_covers"
+    base_catalog_cover_path: str = "data/catalog_covers"
 
     instruments_names_file: str = "data/instruments.json"
     instruments_order_file: str = "data/instruments_order.txt"
