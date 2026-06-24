@@ -1,4 +1,5 @@
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt6.QtCore import QObject, Qt
 from PyQt6.QtWidgets import QFileDialog, QApplication, QMessageBox
 
@@ -83,13 +84,23 @@ class CreatePieceController(QObject):
         
         try:
             file_ids = []
-            for file_path in form_data["files"]:
-                print(f"Uploading {file_path}...")
-                response = self.uploads_api_client.upload_file_to_staging(file_path)
-                if response:
-                    file_ids.append(response.file_id)
-                else:
-                    raise Exception(f"Failed to upload file: {file_path}")
+            if form_data["files"]:
+                with ThreadPoolExecutor() as executor:
+                    future_to_path = {
+                        executor.submit(self.uploads_api_client.upload_file_to_staging, file_path): file_path
+                        for file_path in form_data["files"]
+                    }
+                    for future in as_completed(future_to_path):
+                        file_path = future_to_path[future]
+                        print(f"Waiting for upload response of {file_path}...")
+                        try:
+                            response = future.result()
+                            if response:
+                                file_ids.append(response.file_id)
+                            else:
+                                raise Exception(f"Failed to upload file no response: {file_path}")
+                        except Exception as exc:
+                            raise Exception(f"Failed to upload file {file_path}: {exc}")
 
             # Check Author against known list
             author_input_text = str(form_data["author"]).strip()
