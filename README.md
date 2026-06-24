@@ -21,7 +21,8 @@ The system is divided into two parts: the backend server and the frontend client
    - Linux/macOS: `python -m venv venv && source venv/bin/activate`
    - Windows: `python -m venv venv` and `.\venv\Scripts\Activate.ps1`
 3. Install dependencies: `pip install -r backend/requirements.txt`
-4. Run the server: `python backend/main.py` (or start via standard framework commands).
+4. Move to backend folder: `cd backend`
+5. Run the server: `fastapi dev main.py`. You can run it also using uvicorn
 
 ### Client Installation
 1. Open a new terminal and navigate to the frontend folder: `cd frontend/pyqt`
