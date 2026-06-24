@@ -1,5 +1,6 @@
 from PyQt6 import QtCore, QtWidgets
 import zipfile, io, os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.api_client.base_api_client_factory import get_base_client
 from app.api_client.massive_import_api_client import MassiveImportApiClient
@@ -103,22 +104,55 @@ class MassiveImportController(QtCore.QObject):
         return None
     
     def upload_archive(self, archive_path:str):
-        self.total_pieces = len(os.listdir(archive_path)) #It is inprecise because it counts folders as pieces, but it is just for progress tracking, so it is good enough.
-         
-        for i in os.listdir(archive_path):
-            if os.path.isdir(os.path.join(archive_path, i)):
-                file_name, zip_data = self._compress_folder_to_zip(os.path.join(archive_path, i))
-                file_name = f"{file_name}.zip" # The backend expects a zip file, so we add the extension to the original folder name.
-                response = self.upload_api_client.upload_folder_to_staging(
-                    filename=file_name, 
-                    data=zip_data, 
-                    folder_id=self.folder_id
+        directories = [os.path.join(archive_path, i) for i in os.listdir(archive_path) if os.path.isdir(os.path.join(archive_path, i))]
+        self.total_pieces = len(directories) # More precise now since we only count directories
+
+        if not directories:
+            return
+
+        # Upload the first directory sequentially to establish the folder_id
+        first_dir = directories[0]
+        file_name, zip_data = self._compress_folder_to_zip(first_dir)
+        file_name = f"{file_name}.zip"
+        response = self.upload_api_client.upload_folder_to_staging(
+            filename=file_name, 
+            data=zip_data, 
+            folder_id=self.folder_id
+        )
+        if response:
+            self.folder_id = response.folder_id # Set the folder_id for the next uploads
+            self.imported_pieces += 1
+            print(f"Uploaded {response.original_filename} to staging folder {self.folder_id}. Progress: {self.imported_pieces}/{self.total_pieces} ({(self.imported_pieces/self.total_pieces)*100:.2f}%)")
+            self.view.set_progress(int((self.imported_pieces/self.total_pieces)*100))
+        
+        # Upload the rest in parallel using the obtained folder_id
+        remaining_dirs = directories[1:]
+        if remaining_dirs:
+            def upload_dir(dir_path, folder_id):
+                f_name, z_data = self._compress_folder_to_zip(dir_path)
+                f_name = f"{f_name}.zip" # The backend expects a zip file
+                return self.upload_api_client.upload_folder_to_staging(
+                    filename=f_name, 
+                    data=z_data, 
+                    folder_id=folder_id
                 )
-                if response:
-                    self.folder_id = response.folder_id # Set the folder_id for the next uploads, so all the pieces in the archive are uploaded to the same staging folder.
-                    self.imported_pieces += 1
-                    print(f"Uploaded {response.original_filename} to staging folder {self.folder_id}. Progress: {self.imported_pieces}/{self.total_pieces} ({(self.imported_pieces/self.total_pieces)*100:.2f}%)")
-                    self.view.set_progress(int((self.imported_pieces/self.total_pieces)*100))
+            
+            with ThreadPoolExecutor() as executor:
+                future_to_dir = {
+                    executor.submit(upload_dir, d, self.folder_id): d
+                    for d in remaining_dirs
+                }
+                
+                for future in as_completed(future_to_dir):
+                    dir_path = future_to_dir[future]
+                    try:
+                        resp = future.result()
+                        if resp:
+                            self.imported_pieces += 1
+                            print(f"Uploaded {resp.original_filename} to staging folder {self.folder_id}. Progress: {self.imported_pieces}/{self.total_pieces} ({(self.imported_pieces/self.total_pieces)*100:.2f}%)")
+                            self.view.set_progress(int((self.imported_pieces/self.total_pieces)*100))
+                    except Exception as e:
+                        print(f"Failed to upload directory {dir_path}: {e}")
     
     
     def _compress_folder_to_zip(self, folder_path: str) -> tuple[str, bytes]:
