@@ -1,5 +1,5 @@
 from PyQt6 import QtCore, QtWidgets
-import zipfile, io, os
+import zipfile, io, os, threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from app.api_client.base_api_client_factory import get_base_client
@@ -11,6 +11,10 @@ from app.pop_up_windows.massive_import_result_window import MassiveImportResultW
 from app.pop_up_windows.error.error_window import ShowError
 
 class MassiveImportController(QtCore.QObject):
+    upload_progress_signal = QtCore.pyqtSignal(int)
+    upload_finished_signal = QtCore.pyqtSignal(str)
+    upload_finished_noarg_signal = QtCore.pyqtSignal()
+    upload_error_signal = QtCore.pyqtSignal(str)
     
     def __init__(self, view: MassiveImportView, archive: ArchivePublic, parent=None):
         super().__init__(parent)
@@ -20,6 +24,8 @@ class MassiveImportController(QtCore.QObject):
         # Progress tracking variables
         self.total_pieces:int = 0
         self.imported_pieces:int = 0
+
+        self._uploaded_excel_file_id:str|None = None # The file_id of the uploaded data file in staging, used for the import call.
        
         self.folder_id:str|None = None # Folder id for staging for all the pieces in the archive
         
@@ -30,6 +36,12 @@ class MassiveImportController(QtCore.QObject):
         self.massive_import_api_client = MassiveImportApiClient(get_base_client())
         self.massive_import_api_client.make_import_success.connect(self._on_make_import_success)
         self.massive_import_api_client.make_import_error.connect(self._on_make_import_error)
+
+        # Connect internal upload signals to view and handlers
+        self.upload_progress_signal.connect(self.view.set_progress)
+        self.upload_finished_noarg_signal.connect(self.view.set_finished_uploading)
+        self.upload_finished_signal.connect(self._on_upload_finished)
+        self.upload_error_signal.connect(lambda e: QtWidgets.QMessageBox.critical(self.view, self.tr("Error"), self.tr(f"Failed to upload the archive files: {e}")))
 
         self.view.import_data_file_signal.connect(self._on_import_data_file_clicked)
         self.view.import_archive_signal.connect(self._on_import_clicked)
@@ -67,19 +79,10 @@ class MassiveImportController(QtCore.QObject):
         if not data_file_id:
             QtWidgets.QMessageBox.critical(self.view, self.tr("Error"), self.tr("Failed to upload the data file. Please try again."))
             return
-        
-        self.upload_archive(self.import_folder_path)
-        self.view.set_finished_uploading()
-
-        if not self.folder_id:
-            QtWidgets.QMessageBox.critical(self.view, self.tr("Error"), self.tr("Failed to upload the archive files. Please try again."))
-            return
-        
-        self.massive_import_api_client.make_import(
-            archive_id=self.archive.id,
-            excel_name_path=data_file_id,
-            archive_name_path=self.folder_id
-        )
+        # Start the (potentially long-running) archive upload in a background thread.
+        # When finished the `upload_finished_signal` will trigger the import call.
+        self._uploaded_excel_file_id = data_file_id
+        self.start_upload_archive(self.import_folder_path)
 
     def _on_make_import_success(self, response: MassiveImportResponse):
         result_window = MassiveImportResultWindow(
@@ -103,7 +106,24 @@ class MassiveImportController(QtCore.QObject):
             return response.file_id
         return None
     
-    def upload_archive(self, archive_path:str):
+    def start_upload_archive(self, archive_path: str):
+        """Start uploading the archive in a background thread."""
+        if not archive_path:
+            return
+        thread = threading.Thread(target=self._upload_archive_background, args=(archive_path,), daemon=True)
+        thread.start()
+
+    def _upload_archive_background(self, archive_path: str):
+        """Background wrapper that runs the upload and emits signals."""
+        try:
+            self._upload_archive_task(archive_path)
+            # emit finished with folder_id (or empty string on failure)
+            self.upload_finished_signal.emit(self.folder_id or "")
+            self.upload_finished_noarg_signal.emit()
+        except Exception as e:
+            self.upload_error_signal.emit(str(e))
+
+    def _upload_archive_task(self, archive_path: str):
         directories = [os.path.join(archive_path, i) for i in os.listdir(archive_path) if os.path.isdir(os.path.join(archive_path, i))]
         self.total_pieces = len(directories) # More precise now since we only count directories
 
@@ -123,7 +143,7 @@ class MassiveImportController(QtCore.QObject):
             self.folder_id = response.folder_id # Set the folder_id for the next uploads
             self.imported_pieces += 1
             print(f"Uploaded {response.original_filename} to staging folder {self.folder_id}. Progress: {self.imported_pieces}/{self.total_pieces} ({(self.imported_pieces/self.total_pieces)*100:.2f}%)")
-            self.view.set_progress(int((self.imported_pieces/self.total_pieces)*100))
+            self.upload_progress_signal.emit(int((self.imported_pieces/self.total_pieces)*100))
         
         # Upload the rest in parallel using the obtained folder_id
         remaining_dirs = directories[1:]
@@ -150,7 +170,7 @@ class MassiveImportController(QtCore.QObject):
                         if resp:
                             self.imported_pieces += 1
                             print(f"Uploaded {resp.original_filename} to staging folder {self.folder_id}. Progress: {self.imported_pieces}/{self.total_pieces} ({(self.imported_pieces/self.total_pieces)*100:.2f}%)")
-                            self.view.set_progress(int((self.imported_pieces/self.total_pieces)*100))
+                            self.upload_progress_signal.emit(int((self.imported_pieces/self.total_pieces)*100))
                     except Exception as e:
                         print(f"Failed to upload directory {dir_path}: {e}")
     
@@ -180,3 +200,19 @@ class MassiveImportController(QtCore.QObject):
         self.total_pieces = 0
         self.imported_pieces = 0
         self.folder_id = None
+
+    def _on_upload_finished(self, folder_id: str):
+        """Handler called when upload finishes; triggers the massive import using the previously uploaded data file id."""
+        if not folder_id:
+            QtWidgets.QMessageBox.critical(self.view, self.tr("Error"), self.tr("Failed to upload the archive files. Please try again."))
+            return
+        if not self._uploaded_excel_file_id:
+            QtWidgets.QMessageBox.critical(self.view, self.tr("Error"), self.tr("Data file ID is missing. Cannot proceed with import."))
+            return
+        
+        # call make_import now that we have folder_id and previously uploaded excel id
+        self.massive_import_api_client.make_import(
+            archive_id=self.archive.id,
+            excel_name_path=self._uploaded_excel_file_id,
+            archive_name_path=folder_id
+        )

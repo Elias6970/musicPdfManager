@@ -9,12 +9,11 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir -p backend/ 
 
-COPY __init__.py backend/
-COPY main.py backend/
-COPY tests backend/tests
-COPY api backend/api
-COPY app backend/app
+COPY __init__.py .
+COPY main.py .
+COPY tests tests
+COPY api api
+COPY app app
 
-CMD ["fastapi", "dev", "backend/main.py", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["fastapi", "dev", "main.py", "--host", "0.0.0.0", "--port", "8000"]

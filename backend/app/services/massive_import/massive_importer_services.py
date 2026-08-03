@@ -48,9 +48,21 @@ def massive_import(
     not_added_pieces: list[tuple[str, str]] = [] # List of tuples with the code, name and error for the pieces that could not be created
     settings = get_server_settings()
     temp_folder = settings.temp_upload_folder
+    archive_root_path = os.path.join(temp_folder, archive_name_path)
 
     data = read_data(file=os.path.join(temp_folder, excel_name_path), 
                       ignore_first_row=ignore_first_excel_row)
+
+    archive_piece_folders: dict[int, str] = {}
+    if os.path.isdir(archive_root_path):
+        for folder_name in os.listdir(archive_root_path):
+            folder_path = os.path.join(archive_root_path, folder_name)
+            if not os.path.isdir(folder_path):
+                continue
+
+            folder_code = folder_name.split("-", 1)[0]
+            if folder_code.isdigit():
+                archive_piece_folders.setdefault(int(folder_code), folder_path)
     
     for cod, name, author, type in data:
         piece = PieceCreate(
@@ -73,15 +85,10 @@ def massive_import(
             continue
 
         if piece_added is not None and piece_added.id is not None:
-            archive_piece_folder = None
-            for i in os.listdir(os.path.join(temp_folder, archive_name_path)):
-                file_path = os.path.join(temp_folder, archive_name_path, i)
-                if os.path.isdir(file_path) and os.path.basename(i).startswith(str(cod)):
-                    archive_piece_folder = file_path
-                    break # Only detect the first folder that match with the code
+            archive_piece_folder = archive_piece_folders.get(cod)
 
             if not archive_piece_folder:
-                print(f"No folder found in the archive for piece {piece_added.std_name}. Skipping file import for this piece.")
+                print(f"No folder found in the archive for piece {piece_added.std_name}. Skipping files import.")
                 pieces_without_files.append(piece_added)
                 continue
             full_added_pieces.append(piece_added)
@@ -93,7 +100,7 @@ def massive_import(
                     
                     for filename in files:
                         file_path = os.path.join(root, filename)
-                        if os.path.isfile(file_path) and not filename in [".DS_Store"] and not filename.startswith(("._", ".Spotlight")):
+                        if not filename in [".DS_Store"] and not filename.startswith(("._", ".Spotlight")):
                             for file_name, file_bytes in extract_nested_archives_in_memory(file_path, file_path): # It need the path not the name because it needs to read the file
                                 try:
                                     add_file_to_existing_piece(
