@@ -70,11 +70,11 @@ def _preprocess_preset_print_job(session: Session,
             #Direct assign
             if instrument in scores:
                 solved_file = instrument+".pdf"
-            
-            #Other options
-            for other_option in preset.instruments[instrument].other_options: 
-                if other_option in scores:
-                    solved_file = other_option+".pdf"
+            else:
+                #Other options
+                for other_option in preset.instruments[instrument].other_options: 
+                    if other_option in scores:
+                        solved_file = other_option+".pdf"
         
             
             if not solved_file:

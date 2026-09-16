@@ -10,6 +10,10 @@ from app.models.generated_models import ArchivePublic, MassiveImportResponse
 from app.pop_up_windows.massive_import_result_window import MassiveImportResultWindow
 from app.pop_up_windows.error.error_window import ShowError
 
+
+MAX_PARALLEL_ARCHIVE_UPLOADS = 3
+
+
 class MassiveImportController(QtCore.QObject):
     upload_progress_signal = QtCore.pyqtSignal(int)
     upload_finished_signal = QtCore.pyqtSignal(str)
@@ -157,7 +161,7 @@ class MassiveImportController(QtCore.QObject):
                     folder_id=folder_id
                 )
             
-            with ThreadPoolExecutor() as executor:
+            with ThreadPoolExecutor(max_workers=MAX_PARALLEL_ARCHIVE_UPLOADS) as executor:
                 future_to_dir = {
                     executor.submit(upload_dir, d, self.folder_id): d
                     for d in remaining_dirs

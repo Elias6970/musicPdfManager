@@ -13,6 +13,7 @@ from backend.app.services.instruments_preset_service import get_preset
 from backend.app.constants.constants import DIR_SCORES
 from backend.app.utils.name_manager import NameManager
 from backend.app.services.preset_preprocessing_services import _preprocess_preset_print_job
+from unidecode import unidecode
 import os, fitz
 
 def process_simple_print_job(session: Session, job: SimplePrintJob) -> bytes:
@@ -67,8 +68,8 @@ def process_preset_print_job(session: Session, job: PresetPrintJob) -> bytes:
 
     #Sort the pieces list
     if job.config.sorted_export:
-         job.pieces.sort(key=lambda x: NameManager.get_name(x.std_name).lower())
-         
+         job.pieces.sort(key=lambda x: unidecode(NameManager.get_name(x.std_name)).casefold())
+
     #Check all the files to found the unresolved instruments of the preset
     solved, unresolved = _preprocess_preset_print_job(session, job, preset)
     

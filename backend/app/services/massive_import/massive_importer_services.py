@@ -65,6 +65,11 @@ def massive_import(
                 archive_piece_folders.setdefault(int(folder_code), folder_path)
     
     for cod, name, author, type in data:
+        if not cod or not name or name.strip() == "":
+            if author or type: # Add it only if it seems an error in the data
+                not_added_pieces.append((str(cod)+"-"+name, "Missing cod or name in the Excel file"))
+            continue  # Skip rows with both cod and name missing
+
         piece = PieceCreate(
             archive_id=archive_id,
             cod=cod, 
