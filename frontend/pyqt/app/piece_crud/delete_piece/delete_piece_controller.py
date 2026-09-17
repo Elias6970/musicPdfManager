@@ -72,6 +72,8 @@ class DeletePieceController(QtCore.QObject):
         print("Piece deleted successfully.")
         QtWidgets.QMessageBox.information(self.view, self.tr("Success"), self.tr("Piece deleted successfully."))
         #self.view.accept()
+        # Remove the deleted piece from the combobox
+        self.view.remove_piece_from_combobox(piece_id)
 
     def _on_delete_error(self, error: str):
         QtWidgets.QMessageBox.critical(self.view, self.tr("Error"), f"Failed to delete piece: {error}")

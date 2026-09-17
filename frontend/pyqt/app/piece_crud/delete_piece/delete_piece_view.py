@@ -34,3 +34,10 @@ class DeletePieceView(QtWidgets.QDialog):
         self.main_layout.addWidget(self.piece_combobox)
         self.main_layout.addStretch()
         self.main_layout.addLayout(self.button_layout)
+
+    def remove_piece_from_combobox(self, piece_id: int):
+        """Remove a piece from the combobox by its ID."""
+        for index in range(self.piece_combobox.count()):
+            if self.piece_combobox.itemData(index) == piece_id:
+                self.piece_combobox.removeItem(index)
+                break
