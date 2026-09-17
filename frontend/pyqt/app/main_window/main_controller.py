@@ -211,9 +211,11 @@ class MainController(QtCore.QObject):
 
 
     def save_pieces_preset(self):
-        """Saves the pieces preset with the given name"""
+        """
+        Saves the pieces preset with the given name. 
+        The list is updated after saving the preset
+        """
         self.multiple_selection_controller.save_pieces_preset()
-        self.multiple_selection_controller.get_pieces_presets_names() #To update the pieces presets names in the menu when a new preset is created
 
 
     def update_pieces_presets_menu_list(self, preset_names:list[str]):

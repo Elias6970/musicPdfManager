@@ -390,7 +390,8 @@ class MultipleSelectionController(QObject):
         It receives the saved preset and updates the view.
         """
         self.view.show_message(self.tr("Preset saved successfully!"), self.tr(f"Preset saved: {preset['name']}"))
-
+        self.get_pieces_presets_names() #To update the pieces presets names in the menu when a new preset is created
+    
     def refresh(self):
         """
         Refresh the view to the initial state.
