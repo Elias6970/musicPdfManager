@@ -51,7 +51,8 @@ class MainController(QtCore.QObject):
 
         self.archive_api_client = ArchivesApiClient(get_base_client(), self)
         self.archive_api_client.get_all_archives_success.connect(self._on_get_all_archives_success)
-        
+        self.is_after_logging_setup = False
+
         self._previous_archive_index = -1    
         self.is_admin = False
         self.individual_selection_controller = IndividualSelectionController(self.view.individual_selection_window)
@@ -104,11 +105,10 @@ class MainController(QtCore.QObject):
     def _after_login_setup(self):
         """Setup the archives and the presets (user related data)"""
         self._previous_archive_index = -1
-        self.archive_api_client.get_all_archives()    
+        self.archive_api_client.get_all_archives()
 
-        #Refresh the selectors to load the data of the first archive
-        self.individual_selection_controller.refresh()
-        self.multiple_selection_controller.refresh()
+        # The selectors are refreshed after the archives are loaded
+        self.is_after_logging_setup = True
 
     def logout(self):
         """Logout the user and show the login window"""
@@ -161,6 +161,11 @@ class MainController(QtCore.QObject):
             
         self.view.archive_combobox.setEnabled(True)
         self.view.archive_combobox.blockSignals(False)
+
+        if self.is_after_logging_setup:
+            #Refresh the selectors to load the data of the first archive
+            self.individual_selection_controller.refresh()
+            self.multiple_selection_controller.refresh()
 
     def _on_archive_combobox_changed(self, index: int):
         """Prompt to change the archive and clear progress."""
