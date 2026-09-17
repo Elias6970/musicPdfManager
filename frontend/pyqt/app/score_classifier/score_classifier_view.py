@@ -171,6 +171,14 @@ class ScoreClassifierView(QtWidgets.QDialog):
         self.btn_next.setText(self.tr("Continue"))
         self.btn_next.setStyleSheet("")
 
+    def block_continue_btn(self):
+        """Block the continue button, preventing the user from proceeding to the next score."""
+        self.btn_next.setEnabled(False)
+
+    def unblock_continue_btn(self):
+        """Unblock the continue button, allowing the user to proceed to the next score."""
+        self.btn_next.setEnabled(True)
+
     def clear_line_edit(self):
         self.line_edit.clear()
 

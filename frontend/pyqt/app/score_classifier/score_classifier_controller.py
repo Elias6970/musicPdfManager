@@ -18,6 +18,7 @@ class ScoreClassifierController(QtCore.QObject):
     DPI = 150
     _LOAD_SHORTCUTS = "load_shortcuts"
     _LOAD_PAGES = "load_first_page"
+    _INVALID_INPUT = "Invalid characters"
 
     def __init__(self, view: ScoreClassifierView, piece_std_name: str, scores_and_page_counts: list[tuple[str,int]] = []):
         """
@@ -70,7 +71,7 @@ class ScoreClassifierController(QtCore.QObject):
         
         self.load_image_page(self.current_score_index) # Load the first page
         if len(self.pages) > 1:
-            self.load_image_page(self.current_score_index+1) # Preload the second page for smoother navigation
+            self.load_image_page(self.current_score_index+1, display=False) # Preload the second page for smoother navigation
 
 
     def _create_pages_from_scores(self, scores_and_page_counts: list[tuple[str,int]]) -> list[SourcePageWithResolution]:
@@ -109,7 +110,7 @@ class ScoreClassifierController(QtCore.QObject):
 
         if self.current_score_index < len(self.pages) - 1:
             self.load_image_page(self.current_score_index+1)
-            self.load_image_page(self.current_score_index+2) # Preload the next page for smoother navigation
+            self.load_image_page(self.current_score_index+2, display=False) # Preload the next page for smoother navigation
             self.current_score_index += 1
             self.view.change_to_continue_btn() # In case the button was changed to finish in the previous page, change it back to continue
             self.view.clear_line_edit() # Clear the line edit for the next input
@@ -192,11 +193,12 @@ class ScoreClassifierController(QtCore.QObject):
         """Handle unexpected errors during classification by showing an error message to the user."""
         QtWidgets.QMessageBox.critical(self.view, self.view.tr("Error"), self.view.tr(f"An error occurred while finishing the classification: {error}"))
 
-    def load_image_page(self, index: int):
+    def load_image_page(self, index: int, display: bool = True):
         """
         Load the image for the given page index.
         Args:
             index (int): The index of the page to load in the pages list.
+            display (bool): Whether to display the page immediately, or only preload it.
         """
         if index < 0 or index >= len(self.pages):
             return
@@ -214,7 +216,8 @@ class ScoreClassifierController(QtCore.QObject):
                 self.pages[index].rotation = self._last_rotation # Update the rotation in the page object, so it can be saved when finishing the classification
             else:
                 pixmap = self._images_cache[cache_key]
-            self.view.interactive_previewer.load_img(pixmap)
+            if display:
+                self.view.interactive_previewer.load_img(pixmap)
         else:
             self.preview_api_client.fetch_preview(self.archive_id, self.piece_std_name, page.file_name, page.page, self.DPI, abort_previous=False)
 
@@ -270,11 +273,18 @@ class ScoreClassifierController(QtCore.QObject):
             else:
                 return self.text_analizer.analyze(text)
         except ValueError:
-            return self.view.tr("Invalid characters.")
+            return self._INVALID_INPUT
         
     def update_interpreted_instrument_label(self, text:str):
         """Update the interpreted instrument label in real time as the user types in the line edit."""
-        self.view.interpreted_instrument_lbl.setText(self.get_instrument_from_input(text))
+        instrument = self.get_instrument_from_input(text)
+        # We don't block with None becasue we want to show the pop up in next_page function to be more responsive
+        if instrument != None and instrument == self._INVALID_INPUT:
+            self.view.interpreted_instrument_lbl.setText(self.view.tr(self._INVALID_INPUT))
+            self.view.block_continue_btn()
+        else:
+            self.view.interpreted_instrument_lbl.setText(self.get_instrument_from_input(text))
+            self.view.unblock_continue_btn()
     
 
     def _rotate(self, angle: int, pixmap: QtGui.QPixmap) -> QtGui.QPixmap:
