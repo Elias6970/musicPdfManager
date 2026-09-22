@@ -73,6 +73,15 @@ class ScoreClassifierView(QtWidgets.QDialog):
         self.btn_next.clicked.connect(lambda: self.continue_btn_signal.emit(self.line_edit.text(), 
                                                                        self.keep_rotation_cb.isChecked(),
                                                                        self.interactive_previewer.get_rectangle_corners()))
+
+        # Shortcuts for the next button to continue classifiying (Enter and Return keys)
+        self.next_page_shortcut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Return), self)
+        self.next_page_shortcut.setContext(QtCore.Qt.ShortcutContext.WindowShortcut)
+        self.next_page_shortcut.activated.connect(self.btn_next.click)
+        self.next_page_keypad_shortcut = QtGui.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key.Key_Enter), self)
+        self.next_page_keypad_shortcut.setContext(QtCore.Qt.ShortcutContext.WindowShortcut)
+        self.next_page_keypad_shortcut.activated.connect(self.btn_next.click)
+
         self.btn_next.setAutoDefault(False)
         self.btn_next.setDefault(False)
         btn_close = QtWidgets.QPushButton(self.tr("Close"))
@@ -93,6 +102,9 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         #Last classified
         self.last_classfied_lbl = QtWidgets.QLabel()
+        last_classfied_font = QtGui.QFont()
+        last_classfied_font.setPointSize(16)
+        self.last_classfied_lbl.setFont(last_classfied_font)
         self.last_classfied_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.last_classfied_lbl.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Preferred)
         last_classfied_fixed_txt = QtWidgets.QLabel(self.tr("Last Name: ")) 
@@ -114,9 +126,12 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         self.interpreted_instrument_lbl = QtWidgets.QLabel()
         self.interpreted_instrument_lbl.setAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        interpreted_instrument_font = QtGui.QFont()
+        interpreted_instrument_font.setPointSize(16)
+        self.interpreted_instrument_lbl.setFont(interpreted_instrument_font)
         writing_line_h_layout = QtWidgets.QHBoxLayout()
-        writing_line_h_layout.addWidget(self.line_edit,3)
-        writing_line_h_layout.addWidget(self.interpreted_instrument_lbl,1)
+        writing_line_h_layout.addWidget(self.line_edit,2)
+        writing_line_h_layout.addWidget(self.interpreted_instrument_lbl,2)
 
         #Add widgets
         container_layout.addWidget(self.piece_name_lbl)
