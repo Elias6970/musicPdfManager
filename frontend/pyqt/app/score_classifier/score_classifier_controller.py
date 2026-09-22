@@ -41,7 +41,6 @@ class ScoreClassifierController(QtCore.QObject):
         self.current_score_index = 0 # Start before the first score, so that the first call to next_page() loads the first score
         self.pages:list[SourcePageWithResolution] = self._create_pages_from_scores(scores_and_page_counts) # List with all the pages need to show in order. Each element is a tuple (score_name, page_number)
         self._images_cache: dict[tuple[str, int], QtGui.QPixmap] = {}  # Cache for storing fetched images, key: (file, page_number)
-        self._last_rotation = 0 # Track the last rotation applied in degress
         self.job:ClassificationJob|None = None # Will be created when finishing the classification
 
         self.classifier_api_client = ClassificationApiClient(get_base_client())
@@ -109,6 +108,9 @@ class ScoreClassifierController(QtCore.QObject):
         self.view.set_last_classified(parsed_instrument_name)
 
         if self.current_score_index < len(self.pages) - 1:
+            next_page = self.pages[self.current_score_index + 1]
+            next_page.rotation = self.pages[self.current_score_index].rotation if keep_rotation else 0
+
             self.load_image_page(self.current_score_index+1)
             self.load_image_page(self.current_score_index+2, display=False) # Preload the next page for smoother navigation
             self.current_score_index += 1
@@ -160,14 +162,15 @@ class ScoreClassifierController(QtCore.QObject):
             source_files=list(self.source_files)
         )
 
-        self.classifier_api_client.execute_classification(self.archive_id, self.job)
-            
+        self.view.block_continue_btn()  # Block the continue button to prevent multiple submissions
+        self.classifier_api_client.execute_classification(self.archive_id, self.job)    
 
     def _on_finish_classification_success(self):
         """Handle the successful completion of the classification by showing a success message and emitting a signal to notify other parts of the application."""
         QtWidgets.QMessageBox.information(self.view, self.view.tr("Success"), self.view.tr("Classification completed successfully."))
         self.view.accept()
-    
+        self.view.unblock_continue_btn()  # Unblock the continue button
+
     def _on_finish_classification_file_exists_error(self, missing_names:list[str]):
         """Handle the case when the classification fails because some of the output files already exist in the backend. It opens a collision resolution window where the user can choose to rename the new files or overwrite the existing ones."""
         if missing_names:
@@ -187,11 +190,13 @@ class ScoreClassifierController(QtCore.QObject):
                 else:
                     self.job.classifications[missing_name].config.rename = new_name #type: ignore
                     
+        self.view.block_continue_btn()  # Block the continue button to prevent multiple submissions
         self.classifier_api_client.execute_classification(self.archive_id, self.job)
 
     def _on_finish_classification_error(self, error:str):
         """Handle unexpected errors during classification by showing an error message to the user."""
         QtWidgets.QMessageBox.critical(self.view, self.view.tr("Error"), self.view.tr(f"An error occurred while finishing the classification: {error}"))
+        self.view.unblock_continue_btn()  # Unblock the continue button to allow the user to try again
 
     def load_image_page(self, index: int, display: bool = True):
         """
@@ -210,12 +215,7 @@ class ScoreClassifierController(QtCore.QObject):
         cache_key:tuple[str,int] = (page.file_name, page.page)
 
         if cache_key in self._images_cache:
-            if self.view.keep_rotation_cb.isChecked(): # Keep rotation
-                pixmap = self._rotate(self._last_rotation, self._images_cache[cache_key])
-                self._images_cache[cache_key] = pixmap # Update the cache with the rotated pixmap, so if the user goes back to this page it will be shown with the correct rotation
-                self.pages[index].rotation = self._last_rotation # Update the rotation in the page object, so it can be saved when finishing the classification
-            else:
-                pixmap = self._images_cache[cache_key]
+            pixmap = self._rotate(page.rotation or 0, self._images_cache[cache_key])
             if display:
                 self.view.interactive_previewer.load_img(pixmap)
         else:
@@ -238,12 +238,13 @@ class ScoreClassifierController(QtCore.QObject):
         if cache_key in self._images_cache:
             return  # Image already cached, no need to process it again
 
-        self._images_cache[cache_key] = QtGui.QPixmap()
-        self._images_cache[cache_key].loadFromData(img_bytes)
+        pixmap = QtGui.QPixmap()
+        pixmap.loadFromData(img_bytes)
+        self._images_cache[cache_key] = pixmap
         
         #Ensure that the fetched image corresponds to the currently displayed page
         if self.pages[self.current_score_index].file_name == file_name and self.pages[self.current_score_index].page == page_number:
-            self.view.interactive_previewer.load_img(self._images_cache[cache_key])
+            self.view.interactive_previewer.load_img(self._rotate(self.pages[self.current_score_index].rotation or 0, pixmap))
 
 
     def get_instrument_shortcuts(self):
@@ -310,16 +311,13 @@ class ScoreClassifierController(QtCore.QObject):
             return
         
         
-        self._last_rotation = (self._last_rotation + angle) % 360
-
         # Update the rotation in the page object
         if current_page.rotation is None:
             current_page.rotation = angle
         else:
             current_page.rotation = (current_page.rotation + angle) % 360
 
-        # Rotate the pixmap in the cache
+        # Render the current page from the unrotated cached image.
         cache_key = (current_page.file_name, current_page.page)
         if cache_key in self._images_cache:
-            self._images_cache[cache_key] = self._rotate(angle, self._images_cache[cache_key])
-            self.view.interactive_previewer.load_img(self._images_cache[cache_key])
+            self.view.interactive_previewer.load_img(self._rotate(current_page.rotation, self._images_cache[cache_key]))

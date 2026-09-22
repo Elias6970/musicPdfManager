@@ -19,6 +19,7 @@ class PieceSelectorController(QtCore.QObject):
         self.pieces:list[str] = []
         self.added_pieces:list[tuple[str, str]] = [] #[(id, piece_std_name)]
         self.current_classifying_index: int = 0
+        self.classifier_window_size: QtCore.QSize | None = None # Save the size of the classifier window to restore it when opening a new one
 
         self.view.add_piece_signal.connect(self.add_piece)
         self.view.classify_signal.connect(self.classify)
@@ -38,7 +39,7 @@ class PieceSelectorController(QtCore.QObject):
         The view call this function but already had deleted the item from the view
         """
         for i in self.added_pieces:
-            if i[1] == id:
+            if i[0] == id:
                 self.added_pieces.remove(i)
                 break
     
@@ -71,8 +72,12 @@ class PieceSelectorController(QtCore.QObject):
             return
         
         view = ScoreClassifierView()
+        if self.classifier_window_size is not None:
+            view.resize(self.classifier_window_size)
+
         controller = ScoreClassifierController(view, piece_std_name, scores_and_page_counts)
         result = view.exec()
+        self.classifier_window_size = view.size()
 
         if result == QtWidgets.QDialog.DialogCode.Accepted:
             self.current_classifying_index += 1
