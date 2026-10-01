@@ -9,6 +9,8 @@ class IndividualSelectionView(QtWidgets.QWidget):
     MAX_COPIES = 20
     NO_SCORES_TEXT = "NO SCORES"
     instrument_changed = QtCore.pyqtSignal(str)
+    instrument_navigation_requested = QtCore.pyqtSignal(int)
+    quick_add_requested = QtCore.pyqtSignal(int)
     add_score_signal = QtCore.pyqtSignal(str,str,int)
     generate_pdf_signal = QtCore.pyqtSignal()
     refresh_requested = QtCore.pyqtSignal()
@@ -16,6 +18,7 @@ class IndividualSelectionView(QtWidgets.QWidget):
 
     def __init__(self):
         super(IndividualSelectionView,self).__init__()
+        self.setFocusPolicy(QtCore.Qt.FocusPolicy.StrongFocus)
 
 
         container_layout = QtWidgets.QHBoxLayout()
@@ -33,6 +36,11 @@ class IndividualSelectionView(QtWidgets.QWidget):
         container_layout.addWidget(self.create_preview())
 
         self.setLayout(container_layout)
+
+        self._install_keyboard_event_filters(self)
+        application = QtWidgets.QApplication.instance()
+        if application is not None:
+            application.installEventFilter(self)
 
 
         #self.setGeometry(100,80,200,200)
@@ -177,6 +185,78 @@ class IndividualSelectionView(QtWidgets.QWidget):
             self.add_score_signal.emit(self.piece_lbl.text(),
                                        self.part_combo_box.currentText(),
                                        int(self.num_copies.currentText()))
+
+    def eventFilter(self, a0, a1):
+        """
+        Event filter to handle key press events for navigation and quick add functionality.
+        Buttons 1-9 will trigger the quick add signal with the corresponding number of copies.
+        Up and Down arrow keys will trigger the instrument navigation signal.
+        """
+        if (not isinstance(a1, QtGui.QKeyEvent)
+                or a1.type() != QtCore.QEvent.Type.KeyPress
+                or a1.isAutoRepeat()):
+            return super().eventFilter(a0, a1)
+
+        event = a1
+        focus_widget = QtWidgets.QApplication.focusWidget()
+        if (focus_widget is None
+                or (focus_widget is not self
+                    and not self.isAncestorOf(focus_widget))):
+            return super().eventFilter(a0, event)
+
+        if not self.part_combo_box.isEnabled():
+            return super().eventFilter(a0, event)
+
+        if event.key() == QtCore.Qt.Key.Key_Up:
+            self.instrument_navigation_requested.emit(-1)
+            return True
+
+        if event.key() == QtCore.Qt.Key.Key_Down:
+            self.instrument_navigation_requested.emit(1)
+            return True
+
+        if (focus_widget is self.piece_search_bar
+                or (focus_widget is not None
+                    and self.piece_search_bar.isAncestorOf(focus_widget))):
+            return super().eventFilter(a0, event)
+
+        number_keys: dict[int, int] = {
+            int(QtCore.Qt.Key.Key_1): 1,
+            int(QtCore.Qt.Key.Key_2): 2,
+            int(QtCore.Qt.Key.Key_3): 3,
+            int(QtCore.Qt.Key.Key_4): 4,
+            int(QtCore.Qt.Key.Key_5): 5,
+            int(QtCore.Qt.Key.Key_6): 6,
+            int(QtCore.Qt.Key.Key_7): 7,
+            int(QtCore.Qt.Key.Key_8): 8,
+            int(QtCore.Qt.Key.Key_9): 9,
+        }
+        copies = number_keys.get(int(event.key()))
+        if copies is not None:
+            self.quick_add_requested.emit(copies)
+            return True
+
+        return super().eventFilter(a0, event)
+
+
+
+    def _install_keyboard_event_filters(self, widget: QtWidgets.QWidget):
+        """Sets up event filters for the given widget and all its child widgets to handle keyboard events."""
+        widget.installEventFilter(self)
+        for child in widget.findChildren(QtWidgets.QWidget):
+            child.installEventFilter(self)
+
+    
+    def move_instrument_selection(self, step: int):
+        """
+        Move the selection of the instruments combo box up or down by the given step.
+        """
+        current_index = self.part_combo_box.currentIndex()
+        next_index = max(
+            0,
+            min(current_index + step, self.part_combo_box.count() - 1),
+        )
+        self.part_combo_box.setCurrentIndex(next_index)
     
     #Update the autocompleter list of the search bar
     def update_search_bar_autocompleter(self, pieces:list[str]):
@@ -214,12 +294,18 @@ class IndividualSelectionView(QtWidgets.QWidget):
         Add an item to the scroll area with the piece name, instrument and num of copies. 
         It also has a button to remove the item from the scroll and the list of added scores.
         """
-        self.status_console.add_item(StatusConsoleItemWithTwoTexts(piece_name,
-                                            instrument,
-                                            copies,
-                                            id,
-                                            self.status_console.remove_item,
-                                            remove_from_list))
+        item = StatusConsoleItemWithTwoTexts(piece_name,
+                             instrument,
+                             copies,
+                             id,
+                                             self.remove_status_console_item,
+                             remove_from_list)
+        self._install_keyboard_event_filters(item)
+        self.status_console.add_item(item)
+
+    def remove_status_console_item(self, item):
+        self.status_console.remove_item(item)
+        QtCore.QTimer.singleShot(0, self.setFocus)
 
     #Display a window to select a location to save a pdf
     def dialog_window_select_new_pdf(self):

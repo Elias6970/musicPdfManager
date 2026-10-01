@@ -48,6 +48,8 @@ class IndividualSelectionController(QObject):
         
         # Connect signals
         self.view.add_score_signal.connect(self.add_score)
+        self.view.instrument_navigation_requested.connect(self.navigate_instruments)
+        self.view.quick_add_requested.connect(self.quick_add_score)
         self.view.generate_pdf_signal.connect(self.generate_pdf)
 
         self.view.piece_search_bar.textChanged.connect(self.set_option_of_instruments)
@@ -115,6 +117,15 @@ class IndividualSelectionController(QObject):
         print(f"Added score: Piece: {piece_name}, Instrument: {instrument}, Copies: {copies}")
         self.view.add_item_to_scroll(piece.id, piece_name, instrument, copies, self.remove_score)
         self.view.btn_create_pdf.setEnabled(True)
+
+    def quick_add_score(self, copies: int):
+        """Add a score with the currently selected piece and instrument using the shortcuts"""
+        if self.selected_piece and self.selected_instrument:
+            self.add_score(self.selected_piece, self.selected_instrument, copies)
+
+    def navigate_instruments(self, step: int):
+        """Change the actual selected piece in the instruments combo box by the step given, and update the preview"""
+        self.view.move_instrument_selection(step)
 
     def remove_score(self, id:str):
         """
