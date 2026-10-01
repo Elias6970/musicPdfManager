@@ -74,9 +74,31 @@ class ScoreSearchBar(QtWidgets.QLineEdit):
                 completer = self.auto_completer
                 model = completer.model()
                 if completer and model and model.rowCount() > 0:  # Check if there are suggestions
-                    # Select the first suggestion
-                    completer.setCurrentRow(0)  # First suggestion
-                    self.setText(completer.currentCompletion())  # Set text to the first suggestion
+                    popup = completer.popup()
+                    popup_model = popup.model() if popup else None
+                    selected_index = popup.currentIndex() if popup else QtCore.QModelIndex()
+                    if selected_index.isValid() and popup_model:
+                        selected_completion = popup_model.data(
+                            selected_index,
+                            QtCore.Qt.ItemDataRole.DisplayRole,
+                        )
+                    else:
+                        first_index = popup_model.index(0, 0) if popup_model else QtCore.QModelIndex()
+                        selected_completion = (
+                            popup_model.data(
+                                first_index,
+                                QtCore.Qt.ItemDataRole.DisplayRole,
+                            )
+                            if popup_model and first_index.isValid()
+                            else None
+                        )
+
+                    if selected_completion:
+                        self.setText(selected_completion)
+                    if popup:
+                        popup.hide()
+                    self.returnPressed.emit()
+                    return
 
             # Call the base class to ensure default event processing
             super().keyPressEvent(a0)

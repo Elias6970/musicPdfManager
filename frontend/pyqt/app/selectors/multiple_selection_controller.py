@@ -75,6 +75,7 @@ class MultipleSelectionController(QObject):
 
         self._preset_to_load: str | None = None
         self._pending_preset_loads: set[str] = set()
+        self._pending_add_after_scores = False
 
         # Connect pieces api signals
         self.pieces_api.pieces_loaded.connect(self._on_pieces_fetched)
@@ -100,6 +101,7 @@ class MultipleSelectionController(QObject):
         self.view.only_digitalized_changed.connect(self.get_pieces)
         self.view.instrument_changed.connect(self.instrument_changed)
         self.view.add_piece_signal.connect(self.add_piece)
+        self.view.piece_search_bar.returnPressed.connect(self._add_piece_from_search)
         self.view.generate_pdf_signal.connect(self.launch_exporting_configuration_window)
         self.view.instruments_preset_changed.connect(self.instruments_preset_changed)
         self.view.refresh_requested.connect(self.refresh)
@@ -142,8 +144,17 @@ class MultipleSelectionController(QObject):
             copies,
             self.remove_piece
         )
+        self.view.piece_search_bar.clear()
         self.view.btn_create_pdf.setEnabled(True)
         self.view.presets_combo_box.setEnabled(False)
+
+
+    def _add_piece_from_search(self):
+        """Add the completed search result after its scores have loaded."""
+        if self.view.btn_add_piece.isEnabled():
+            self.view.btn_add_piece.click()
+        elif self.selected_piece and self.selected_instruments_preset:
+            self._pending_add_after_scores = True
 
 
     def remove_piece(self, id:str):
@@ -296,7 +307,11 @@ class MultipleSelectionController(QObject):
         """
         if scores:
             self.view.set_combo_box_instruments(scores)
+            if self._pending_add_after_scores:
+                self._pending_add_after_scores = False
+                self.view.btn_add_piece.click()
         else:    
+            self._pending_add_after_scores = False
             self.view.disable_instruments_combo_box_no_scores()
     
 

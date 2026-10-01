@@ -325,5 +325,4 @@ class MultipleSelectionView(QtWidgets.QWidget):
         preset_name, ok =QtWidgets.QInputDialog.getText(self, self.tr("Save pieces preset"), self.tr("Preset name:"))
         if ok and preset_name:
             self.save_pieces_preset_signal.emit(preset_name)
-    
-###########################OLDDDDDDDDDDDDDD@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@J
+
