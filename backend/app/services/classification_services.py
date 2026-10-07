@@ -70,8 +70,9 @@ def precheck_classification(session: Session, job: ClassificationJob):
                 
         target_name = f"{key}.pdf"
         target_path = os.path.join(scores_path, target_name)
-        
-        if os.path.exists(target_path):
+
+        # If it is in source files is not managed because it will be removed during the classification process
+        if os.path.exists(target_path) and target_name.lower() not in [i.lower() for i in job.source_files]:
             if doc.config.overwrite:
                 continue
             elif doc.config.rename and doc.config.rename.strip():

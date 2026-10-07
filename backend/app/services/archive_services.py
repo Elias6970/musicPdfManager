@@ -127,9 +127,9 @@ def add_piece_to_archive(
         raise PieceCodAlreadyExistsError(f"A piece with cod {piece.cod} already exists in archive {piece.archive_id}.")
 
     # Check if name already exists in the archive
-    existing_name = session.exec(select(Piece).where(Piece.name == piece.name, Piece.archive_id == piece.archive_id)).first()
-    if existing_name:
-        raise PieceNameAlreadyExistsError(f"A piece with name '{piece.name}' already exists in archive {piece.archive_id} with code {existing_name.cod}.")
+    #existing_name = session.exec(select(Piece).where(Piece.name == piece.name, Piece.archive_id == piece.archive_id)).first()
+    #if existing_name:
+        #raise PieceNameAlreadyExistsError(f"A piece with name '{piece.name}' already exists in archive {piece.archive_id} with code {existing_name.cod}.")
 
     #Create directory and copy the files
     folder_name = file_manager.parse_name_to_file_manager(piece.std_name)
@@ -188,9 +188,9 @@ def update_piece_in_archive(
         raise PieceCodAlreadyExistsError(f"A piece with cod {piece_in.cod} already exists in archive {piece_in.archive_id}.")
 
     # Check if new name already exists for another piece
-    existing_name = session.exec(select(Piece).where(Piece.name == piece_in.name, Piece.archive_id == piece_in.archive_id, Piece.id != piece_id)).first()
-    if existing_name:
-        raise PieceNameAlreadyExistsError(f"A piece with name '{piece_in.name}' already exists in archive {piece_in.archive_id}.")
+    #existing_name = session.exec(select(Piece).where(Piece.name == piece_in.name, Piece.archive_id == piece_in.archive_id, Piece.id != piece_id)).first()
+    #if existing_name:
+        #raise PieceNameAlreadyExistsError(f"A piece with name '{piece_in.name}' already exists in archive {piece_in.archive_id}.")
 
     # Handle author and type update if names are provided instead of IDs
     if piece_in.author_id is None and piece_in.author_name:
