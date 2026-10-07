@@ -1,12 +1,15 @@
 from PyQt6 import QtWidgets, QtCore, QtGui
+from collections.abc import Sequence
 
 from app.config.constants import INSTRUCTIONS_SCORE_CLASSIFIER, ROTATE_L_IMG_PATH, ROTATE_R_IMG_PATH
 from app.score_classifier.interactive_previewer.interactive_previewer import InteractivePreviewer
+from app.score_classifier.score_pages_navigator import ScorePage, ScorePagesNavigator
 
 class ScoreClassifierView(QtWidgets.QDialog):
     rotate_clockwise_signal = QtCore.pyqtSignal() 
     rotate_counterclockwise_signal = QtCore.pyqtSignal()
     previous_btn_signal = QtCore.pyqtSignal()
+    score_page_selected = QtCore.pyqtSignal(int)
     continue_btn_signal = QtCore.pyqtSignal(str, bool, list) #str: name of the score, bool: if the rotation should be kept for the next page, list: corners of the selected area in the interactive previewer
     line_edit_text_changed_signal = QtCore.pyqtSignal(str) #str: text in the line edit, used to update the real time interpreted instrument label
     
@@ -141,6 +144,10 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
         container_layout.addLayout(btns_layout)
         container_layout.addWidget(self.interactive_previewer)
+
+        self.score_pages_navigator = ScorePagesNavigator()
+        self.score_pages_navigator.setMaximumWidth(200)
+        self.score_pages_navigator.page_selected.connect(self.score_page_selected.emit)
         
 
         # Shortcuts instructions
@@ -169,6 +176,7 @@ class ScoreClassifierView(QtWidgets.QDialog):
         main_layout.addLayout(shortcuts_layout)
         main_layout.addWidget(line)
         main_layout.addLayout(container_layout)
+        main_layout.addWidget(self.score_pages_navigator)
         main_layout.setMenuBar(menu)
         main_layout.setContentsMargins(10, 0, 10, 10)
         self.setLayout(main_layout)
@@ -196,6 +204,9 @@ class ScoreClassifierView(QtWidgets.QDialog):
 
     def clear_line_edit(self):
         self.line_edit.clear()
+
+    def set_score_pages(self, pages: Sequence[ScorePage], current_index: int):
+        self.score_pages_navigator.set_pages(pages, current_index)
 
     #Opens a pop up window with the instructions
     def show_help(self):

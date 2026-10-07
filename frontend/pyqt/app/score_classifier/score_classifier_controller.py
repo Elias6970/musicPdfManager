@@ -40,6 +40,7 @@ class ScoreClassifierController(QtCore.QObject):
 
         self.current_score_index = 0 # Start before the first score, so that the first call to next_page() loads the first score
         self.pages:list[SourcePageWithResolution] = self._create_pages_from_scores(scores_and_page_counts) # List with all the pages need to show in order. Each element is a tuple (score_name, page_number)
+        self.view.set_score_pages(self.pages, self.current_score_index)
         self._images_cache: dict[tuple[str, int], QtGui.QPixmap] = {}  # Cache for storing fetched images, key: (file, page_number)
         self.job:ClassificationJob|None = None # Will be created when finishing the classification
 
@@ -59,6 +60,7 @@ class ScoreClassifierController(QtCore.QObject):
         self.view.rotate_counterclockwise_signal.connect(lambda: self.rotate_and_load(-90))
         self.view.continue_btn_signal.connect(self.next_page)
         self.view.previous_btn_signal.connect(self.previous_page)
+        self.view.score_page_selected.connect(self.go_to_page)
 
         self.text_analizer = TextAnalizer()
         self.view.line_edit_text_changed_signal.connect(self.update_interpreted_instrument_label)
@@ -122,6 +124,8 @@ class ScoreClassifierController(QtCore.QObject):
         
         if self.current_score_index == len(self.pages) - 1:
             self.view.change_to_finish_btn()
+
+        self.view.set_score_pages(self.pages, self.current_score_index)
     
     def previous_page(self):
         """Navigate to the previous page in the classification process."""
@@ -140,9 +144,50 @@ class ScoreClassifierController(QtCore.QObject):
             
             if self.current_score_index == 0:
                 self.view.btn_back.setEnabled(False) # Disable the back button, since we are in the first page
+            self.view.set_score_pages(self.pages, self.current_score_index)
         else:
             ShowError.show_tooltip_error(self.view.tr("You are already in the first page."), 5000, self.view.btn_back)
             self.view.btn_back.setEnabled(False)
+
+    def go_to_page(self, page_index: int):
+        """Navigate directly to a page selected in the score navigator."""
+        if page_index < 0 or page_index >= len(self.pages):
+            return
+
+        self._save_current_page_state()
+        self.current_score_index = page_index
+        page = self.pages[page_index]
+
+        self.load_image_page(page_index)
+        self.view.line_edit.setText(page.user_input or "")
+        previous_resolution = self.pages[page_index - 1].resolution if page_index > 0 else ""
+        self.view.set_last_classified(previous_resolution or "")
+        self.view.btn_back.setEnabled(page_index > 0)
+
+        if page_index == len(self.pages) - 1:
+            self.view.change_to_finish_btn()
+        else:
+            self.view.change_to_continue_btn()
+
+        self.view.set_score_pages(self.pages, self.current_score_index)
+
+    def _save_current_page_state(self):
+        """Preserve a valid in-progress classification before direct navigation."""
+        if not self.pages:
+            return
+
+        user_input = self.view.line_edit.text()
+        if not user_input.strip():
+            return
+
+        parsed_instrument_name = self.get_instrument_from_input(user_input)
+        if parsed_instrument_name in (None, self._INVALID_INPUT):
+            return
+
+        current_page = self.pages[self.current_score_index]
+        current_page.user_input = user_input
+        current_page.resolution = parsed_instrument_name
+        current_page.corners = self.view.interactive_previewer.get_rectangle_corners()
 
     def finish_classification(self):
         """
