@@ -75,6 +75,7 @@ def _preprocess_preset_print_job(session: Session,
                 for other_option in preset.instruments[instrument].other_options: 
                     if other_option in scores:
                         solved_file = other_option+".pdf"
+                        break
         
             
             if not solved_file:
