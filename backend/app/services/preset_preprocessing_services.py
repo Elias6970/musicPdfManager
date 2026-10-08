@@ -89,9 +89,12 @@ def _preprocess_preset_print_job(session: Session,
                 total_copies = instrument_copies * piece.copies
                 _add_to_solution(solved, job.archive_id, piece.std_name, instrument, solved_file, total_copies, job.config.group_by_instrument)
             else: #Not found
+                # It also works with scores because they have the name of the instruments. 
+                # If any score has a different name it goes at the end of the list
+                sorted_scores = InstrumentSorter.sort_instruments(scores)
                 unresolved.append(UnresolvedInstrumentResponse(archive_id=job.archive_id, 
                                                                 piece_std_name=piece.std_name, 
                                                                 missing_instrument=instrument, 
-                                                                options=scores))
+                                                                options=sorted_scores))
     
     return solved, unresolved
