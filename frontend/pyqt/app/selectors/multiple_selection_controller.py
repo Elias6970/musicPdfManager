@@ -273,10 +273,35 @@ class MultipleSelectionController(QObject):
             self._preset_to_load = None
             return
         
-        self.selected_instruments_preset = preset.instruments_preset_name
-        self.view.set_instrument_preset_in_combo_box(preset.instruments_preset_name)
+        if not self.instruments_preset:
+            QtWidgets.QMessageBox.warning(
+                self.view,
+                self.tr("Error"),
+                self.tr("No instruments presets are available"),
+            )
+            self._preset_to_load = None
+            return
+
+        # Ask the user to select an instruments preset when loading a piece preset.
+        # The default selection is the one that was saved with the piece preset, if it exists in the current instruments presets.
+        default_index = self.instruments_preset.index(preset.instruments_preset_name) \
+            if preset.instruments_preset_name in self.instruments_preset else 0
+        instruments_preset, accepted = QtWidgets.QInputDialog.getItem(
+            self.view,
+            self.tr("Select instruments preset"),
+            self.tr("Instruments preset:"),
+            self.instruments_preset,
+            default_index,
+            False,
+        )
+        if not accepted:
+            self._preset_to_load = None
+            return
+
+        self.selected_instruments_preset = instruments_preset
+        self.view.set_instrument_preset_in_combo_box(instruments_preset)
         for piece in preset.pieces:
-            self.add_piece(piece.std_name, preset.instruments_preset_name, piece.copies or 1)
+            self.add_piece(piece.std_name, instruments_preset, piece.copies or 1)
         self._preset_to_load = None
 
 
