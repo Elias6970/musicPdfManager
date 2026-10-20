@@ -60,9 +60,7 @@ class MultipleSelectionController(QObject):
         self.type_of_export_controller = TypeOfExportController(self.type_of_export_window)
         self.type_of_export_controller.export_signal.connect(self.export)
         
-        self.resolve_unmatched_presets_view = ResolveUnmatchedPresetsView()
-        self.resolve_unmatched_presets_controller = ResolveUnmatchedPresetsController(self.resolve_unmatched_presets_view)
-        self.resolve_unmatched_presets_controller.resolved_signal.connect(self.handle_resolved_unmatched_presets)
+        self._reload_unmatcher_window()
 
         self.added_pieces: list[PrinteablePieceWithId] = [] #List of pieces added to the PDF with their id to be able to delete them from the list.
         self.pieces: list[PiecePublic] = [] #List of pieces public objects.
@@ -376,7 +374,8 @@ class MultipleSelectionController(QObject):
             for i in unresolved:
                 #We ignore archive_id because it is not needed in the frontend, and it is always the same for all the items because they belong to the same preset print job.
                 unresolved_items.append((i["piece_std_name"], i["missing_instrument"], i["options"]))
-        
+
+            self._reload_unmatcher_window()
             self.resolve_unmatched_presets_controller.set_unresolved_instruments(unresolved_items)
             self.resolve_unmatched_presets_controller.show()
 
@@ -453,4 +452,8 @@ class MultipleSelectionController(QObject):
         self.pieces_presets_api.create_preset(preset)
     
 
-        
+    def _reload_unmatcher_window(self):
+        """Reload the unmached presets window with the current unresolved instruments."""
+        self.resolve_unmatched_presets_view = ResolveUnmatchedPresetsView()
+        self.resolve_unmatched_presets_controller = ResolveUnmatchedPresetsController(self.resolve_unmatched_presets_view)
+        self.resolve_unmatched_presets_controller.resolved_signal.connect(self.handle_resolved_unmatched_presets)

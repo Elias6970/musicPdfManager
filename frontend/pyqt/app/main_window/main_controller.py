@@ -6,7 +6,8 @@ from app.api_client.archives_api_client import ArchivesApiClient
 from app.api_client.base_api_client_factory import get_base_client
 from app.config.session_manager import SessionManager
 from app.main_window.main_view import MainView
-from app.models.generated_models import ArchivePublic
+from app.models.generated_models import ArchivePublic, UserConfigPublic
+from app.main_window.startup_auth_checker import StartupAuthChecker
 
 from app.selectors.individual_selection_controller import IndividualSelectionController
 from app.selectors.multiple_selection_controller import MultipleSelectionController
@@ -35,7 +36,6 @@ from app.instruments_presets.list_instruments_presets.list_instruments_presets_v
 
 from app.login.login_view import LoginView
 from app.login.login_controller import LoginController
-from app.api_client.users_api_client import UsersApiClient
 from app.users_crud.users_controller import UsersController
 from app.users_crud.users_view import UsersView
 
@@ -49,8 +49,16 @@ class MainController(QtCore.QObject):
 
         self.change_language(self.session.get_language())
 
-        self.archive_api_client = ArchivesApiClient(get_base_client(), self)
+        self.base_client = get_base_client()
+        self.archive_api_client = ArchivesApiClient(self.base_client, self)
         self.archive_api_client.get_all_archives_success.connect(self._on_get_all_archives_success)
+        self.startup_auth_checker = StartupAuthChecker(
+            self.base_client,
+            self.session,
+            self,
+        )
+        self.startup_auth_checker.authenticated.connect(self._on_startup_auth_success)
+        self.startup_auth_checker.authentication_required.connect(self._show_login)
         self.is_after_logging_setup = False
 
         self._previous_archive_index = -1    
@@ -85,21 +93,26 @@ class MainController(QtCore.QObject):
     
     def _check_auth(self):
         """Check if the user is authenticated, if not, show the login window"""
-        if not self.session.is_logged_in():
+        if not self.startup_auth_checker.check():
             self._show_login()
-        else:
-            self._after_login_setup()
 
     def _show_login(self, error: str = ""):
         """Show the login window and handle the authentication process"""
         login_view = LoginView(self.view)
         login_controller = LoginController(login_view)
         login_controller.is_admin_signal.connect(self.set_is_admin)
+        if error:
+            login_view.show_error(error)
         # Assuming LoginController sets up token internally and dialog closes with accept()
         if not login_view.exec() == QtWidgets.QDialog.DialogCode.Accepted:
             sys.exit(0)
         else:
             self._after_login_setup()
+
+    def _on_startup_auth_success(self, user_config: UserConfigPublic):
+        self.session.set_language(user_config.language)
+        self.set_is_admin(user_config.is_admin)
+        self._after_login_setup()
     
     
     def _after_login_setup(self):
@@ -291,4 +304,3 @@ class MainController(QtCore.QObject):
     def show_about_us(self):
         view = AboutUsView(self.view)
         view.exec()
-
